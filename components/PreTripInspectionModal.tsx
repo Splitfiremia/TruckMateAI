@@ -721,15 +721,6 @@ const styles = StyleSheet.create({
     marginLeft: 8,
     flex: 1,
   },
-  completeButton: {
-    flexDirection: 'row',
-    backgroundColor: colors.secondary,
-    borderRadius: 12,
-    paddingVertical: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-  },
   disabledButton: {
     backgroundColor: colors.border,
   },
