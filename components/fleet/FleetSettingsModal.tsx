@@ -35,13 +35,20 @@ export default function FleetSettingsModal({ visible, onClose }: FleetSettingsMo
   };
   
   const updateSetting = (section: keyof typeof localSettings, key: string, value: any) => {
-    setLocalSettings(prev => prev ? {
-      ...prev,
-      [section]: {
-        ...prev[section],
-        [key]: value,
-      },
-    } : null);
+    setLocalSettings(prev => {
+      if (!prev) return null;
+      const currentSection = prev[section];
+      if (typeof currentSection === 'object' && currentSection !== null) {
+        return {
+          ...prev,
+          [section]: {
+            ...currentSection,
+            [key]: value,
+          },
+        };
+      }
+      return prev;
+    });
   };
   
   const renderTabButton = (tab: typeof activeTab, icon: React.ReactNode, label: string) => (
@@ -74,7 +81,13 @@ export default function FleetSettingsModal({ visible, onClose }: FleetSettingsMo
         <Text style={styles.settingDescription}>{description}</Text>
       </View>
       <Switch
-        value={localSettings[section][key] as boolean}
+        value={(() => {
+          const sectionData = localSettings[section];
+          if (typeof sectionData === 'object' && sectionData !== null) {
+            return (sectionData as any)[key] as boolean;
+          }
+          return false;
+        })()}
         onValueChange={(value) => updateSetting(section, key, value)}
         trackColor={{ false: colors.border, true: colors.primaryLight }}
         thumbColor={colors.text}

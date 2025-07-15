@@ -87,11 +87,11 @@ export default function FleetDriverCard({ driver, onPress }: FleetDriverCardProp
           <View style={styles.certValueContainer}>
             <Text style={[
               styles.certValue,
-              isExpiringsSoon(driver.licenseExpiry) && { color: colors.warning }
+              isExpiringSoon(driver.licenseExpiry) && { color: colors.warning }
             ]}>
               {new Date(driver.licenseExpiry).toLocaleDateString()}
             </Text>
-            {isExpiringsSoon(driver.licenseExpiry) && (
+            {isExpiringSoon(driver.licenseExpiry) && (
               <AlertTriangle size={14} color={colors.warning} />
             )}
           </View>
@@ -102,11 +102,11 @@ export default function FleetDriverCard({ driver, onPress }: FleetDriverCardProp
           <View style={styles.certValueContainer}>
             <Text style={[
               styles.certValue,
-              isExpiringsSoon(driver.medicalCertExpiry) && { color: colors.warning }
+              isExpiringSoon(driver.medicalCertExpiry) && { color: colors.warning }
             ]}>
               {new Date(driver.medicalCertExpiry).toLocaleDateString()}
             </Text>
-            {isExpiringsSoon(driver.medicalCertExpiry) && (
+            {isExpiringSoon(driver.medicalCertExpiry) && (
               <AlertTriangle size={14} color={colors.warning} />
             )}
           </View>
