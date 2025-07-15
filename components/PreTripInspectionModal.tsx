@@ -96,8 +96,8 @@ export default function PreTripInspectionModal({
   const handleComplete = () => {
     if (!canCompleteInspection()) {
       Alert.alert(
-        'Incomplete Inspection',
-        'Please complete all inspection items before finishing.',
+        'CDL Inspection Incomplete',
+        `Please complete all ${preTripInspectionItems.reduce((sum, cat) => sum + cat.items.length, 0)} CDL inspection points before finishing. This is required by FMCSA regulations.`,
         [{ text: 'OK' }]
       );
       return;
@@ -105,12 +105,12 @@ export default function PreTripInspectionModal({
     
     if (hasDefects()) {
       Alert.alert(
-        'Defects Found',
-        'This vehicle has defects and may not be safe to operate. Contact maintenance before driving.',
+        'CDL Inspection: Defects Found',
+        'This vehicle has defects and may not be safe to operate. FMCSA regulations require addressing defects before operation. Contact maintenance immediately.',
         [
           { text: 'Cancel', style: 'cancel' },
           { 
-            text: 'Complete Anyway', 
+            text: 'Complete with Defects', 
             style: 'destructive',
             onPress: () => {
               completeInspection(location);
@@ -121,9 +121,20 @@ export default function PreTripInspectionModal({
         ]
       );
     } else {
-      completeInspection(location);
-      onComplete();
-      onClose();
+      Alert.alert(
+        'CDL Inspection Complete',
+        'All 21 inspection points passed. Vehicle is safe to operate.',
+        [
+          {
+            text: 'Finish',
+            onPress: () => {
+              completeInspection(location);
+              onComplete();
+              onClose();
+            }
+          }
+        ]
+      );
     }
   };
   
@@ -154,12 +165,23 @@ export default function PreTripInspectionModal({
   
   const renderInspectionItem = (item: any) => {
     const itemStatus = getItemStatus(item.id);
-    const showDefectInput = itemStatus === 'Fail';
+    const showDefectInput = itemStatus === 'Fail' || itemStatus === 'Defect';
+    const isCompleted = itemStatus === 'Pass' || itemStatus === 'Fail' || itemStatus === 'Defect';
     
     return (
-      <View key={item.id} style={styles.inspectionItem}>
-        <Text style={styles.itemLabel}>{item.label}</Text>
-        {item.required && <Text style={styles.requiredText}>*Required</Text>}
+      <View key={item.id} style={[
+        styles.inspectionItem,
+        isCompleted && styles.completedItem
+      ]}>
+        <View style={styles.itemHeader}>
+          <Text style={styles.itemLabel}>{item.label}</Text>
+          {item.required && <Text style={styles.requiredText}>*CDL Required</Text>}
+          {isCompleted && (
+            <View style={styles.completedBadge}>
+              <CheckCircle size={14} color={colors.secondary} />
+            </View>
+          )}
+        </View>
         
         <View style={styles.statusButtons}>
           {renderStatusButton(
@@ -185,7 +207,7 @@ export default function PreTripInspectionModal({
         {showDefectInput && (
           <TextInput
             style={styles.defectInput}
-            placeholder="Describe the defect..."
+            placeholder="Describe the defect or issue in detail..."
             placeholderTextColor={colors.textSecondary}
             value={defectDescriptions[item.id] || ''}
             onChangeText={(text) => handleDefectDescriptionChange(item.id, text)}
@@ -195,7 +217,7 @@ export default function PreTripInspectionModal({
         
         <TextInput
           style={styles.notesInput}
-          placeholder="Additional notes (optional)"
+          placeholder="Additional inspection notes (optional)"
           placeholderTextColor={colors.textSecondary}
           value={notes[item.id] || ''}
           onChangeText={(text) => handleNotesChange(item.id, text)}
@@ -215,7 +237,10 @@ export default function PreTripInspectionModal({
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <Clipboard size={24} color={colors.primaryLight} />
-            <Text style={styles.title}>Pre-Trip Inspection</Text>
+            <View>
+              <Text style={styles.title}>CDL Pre-Trip Inspection</Text>
+              <Text style={styles.subtitle}>21-Point Safety Checklist</Text>
+            </View>
           </View>
           <TouchableOpacity onPress={onClose} style={styles.closeButton}>
             <X size={24} color={colors.text} />
@@ -225,7 +250,7 @@ export default function PreTripInspectionModal({
         <View style={styles.progressContainer}>
           <View style={styles.progressInfo}>
             <Text style={styles.progressText}>
-              Progress: {progress.completed}/{progress.total} items
+              CDL Inspection Progress: {progress.completed}/{progress.total} points
             </Text>
             <Text style={styles.progressPercentage}>{progress.percentage}%</Text>
           </View>
@@ -237,6 +262,9 @@ export default function PreTripInspectionModal({
               ]} 
             />
           </View>
+          {progress.percentage === 100 && (
+            <Text style={styles.completionText}>✓ All 21 points completed</Text>
+          )}
         </View>
         
         <View style={styles.locationContainer}>
@@ -287,7 +315,15 @@ export default function PreTripInspectionModal({
             <View style={styles.warningContainer}>
               <AlertTriangle size={16} color={colors.warning} />
               <Text style={styles.warningText}>
-                Defects found - Vehicle may not be safe to operate
+                ⚠️ Defects found - Vehicle may not be safe to operate. Contact maintenance before driving.
+              </Text>
+            </View>
+          )}
+          
+          {!canCompleteInspection() && (
+            <View style={styles.infoContainer}>
+              <Text style={styles.infoText}>
+                Complete all {preTripInspectionItems.reduce((sum, cat) => sum + cat.items.length, 0)} CDL inspection points to finish
               </Text>
             </View>
           )}
@@ -303,7 +339,7 @@ export default function PreTripInspectionModal({
           >
             <User size={20} color={colors.text} />
             <Text style={styles.completeButtonText}>
-              {hasDefects() ? 'Complete with Defects' : 'Complete Inspection'}
+              {hasDefects() ? 'Complete CDL Inspection with Defects' : 'Complete CDL Inspection'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -337,6 +373,12 @@ const styles = StyleSheet.create({
     color: colors.text,
     marginLeft: 8,
   },
+  subtitle: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    marginLeft: 8,
+    marginTop: 2,
+  },
   closeButton: {
     padding: 4,
   },
@@ -368,6 +410,13 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: colors.primaryLight,
     borderRadius: 2,
+  },
+  completionText: {
+    fontSize: 12,
+    color: colors.secondary,
+    textAlign: 'center',
+    marginTop: 4,
+    fontWeight: '500',
   },
   locationContainer: {
     flexDirection: 'row',
@@ -423,6 +472,21 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  completedItem: {
+    borderColor: colors.secondary,
+    backgroundColor: 'rgba(34, 197, 94, 0.05)',
+  },
+  itemHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  completedBadge: {
+    marginLeft: 8,
   },
   itemLabel: {
     fontSize: 16,
@@ -431,9 +495,14 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   requiredText: {
-    fontSize: 12,
-    color: colors.danger,
-    marginBottom: 12,
+    fontSize: 11,
+    color: colors.primaryLight,
+    fontWeight: '500',
+    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    overflow: 'hidden',
   },
   statusButtons: {
     flexDirection: 'row',
@@ -482,6 +551,17 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 8,
     marginBottom: 12,
+  },
+  infoContainer: {
+    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  infoText: {
+    fontSize: 14,
+    color: colors.primaryLight,
+    textAlign: 'center',
   },
   warningText: {
     fontSize: 14,

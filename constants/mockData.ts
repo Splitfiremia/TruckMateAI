@@ -332,82 +332,129 @@ export const mockMaintenanceItems = [
   },
 ];
 
+// CDL 21-Point Pre-Trip Inspection Checklist
+// Based on FMCSA requirements for commercial vehicle safety
 export const preTripInspectionItems = [
   {
-    category: "Engine Compartment",
+    category: "1. Engine Compartment",
     items: [
-      { id: "engine_oil", label: "Engine Oil Level", required: true },
-      { id: "coolant", label: "Coolant Level", required: true },
+      { id: "engine_oil", label: "Engine Oil Level & Condition", required: true },
+      { id: "coolant", label: "Coolant Level & Condition", required: true },
       { id: "power_steering", label: "Power Steering Fluid", required: true },
-      { id: "windshield_washer", label: "Windshield Washer Fluid", required: true },
-      { id: "battery", label: "Battery & Connections", required: true },
-      { id: "belts_hoses", label: "Belts & Hoses", required: true },
     ],
   },
   {
-    category: "Air Brake System",
+    category: "2. Air Brake System",
     items: [
-      { id: "air_compressor", label: "Air Compressor", required: true },
+      { id: "air_compressor", label: "Air Compressor Belt & Mounting", required: true },
       { id: "air_lines", label: "Air Lines & Fittings", required: true },
-      { id: "brake_chambers", label: "Brake Chambers", required: true },
+      { id: "brake_chambers", label: "Brake Chambers & Push Rods", required: true },
       { id: "slack_adjusters", label: "Slack Adjusters", required: true },
-      { id: "brake_drums", label: "Brake Drums/Rotors", required: true },
     ],
   },
   {
-    category: "Steering System",
+    category: "3. Steering System",
     items: [
-      { id: "steering_wheel", label: "Steering Wheel Play", required: true },
-      { id: "steering_linkage", label: "Steering Linkage", required: true },
-      { id: "power_steering_pump", label: "Power Steering Pump", required: true },
+      { id: "steering_wheel", label: "Steering Wheel Free Play (Max 2 inches)", required: true },
+      { id: "steering_linkage", label: "Steering Linkage & Joints", required: true },
     ],
   },
   {
-    category: "Suspension System",
+    category: "4. Suspension System",
     items: [
-      { id: "leaf_springs", label: "Leaf Springs", required: true },
+      { id: "leaf_springs", label: "Leaf Springs & Mounting", required: true },
       { id: "shock_absorbers", label: "Shock Absorbers", required: true },
-      { id: "u_bolts", label: "U-Bolts", required: true },
+      { id: "u_bolts", label: "U-Bolts & Spring Hangers", required: true },
     ],
   },
   {
-    category: "Tires & Wheels",
+    category: "5. Exhaust System",
     items: [
-      { id: "tire_condition", label: "Tire Condition & Tread", required: true },
-      { id: "tire_pressure", label: "Tire Pressure", required: true },
-      { id: "wheel_rims", label: "Wheel Rims", required: true },
-      { id: "lug_nuts", label: "Lug Nuts", required: true },
+      { id: "exhaust_pipes", label: "Exhaust Pipes & Muffler", required: true },
+      { id: "exhaust_mounting", label: "Exhaust System Mounting", required: true },
     ],
   },
   {
-    category: "Lights & Electrical",
+    category: "6. Frame & Body",
     items: [
-      { id: "headlights", label: "Headlights", required: true },
-      { id: "tail_lights", label: "Tail Lights", required: true },
+      { id: "frame_rails", label: "Frame Rails & Cross Members", required: true },
+      { id: "body_damage", label: "Body Damage & Doors", required: true },
+    ],
+  },
+  {
+    category: "7. Tires & Wheels",
+    items: [
+      { id: "tire_condition", label: "Tire Condition & Tread Depth (4/32\" min)", required: true },
+      { id: "tire_pressure", label: "Tire Pressure & Sidewall Damage", required: true },
+      { id: "wheel_rims", label: "Wheel Rims & Lug Nuts", required: true },
+    ],
+  },
+  {
+    category: "8. Lights & Reflectors",
+    items: [
+      { id: "headlights", label: "Headlights (High & Low Beam)", required: true },
+      { id: "tail_lights", label: "Tail Lights & Marker Lights", required: true },
       { id: "brake_lights", label: "Brake Lights", required: true },
-      { id: "turn_signals", label: "Turn Signals", required: true },
-      { id: "hazard_lights", label: "Hazard Lights", required: true },
-      { id: "clearance_lights", label: "Clearance Lights", required: true },
+      { id: "turn_signals", label: "Turn Signals & Hazard Lights", required: true },
+      { id: "clearance_lights", label: "Clearance & Identification Lights", required: true },
+      { id: "reflectors", label: "Reflectors & Reflective Tape", required: true },
     ],
   },
   {
-    category: "Cab & Controls",
+    category: "9. Windshield & Mirrors",
     items: [
-      { id: "mirrors", label: "Mirrors", required: true },
-      { id: "windshield", label: "Windshield", required: true },
-      { id: "wipers", label: "Windshield Wipers", required: true },
-      { id: "horn", label: "Horn", required: true },
-      { id: "seatbelt", label: "Seatbelt", required: true },
+      { id: "windshield", label: "Windshield Condition & Visibility", required: true },
+      { id: "mirrors", label: "Mirrors (Left, Right, Convex)", required: true },
+      { id: "wipers", label: "Windshield Wipers & Washers", required: true },
+    ],
+  },
+  {
+    category: "10. Horn & Warning Devices",
+    items: [
+      { id: "horn", label: "Horn Operation", required: true },
+      { id: "warning_devices", label: "Emergency Warning Devices (3 required)", required: true },
+    ],
+  },
+  {
+    category: "11. Fuel System",
+    items: [
+      { id: "fuel_tanks", label: "Fuel Tanks & Mounting", required: true },
+      { id: "fuel_lines", label: "Fuel Lines & Connections", required: true },
+      { id: "fuel_cap", label: "Fuel Tank Cap & Venting", required: true },
+    ],
+  },
+  {
+    category: "12. Coupling Devices",
+    items: [
+      { id: "fifth_wheel", label: "Fifth Wheel Mounting & Locking", required: true },
+      { id: "kingpin", label: "Kingpin & Upper Coupler", required: true },
+      { id: "air_lines_glad", label: "Air Lines & Glad Hands", required: true },
+      { id: "electrical_cord", label: "Electrical Cord & Plug", required: true },
+    ],
+  },
+  {
+    category: "13. Cargo Securement",
+    items: [
+      { id: "tie_downs", label: "Tie-Downs & Securing Devices", required: true },
+      { id: "cargo_doors", label: "Cargo Doors & Latches", required: true },
+      { id: "load_distribution", label: "Load Distribution & Weight", required: true },
+    ],
+  },
+  {
+    category: "14. Driver Controls",
+    items: [
+      { id: "clutch_pedal", label: "Clutch Pedal Free Play", required: true },
+      { id: "brake_pedal", label: "Brake Pedal Travel & Feel", required: true },
+      { id: "parking_brake", label: "Parking Brake Operation", required: true },
       { id: "gauges", label: "Gauges & Warning Lights", required: true },
     ],
   },
   {
-    category: "Coupling System",
+    category: "15. Safety Equipment",
     items: [
-      { id: "fifth_wheel", label: "Fifth Wheel", required: true },
-      { id: "kingpin", label: "Kingpin", required: true },
-      { id: "air_lines_glad", label: "Air Lines (Glad Hands)", required: true },
-      { id: "electrical_cord", label: "Electrical Cord", required: true },
+      { id: "seatbelt", label: "Seatbelt & Mounting", required: true },
+      { id: "fire_extinguisher", label: "Fire Extinguisher", required: true },
+      { id: "first_aid_kit", label: "First Aid Kit", required: true },
     ],
   },
 ];

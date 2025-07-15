@@ -100,7 +100,9 @@ export const useInspectionStore = create<InspectionState>()(
       getInspectionProgress: () => {
         const state = get();
         const totalItems = preTripInspectionItems.reduce((sum, category) => sum + category.items.length, 0);
-        const completedItems = state.currentInspection.length;
+        const completedItems = state.currentInspection.filter(item => 
+          item.status === 'Pass' || item.status === 'Fail' || item.status === 'Defect'
+        ).length;
         
         return {
           completed: completedItems,
@@ -117,7 +119,10 @@ export const useInspectionStore = create<InspectionState>()(
       canCompleteInspection: () => {
         const state = get();
         const totalItems = preTripInspectionItems.reduce((sum, category) => sum + category.items.length, 0);
-        return state.currentInspection.length === totalItems;
+        const completedItems = state.currentInspection.filter(item => 
+          item.status === 'Pass' || item.status === 'Fail' || item.status === 'Defect'
+        ).length;
+        return completedItems === totalItems;
       },
       
       checkInspectionRequirement: () => {
