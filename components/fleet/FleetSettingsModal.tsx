@@ -42,7 +42,7 @@ export default function FleetSettingsModal({ visible, onClose }: FleetSettingsMo
         return {
           ...prev,
           [section]: {
-            ...currentSection,
+            ...(currentSection as Record<string, any>),
             [key]: value,
           },
         };
@@ -84,7 +84,7 @@ export default function FleetSettingsModal({ visible, onClose }: FleetSettingsMo
         value={(() => {
           const sectionData = localSettings[section];
           if (typeof sectionData === 'object' && sectionData !== null) {
-            return (sectionData as any)[key] as boolean;
+            return (sectionData as Record<string, any>)[key] as boolean;
           }
           return false;
         })()}
@@ -117,7 +117,7 @@ export default function FleetSettingsModal({ visible, onClose }: FleetSettingsMo
         <Text style={styles.settingLabel}>Welcome Message</Text>
         <TextInput
           style={styles.textInput}
-          value={localSettings.companyBranding.welcomeMessage || ''}
+          value={(localSettings.companyBranding as any)?.welcomeMessage || ''}
           onChangeText={(text) => updateSetting('companyBranding', 'welcomeMessage', text)}
           placeholder="Enter custom welcome message"
           placeholderTextColor={colors.textSecondary}
@@ -156,7 +156,7 @@ export default function FleetSettingsModal({ visible, onClose }: FleetSettingsMo
         <Text style={styles.settingLabel}>Custom Break Requirement (hours)</Text>
         <TextInput
           style={styles.numberInput}
-          value={localSettings.complianceRules.customBreakRequirements?.toString() || '8'}
+          value={(localSettings.complianceRules as any)?.customBreakRequirements?.toString() || '8'}
           onChangeText={(text) => updateSetting('complianceRules', 'customBreakRequirements', parseInt(text) || 8)}
           placeholder="8"
           placeholderTextColor={colors.textSecondary}
