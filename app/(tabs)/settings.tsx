@@ -20,7 +20,7 @@ export default function SettingsScreen() {
   const [helpModalVisible, setHelpModalVisible] = useState(false);
   
   const { lastCommand, lastResponse } = useVoiceCommandStore();
-  const { driverStatus, updateDriverStatus } = useLogbookStore();
+  const { currentStatus, changeStatus } = useLogbookStore();
   const { 
     autoTrackDriving,
     voiceCommands,
@@ -65,7 +65,7 @@ export default function SettingsScreen() {
           style: 'destructive',
           onPress: () => {
             // Reset driver status and navigate to login
-            updateDriverStatus('off_duty');
+            changeStatus('Off Duty');
             Alert.alert('Logged Out', 'You have been successfully logged out.');
           }
         }
