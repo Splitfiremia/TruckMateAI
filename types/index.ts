@@ -194,6 +194,24 @@ export interface ComplianceViolationPrediction {
   preventionActions: PreventionAction[];
   location?: string;
   estimatedFine?: number;
+  canOverride?: boolean;
+  overrideInfo?: ViolationOverride;
+}
+
+export interface ViolationOverride {
+  id: string;
+  timestamp: string;
+  reason: string;
+  driverId: string;
+  supervisorApproval?: {
+    supervisorId: string;
+    approvedAt: string;
+    notes?: string;
+  };
+  documentedInTrip: boolean;
+  tripId?: string;
+  riskAcknowledged: boolean;
+  estimatedFineAccepted: boolean;
 }
 
 export interface PreventionAction {
@@ -239,4 +257,23 @@ export interface ComplianceMetrics {
   ruleUpdatesCount: number;
   lastRuleSync: string;
   activeAlerts: number;
+  overridesUsed: number;
+  overridesThisWeek: number;
+}
+
+export interface TripOverrideLog {
+  id: string;
+  tripId: string;
+  timestamp: string;
+  violationType: string;
+  reason: string;
+  driverId: string;
+  location: string;
+  riskLevel: 'Low' | 'Medium' | 'High' | 'Critical';
+  estimatedFine?: number;
+  supervisorApproval?: {
+    supervisorId: string;
+    approvedAt: string;
+    notes?: string;
+  };
 }

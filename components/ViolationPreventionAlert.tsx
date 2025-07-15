@@ -8,7 +8,8 @@ import {
   Modal,
   Alert,
   Vibration,
-  Platform
+  Platform,
+  TextInput
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { 
@@ -19,10 +20,12 @@ import {
   X,
   CheckCircle,
   Zap,
-  Phone
+  Phone,
+  Shield,
+  FileText
 } from 'lucide-react-native';
 import { colors } from '@/constants/colors';
-import { ComplianceViolationPrediction } from '@/types';
+import { ComplianceViolationPrediction, ViolationOverride } from '@/types';
 import { usePredictiveComplianceStore } from '@/store/predictiveComplianceStore';
 import { useLogbookStore } from '@/store/logbookStore';
 
@@ -42,9 +45,13 @@ export const ViolationPreventionAlert: React.FC<ViolationPreventionAlertProps> =
   const [pulseAnim] = useState(new Animated.Value(1));
   const [countdownAnim] = useState(new Animated.Value(1));
   const [timeRemaining, setTimeRemaining] = useState(prediction.timeToViolation);
+  const [showOverrideModal, setShowOverrideModal] = useState(false);
+  const [overrideReason, setOverrideReason] = useState('');
+  const [riskAcknowledged, setRiskAcknowledged] = useState(false);
+  const [fineAccepted, setFineAccepted] = useState(false);
   
-  const { executePreventionAction } = usePredictiveComplianceStore();
-  const { startBreak, changeStatus } = useLogbookStore();
+  const { executePreventionAction, overrideViolationPrediction, canOverrideViolation } = usePredictiveComplianceStore();
+  const { startBreak, changeStatus, currentTripId, getWeeklyOverrideCount } = useLogbookStore();
 
   useEffect(() => {
     if (visible && prediction.severity === 'Critical') {
@@ -136,6 +143,65 @@ export const ViolationPreventionAlert: React.FC<ViolationPreventionAlertProps> =
       onActionTaken(actionType);
     } catch (error) {
       Alert.alert('Error', 'Failed to execute action');
+    }
+  };
+  
+  const handleOverrideRequest = () => {
+    if (!canOverrideViolation(prediction.id)) {
+      const weeklyCount = getWeeklyOverrideCount();
+      Alert.alert(
+        'Override Not Available',
+        weeklyCount >= 3 
+          ? 'Maximum 3 overrides per week already used'
+          : 'This violation type cannot be overridden',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+    
+    setShowOverrideModal(true);
+  };
+  
+  const handleOverrideSubmit = async () => {
+    if (!overrideReason.trim()) {
+      Alert.alert('Error', 'Please provide a reason for the override');
+      return;
+    }
+    
+    if (!riskAcknowledged) {
+      Alert.alert('Error', 'Please acknowledge the safety risks');
+      return;
+    }
+    
+    if (prediction.estimatedFine && !fineAccepted) {
+      Alert.alert('Error', 'Please acknowledge the potential fine');
+      return;
+    }
+    
+    const override: ViolationOverride = {
+      id: `override-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      reason: overrideReason,
+      driverId: 'current-driver', // In real app, get from auth
+      documentedInTrip: true,
+      tripId: currentTripId,
+      riskAcknowledged,
+      estimatedFineAccepted: fineAccepted
+    };
+    
+    const success = await overrideViolationPrediction(prediction.id, override);
+    
+    if (success) {
+      Alert.alert(
+        'Override Applied',
+        'Violation override has been documented in your trip log. Continue with caution.',
+        [{ text: 'OK', onPress: () => {
+          setShowOverrideModal(false);
+          onActionTaken('override');
+        }}]
+      );
+    } else {
+      Alert.alert('Error', 'Failed to apply override. Please try again.');
     }
   };
 
@@ -526,5 +592,196 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     color: colors.error,
+  },
+  
+  // Override Styles
+  overrideSection: {
+    marginBottom: 16,
+    padding: 16,
+    backgroundColor: colors.warning + '10',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.warning + '30',
+  },
+  overrideTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: 4,
+  },
+  overrideDescription: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    marginBottom: 12,
+    lineHeight: 16,
+  },
+  overrideButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: colors.warning,
+    borderRadius: 8,
+    paddingVertical: 10,
+  },
+  overrideButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: 'white',
+  },
+  
+  overrideAppliedSection: {
+    marginBottom: 16,
+    padding: 16,
+    backgroundColor: colors.primary + '10',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.primary + '30',
+  },
+  overrideAppliedHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  overrideAppliedTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.primary,
+  },
+  overrideAppliedText: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    marginBottom: 4,
+  },
+  overrideReason: {
+    fontSize: 12,
+    color: colors.text,
+    fontStyle: 'italic',
+  },
+  
+  // Override Modal Styles
+  overrideModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  overrideModalContainer: {
+    width: '100%',
+    maxWidth: 400,
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    padding: 24,
+  },
+  overrideModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  overrideModalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.text,
+  },
+  overrideModalClose: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  overrideModalWarning: {
+    fontSize: 14,
+    color: colors.warning,
+    backgroundColor: colors.warning + '10',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 20,
+    lineHeight: 18,
+  },
+  overrideFormSection: {
+    marginBottom: 20,
+  },
+  overrideFormLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: 8,
+  },
+  overrideReasonInput: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 14,
+    color: colors.text,
+    backgroundColor: colors.background,
+    textAlignVertical: 'top',
+    minHeight: 80,
+  },
+  overrideCheckboxSection: {
+    marginBottom: 24,
+    gap: 12,
+  },
+  overrideCheckbox: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderWidth: 2,
+    borderColor: colors.border,
+    borderRadius: 4,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 2,
+  },
+  checkboxChecked: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  checkboxText: {
+    fontSize: 14,
+    color: colors.text,
+    flex: 1,
+    lineHeight: 18,
+  },
+  overrideModalActions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  overrideCancelButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: 'center',
+  },
+  overrideCancelText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.textSecondary,
+  },
+  overrideSubmitButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: colors.warning,
+    alignItems: 'center',
+  },
+  overrideSubmitButtonDisabled: {
+    backgroundColor: colors.border,
+  },
+  overrideSubmitText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: 'white',
   },
 });

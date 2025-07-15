@@ -7,7 +7,8 @@ import {
   PredictiveAlert, 
   RuleUpdateNotification,
   ComplianceMetrics,
-  PreventionAction
+  PreventionAction,
+  ViolationOverride
 } from '@/types';
 
 interface PredictiveComplianceState {
@@ -32,6 +33,7 @@ interface PredictiveComplianceState {
   analyzePredictiveCompliance: (drivingData: any) => Promise<void>;
   addViolationPrediction: (prediction: ComplianceViolationPrediction) => void;
   resolveViolationPrediction: (id: string) => void;
+  overrideViolationPrediction: (id: string, override: ViolationOverride) => Promise<boolean>;
   addAlert: (alert: PredictiveAlert) => void;
   dismissAlert: (id: string) => void;
   executePreventionAction: (actionId: string) => Promise<void>;
@@ -39,6 +41,7 @@ interface PredictiveComplianceState {
   checkForRuleUpdates: () => Promise<void>;
   getTimeToNextViolation: () => number;
   getRiskLevel: () => 'Low' | 'Medium' | 'High' | 'Critical';
+  canOverrideViolation: (predictionId: string) => boolean;
 }
 
 // Mock DOT Rules Database
@@ -123,7 +126,9 @@ export const usePredictiveComplianceStore = create<PredictiveComplianceState>()(
         predictedViolations: [],
         ruleUpdatesCount: 0,
         lastRuleSync: new Date().toISOString(),
-        activeAlerts: 0
+        activeAlerts: 0,
+        overridesUsed: 0,
+        overridesThisWeek: 0
       },
       isMonitoring: false,
       lastRuleSync: new Date().toISOString(),
@@ -239,7 +244,8 @@ export const usePredictiveComplianceStore = create<PredictiveComplianceState>()(
                   automated: false
                 }
               ],
-              estimatedFine: 395
+              estimatedFine: 395,
+              canOverride: true
             });
           }
 
@@ -272,7 +278,8 @@ export const usePredictiveComplianceStore = create<PredictiveComplianceState>()(
                   automated: true
                 }
               ],
-              estimatedFine: 1150
+              estimatedFine: 1150,
+              canOverride: false // Cannot override driving time limits
             });
           }
 
@@ -303,7 +310,8 @@ export const usePredictiveComplianceStore = create<PredictiveComplianceState>()(
                   automated: true
                 }
               ],
-              estimatedFine: 1150
+              estimatedFine: 1150,
+              canOverride: false // Cannot override 14-hour window
             });
           }
 
