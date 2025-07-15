@@ -23,6 +23,7 @@ import {
 } from 'lucide-react-native';
 import { colors } from '@/constants/colors';
 import { useInspectionStore } from '@/store/inspectionStore';
+import { useSettingsStore } from '@/store/settingsStore';
 import { preTripInspectionItems } from '@/constants/mockData';
 import { InspectionStatus } from '@/types';
 
@@ -54,6 +55,8 @@ export default function PreTripInspectionModal({
     hasDefects,
     canCompleteInspection,
   } = useInspectionStore();
+  
+  const { bypassPreTripHardStop } = useSettingsStore();
   
   useEffect(() => {
     if (visible && currentInspection.length === 0) {
@@ -148,8 +151,8 @@ export default function PreTripInspectionModal({
   
   // Handle close with conditional hard stop
   const handleClose = () => {
-    // Only enforce hard stop when beginning a trip
-    if (isBeginningTrip && !canCompleteInspection()) {
+    // Only enforce hard stop when beginning a trip AND bypass is disabled
+    if (isBeginningTrip && !canCompleteInspection() && !bypassPreTripHardStop) {
       Alert.alert(
         'Trip Start - Inspection Required',
         'You cannot begin your trip until ALL 21 inspection points are completed. This is a federal safety requirement for trip initiation.',
@@ -167,6 +170,32 @@ export default function PreTripInspectionModal({
                   { text: 'Cancel Trip', style: 'destructive', onPress: onClose }
                 ]
               );
+            }
+          }
+        ]
+      );
+      return;
+    }
+    
+    // Show bypass warning if starting trip with incomplete inspection
+    if (isBeginningTrip && !canCompleteInspection() && bypassPreTripHardStop) {
+      Alert.alert(
+        'Bypass Warning - Incomplete Inspection',
+        'You are starting a trip without completing the full 21-point CDL inspection. This bypass has been enabled in settings but may violate FMCSA safety regulations. Proceed with caution.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { 
+            text: 'Start Trip Anyway', 
+            style: 'destructive',
+            onPress: () => {
+              // Log the bypass for compliance tracking
+              console.log('Pre-trip inspection bypassed for trip start:', {
+                timestamp: new Date().toISOString(),
+                location,
+                completionPercentage: progress.percentage,
+                bypassReason: 'User setting enabled'
+              });
+              onClose();
             }
           }
         ]
@@ -192,6 +221,34 @@ export default function PreTripInspectionModal({
   
   const handleComplete = () => {
     if (!canCompleteInspection()) {
+      // Allow bypass only for trip start if setting is enabled
+      if (isBeginningTrip && bypassPreTripHardStop) {
+        Alert.alert(
+          'Incomplete Inspection - Bypass Available',
+          `Only ${progress.completed} of ${preTripInspectionItems.reduce((sum, cat) => sum + cat.items.length, 0)} CDL inspection points completed. You can bypass this requirement due to your settings, but this may violate FMCSA regulations.`,
+          [
+            { text: 'Continue Inspection', style: 'cancel' },
+            { 
+              text: 'Bypass & Start Trip', 
+              style: 'destructive',
+              onPress: () => {
+                // Log the bypass for compliance tracking
+                console.log('Pre-trip inspection bypassed during completion:', {
+                  timestamp: new Date().toISOString(),
+                  location,
+                  completionPercentage: progress.percentage,
+                  bypassReason: 'User setting enabled - forced completion'
+                });
+                completeInspection(location);
+                onComplete();
+                onClose();
+              }
+            }
+          ]
+        );
+        return;
+      }
+      
       const message = isBeginningTrip 
         ? `Please complete all ${preTripInspectionItems.reduce((sum, cat) => sum + cat.items.length, 0)} CDL inspection points before starting your trip. This is required by FMCSA regulations for trip initiation.`
         : `Please complete all ${preTripInspectionItems.reduce((sum, cat) => sum + cat.items.length, 0)} CDL inspection points before finishing. This inspection can be completed later if not starting a trip.`;
@@ -383,6 +440,14 @@ export default function PreTripInspectionModal({
           </View>
           {progress.percentage === 100 && (
             <Text style={styles.completionText}>✓ All 21 points completed</Text>
+          )}
+          {isBeginningTrip && bypassPreTripHardStop && (
+            <View style={styles.bypassStatusContainer}>
+              <AlertTriangle size={14} color={colors.warning} />
+              <Text style={styles.bypassStatusText}>
+                Hard Stop Bypass Enabled - Trip can start without full completion
+              </Text>
+            </View>
           )}
         </View>
         
@@ -909,6 +974,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.primaryLight,
     marginLeft: 8,
+    fontWeight: '500',
+  },
+  bypassStatusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+    padding: 8,
+    borderRadius: 6,
+    marginTop: 8,
+  },
+  bypassStatusText: {
+    fontSize: 12,
+    color: colors.warning,
+    marginLeft: 6,
     fontWeight: '500',
   },
 });

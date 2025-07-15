@@ -1,32 +1,59 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Switch } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Switch, Alert } from 'react-native';
 import { Stack } from 'expo-router';
-import { User, Truck, Bell, Shield, HelpCircle, LogOut, ChevronRight } from 'lucide-react-native';
+import { User, Truck, Bell, Shield, HelpCircle, LogOut, ChevronRight, AlertTriangle } from 'lucide-react-native';
 
 import { colors } from '@/constants/colors';
 import { driverInfo } from '@/constants/mockData';
 import VoiceCommandButton from '@/components/VoiceCommandButton';
 import CommandResponseModal from '@/components/CommandResponseModal';
 import { useVoiceCommandStore } from '@/store/voiceCommandStore';
+import { useSettingsStore } from '@/store/settingsStore';
 
 export default function SettingsScreen() {
   const [commandModalVisible, setCommandModalVisible] = useState(false);
   const { lastCommand, lastResponse } = useVoiceCommandStore();
+  const { 
+    autoTrackDriving,
+    voiceCommands,
+    pushNotifications,
+    complianceAlerts,
+    dataSync,
+    darkMode,
+    bypassPreTripHardStop,
+    updateSetting 
+  } = useSettingsStore();
   
-  const [settings, setSettings] = useState({
-    autoTrackDriving: true,
-    voiceCommands: true,
-    pushNotifications: true,
-    complianceAlerts: true,
-    dataSync: true,
-    darkMode: true,
-  });
+  const settings = {
+    autoTrackDriving,
+    voiceCommands,
+    pushNotifications,
+    complianceAlerts,
+    dataSync,
+    darkMode,
+    bypassPreTripHardStop,
+  };
   
   const toggleSetting = (setting: keyof typeof settings) => {
-    setSettings(prev => ({
-      ...prev,
-      [setting]: !prev[setting],
-    }));
+    if (setting === 'bypassPreTripHardStop') {
+      // Show confirmation dialog for safety-critical setting
+      Alert.alert(
+        'Safety Setting Change',
+        settings[setting] 
+          ? 'Re-enabling pre-trip inspection hard stop will require completion of all 21 CDL inspection points before starting a trip. This is the recommended safety setting.'
+          : 'WARNING: Disabling the pre-trip inspection hard stop will allow you to start trips without completing the full 21-point CDL inspection. This may violate FMCSA safety regulations and is not recommended.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { 
+            text: settings[setting] ? 'Enable Hard Stop' : 'Disable Hard Stop',
+            style: settings[setting] ? 'default' : 'destructive',
+            onPress: () => updateSetting(setting, !settings[setting])
+          }
+        ]
+      );
+    } else {
+      updateSetting(setting, !settings[setting]);
+    }
   };
   
   const handleCommandProcessed = () => {
@@ -134,6 +161,31 @@ export default function SettingsScreen() {
             'Dark Mode',
             'Use dark theme for night driving'
           )}
+        </View>
+        
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Safety Settings</Text>
+        </View>
+        
+        <View style={styles.settingsCard}>
+          <View style={styles.settingItem}>
+            <View style={styles.settingContent}>
+              <View style={styles.settingLabelContainer}>
+                <AlertTriangle size={16} color={colors.warning} style={{ marginRight: 8 }} />
+                <Text style={styles.settingLabel}>Bypass Pre-Trip Hard Stop</Text>
+              </View>
+              <Text style={styles.settingDescription}>
+                Allow starting trips without completing all 21 CDL inspection points. 
+                <Text style={styles.warningText}>Not recommended - may violate FMCSA regulations.</Text>
+              </Text>
+            </View>
+            <Switch
+              value={settings.bypassPreTripHardStop}
+              onValueChange={() => toggleSetting('bypassPreTripHardStop')}
+              trackColor={{ false: colors.border, true: colors.warning }}
+              thumbColor={colors.text}
+            />
+          </View>
         </View>
         
         <View style={styles.sectionHeader}>
@@ -286,6 +338,15 @@ const styles = StyleSheet.create({
   settingDescription: {
     fontSize: 14,
     color: colors.textSecondary,
+  },
+  settingLabelContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 2,
+  },
+  warningText: {
+    color: colors.warning,
+    fontWeight: '500',
   },
   settingLink: {
     flexDirection: 'row',
