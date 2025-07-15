@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { Stack } from 'expo-router';
-import { Mic, Camera, Clock, AlertTriangle, Truck, DollarSign, Clipboard } from 'lucide-react-native';
+import { Mic, Camera, Clock, AlertTriangle, Truck, DollarSign, Clipboard, Building } from 'lucide-react-native';
 
 import { colors } from '@/constants/colors';
 import { driverInfo, upcomingLoads, weeklyStats } from '@/constants/mockData';
@@ -17,6 +17,7 @@ import PreTripInspectionModal from '@/components/PreTripInspectionModal';
 import InspectionRequiredModal from '@/components/InspectionRequiredModal';
 import { useVoiceCommandStore } from '@/store/voiceCommandStore';
 import { useInspectionStore } from '@/store/inspectionStore';
+import { useFleetStore } from '@/store/fleetStore';
 
 export default function DashboardScreen() {
   const [statusModalVisible, setStatusModalVisible] = useState(false);
@@ -27,6 +28,7 @@ export default function DashboardScreen() {
   
   const { lastCommand, lastResponse } = useVoiceCommandStore();
   const { isInspectionRequired, checkInspectionRequirement } = useInspectionStore();
+  const { currentFleet, settings, isFleetManager } = useFleetStore();
   
   useEffect(() => {
     // Check if inspection is required when component mounts
@@ -65,6 +67,12 @@ export default function DashboardScreen() {
     setInspectionModalVisible(true);
   };
   
+  // Get welcome message from fleet settings or use default
+  const welcomeMessage = settings?.companyBranding.welcomeMessage || 
+    `Hello, ${driverInfo.name}`;
+  
+  const companyName = currentFleet?.name || driverInfo.company;
+  
   return (
     <View style={styles.container}>
       <Stack.Screen 
@@ -77,12 +85,28 @@ export default function DashboardScreen() {
       />
       
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.greeting}>Hello, {driverInfo.name}</Text>
-            <Text style={styles.subGreeting}>{driverInfo.company}</Text>
+        {/* Fleet Branding Header */}
+        {currentFleet && settings?.companyBranding.showLogo && (
+          <View style={styles.fleetHeader}>
+            {currentFleet.logo && (
+              <Image source={{ uri: currentFleet.logo }} style={styles.fleetLogo} />
+            )}
+            <View style={styles.fleetInfo}>
+              <Text style={styles.fleetWelcome}>{welcomeMessage}</Text>
+              <Text style={styles.fleetCompany}>{companyName}</Text>
+            </View>
           </View>
-        </View>
+        )}
+        
+        {/* Default Header for non-fleet users */}
+        {!currentFleet && (
+          <View style={styles.header}>
+            <View>
+              <Text style={styles.greeting}>Hello, {driverInfo.name}</Text>
+              <Text style={styles.subGreeting}>{driverInfo.company}</Text>
+            </View>
+          </View>
+        )}
         
         <StatusCard onStatusChange={handleStatusCardPress} />
         
@@ -113,12 +137,15 @@ export default function DashboardScreen() {
             color={isInspectionRequired ? colors.warning : colors.secondary}
           />
           
-          <QuickActionButton 
-            icon={<Camera size={20} color={colors.text} />}
-            label="Scan Receipt"
-            onPress={() => setScannerVisible(true)}
-            color={colors.secondary}
-          />
+          {/* Only show receipt scanning if enabled in fleet settings */}
+          {(!settings || settings.features.receiptScanning) && (
+            <QuickActionButton 
+              icon={<Camera size={20} color={colors.text} />}
+              label="Scan Receipt"
+              onPress={() => setScannerVisible(true)}
+              color={colors.secondary}
+            />
+          )}
           
           <QuickActionButton 
             icon={<AlertTriangle size={20} color={colors.text} />}
@@ -126,6 +153,16 @@ export default function DashboardScreen() {
             onPress={() => {}}
             color={colors.warning}
           />
+          
+          {/* Fleet Management Quick Access */}
+          {isFleetManager && (
+            <QuickActionButton 
+              icon={<Building size={20} color={colors.text} />}
+              label="Fleet Dashboard"
+              onPress={() => {}}
+              color={colors.primaryLight}
+            />
+          )}
         </View>
         
         <View style={styles.sectionHeader}>
@@ -173,9 +210,12 @@ export default function DashboardScreen() {
         <View style={styles.footer} />
       </ScrollView>
       
-      <View style={styles.voiceButtonContainer}>
-        <VoiceCommandButton onCommandProcessed={handleCommandProcessed} />
-      </View>
+      {/* Only show voice commands if enabled in fleet settings */}
+      {(!settings || settings.features.voiceCommands) && (
+        <View style={styles.voiceButtonContainer}>
+          <VoiceCommandButton onCommandProcessed={handleCommandProcessed} />
+        </View>
+      )}
       
       <StatusChangeModal 
         visible={statusModalVisible}
@@ -217,6 +257,34 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
     paddingHorizontal: 16,
+  },
+  fleetHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 16,
+    marginBottom: 16,
+    backgroundColor: colors.backgroundLight,
+    borderRadius: 12,
+    padding: 16,
+  },
+  fleetLogo: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 12,
+  },
+  fleetInfo: {
+    flex: 1,
+  },
+  fleetWelcome: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  fleetCompany: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    marginTop: 4,
   },
   header: {
     flexDirection: 'row',
