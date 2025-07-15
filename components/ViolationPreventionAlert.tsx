@@ -147,13 +147,21 @@ export const ViolationPreventionAlert: React.FC<ViolationPreventionAlertProps> =
   };
   
   const handleOverrideRequest = () => {
+    const weeklyCount = getWeeklyOverrideCount();
+    
+    if (weeklyCount >= 3) {
+      Alert.alert(
+        'Override Limit Reached',
+        'You have already used the maximum of 3 overrides this week. Overrides reset every Monday.',
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+    
     if (!canOverrideViolation(prediction.id)) {
-      const weeklyCount = getWeeklyOverrideCount();
       Alert.alert(
         'Override Not Available',
-        weeklyCount >= 3 
-          ? 'Maximum 3 overrides per week already used'
-          : 'This violation type cannot be overridden',
+        'This violation type cannot be overridden for safety reasons.',
         [{ text: 'OK' }]
       );
       return;
@@ -190,28 +198,39 @@ export const ViolationPreventionAlert: React.FC<ViolationPreventionAlertProps> =
       estimatedFineAccepted: fineAccepted
     };
     
-    const success = await overrideViolationPrediction(prediction.id, override);
-    
-    if (success) {
-      // Log the override in the logbook store for record keeping
-      const { logViolationOverride } = useLogbookStore.getState();
-      logViolationOverride(
-        override, 
-        prediction.type, 
-        prediction.severity === 'Critical' ? 'Critical' : prediction.severity === 'Warning' ? 'High' : 'Medium',
-        prediction.estimatedFine
-      );
+    try {
+      const success = await overrideViolationPrediction(prediction.id, override);
       
-      Alert.alert(
-        'Override Applied',
-        'Violation override has been documented in your driver logs. Continue with caution.',
-        [{ text: 'OK', onPress: () => {
-          setShowOverrideModal(false);
-          onActionTaken('override');
-        }}]
-      );
-    } else {
-      Alert.alert('Error', 'Failed to apply override. Please try again.');
+      if (success) {
+        // Log the override in the logbook store for record keeping
+        const { logViolationOverride } = useLogbookStore.getState();
+        logViolationOverride(
+          override, 
+          prediction.type, 
+          prediction.severity === 'Critical' ? 'Critical' : prediction.severity === 'Warning' ? 'High' : 'Medium',
+          prediction.estimatedFine
+        );
+        
+        const weeklyCount = getWeeklyOverrideCount();
+        const remainingOverrides = 3 - weeklyCount - 1;
+        
+        Alert.alert(
+          'Override Applied Successfully',
+          `Violation override has been documented in your driver logs. You have ${remainingOverrides} override${remainingOverrides !== 1 ? 's' : ''} remaining this week.\n\nContinue with caution.`,
+          [{ text: 'OK', onPress: () => {
+            setShowOverrideModal(false);
+            setOverrideReason('');
+            setRiskAcknowledged(false);
+            setFineAccepted(false);
+            onActionTaken('override');
+          }}]
+        );
+      } else {
+        Alert.alert('Override Failed', 'Failed to apply override. Please try again or contact support.');
+      }
+    } catch (error) {
+      console.error('Override error:', error);
+      Alert.alert('Override Error', 'An error occurred while processing the override. Please try again.');
     }
   };
 
@@ -382,14 +401,20 @@ export const ViolationPreventionAlert: React.FC<ViolationPreventionAlertProps> =
                 <Text style={styles.overrideTitle}>Override Available</Text>
                 <Text style={styles.overrideDescription}>
                   This violation can be overridden with proper documentation. 
-                  Maximum 3 overrides per week allowed. Override will be recorded in driver logs.
+                  You have {Math.max(0, 3 - getWeeklyOverrideCount())} override{Math.max(0, 3 - getWeeklyOverrideCount()) !== 1 ? 's' : ''} remaining this week. Override will be recorded in driver logs.
                 </Text>
                 <TouchableOpacity 
-                  style={styles.overrideButton}
+                  style={[
+                    styles.overrideButton,
+                    getWeeklyOverrideCount() >= 3 && styles.overrideButtonDisabled
+                  ]}
                   onPress={handleOverrideRequest}
+                  disabled={getWeeklyOverrideCount() >= 3}
                 >
                   <Shield size={16} color="white" />
-                  <Text style={styles.overrideButtonText}>Request Override</Text>
+                  <Text style={styles.overrideButtonText}>
+                    {getWeeklyOverrideCount() >= 3 ? 'Override Limit Reached' : 'Request Override'}
+                  </Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -503,7 +528,7 @@ export const ViolationPreventionAlert: React.FC<ViolationPreventionAlertProps> =
                   styles.overrideSubmitButtonDisabled
                 ]}
                 onPress={handleOverrideSubmit}
-                disabled={!overrideReason.trim() || !riskAcknowledged || (!!prediction.estimatedFine && !fineAccepted)}
+                disabled={!overrideReason.trim() || !riskAcknowledged || (prediction.estimatedFine ? !fineAccepted : false)}
               >
                 <Text style={styles.overrideSubmitText}>Apply Override</Text>
               </TouchableOpacity>
@@ -756,6 +781,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.warning,
     borderRadius: 8,
     paddingVertical: 10,
+  },
+  overrideButtonDisabled: {
+    backgroundColor: colors.border,
+    opacity: 0.6,
   },
   overrideButtonText: {
     fontSize: 14,

@@ -51,7 +51,8 @@ export default function ComplianceScreen() {
     syncDOTRules,
     analyzePredictiveCompliance,
     dismissAlert,
-    getRiskLevel
+    getRiskLevel,
+    resetWeeklyOverrides
   } = usePredictiveComplianceStore();
 
   const { drivingHoursToday, drivingHoursWeek } = useLogbookStore();
@@ -193,6 +194,76 @@ export default function ComplianceScreen() {
             <Text style={styles.settingButtonTitle}>Timing Preferences</Text>
             <Text style={styles.settingButtonDescription}>
               Set preferred break and rest periods
+            </Text>
+          </View>
+        </TouchableOpacity>
+      </View>
+
+      {/* Testing */}
+      <View style={styles.settingsSection}>
+        <Text style={styles.settingsSectionTitle}>🧪 Testing</Text>
+        
+        <TouchableOpacity 
+          style={styles.settingButton}
+          onPress={() => {
+            const testPrediction: ComplianceViolationPrediction = {
+              id: `test-${Date.now()}`,
+              type: 'Break',
+              severity: 'Critical',
+              timeToViolation: 15, // 15 minutes
+              currentValue: 7.8,
+              thresholdValue: 8,
+              message: 'Test violation: 30-minute break required in 15 minutes',
+              recommendations: ['Find nearest rest area', 'Take 30-minute break'],
+              preventionActions: [{
+                id: 'test-action',
+                type: 'Break',
+                title: 'Take Break',
+                description: 'Start required break',
+                urgency: 'Immediate',
+                estimatedTime: 30,
+                automated: false
+              }],
+              estimatedFine: 395,
+              canOverride: true
+            };
+            handleViolationAlert(testPrediction);
+          }}
+        >
+          <AlertTriangle size={20} color={colors.warning} />
+          <View style={styles.settingButtonInfo}>
+            <Text style={styles.settingButtonTitle}>Test Violation Alert</Text>
+            <Text style={styles.settingButtonDescription}>
+              Trigger a test violation alert to test override functionality
+            </Text>
+          </View>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.settingButton}
+          onPress={() => {
+            Alert.alert(
+              'Reset Weekly Overrides',
+              'This will reset your weekly override count to 0. This is for testing purposes only.',
+              [
+                { text: 'Cancel', style: 'cancel' },
+                { 
+                  text: 'Reset', 
+                  style: 'destructive',
+                  onPress: () => {
+                    resetWeeklyOverrides();
+                    Alert.alert('Success', 'Weekly override count has been reset.');
+                  }
+                }
+              ]
+            );
+          }}
+        >
+          <XCircle size={20} color={colors.error} />
+          <View style={styles.settingButtonInfo}>
+            <Text style={styles.settingButtonTitle}>Reset Weekly Overrides</Text>
+            <Text style={styles.settingButtonDescription}>
+              Reset override count for testing (Current: {metrics.overridesThisWeek}/3)
             </Text>
           </View>
         </TouchableOpacity>

@@ -42,6 +42,7 @@ interface PredictiveComplianceState {
   checkForRuleUpdates: () => Promise<void>;
   getTimeToNextViolation: () => number;
   getRiskLevel: () => 'Low' | 'Medium' | 'High' | 'Critical';
+  resetWeeklyOverrides: () => void;
 }
 
 // Mock DOT Rules Database
@@ -372,8 +373,24 @@ export const usePredictiveComplianceStore = create<PredictiveComplianceState>()(
 
       overrideViolationPrediction: async (id, override) => {
         try {
-          // In a real app, this would make an API call to log the override
-          await new Promise(resolve => setTimeout(resolve, 500));
+          const state = get();
+          
+          // Check if override is still valid
+          const prediction = state.violationPredictions.find(p => p.id === id);
+          if (!prediction) {
+            throw new Error('Prediction not found');
+          }
+          
+          if (!prediction.canOverride) {
+            throw new Error('This violation cannot be overridden');
+          }
+          
+          if (state.metrics.overridesThisWeek >= 3) {
+            throw new Error('Weekly override limit exceeded');
+          }
+          
+          // Simulate API call to log the override
+          await new Promise(resolve => setTimeout(resolve, 800));
           
           set(state => {
             const updatedPredictions = state.violationPredictions.map(p => 
@@ -397,7 +414,7 @@ export const usePredictiveComplianceStore = create<PredictiveComplianceState>()(
             type: 'Violation Prevention',
             priority: 'Medium',
             title: 'Violation Override Applied',
-            message: `Override documented: ${override.reason}`,
+            message: `Override documented: ${override.reason.substring(0, 50)}${override.reason.length > 50 ? '...' : ''}`,
             actionRequired: false,
             autoResolved: true,
             expiresAt: new Date(Date.now() + 300000).toISOString() // 5 minutes
@@ -413,7 +430,11 @@ export const usePredictiveComplianceStore = create<PredictiveComplianceState>()(
       canOverrideViolation: (predictionId) => {
         const state = get();
         const prediction = state.violationPredictions.find(p => p.id === predictionId);
-        return prediction?.canOverride === true;
+        if (!prediction?.canOverride) return false;
+        
+        // Check weekly override limit (max 3 per week)
+        const weeklyCount = state.metrics.overridesThisWeek;
+        return weeklyCount < 3;
       },
 
       addAlert: (alert) => {
@@ -548,6 +569,15 @@ export const usePredictiveComplianceStore = create<PredictiveComplianceState>()(
         if (riskScore >= 60) return 'High';
         if (riskScore >= 30) return 'Medium';
         return 'Low';
+      },
+      
+      resetWeeklyOverrides: () => {
+        set(state => ({
+          metrics: {
+            ...state.metrics,
+            overridesThisWeek: 0
+          }
+        }));
       }
     }),
     {
