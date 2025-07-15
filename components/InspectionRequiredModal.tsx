@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
-import { AlertTriangle, Clipboard, Shield, Lock } from 'lucide-react-native';
+import { AlertTriangle, Clipboard, Shield } from 'lucide-react-native';
 import { colors } from '@/constants/colors';
 
 interface InspectionRequiredModalProps {
@@ -17,7 +17,7 @@ export default function InspectionRequiredModal({
       visible={visible}
       transparent={true}
       animationType="fade"
-      onRequestClose={() => {}} // Prevent back button from closing
+      onRequestClose={() => {}}
     >
       <View style={styles.overlay}>
         <View style={styles.container}>
@@ -25,16 +25,16 @@ export default function InspectionRequiredModal({
             <AlertTriangle size={48} color={colors.warning} />
           </View>
           
-          <Text style={styles.title}>HARD STOP: Pre-Trip Inspection Required</Text>
+          <Text style={styles.title}>Pre-Trip Inspection Recommended</Text>
           
           <Text style={styles.message}>
-            <Text style={styles.boldText}>FMCSA Federal Regulation:</Text> You cannot begin your driving shift without completing a full 21-point CDL pre-trip inspection. This is a mandatory safety requirement.
+            <Text style={styles.boldText}>Safety Recommendation:</Text> Complete a full 21-point CDL pre-trip inspection before beginning your driving shift for optimal safety and compliance.
           </Text>
           
-          <View style={styles.hardStopNotice}>
-            <Lock size={16} color={colors.danger} />
-            <Text style={styles.hardStopText}>
-              System Locked - No Bypass Available
+          <View style={styles.recommendationNotice}>
+            <Shield size={16} color={colors.primaryLight} />
+            <Text style={styles.recommendationText}>
+              Inspection Recommended for Safety
             </Text>
           </View>
           
@@ -70,7 +70,7 @@ export default function InspectionRequiredModal({
           </TouchableOpacity>
           
           <Text style={styles.disclaimer}>
-            <Text style={styles.boldText}>WARNING:</Text> Attempting to bypass this inspection violates federal safety regulations and may result in penalties.
+            <Text style={styles.boldText}>Note:</Text> While not mandatory, completing inspections helps ensure vehicle safety and regulatory compliance.
           </Text>
         </View>
       </View>
@@ -159,19 +159,19 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: colors.text,
   },
-  hardStopNotice: {
+  recommendationNotice: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    backgroundColor: 'rgba(59, 130, 246, 0.1)',
     padding: 12,
     borderRadius: 8,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: colors.danger,
+    borderColor: colors.primaryLight,
   },
-  hardStopText: {
+  recommendationText: {
     fontSize: 14,
-    color: colors.danger,
+    color: colors.primaryLight,
     marginLeft: 8,
     fontWeight: '600',
   },

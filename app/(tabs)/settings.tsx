@@ -20,7 +20,7 @@ export default function SettingsScreen() {
     complianceAlerts,
     dataSync,
     darkMode,
-    bypassPreTripHardStop,
+
     updateSetting 
   } = useSettingsStore();
   
@@ -31,35 +31,11 @@ export default function SettingsScreen() {
     complianceAlerts,
     dataSync,
     darkMode,
-    bypassPreTripHardStop,
+
   };
   
   const toggleSetting = (setting: keyof typeof settings) => {
-    if (setting === 'bypassPreTripHardStop') {
-      const currentValue = bypassPreTripHardStop;
-      const newValue = !currentValue;
-      
-      // Show confirmation dialog for safety-critical setting
-      Alert.alert(
-        'Safety Setting Change',
-        currentValue 
-          ? 'Re-enabling pre-trip inspection hard stop will require completion of all 21 CDL inspection points before starting a trip. This is the recommended safety setting.'
-          : 'WARNING: Disabling the pre-trip inspection hard stop will allow you to start trips without completing the full 21-point CDL inspection. This may violate FMCSA safety regulations and is not recommended.',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { 
-            text: currentValue ? 'Enable Hard Stop' : 'Disable Hard Stop',
-            style: currentValue ? 'default' : 'destructive',
-            onPress: () => {
-              console.log('Toggling bypassPreTripHardStop from', currentValue, 'to', newValue);
-              updateSetting('bypassPreTripHardStop', newValue);
-            }
-          }
-        ]
-      );
-    } else {
-      updateSetting(setting, !settings[setting]);
-    }
+    updateSetting(setting, !settings[setting]);
   };
   
   const handleCommandProcessed = () => {
@@ -177,35 +153,7 @@ export default function SettingsScreen() {
           <Text style={styles.sectionTitle}>Safety Settings</Text>
         </View>
         
-        <View style={styles.settingsCard}>
-          <View style={styles.settingItem}>
-            <View style={styles.settingContent}>
-              <View style={styles.settingLabelContainer}>
-                <AlertTriangle size={16} color={colors.warning} style={{ marginRight: 8 }} />
-                <Text style={styles.settingLabel}>Bypass Pre-Trip Hard Stop</Text>
-              </View>
-              <Text style={styles.settingDescription}>
-                Allow starting trips without completing all 21 CDL inspection points. 
-                <Text style={styles.warningText}>Not recommended - may violate FMCSA regulations.</Text>
-              </Text>
-              <Text style={[styles.statusText, { color: bypassPreTripHardStop ? colors.warning : colors.primary }]}>
-                Status: {bypassPreTripHardStop ? 'BYPASS ENABLED' : 'HARD STOP ACTIVE'}
-              </Text>
-            </View>
-            <View style={styles.switchContainer}>
-              <Switch
-                value={bypassPreTripHardStop}
-                onValueChange={() => {
-                  console.log('Switch onValueChange called, current value:', bypassPreTripHardStop);
-                  toggleSetting('bypassPreTripHardStop');
-                }}
-                trackColor={{ false: colors.border, true: colors.warning }}
-                thumbColor={bypassPreTripHardStop ? colors.background : colors.text}
-                ios_backgroundColor={colors.border}
-              />
-            </View>
-          </View>
-        </View>
+
         
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Account</Text>

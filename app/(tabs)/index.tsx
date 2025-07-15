@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import { Stack } from 'expo-router';
-import { Mic, Camera, Clock, AlertTriangle, Truck, DollarSign, Clipboard, Upload, Shield, Lock } from 'lucide-react-native';
+import { Mic, Camera, Clock, AlertTriangle, Truck, DollarSign, Clipboard, Upload, Shield } from 'lucide-react-native';
 
 import { colors } from '@/constants/colors';
 import { ComplianceViolationPrediction } from '@/types';
@@ -239,24 +239,7 @@ export default function DashboardScreen() {
         <View style={styles.footer} />
       </ScrollView>
       
-      {/* Hard Stop Overlay when inspection is required */}
-      {isInspectionRequired && (
-        <View style={styles.hardStopOverlay}>
-          <View style={styles.hardStopContent}>
-            <Lock size={32} color={colors.danger} />
-            <Text style={styles.hardStopTitle}>System Locked</Text>
-            <Text style={styles.hardStopMessage}>
-              Complete pre-trip inspection to unlock all features
-            </Text>
-            <TouchableOpacity 
-              style={styles.hardStopButton}
-              onPress={() => setInspectionRequiredModalVisible(true)}
-            >
-              <Text style={styles.hardStopButtonText}>Start Inspection</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      )}
+
       
       <View style={styles.voiceButtonContainer}>
         <VoiceCommandButton onCommandProcessed={handleCommandProcessed} />
@@ -502,49 +485,5 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: colors.textSecondary,
   },
-  hardStopOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 999,
-  },
-  hardStopContent: {
-    backgroundColor: colors.background,
-    borderRadius: 16,
-    padding: 24,
-    alignItems: 'center',
-    width: '80%',
-    borderWidth: 2,
-    borderColor: colors.danger,
-  },
-  hardStopTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: colors.danger,
-    marginTop: 12,
-    marginBottom: 8,
-  },
-  hardStopMessage: {
-    fontSize: 16,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    marginBottom: 20,
-    lineHeight: 22,
-  },
-  hardStopButton: {
-    backgroundColor: colors.primaryLight,
-    borderRadius: 12,
-    paddingVertical: 14,
-    paddingHorizontal: 24,
-  },
-  hardStopButtonText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text,
-  },
+
 });

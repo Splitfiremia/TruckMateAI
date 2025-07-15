@@ -23,7 +23,7 @@ import {
 } from 'lucide-react-native';
 import { colors } from '@/constants/colors';
 import { useInspectionStore } from '@/store/inspectionStore';
-import { useSettingsStore } from '@/store/settingsStore';
+
 import { preTripInspectionItems } from '@/constants/mockData';
 import { InspectionStatus } from '@/types';
 
@@ -56,7 +56,7 @@ export default function PreTripInspectionModal({
     canCompleteInspection,
   } = useInspectionStore();
   
-  const { bypassPreTripHardStop } = useSettingsStore();
+
   
   useEffect(() => {
     if (visible && currentInspection.length === 0) {
@@ -126,11 +126,18 @@ export default function PreTripInspectionModal({
   // Handle next category
   const handleNextCategory = () => {
     if (!canProceedToNext()) {
-      setAttemptedBypass(true);
       Alert.alert(
-        'Category Incomplete - Hard Stop',
-        `You must complete ALL inspection points in "${preTripInspectionItems[activeCategory].category}" before proceeding. This is a FMCSA safety requirement and cannot be bypassed.`,
-        [{ text: 'OK' }]
+        'Category Incomplete',
+        `Please complete all inspection points in "${preTripInspectionItems[activeCategory].category}" before proceeding to ensure thorough inspection.`,
+        [
+          { text: 'Continue Anyway', onPress: () => {
+            if (activeCategory < preTripInspectionItems.length - 1) {
+              setActiveCategory(activeCategory + 1);
+              setAttemptedBypass(false);
+            }
+          }},
+          { text: 'Complete Items', style: 'cancel' }
+        ]
       );
       return;
     }
@@ -149,51 +156,24 @@ export default function PreTripInspectionModal({
     }
   };
   
-  // Handle close with conditional hard stop
+  // Handle close - no hard stops
   const handleClose = () => {
-    // Only enforce hard stop when beginning a trip AND bypass is disabled
-    if (isBeginningTrip && !canCompleteInspection() && !bypassPreTripHardStop) {
+    // Show warning if starting trip with incomplete inspection
+    if (isBeginningTrip && !canCompleteInspection()) {
       Alert.alert(
-        'Trip Start - Inspection Required',
-        'You cannot begin your trip until ALL 21 inspection points are completed. This is a federal safety requirement for trip initiation.',
+        'Incomplete Inspection Warning',
+        'You are starting a trip without completing the full 21-point CDL inspection. While not blocked, completing inspections is recommended for safety and compliance.',
         [
-          { text: 'Continue Inspection', style: 'default' },
-          { 
-            text: 'Cancel Trip Start', 
-            style: 'destructive',
-            onPress: () => {
-              Alert.alert(
-                'Cancel Trip Confirmation',
-                'Canceling will prevent you from starting your trip. You can complete the inspection later for routine checks.',
-                [
-                  { text: 'Stay', style: 'cancel' },
-                  { text: 'Cancel Trip', style: 'destructive', onPress: onClose }
-                ]
-              );
-            }
-          }
-        ]
-      );
-      return;
-    }
-    
-    // Show bypass warning if starting trip with incomplete inspection
-    if (isBeginningTrip && !canCompleteInspection() && bypassPreTripHardStop) {
-      Alert.alert(
-        'Bypass Warning - Incomplete Inspection',
-        'You are starting a trip without completing the full 21-point CDL inspection. This bypass has been enabled in settings but may violate FMCSA safety regulations. Proceed with caution.',
-        [
-          { text: 'Cancel', style: 'cancel' },
+          { text: 'Continue Inspection', style: 'cancel' },
           { 
             text: 'Start Trip Anyway', 
-            style: 'destructive',
             onPress: () => {
-              // Log the bypass for compliance tracking
-              console.log('Pre-trip inspection bypassed for trip start:', {
+              // Log the incomplete inspection for compliance tracking
+              console.log('Pre-trip inspection incomplete for trip start:', {
                 timestamp: new Date().toISOString(),
                 location,
                 completionPercentage: progress.percentage,
-                bypassReason: 'User setting enabled'
+                reason: 'User chose to start trip with incomplete inspection'
               });
               onClose();
             }
@@ -207,7 +187,7 @@ export default function PreTripInspectionModal({
     if (!isBeginningTrip && !canCompleteInspection()) {
       Alert.alert(
         'Incomplete Inspection',
-        'This inspection is not complete. You can finish it later, but it will be required before starting a trip.',
+        'This inspection is not complete. You can finish it later.',
         [
           { text: 'Continue Later', onPress: onClose },
           { text: 'Stay', style: 'cancel' }
@@ -221,42 +201,27 @@ export default function PreTripInspectionModal({
   
   const handleComplete = () => {
     if (!canCompleteInspection()) {
-      // Allow bypass only for trip start if setting is enabled
-      if (isBeginningTrip && bypassPreTripHardStop) {
-        Alert.alert(
-          'Incomplete Inspection - Bypass Available',
-          `Only ${progress.completed} of ${preTripInspectionItems.reduce((sum, cat) => sum + cat.items.length, 0)} CDL inspection points completed. You can bypass this requirement due to your settings, but this may violate FMCSA regulations.`,
-          [
-            { text: 'Continue Inspection', style: 'cancel' },
-            { 
-              text: 'Bypass & Start Trip', 
-              style: 'destructive',
-              onPress: () => {
-                // Log the bypass for compliance tracking
-                console.log('Pre-trip inspection bypassed during completion:', {
-                  timestamp: new Date().toISOString(),
-                  location,
-                  completionPercentage: progress.percentage,
-                  bypassReason: 'User setting enabled - forced completion'
-                });
-                completeInspection(location);
-                onComplete();
-                onClose();
-              }
-            }
-          ]
-        );
-        return;
-      }
-      
-      const message = isBeginningTrip 
-        ? `Please complete all ${preTripInspectionItems.reduce((sum, cat) => sum + cat.items.length, 0)} CDL inspection points before starting your trip. This is required by FMCSA regulations for trip initiation.`
-        : `Please complete all ${preTripInspectionItems.reduce((sum, cat) => sum + cat.items.length, 0)} CDL inspection points before finishing. This inspection can be completed later if not starting a trip.`;
-      
       Alert.alert(
-        'CDL Inspection Incomplete',
-        message,
-        [{ text: 'OK' }]
+        'Incomplete Inspection',
+        `Only ${progress.completed} of ${preTripInspectionItems.reduce((sum, cat) => sum + cat.items.length, 0)} CDL inspection points completed. You can still complete the inspection or finish with current progress.`,
+        [
+          { text: 'Continue Inspection', style: 'cancel' },
+          { 
+            text: 'Complete with Current Progress', 
+            onPress: () => {
+              // Log the incomplete completion for compliance tracking
+              console.log('Pre-trip inspection completed with incomplete items:', {
+                timestamp: new Date().toISOString(),
+                location,
+                completionPercentage: progress.percentage,
+                reason: 'User chose to complete with incomplete items'
+              });
+              completeInspection(location);
+              onComplete();
+              onClose();
+            }
+          }
+        ]
       );
       return;
     }
@@ -277,9 +242,16 @@ export default function PreTripInspectionModal({
             onPress: () => {
               if (isBeginningTrip) {
                 Alert.alert(
-                  'Trip Start Blocked',
-                  'Cannot start trip with vehicle defects. Please resolve defects first.',
-                  [{ text: 'OK' }]
+                  'Trip Start Warning',
+                  'Starting trip with vehicle defects is not recommended. Please consider resolving defects first for safety.',
+                  [
+                    { text: 'Resolve Defects First', style: 'cancel' },
+                    { text: 'Start Trip Anyway', style: 'destructive', onPress: () => {
+                      completeInspection(location);
+                      onComplete();
+                      onClose();
+                    }}
+                  ]
                 );
                 return;
               }
@@ -441,14 +413,7 @@ export default function PreTripInspectionModal({
           {progress.percentage === 100 && (
             <Text style={styles.completionText}>✓ All 21 points completed</Text>
           )}
-          {isBeginningTrip && bypassPreTripHardStop && (
-            <View style={styles.bypassStatusContainer}>
-              <AlertTriangle size={14} color={colors.warning} />
-              <Text style={styles.bypassStatusText}>
-                Hard Stop Bypass Enabled - Trip can start without full completion
-              </Text>
-            </View>
-          )}
+
         </View>
         
         <View style={styles.locationContainer}>
@@ -495,14 +460,7 @@ export default function PreTripInspectionModal({
             ))}
           </View>
           
-          {attemptedBypass && (
-            <View style={styles.bypassWarning}>
-              <AlertTriangle size={16} color={colors.danger} />
-              <Text style={styles.bypassWarningText}>
-                Complete all items in this category to proceed
-              </Text>
-            </View>
-          )}
+
         </View>
         
         <ScrollView style={styles.inspectionContent}>
@@ -547,30 +505,23 @@ export default function PreTripInspectionModal({
                 <TouchableOpacity
                   style={[
                     styles.navButton,
-                    styles.nextButton,
-                    !canProceedToNext() && styles.disabledNavButton
+                    styles.nextButton
                   ]}
                   onPress={handleNextCategory}
-                  disabled={!canProceedToNext()}
                 >
-                  <Text style={[
-                    styles.navButtonText,
-                    !canProceedToNext() && styles.disabledNavButtonText
-                  ]}>
+                  <Text style={styles.navButtonText}>
                     Next Category
                   </Text>
-                  <ChevronRight size={20} color={canProceedToNext() ? colors.text : colors.textSecondary} />
+                  <ChevronRight size={20} color={colors.text} />
                 </TouchableOpacity>
               ) : (
                 <TouchableOpacity
                   style={[
                     styles.navButton,
                     styles.completeButton,
-                    !canCompleteInspection() && styles.disabledNavButton,
                     hasDefects() && { backgroundColor: colors.warning }
                   ]}
                   onPress={handleComplete}
-                  disabled={!canCompleteInspection()}
                 >
                   <User size={20} color={colors.text} />
                   <Text style={styles.navButtonText}>
@@ -593,10 +544,9 @@ export default function PreTripInspectionModal({
           )}
           
           {isBeginningTrip && (
-            <View style={styles.hardStopNotice}>
-              <Lock size={16} color={colors.primaryLight} />
-              <Text style={styles.hardStopText}>
-                FMCSA Hard Stop: Complete ALL categories to begin trip
+            <View style={styles.infoContainer}>
+              <Text style={styles.infoText}>
+                Trip Start Inspection - Complete all categories for full compliance
               </Text>
             </View>
           )}

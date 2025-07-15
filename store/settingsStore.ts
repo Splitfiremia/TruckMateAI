@@ -11,8 +11,7 @@ interface SettingsState {
   dataSync: boolean;
   darkMode: boolean;
   
-  // Safety Settings
-  bypassPreTripHardStop: boolean;
+
   
   // Actions
   updateSetting: (key: keyof Omit<SettingsState, 'updateSetting'>, value: boolean) => void;
@@ -26,7 +25,7 @@ const defaultSettings = {
   complianceAlerts: true,
   dataSync: true,
   darkMode: true,
-  bypassPreTripHardStop: false, // Default to false for safety
+
 };
 
 export const useSettingsStore = create<SettingsState>()(persist(

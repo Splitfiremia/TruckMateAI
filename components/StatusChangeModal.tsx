@@ -25,15 +25,21 @@ export default function StatusChangeModal({
     const isBeginningTrip = status === 'Driving' && 
       (currentStatus === 'Off Duty' || currentStatus === 'Sleeper Berth');
     
-    // Only enforce hard stop for trip beginning, not all driving status changes
+    // Show inspection recommendation for trip beginning
     if (status === 'Driving' && isBeginningTrip && isInspectionRequired) {
       Alert.alert(
-        'Trip Start - Pre-Trip Inspection Required',
-        'You must complete a pre-trip inspection before you can begin your trip. This is required by FMCSA regulations for trip initiation.',
+        'Trip Start - Pre-Trip Inspection Recommended',
+        'A pre-trip inspection is recommended before beginning your trip for safety and compliance.',
         [
-          { text: 'Cancel', style: 'cancel' },
+          { text: 'Start Trip Without Inspection', onPress: () => {
+            const success = changeStatus(status, true);
+            if (success) {
+              onClose();
+            }
+          }},
           { 
-            text: 'Start Trip Inspection', 
+            text: 'Do Inspection First', 
+            style: 'cancel',
             onPress: () => {
               onClose();
               if (onInspectionRequired) {
@@ -46,25 +52,25 @@ export default function StatusChangeModal({
       return;
     }
     
-    // For non-trip driving changes, show warning but allow if inspection exists
+    // For non-trip driving changes, show warning but allow
     if (status === 'Driving' && !isBeginningTrip && isInspectionRequired) {
       Alert.alert(
         'Inspection Recommended',
-        'A current pre-trip inspection is recommended but not required for status changes during an active trip.',
+        'A current pre-trip inspection is recommended for continued driving.',
         [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Continue', onPress: () => {
-            const success = changeStatus(status, true); // Allow driving for non-trip changes
+          { text: 'Continue Without Inspection', onPress: () => {
+            const success = changeStatus(status, true);
             if (success) {
               onClose();
             }
           }},
           { 
             text: 'Do Inspection', 
+            style: 'cancel',
             onPress: () => {
               onClose();
               if (onInspectionRequired) {
-                onInspectionRequired(false); // Not beginning trip
+                onInspectionRequired(false);
               }
             }
           }
@@ -108,10 +114,7 @@ export default function StatusChangeModal({
           
           <View style={styles.options}>
             <TouchableOpacity 
-              style={[
-                styles.option,
-                isInspectionRequired && styles.disabledOption
-              ]}
+              style={styles.option}
               onPress={() => handleStatusChange('Driving')}
             >
               <View style={[styles.iconContainer, { backgroundColor: colors.primaryLight }]}>
@@ -217,9 +220,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
-  disabledOption: {
-    opacity: 0.6,
-  },
+
   iconContainer: {
     width: 44,
     height: 44,

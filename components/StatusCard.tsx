@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Clock, AlertTriangle, Shield, Lock } from 'lucide-react-native';
+import { Clock, AlertTriangle, Shield } from 'lucide-react-native';
 import { colors } from '@/constants/colors';
 import { DutyStatus } from '@/types';
 import { useLogbookStore } from '@/store/logbookStore';
@@ -82,9 +82,9 @@ export default function StatusCard({ onStatusChange }: StatusCardProps) {
       
       {isInspectionRequired && (
         <View style={styles.inspectionAlert}>
-          <Lock size={16} color={colors.danger} />
+          <Shield size={16} color={colors.warning} />
           <Text style={styles.inspectionAlertText}>
-            HARD STOP: Complete 21-point CDL inspection to unlock driving
+            Pre-trip inspection recommended before driving
           </Text>
         </View>
       )}
@@ -155,16 +155,16 @@ const styles = StyleSheet.create({
   inspectionAlert: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    backgroundColor: 'rgba(245, 158, 11, 0.1)',
     padding: 12,
     borderRadius: 8,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: colors.danger,
+    borderColor: colors.warning,
   },
   inspectionAlertText: {
     fontSize: 14,
-    color: colors.danger,
+    color: colors.warning,
     marginLeft: 8,
     flex: 1,
     fontWeight: '600',
