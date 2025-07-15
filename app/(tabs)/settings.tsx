@@ -36,18 +36,24 @@ export default function SettingsScreen() {
   
   const toggleSetting = (setting: keyof typeof settings) => {
     if (setting === 'bypassPreTripHardStop') {
+      const currentValue = bypassPreTripHardStop;
+      const newValue = !currentValue;
+      
       // Show confirmation dialog for safety-critical setting
       Alert.alert(
         'Safety Setting Change',
-        settings[setting] 
+        currentValue 
           ? 'Re-enabling pre-trip inspection hard stop will require completion of all 21 CDL inspection points before starting a trip. This is the recommended safety setting.'
           : 'WARNING: Disabling the pre-trip inspection hard stop will allow you to start trips without completing the full 21-point CDL inspection. This may violate FMCSA safety regulations and is not recommended.',
         [
           { text: 'Cancel', style: 'cancel' },
           { 
-            text: settings[setting] ? 'Enable Hard Stop' : 'Disable Hard Stop',
-            style: settings[setting] ? 'default' : 'destructive',
-            onPress: () => updateSetting(setting, !settings[setting])
+            text: currentValue ? 'Enable Hard Stop' : 'Disable Hard Stop',
+            style: currentValue ? 'default' : 'destructive',
+            onPress: () => {
+              console.log('Toggling bypassPreTripHardStop from', currentValue, 'to', newValue);
+              updateSetting('bypassPreTripHardStop', newValue);
+            }
           }
         ]
       );
@@ -64,20 +70,24 @@ export default function SettingsScreen() {
     setting: keyof typeof settings,
     label: string,
     description: string
-  ) => (
-    <View style={styles.settingItem}>
-      <View style={styles.settingContent}>
-        <Text style={styles.settingLabel}>{label}</Text>
-        <Text style={styles.settingDescription}>{description}</Text>
+  ) => {
+    const currentValue = settings[setting];
+    return (
+      <View style={styles.settingItem}>
+        <View style={styles.settingContent}>
+          <Text style={styles.settingLabel}>{label}</Text>
+          <Text style={styles.settingDescription}>{description}</Text>
+        </View>
+        <Switch
+          value={currentValue}
+          onValueChange={() => toggleSetting(setting)}
+          trackColor={{ false: colors.border, true: colors.primaryLight }}
+          thumbColor={currentValue ? colors.background : colors.text}
+          ios_backgroundColor={colors.border}
+        />
       </View>
-      <Switch
-        value={settings[setting]}
-        onValueChange={() => toggleSetting(setting)}
-        trackColor={{ false: colors.border, true: colors.primaryLight }}
-        thumbColor={colors.text}
-      />
-    </View>
-  );
+    );
+  };
   
   const renderSettingLink = (
     icon: React.ReactNode,
@@ -178,13 +188,22 @@ export default function SettingsScreen() {
                 Allow starting trips without completing all 21 CDL inspection points. 
                 <Text style={styles.warningText}>Not recommended - may violate FMCSA regulations.</Text>
               </Text>
+              <Text style={[styles.statusText, { color: bypassPreTripHardStop ? colors.warning : colors.primary }]}>
+                Status: {bypassPreTripHardStop ? 'BYPASS ENABLED' : 'HARD STOP ACTIVE'}
+              </Text>
             </View>
-            <Switch
-              value={settings.bypassPreTripHardStop}
-              onValueChange={() => toggleSetting('bypassPreTripHardStop')}
-              trackColor={{ false: colors.border, true: colors.warning }}
-              thumbColor={colors.text}
-            />
+            <View style={styles.switchContainer}>
+              <Switch
+                value={bypassPreTripHardStop}
+                onValueChange={() => {
+                  console.log('Switch onValueChange called, current value:', bypassPreTripHardStop);
+                  toggleSetting('bypassPreTripHardStop');
+                }}
+                trackColor={{ false: colors.border, true: colors.warning }}
+                thumbColor={bypassPreTripHardStop ? colors.background : colors.text}
+                ios_backgroundColor={colors.border}
+              />
+            </View>
           </View>
         </View>
         
@@ -347,6 +366,16 @@ const styles = StyleSheet.create({
   warningText: {
     color: colors.warning,
     fontWeight: '500',
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 4,
+    textTransform: 'uppercase',
+  },
+  switchContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   settingLink: {
     flexDirection: 'row',

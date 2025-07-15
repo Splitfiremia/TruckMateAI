@@ -34,15 +34,24 @@ export const useSettingsStore = create<SettingsState>()(persist(
     ...defaultSettings,
     
     updateSetting: (key, value) => {
-      set({ [key]: value });
+      console.log(`Updating setting ${key} from ${get()[key]} to ${value}`);
+      set((state) => {
+        const newState = { ...state, [key]: value };
+        console.log('New state:', newState);
+        return newState;
+      });
     },
     
     resetSettings: () => {
+      console.log('Resetting settings to defaults');
       set(defaultSettings);
     },
   }),
   {
     name: 'settings-storage',
     storage: createJSONStorage(() => AsyncStorage),
+    onRehydrateStorage: () => (state) => {
+      console.log('Settings rehydrated:', state);
+    },
   }
 ));
