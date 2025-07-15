@@ -70,10 +70,10 @@ export const upcomingLoads: Load[] = [
   },
 ];
 
-export const recentReceipts: Receipt[] = [
+export const recentReceipts = [
   {
     id: "R-12345",
-    type: "Fuel" as ReceiptType,
+    type: "Fuel",
     vendor: "Love's Travel Stop",
     location: "Atlanta, GA",
     date: "2025-07-14",
@@ -85,7 +85,7 @@ export const recentReceipts: Receipt[] = [
   },
   {
     id: "R-12346",
-    type: "Toll" as ReceiptType,
+    type: "Toll",
     vendor: "Florida Turnpike",
     location: "Orlando, FL",
     date: "2025-07-12",
@@ -94,7 +94,7 @@ export const recentReceipts: Receipt[] = [
   },
   {
     id: "R-12347",
-    type: "Maintenance" as ReceiptType,
+    type: "Maintenance",
     vendor: "Truck Care Center",
     location: "Macon, GA",
     date: "2025-07-10",
