@@ -503,7 +503,7 @@ export const ViolationPreventionAlert: React.FC<ViolationPreventionAlertProps> =
                   styles.overrideSubmitButtonDisabled
                 ]}
                 onPress={handleOverrideSubmit}
-                disabled={!overrideReason.trim() || !riskAcknowledged || (prediction.estimatedFine && !fineAccepted)}
+                disabled={!overrideReason.trim() || !riskAcknowledged || (!!prediction.estimatedFine && !fineAccepted)}
               >
                 <Text style={styles.overrideSubmitText}>Apply Override</Text>
               </TouchableOpacity>
