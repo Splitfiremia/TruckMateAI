@@ -18,8 +18,13 @@ import PreTripInspectionModal from '@/components/PreTripInspectionModal';
 import InspectionRequiredModal from '@/components/InspectionRequiredModal';
 import DOTInspectionAssistant from '@/components/DOTInspectionAssistant';
 import DOTInspectionCard from '@/components/DOTInspectionCard';
+import { PredictiveComplianceDashboard } from '@/components/PredictiveComplianceDashboard';
+import { ViolationPreventionAlert } from '@/components/ViolationPreventionAlert';
+import { RealTimeComplianceMonitor } from '@/components/RealTimeComplianceMonitor';
+import { ComplianceNotificationSystem } from '@/components/ComplianceNotificationSystem';
 import { useVoiceCommandStore } from '@/store/voiceCommandStore';
 import { useInspectionStore } from '@/store/inspectionStore';
+import { usePredictiveComplianceStore } from '@/store/predictiveComplianceStore';
 
 export default function DashboardScreen() {
   const [statusModalVisible, setStatusModalVisible] = useState(false);
@@ -29,9 +34,13 @@ export default function DashboardScreen() {
   const [inspectionModalVisible, setInspectionModalVisible] = useState(false);
   const [inspectionRequiredModalVisible, setInspectionRequiredModalVisible] = useState(false);
   const [dotAssistantVisible, setDotAssistantVisible] = useState(false);
+  const [predictiveComplianceVisible, setPredictiveComplianceVisible] = useState(false);
+  const [violationAlertVisible, setViolationAlertVisible] = useState(false);
+  const [currentViolationPrediction, setCurrentViolationPrediction] = useState(null);
   
   const { lastCommand, lastResponse } = useVoiceCommandStore();
   const { isInspectionRequired, checkInspectionRequirement } = useInspectionStore();
+  const { violationPredictions, activeAlerts, metrics } = usePredictiveComplianceStore();
   
   useEffect(() => {
     // Check if inspection is required when component mounts
@@ -44,6 +53,15 @@ export default function DashboardScreen() {
       setInspectionRequiredModalVisible(true);
     }
   }, [isInspectionRequired]);
+  
+  useEffect(() => {
+    // Monitor for critical violation predictions
+    const criticalPredictions = violationPredictions.filter(p => p.severity === 'Critical');
+    if (criticalPredictions.length > 0 && !violationAlertVisible) {
+      setCurrentViolationPrediction(criticalPredictions[0]);
+      setViolationAlertVisible(true);
+    }
+  }, [violationPredictions, violationAlertVisible]);
   
   const handleStatusCardPress = () => {
     if (isInspectionRequired) {
@@ -63,6 +81,16 @@ export default function DashboardScreen() {
   
   const handleInspectionComplete = () => {
     checkInspectionRequirement();
+  };
+  
+  const handleViolationAlert = (prediction) => {
+    setCurrentViolationPrediction(prediction);
+    setViolationAlertVisible(true);
+  };
+  
+  const handleViolationActionTaken = (actionId) => {
+    setViolationAlertVisible(false);
+    setCurrentViolationPrediction(null);
   };
   
   const handleStartInspection = () => {
@@ -92,6 +120,12 @@ export default function DashboardScreen() {
         <StatusCard onStatusChange={handleStatusCardPress} />
         
         <ComplianceAlert />
+        
+        {/* Real-Time Compliance Monitor */}
+        <RealTimeComplianceMonitor 
+          onViolationAlert={handleViolationAlert}
+          onViewDetails={() => setPredictiveComplianceVisible(true)}
+        />
         
         <DOTInspectionCard onPress={() => setDotAssistantVisible(true)} />
         
@@ -139,6 +173,13 @@ export default function DashboardScreen() {
             label="DOT Assistant"
             onPress={() => setDotAssistantVisible(true)}
             color={colors.secondary}
+          />
+          
+          <QuickActionButton 
+            icon={<AlertTriangle size={20} color={colors.text} />}
+            label="AI Compliance"
+            onPress={() => setPredictiveComplianceVisible(true)}
+            color={violationPredictions.length > 0 ? colors.warning : colors.primaryLight}
           />
         </View>
         
@@ -232,6 +273,41 @@ export default function DashboardScreen() {
         visible={dotAssistantVisible}
         onClose={() => setDotAssistantVisible(false)}
       />
+      
+      {/* Predictive Compliance Dashboard Modal */}
+      {predictiveComplianceVisible && (
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>AI Predictive Compliance</Text>
+            <TouchableOpacity 
+              onPress={() => setPredictiveComplianceVisible(false)}
+              style={styles.modalCloseButton}
+            >
+              <Text style={styles.modalCloseText}>×</Text>
+            </TouchableOpacity>
+          </View>
+          <PredictiveComplianceDashboard onViolationAlert={handleViolationAlert} />
+        </View>
+      )}
+      
+      {/* Violation Prevention Alert */}
+      {currentViolationPrediction && (
+        <ViolationPreventionAlert
+          prediction={currentViolationPrediction}
+          visible={violationAlertVisible}
+          onDismiss={() => setViolationAlertVisible(false)}
+          onActionTaken={handleViolationActionTaken}
+        />
+      )}
+      
+      {/* Compliance Notification System */}
+      <ComplianceNotificationSystem 
+        onNotificationPress={(alert) => {
+          if (alert.type === 'Violation Prevention') {
+            setPredictiveComplianceVisible(true);
+          }
+        }}
+      />
     </View>
   );
 }
@@ -316,5 +392,83 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 20,
     alignSelf: 'center',
+  },
+  predictiveComplianceCard: {
+    backgroundColor: colors.backgroundLight,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  predictiveHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  predictiveInfo: {
+    flex: 1,
+  },
+  predictiveTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  predictiveSubtitle: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    marginTop: 2,
+  },
+  riskIndicator: {
+    alignItems: 'center',
+  },
+  riskScore: {
+    fontSize: 20,
+    fontWeight: '700',
+  },
+  riskLabel: {
+    fontSize: 10,
+    color: colors.textSecondary,
+  },
+  nextViolation: {
+    fontSize: 12,
+    color: colors.warning,
+    fontWeight: '500',
+  },
+  modalContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: colors.background,
+    zIndex: 1000,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  modalCloseButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalCloseText: {
+    fontSize: 20,
+    color: colors.textSecondary,
   },
 });

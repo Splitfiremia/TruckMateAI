@@ -168,3 +168,75 @@ export interface InspectionBlitzAlert {
   severity: 'High' | 'Medium' | 'Low';
   alternativeRoutes: string[];
 }
+
+export interface DOTRule {
+  id: string;
+  category: 'HOS' | 'ELD' | 'Inspection' | 'Medical' | 'Vehicle' | 'Driver';
+  title: string;
+  description: string;
+  effectiveDate: string;
+  lastUpdated: string;
+  source: 'FMCSA' | 'DOT' | 'State';
+  severity: 'Critical' | 'Important' | 'Standard';
+  applicableVehicleTypes: string[];
+  parameters: Record<string, any>;
+}
+
+export interface ComplianceViolationPrediction {
+  id: string;
+  type: 'HOS' | 'Break' | 'Inspection' | 'Medical' | 'Vehicle';
+  severity: 'Critical' | 'Warning' | 'Advisory';
+  timeToViolation: number; // minutes
+  currentValue: number;
+  thresholdValue: number;
+  message: string;
+  recommendations: string[];
+  preventionActions: PreventionAction[];
+  location?: string;
+  estimatedFine?: number;
+}
+
+export interface PreventionAction {
+  id: string;
+  type: 'Break' | 'Route' | 'Inspection' | 'Documentation';
+  title: string;
+  description: string;
+  urgency: 'Immediate' | 'Soon' | 'Planned';
+  estimatedTime: number; // minutes
+  location?: string;
+  automated: boolean;
+}
+
+export interface PredictiveAlert {
+  id: string;
+  timestamp: string;
+  type: 'Violation Prevention' | 'Rule Update' | 'Inspection Alert' | 'Route Advisory';
+  priority: 'Critical' | 'High' | 'Medium' | 'Low';
+  title: string;
+  message: string;
+  actionRequired: boolean;
+  autoResolved: boolean;
+  expiresAt?: string;
+  relatedRuleId?: string;
+}
+
+export interface RuleUpdateNotification {
+  id: string;
+  ruleId: string;
+  changeType: 'New' | 'Modified' | 'Deprecated';
+  effectiveDate: string;
+  summary: string;
+  impactLevel: 'High' | 'Medium' | 'Low';
+  actionRequired: boolean;
+  deadline?: string;
+}
+
+export interface ComplianceMetrics {
+  violationRisk: number; // 0-100
+  complianceScore: number; // 0-100
+  hoursUntilViolation: number;
+  predictedViolations: ComplianceViolationPrediction[];
+  ruleUpdatesCount: number;
+  lastRuleSync: string;
+  activeAlerts: number;
+}
