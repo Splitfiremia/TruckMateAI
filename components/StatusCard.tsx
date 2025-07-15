@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Clock, AlertTriangle, Shield } from 'lucide-react-native';
+import { Clock, AlertTriangle, Shield, Edit3 } from 'lucide-react-native';
 import { colors } from '@/constants/colors';
 import { DutyStatus } from '@/types';
 import { useLogbookStore } from '@/store/logbookStore';
@@ -71,13 +71,19 @@ export default function StatusCard({ onStatusChange }: StatusCardProps) {
       activeOpacity={0.8}
     >
       <View style={styles.header}>
-        <View style={[styles.statusIndicator, { backgroundColor: getStatusColor(currentStatus) }]} />
-        <Text style={styles.statusText}>{currentStatus}</Text>
-        {isInspectionRequired && (
-          <View style={styles.inspectionWarning}>
-            <Shield size={16} color={colors.warning} />
-          </View>
-        )}
+        <View style={styles.statusInfo}>
+          <View style={[styles.statusIndicator, { backgroundColor: getStatusColor(currentStatus) }]} />
+          <Text style={styles.statusText}>{currentStatus}</Text>
+          {isInspectionRequired && (
+            <View style={styles.inspectionWarning}>
+              <Shield size={16} color={colors.warning} />
+            </View>
+          )}
+        </View>
+        <View style={styles.changeStatusButton}>
+          <Edit3 size={18} color={colors.primaryLight} />
+          <Text style={styles.changeStatusText}>Change</Text>
+        </View>
       </View>
       
       {isInspectionRequired && (
@@ -135,7 +141,13 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 12,
+  },
+  statusInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
   },
   statusIndicator: {
     width: 12,
@@ -147,7 +159,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: colors.text,
-    flex: 1,
   },
   inspectionWarning: {
     padding: 4,
@@ -192,5 +203,21 @@ const styles = StyleSheet.create({
     width: 1,
     backgroundColor: colors.border,
     marginHorizontal: 12,
+  },
+  changeStatusButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: colors.primaryLight,
+  },
+  changeStatusText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.primaryLight,
+    marginLeft: 4,
   },
 });
