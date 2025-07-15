@@ -26,6 +26,7 @@ import {
   XCircle
 } from 'lucide-react-native';
 import { colors } from '@/constants/colors';
+import { ComplianceViolationPrediction } from '@/types';
 import { PredictiveComplianceDashboard } from '@/components/PredictiveComplianceDashboard';
 import { DOTRuleUpdates } from '@/components/DOTRuleUpdates';
 import { ViolationPreventionAlert } from '@/components/ViolationPreventionAlert';
@@ -36,7 +37,7 @@ export default function ComplianceScreen() {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'rules' | 'settings'>('dashboard');
   const [refreshing, setRefreshing] = useState(false);
   const [violationAlertVisible, setViolationAlertVisible] = useState(false);
-  const [currentViolationPrediction, setCurrentViolationPrediction] = useState(null);
+  const [currentViolationPrediction, setCurrentViolationPrediction] = useState<ComplianceViolationPrediction | null>(null);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [autoPreventionEnabled, setAutoPreventionEnabled] = useState(true);
 
@@ -81,14 +82,14 @@ export default function ComplianceScreen() {
     }
   };
 
-  const handleViolationAlert = (prediction) => {
+  const handleViolationAlert = (prediction: ComplianceViolationPrediction) => {
     if (notificationsEnabled) {
       setCurrentViolationPrediction(prediction);
       setViolationAlertVisible(true);
     }
   };
 
-  const handleViolationActionTaken = (actionId) => {
+  const handleViolationActionTaken = (actionId: string) => {
     setViolationAlertVisible(false);
     setCurrentViolationPrediction(null);
   };

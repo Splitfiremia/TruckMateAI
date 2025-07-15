@@ -4,6 +4,7 @@ import { Stack } from 'expo-router';
 import { Mic, Camera, Clock, AlertTriangle, Truck, DollarSign, Clipboard, Upload, Shield } from 'lucide-react-native';
 
 import { colors } from '@/constants/colors';
+import { ComplianceViolationPrediction } from '@/types';
 import { driverInfo, upcomingLoads, weeklyStats } from '@/constants/mockData';
 import StatusCard from '@/components/StatusCard';
 import ComplianceAlert from '@/components/ComplianceAlert';
@@ -36,7 +37,7 @@ export default function DashboardScreen() {
   const [dotAssistantVisible, setDotAssistantVisible] = useState(false);
   const [predictiveComplianceVisible, setPredictiveComplianceVisible] = useState(false);
   const [violationAlertVisible, setViolationAlertVisible] = useState(false);
-  const [currentViolationPrediction, setCurrentViolationPrediction] = useState(null);
+  const [currentViolationPrediction, setCurrentViolationPrediction] = useState<ComplianceViolationPrediction | null>(null);
   
   const { lastCommand, lastResponse } = useVoiceCommandStore();
   const { isInspectionRequired, checkInspectionRequirement } = useInspectionStore();
@@ -83,12 +84,12 @@ export default function DashboardScreen() {
     checkInspectionRequirement();
   };
   
-  const handleViolationAlert = (prediction) => {
+  const handleViolationAlert = (prediction: ComplianceViolationPrediction) => {
     setCurrentViolationPrediction(prediction);
     setViolationAlertVisible(true);
   };
   
-  const handleViolationActionTaken = (actionId) => {
+  const handleViolationActionTaken = (actionId: string) => {
     setViolationAlertVisible(false);
     setCurrentViolationPrediction(null);
   };
