@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MapPin, Clock, DollarSign, ChevronRight } from 'lucide-react-native';
 import { colors } from '@/constants/colors';
 import { Load } from '@/types';
+import { HazmatIndicator } from './HazmatIndicator';
+import { HazmatPlacardGuide } from './HazmatPlacardGuide';
 
 interface UpcomingLoadCardProps {
   load: Load;
@@ -10,6 +12,7 @@ interface UpcomingLoadCardProps {
 }
 
 export default function UpcomingLoadCard({ load, onPress }: UpcomingLoadCardProps) {
+  const [showHazmatGuide, setShowHazmatGuide] = useState(false);
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -53,6 +56,13 @@ export default function UpcomingLoadCard({ load, onPress }: UpcomingLoadCardProp
         </View>
       </View>
       
+      {load.hazmat?.isHazmat && (
+        <HazmatIndicator 
+          hazmatInfo={load.hazmat} 
+          onPress={() => setShowHazmatGuide(true)}
+        />
+      )}
+      
       <View style={styles.footer}>
         <View style={styles.infoItem}>
           <Text style={styles.infoLabel}>Distance</Text>
@@ -69,8 +79,18 @@ export default function UpcomingLoadCard({ load, onPress }: UpcomingLoadCardProp
           <Text style={[styles.infoValue, { color: colors.secondary }]}>{load.totalPay}</Text>
         </View>
         
+        {load.hazmat?.isHazmat && (
+          <HazmatIndicator hazmatInfo={load.hazmat} compact onPress={() => setShowHazmatGuide(true)} />
+        )}
+        
         <ChevronRight size={20} color={colors.textSecondary} />
       </View>
+      
+      <HazmatPlacardGuide
+        visible={showHazmatGuide}
+        onClose={() => setShowHazmatGuide(false)}
+        hazmatInfo={load.hazmat}
+      />
     </TouchableOpacity>
   );
 }

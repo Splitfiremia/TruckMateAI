@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, TextInput } from 'react-native';
 import { Stack } from 'expo-router';
-import { Search, Filter, DollarSign, TrendingUp, MessageSquare } from 'lucide-react-native';
+import { Search, Filter, DollarSign, TrendingUp, MessageSquare, AlertTriangle } from 'lucide-react-native';
 
 import { colors } from '@/constants/colors';
 import { useLoadStore } from '@/store/loadStore';
@@ -21,9 +21,14 @@ export default function LoadsScreen() {
         load.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
         load.pickup.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
         load.delivery.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        load.broker.toLowerCase().includes(searchQuery.toLowerCase())
+        load.broker.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (load.hazmat?.properShippingName?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (load.hazmat?.unNumber?.toLowerCase().includes(searchQuery.toLowerCase()))
       )
     : loads;
+  
+  const hazmatLoads = loads.filter(load => load.hazmat?.isHazmat);
+  const regularLoads = loads.filter(load => !load.hazmat?.isHazmat);
   
   const handleCommandProcessed = () => {
     setCommandModalVisible(true);
@@ -80,19 +85,84 @@ export default function LoadsScreen() {
           <Text style={styles.statValue}>$662</Text>
           <Text style={styles.statLabel}>Avg Load</Text>
         </View>
+        
+        {hazmatLoads.length > 0 && (
+          <View style={styles.statItem}>
+            <View style={styles.hazmatStatContainer}>
+              <AlertTriangle size={16} color={colors.warning} />
+              <Text style={[styles.statValue, { color: colors.warning }]}>{hazmatLoads.length}</Text>
+            </View>
+            <Text style={styles.statLabel}>Hazmat</Text>
+          </View>
+        )}
       </View>
       
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        {hazmatLoads.length > 0 && (
+          <>
+            <View style={styles.sectionHeader}>
+              <View style={styles.hazmatSectionHeader}>
+                <AlertTriangle size={20} color={colors.warning} />
+                <Text style={[styles.sectionTitle, { color: colors.warning }]}>Hazmat Loads</Text>
+              </View>
+              <Text style={styles.sectionSubtitle}>Requires special handling and placards</Text>
+            </View>
+            
+            {hazmatLoads.map((load) => (
+              <View key={load.id}>
+                <UpcomingLoadCard load={load} />
+                <View style={styles.loadActions}>
+                  <TouchableOpacity 
+                    style={[styles.loadActionButton, { backgroundColor: colors.primaryLight }]}
+                    onPress={() => {}}
+                  >
+                    <MessageSquare size={18} color={colors.text} />
+                    <Text style={styles.loadActionText}>Contact</Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity 
+                    style={[styles.loadActionButton, { backgroundColor: colors.secondary }]}
+                    onPress={() => handleNegotiateRate(load.id)}
+                  >
+                    <DollarSign size={18} color={colors.text} />
+                    <Text style={styles.loadActionText}>Negotiate</Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity 
+                    style={[styles.loadActionButton, { backgroundColor: colors.warning }]}
+                    onPress={() => {}}
+                  >
+                    <TrendingUp size={18} color={colors.text} />
+                    <Text style={styles.loadActionText}>Counter</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ))}
+          </>
+        )}
+        
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Available Loads</Text>
+          <Text style={styles.sectionTitle}>Regular Loads</Text>
         </View>
         
-        {filteredLoads.length === 0 ? (
+        {regularLoads.filter(load => 
+          !searchQuery || 
+          load.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          load.pickup.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          load.delivery.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          load.broker.toLowerCase().includes(searchQuery.toLowerCase())
+        ).length === 0 ? (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyStateText}>No loads found</Text>
+            <Text style={styles.emptyStateText}>No regular loads found</Text>
           </View>
         ) : (
-          filteredLoads.map((load) => (
+          regularLoads.filter(load => 
+            !searchQuery || 
+            load.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            load.pickup.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            load.delivery.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            load.broker.toLowerCase().includes(searchQuery.toLowerCase())
+          ).map((load) => (
             <View key={load.id}>
               <UpcomingLoadCard load={load} />
               <View style={styles.loadActions}>
@@ -194,6 +264,21 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 12,
+    color: colors.textSecondary,
+    marginTop: 4,
+  },
+  hazmatStatContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  hazmatSectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  sectionSubtitle: {
+    fontSize: 14,
     color: colors.textSecondary,
     marginTop: 4,
   },

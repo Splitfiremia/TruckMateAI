@@ -9,6 +9,7 @@ interface QuickActionButtonProps {
   onPress: () => void;
   style?: ViewStyle;
   color?: string;
+  badge?: string;
 }
 
 export default function QuickActionButton({ 
@@ -16,7 +17,8 @@ export default function QuickActionButton({
   label, 
   onPress, 
   style,
-  color = colors.primaryLight
+  color = colors.primaryLight,
+  badge
 }: QuickActionButtonProps) {
   return (
     <TouchableOpacity 
@@ -26,6 +28,11 @@ export default function QuickActionButton({
     >
       <View style={[styles.iconContainer, { backgroundColor: color }]}>
         {icon}
+        {badge && (
+          <View style={styles.badge}>
+            <Text style={styles.badgeText}>{badge}</Text>
+          </View>
+        )}
       </View>
       <Text style={styles.label}>{label}</Text>
     </TouchableOpacity>
@@ -57,5 +64,22 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: colors.text,
     textAlign: 'center',
+  },
+  badge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: colors.error,
+    borderRadius: 8,
+    minWidth: 16,
+    height: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
+  badgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: 'white',
   },
 });

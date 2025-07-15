@@ -23,9 +23,11 @@ import { PredictiveComplianceDashboard } from '@/components/PredictiveCompliance
 import { ViolationPreventionAlert } from '@/components/ViolationPreventionAlert';
 import { RealTimeComplianceMonitor } from '@/components/RealTimeComplianceMonitor';
 import { ComplianceNotificationSystem } from '@/components/ComplianceNotificationSystem';
+import { HazmatLoadManager } from '@/components/HazmatLoadManager';
 import { useVoiceCommandStore } from '@/store/voiceCommandStore';
 import { useInspectionStore } from '@/store/inspectionStore';
 import { usePredictiveComplianceStore } from '@/store/predictiveComplianceStore';
+import { useLoadStore } from '@/store/loadStore';
 
 export default function DashboardScreen() {
   const [statusModalVisible, setStatusModalVisible] = useState(false);
@@ -37,11 +39,15 @@ export default function DashboardScreen() {
   const [dotAssistantVisible, setDotAssistantVisible] = useState(false);
   const [predictiveComplianceVisible, setPredictiveComplianceVisible] = useState(false);
   const [violationAlertVisible, setViolationAlertVisible] = useState(false);
+  const [hazmatManagerVisible, setHazmatManagerVisible] = useState(false);
   const [currentViolationPrediction, setCurrentViolationPrediction] = useState<ComplianceViolationPrediction | null>(null);
   
   const { lastCommand, lastResponse } = useVoiceCommandStore();
   const { isInspectionRequired, checkInspectionRequirement } = useInspectionStore();
   const { violationPredictions, activeAlerts, metrics } = usePredictiveComplianceStore();
+  const { loads } = useLoadStore();
+  
+  const hazmatLoads = loads.filter(load => load.hazmat?.isHazmat);
   
   useEffect(() => {
     // Check if inspection is required when component mounts
@@ -182,6 +188,14 @@ export default function DashboardScreen() {
             onPress={() => setPredictiveComplianceVisible(true)}
             color={violationPredictions.length > 0 ? colors.warning : colors.primaryLight}
           />
+          
+          <QuickActionButton 
+            icon={<AlertTriangle size={20} color={colors.text} />}
+            label="Hazmat Manager"
+            onPress={() => setHazmatManagerVisible(true)}
+            color={hazmatLoads.length > 0 ? colors.warning : colors.primaryLight}
+            badge={hazmatLoads.length > 0 ? hazmatLoads.length.toString() : undefined}
+          />
         </View>
         
         <View style={styles.sectionHeader}>
@@ -308,6 +322,12 @@ export default function DashboardScreen() {
             setPredictiveComplianceVisible(true);
           }
         }}
+      />
+      
+      {/* Hazmat Load Manager */}
+      <HazmatLoadManager
+        visible={hazmatManagerVisible}
+        onClose={() => setHazmatManagerVisible(false)}
       />
     </View>
   );
