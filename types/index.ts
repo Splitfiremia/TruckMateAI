@@ -119,3 +119,52 @@ export interface PreTripInspection {
   defectsFound: number;
   safeToOperate: boolean;
 }
+
+export interface DOTInspectionPrediction {
+  riskLevel: 'Low' | 'Medium' | 'High';
+  probability: number;
+  factors: string[];
+  recommendations: string[];
+  nextLikelyLocation: string;
+  estimatedTime: string;
+}
+
+export interface DOTInspectionTip {
+  id: string;
+  category: 'Vehicle' | 'Driver' | 'Documentation' | 'Cargo';
+  title: string;
+  description: string;
+  priority: 'High' | 'Medium' | 'Low';
+  actionRequired: boolean;
+}
+
+export interface DOTInspectionHistory {
+  id: string;
+  date: string;
+  location: string;
+  inspector: string;
+  type: 'Level 1' | 'Level 2' | 'Level 3';
+  result: 'Pass' | 'Warning' | 'Out of Service';
+  violations: DOTViolation[];
+  score: number;
+  duration: string;
+}
+
+export interface DOTViolation {
+  code: string;
+  description: string;
+  severity: 'Critical' | 'Serious' | 'Minor';
+  category: string;
+  points: number;
+  fineAmount?: number;
+}
+
+export interface InspectionBlitzAlert {
+  id: string;
+  location: string;
+  startDate: string;
+  endDate: string;
+  focus: string[];
+  severity: 'High' | 'Medium' | 'Low';
+  alternativeRoutes: string[];
+}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import { Stack } from 'expo-router';
-import { Mic, Camera, Clock, AlertTriangle, Truck, DollarSign, Clipboard, Upload } from 'lucide-react-native';
+import { Mic, Camera, Clock, AlertTriangle, Truck, DollarSign, Clipboard, Upload, Shield } from 'lucide-react-native';
 
 import { colors } from '@/constants/colors';
 import { driverInfo, upcomingLoads, weeklyStats } from '@/constants/mockData';
@@ -16,6 +16,8 @@ import ReceiptScanner from '@/components/ReceiptScanner';
 import BulkReceiptUpload from '@/components/BulkReceiptUpload';
 import PreTripInspectionModal from '@/components/PreTripInspectionModal';
 import InspectionRequiredModal from '@/components/InspectionRequiredModal';
+import DOTInspectionAssistant from '@/components/DOTInspectionAssistant';
+import DOTInspectionCard from '@/components/DOTInspectionCard';
 import { useVoiceCommandStore } from '@/store/voiceCommandStore';
 import { useInspectionStore } from '@/store/inspectionStore';
 
@@ -26,6 +28,7 @@ export default function DashboardScreen() {
   const [bulkUploadVisible, setBulkUploadVisible] = useState(false);
   const [inspectionModalVisible, setInspectionModalVisible] = useState(false);
   const [inspectionRequiredModalVisible, setInspectionRequiredModalVisible] = useState(false);
+  const [dotAssistantVisible, setDotAssistantVisible] = useState(false);
   
   const { lastCommand, lastResponse } = useVoiceCommandStore();
   const { isInspectionRequired, checkInspectionRequirement } = useInspectionStore();
@@ -90,6 +93,8 @@ export default function DashboardScreen() {
         
         <ComplianceAlert />
         
+        <DOTInspectionCard onPress={() => setDotAssistantVisible(true)} />
+        
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Quick Actions</Text>
         </View>
@@ -127,6 +132,13 @@ export default function DashboardScreen() {
             label="Bulk Upload"
             onPress={() => setBulkUploadVisible(true)}
             color={colors.primaryLight}
+          />
+          
+          <QuickActionButton 
+            icon={<Shield size={20} color={colors.text} />}
+            label="DOT Assistant"
+            onPress={() => setDotAssistantVisible(true)}
+            color={colors.secondary}
           />
         </View>
         
@@ -214,6 +226,11 @@ export default function DashboardScreen() {
       <InspectionRequiredModal
         visible={inspectionRequiredModalVisible}
         onStartInspection={handleStartInspection}
+      />
+      
+      <DOTInspectionAssistant
+        visible={dotAssistantVisible}
+        onClose={() => setDotAssistantVisible(false)}
       />
     </View>
   );
