@@ -1,272 +1,334 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, TextInput, Switch } from 'react-native';
 import { Stack } from 'expo-router';
 import { 
   Users, 
-  Truck, 
-  AlertTriangle, 
-  TrendingUp, 
   Settings, 
-  Shield,
-  DollarSign,
-  Fuel,
-  Wrench
+  Palette, 
+  Shield, 
+  BarChart3, 
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  Truck,
+  FileText,
+  Eye,
+  Edit3,
+  Plus
 } from 'lucide-react-native';
 
 import { colors } from '@/constants/colors';
 import { useFleetStore } from '@/store/fleetStore';
-import FleetStatsCard from '@/components/fleet/FleetStatsCard';
-import FleetDriverCard from '@/components/fleet/FleetDriverCard';
-import FleetVehicleCard from '@/components/fleet/FleetVehicleCard';
-import ComplianceViolationCard from '@/components/fleet/ComplianceViolationCard';
-import FleetSettingsModal from '@/components/fleet/FleetSettingsModal';
+import FleetDriverCard from '@/components/FleetDriverCard';
+import FleetStatsCard from '@/components/FleetStatsCard';
+import BrandingCustomizer from '@/components/BrandingCustomizer';
+import ComplianceOverview from '@/components/ComplianceOverview';
 
-export default function FleetScreen() {
-  const [settingsVisible, setSettingsVisible] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'drivers' | 'vehicles' | 'compliance'>('overview');
+export default function FleetAdminScreen() {
+  const [activeTab, setActiveTab] = useState<'overview' | 'drivers' | 'branding' | 'compliance' | 'settings'>('overview');
   
-  const {
-    currentFleet,
-    drivers,
-    vehicles,
-    dashboardStats,
-    violations,
-    isFleetManager,
-    updateDashboardStats,
-    getDriversByStatus,
-    getVehiclesByStatus,
-    getUnresolvedViolations,
-    initializeMockData,
+  const { 
+    fleetInfo, 
+    drivers, 
+    fleetStats, 
+    complianceOverview,
+    brandingSettings,
+    fleetSettings,
+    updateFleetSettings,
+    addDriver,
+    updateDriverStatus
   } = useFleetStore();
-  
-  useEffect(() => {
-    if (!currentFleet) {
-      initializeMockData();
-    }
-    updateDashboardStats();
-  }, []);
-  
-  if (!isFleetManager || !currentFleet) {
-    return (
-      <View style={styles.container}>
-        <Stack.Screen options={{ title: 'Fleet Management' }} />
-        <View style={styles.noAccessContainer}>
-          <Shield size={48} color={colors.textSecondary} />
-          <Text style={styles.noAccessText}>Fleet Management Access Required</Text>
-          <Text style={styles.noAccessSubtext}>
-            Contact your fleet administrator for access to this feature
-          </Text>
-        </View>
-      </View>
-    );
-  }
-  
-  const activeDrivers = getDriversByStatus('active');
-  const activeVehicles = getVehiclesByStatus('active');
-  const unresolvedViolations = getUnresolvedViolations();
-  
-  const renderTabButton = (tab: typeof activeTab, icon: React.ReactNode, label: string) => (
+
+  const renderTabButton = (
+    tab: typeof activeTab,
+    icon: React.ReactNode,
+    label: string
+  ) => (
     <TouchableOpacity
       style={[
         styles.tabButton,
-        activeTab === tab && styles.activeTabButton
+        activeTab === tab && { backgroundColor: colors.primaryLight }
       ]}
       onPress={() => setActiveTab(tab)}
     >
       {icon}
       <Text style={[
         styles.tabButtonText,
-        activeTab === tab && styles.activeTabButtonText
+        activeTab === tab && { color: colors.text }
       ]}>
         {label}
       </Text>
     </TouchableOpacity>
   );
-  
-  const renderOverview = () => (
-    <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
+
+  const renderOverviewTab = () => (
+    <ScrollView style={styles.tabContent}>
+      <View style={styles.fleetHeader}>
+        <View>
+          <Text style={styles.fleetName}>{fleetInfo.name}</Text>
+          <Text style={styles.fleetDetails}>
+            {fleetInfo.totalDrivers} Drivers • {fleetInfo.totalVehicles} Vehicles
+          </Text>
+          <Text style={styles.fleetDetails}>DOT: {fleetInfo.dotNumber}</Text>
+        </View>
+        <View style={styles.fleetStatus}>
+          <View style={[styles.statusIndicator, { backgroundColor: colors.secondary }]} />
+          <Text style={styles.statusText}>Active</Text>
+        </View>
+      </View>
+
       <View style={styles.statsGrid}>
         <FleetStatsCard
           title="Active Drivers"
-          value={dashboardStats?.activeDrivers.toString() || '0'}
-          total={dashboardStats?.totalDrivers.toString() || '0'}
+          value={fleetStats.activeDrivers.toString()}
+          subtitle={`${fleetStats.availableDrivers} available`}
           icon={<Users size={24} color={colors.primaryLight} />}
           color={colors.primaryLight}
         />
         
         <FleetStatsCard
-          title="Active Vehicles"
-          value={dashboardStats?.activeVehicles.toString() || '0'}
-          total={dashboardStats?.totalVehicles.toString() || '0'}
-          icon={<Truck size={24} color={colors.secondary} />}
-          color={colors.secondary}
+          title="HOS Violations"
+          value={fleetStats.hosViolations.toString()}
+          subtitle="This week"
+          icon={<AlertTriangle size={24} color={fleetStats.hosViolations > 0 ? colors.warning : colors.secondary} />}
+          color={fleetStats.hosViolations > 0 ? colors.warning : colors.secondary}
         />
         
         <FleetStatsCard
           title="Compliance Score"
-          value={`${dashboardStats?.complianceScore || 0}%`}
+          value={`${fleetStats.complianceScore}%`}
+          subtitle="Fleet average"
           icon={<Shield size={24} color={colors.secondary} />}
           color={colors.secondary}
         />
         
         <FleetStatsCard
-          title="Violations"
-          value={dashboardStats?.violationsThisWeek.toString() || '0'}
-          subtitle="This Week"
-          icon={<AlertTriangle size={24} color={colors.warning} />}
-          color={colors.warning}
-        />
-      </View>
-      
-      <View style={styles.performanceGrid}>
-        <FleetStatsCard
           title="Revenue"
-          value={`$${(dashboardStats?.revenue || 0).toLocaleString()}`}
-          subtitle="This Month"
-          icon={<DollarSign size={24} color={colors.secondary} />}
+          value={`$${fleetStats.weeklyRevenue.toLocaleString()}`}
+          subtitle="This week"
+          icon={<BarChart3 size={24} color={colors.secondary} />}
           color={colors.secondary}
         />
-        
-        <FleetStatsCard
-          title="Miles Driven"
-          value={(dashboardStats?.miles || 0).toLocaleString()}
-          subtitle="This Month"
-          icon={<TrendingUp size={24} color={colors.primaryLight} />}
-          color={colors.primaryLight}
+      </View>
+
+      <ComplianceOverview data={complianceOverview} />
+    </ScrollView>
+  );
+
+  const renderDriversTab = () => (
+    <ScrollView style={styles.tabContent}>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.sectionTitle}>Driver Management</Text>
+        <TouchableOpacity style={styles.addButton}>
+          <Plus size={20} color={colors.text} />
+          <Text style={styles.addButtonText}>Add Driver</Text>
+        </TouchableOpacity>
+      </View>
+
+      {drivers.map((driver) => (
+        <FleetDriverCard
+          key={driver.id}
+          driver={driver}
+          onStatusChange={(status) => updateDriverStatus(driver.id, status)}
         />
+      ))}
+    </ScrollView>
+  );
+
+  const renderBrandingTab = () => (
+    <ScrollView style={styles.tabContent}>
+      <BrandingCustomizer
+        settings={brandingSettings}
+        onUpdate={(updates) => {
+          // In real app, this would update the branding
+          console.log('Branding updates:', updates);
+        }}
+      />
+    </ScrollView>
+  );
+
+  const renderComplianceTab = () => (
+    <ScrollView style={styles.tabContent}>
+      <View style={styles.complianceSection}>
+        <Text style={styles.sectionTitle}>Fleet Compliance Monitoring</Text>
         
-        <FleetStatsCard
-          title="Fuel Costs"
-          value={`$${(dashboardStats?.fuelCosts || 0).toLocaleString()}`}
-          subtitle="This Month"
-          icon={<Fuel size={24} color={colors.warning} />}
-          color={colors.warning}
-        />
+        <View style={styles.complianceCard}>
+          <View style={styles.complianceHeader}>
+            <Shield size={24} color={colors.secondary} />
+            <Text style={styles.complianceTitle}>Overall Fleet Health</Text>
+            <View style={[styles.complianceStatus, { backgroundColor: colors.secondary }]}>
+              <Text style={styles.complianceStatusText}>Good</Text>
+            </View>
+          </View>
+          
+          <View style={styles.complianceMetrics}>
+            <View style={styles.complianceMetric}>
+              <Text style={styles.metricValue}>94%</Text>
+              <Text style={styles.metricLabel}>On-Time Inspections</Text>
+            </View>
+            <View style={styles.complianceMetric}>
+              <Text style={styles.metricValue}>2</Text>
+              <Text style={styles.metricLabel}>Active Violations</Text>
+            </View>
+            <View style={styles.complianceMetric}>
+              <Text style={styles.metricValue}>15</Text>
+              <Text style={styles.metricLabel}>Expiring Docs</Text>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.alertsList}>
+          <Text style={styles.alertsTitle}>Recent Compliance Alerts</Text>
+          
+          <View style={styles.alertItem}>
+            <AlertTriangle size={20} color={colors.warning} />
+            <View style={styles.alertContent}>
+              <Text style={styles.alertText}>Driver M. Johnson - Medical cert expires in 15 days</Text>
+              <Text style={styles.alertTime}>2 hours ago</Text>
+            </View>
+          </View>
+          
+          <View style={styles.alertItem}>
+            <Clock size={20} color={colors.danger} />
+            <View style={styles.alertContent}>
+              <Text style={styles.alertText}>Driver S. Williams - HOS violation risk detected</Text>
+              <Text style={styles.alertTime}>4 hours ago</Text>
+            </View>
+          </View>
+          
+          <View style={styles.alertItem}>
+            <CheckCircle size={20} color={colors.secondary} />
+            <View style={styles.alertContent}>
+              <Text style={styles.alertText}>Vehicle FL-4872 - Inspection completed</Text>
+              <Text style={styles.alertTime}>6 hours ago</Text>
+            </View>
+          </View>
+        </View>
+      </div>
+    </ScrollView>
+  );
+
+  const renderSettingsTab = () => (
+    <ScrollView style={styles.tabContent}>
+      <View style={styles.settingsSection}>
+        <Text style={styles.sectionTitle}>Fleet Settings</Text>
         
-        <FleetStatsCard
-          title="Maintenance Due"
-          value={dashboardStats?.maintenanceOverdue.toString() || '0'}
-          subtitle="Overdue"
-          icon={<Wrench size={24} color={colors.danger} />}
-          color={colors.danger}
-        />
-      </View>
-      
-      {unresolvedViolations.length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Recent Violations</Text>
-          {unresolvedViolations.slice(0, 3).map((violation) => (
-            <ComplianceViolationCard key={violation.id} violation={violation} />
-          ))}
+        <View style={styles.settingGroup}>
+          <Text style={styles.settingGroupTitle}>Compliance Policies</Text>
+          
+          <View style={styles.settingItem}>
+            <View style={styles.settingContent}>
+              <Text style={styles.settingLabel}>Enforce Pre-Trip Inspections</Text>
+              <Text style={styles.settingDescription}>Require daily pre-trip inspections</Text>
+            </View>
+            <Switch
+              value={fleetSettings.enforcePreTrip}
+              onValueChange={(value) => updateFleetSettings({ enforcePreTrip: value })}
+              trackColor={{ false: colors.border, true: colors.primaryLight }}
+              thumbColor={colors.text}
+            />
+          </View>
+          
+          <View style={styles.settingItem}>
+            <View style={styles.settingContent}>
+              <Text style={styles.settingLabel}>Auto HOS Tracking</Text>
+              <Text style={styles.settingDescription}>Automatically track hours of service</Text>
+            </View>
+            <Switch
+              value={fleetSettings.autoHOSTracking}
+              onValueChange={(value) => updateFleetSettings({ autoHOSTracking: value })}
+              trackColor={{ false: colors.border, true: colors.primaryLight }}
+              thumbColor={colors.text}
+            />
+          </View>
+          
+          <View style={styles.settingItem}>
+            <View style={styles.settingContent}>
+              <Text style={styles.settingLabel}>Speed Limit Alerts</Text>
+              <Text style={styles.settingDescription}>Alert drivers when exceeding speed limits</Text>
+            </View>
+            <Switch
+              value={fleetSettings.speedAlerts}
+              onValueChange={(value) => updateFleetSettings({ speedAlerts: value })}
+              trackColor={{ false: colors.border, true: colors.primaryLight }}
+              thumbColor={colors.text}
+            />
+          </View>
         </View>
-      )}
-    </ScrollView>
-  );
-  
-  const renderDrivers = () => (
-    <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Active Drivers ({activeDrivers.length})</Text>
-        {activeDrivers.map((driver) => (
-          <FleetDriverCard key={driver.id} driver={driver} />
-        ))}
-      </View>
-      
-      {getDriversByStatus('inactive').length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Inactive Drivers</Text>
-          {getDriversByStatus('inactive').map((driver) => (
-            <FleetDriverCard key={driver.id} driver={driver} />
-          ))}
+
+        <View style={styles.settingGroup}>
+          <Text style={styles.settingGroupTitle}>Notification Settings</Text>
+          
+          <View style={styles.settingItem}>
+            <View style={styles.settingContent}>
+              <Text style={styles.settingLabel}>Real-time Alerts</Text>
+              <Text style={styles.settingDescription}>Send immediate compliance alerts</Text>
+            </View>
+            <Switch
+              value={fleetSettings.realtimeAlerts}
+              onValueChange={(value) => updateFleetSettings({ realtimeAlerts: value })}
+              trackColor={{ false: colors.border, true: colors.primaryLight }}
+              thumbColor={colors.text}
+            />
+          </View>
+          
+          <View style={styles.settingItem}>
+            <View style={styles.settingContent}>
+              <Text style={styles.settingLabel}>Daily Reports</Text>
+              <Text style={styles.settingDescription}>Email daily fleet summary reports</Text>
+            </View>
+            <Switch
+              value={fleetSettings.dailyReports}
+              onValueChange={(value) => updateFleetSettings({ dailyReports: value })}
+              trackColor={{ false: colors.border, true: colors.primaryLight }}
+              thumbColor={colors.text}
+            />
+          </View>
         </View>
-      )}
-    </ScrollView>
-  );
-  
-  const renderVehicles = () => (
-    <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Active Vehicles ({activeVehicles.length})</Text>
-        {activeVehicles.map((vehicle) => (
-          <FleetVehicleCard key={vehicle.id} vehicle={vehicle} />
-        ))}
-      </View>
-      
-      {getVehiclesByStatus('maintenance').length > 0 && (
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>In Maintenance</Text>
-          {getVehiclesByStatus('maintenance').map((vehicle) => (
-            <FleetVehicleCard key={vehicle.id} vehicle={vehicle} />
-          ))}
+
+        <View style={styles.settingGroup}>
+          <Text style={styles.settingGroupTitle}>Data & Privacy</Text>
+          
+          <View style={styles.settingItem}>
+            <View style={styles.settingContent}>
+              <Text style={styles.settingLabel}>Location Tracking</Text>
+              <Text style={styles.settingDescription}>Track vehicle locations for compliance</Text>
+            </View>
+            <Switch
+              value={fleetSettings.locationTracking}
+              onValueChange={(value) => updateFleetSettings({ locationTracking: value })}
+              trackColor={{ false: colors.border, true: colors.primaryLight }}
+              thumbColor={colors.text}
+            />
+          </View>
         </View>
-      )}
-    </ScrollView>
-  );
-  
-  const renderCompliance = () => (
-    <ScrollView style={styles.tabContent} showsVerticalScrollIndicator={false}>
-      <View style={styles.complianceHeader}>
-        <Text style={styles.complianceScore}>
-          Compliance Score: {dashboardStats?.complianceScore || 0}%
-        </Text>
-        <View style={[
-          styles.complianceIndicator,
-          { backgroundColor: (dashboardStats?.complianceScore || 0) >= 90 ? colors.secondary : colors.warning }
-        ]} />
-      </View>
-      
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>All Violations</Text>
-        {violations.map((violation) => (
-          <ComplianceViolationCard key={violation.id} violation={violation} />
-        ))}
       </View>
     </ScrollView>
   );
-  
+
   return (
     <View style={styles.container}>
       <Stack.Screen 
         options={{ 
-          title: currentFleet.name,
-          headerRight: () => (
-            <TouchableOpacity 
-              style={styles.settingsButton}
-              onPress={() => setSettingsVisible(true)}
-            >
-              <Settings size={22} color={colors.text} />
-            </TouchableOpacity>
-          ),
+          title: 'Fleet Administration',
         }} 
       />
       
-      <View style={styles.header}>
-        {currentFleet.logo && (
-          <Image source={{ uri: currentFleet.logo }} style={styles.companyLogo} />
-        )}
-        <View style={styles.companyInfo}>
-          <Text style={styles.companyName}>{currentFleet.name}</Text>
-          <Text style={styles.companyDetails}>DOT: {currentFleet.dotNumber}</Text>
-          <Text style={styles.companyDetails}>MC: {currentFleet.mcNumber}</Text>
-        </View>
-      </View>
-      
       <View style={styles.tabBar}>
-        {renderTabButton('overview', <TrendingUp size={18} color={activeTab === 'overview' ? colors.text : colors.textSecondary} />, 'Overview')}
-        {renderTabButton('drivers', <Users size={18} color={activeTab === 'drivers' ? colors.text : colors.textSecondary} />, 'Drivers')}
-        {renderTabButton('vehicles', <Truck size={18} color={activeTab === 'vehicles' ? colors.text : colors.textSecondary} />, 'Vehicles')}
-        {renderTabButton('compliance', <Shield size={18} color={activeTab === 'compliance' ? colors.text : colors.textSecondary} />, 'Compliance')}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          {renderTabButton('overview', <BarChart3 size={18} color={activeTab === 'overview' ? colors.text : colors.textSecondary} />, 'Overview')}
+          {renderTabButton('drivers', <Users size={18} color={activeTab === 'drivers' ? colors.text : colors.textSecondary} />, 'Drivers')}
+          {renderTabButton('branding', <Palette size={18} color={activeTab === 'branding' ? colors.text : colors.textSecondary} />, 'Branding')}
+          {renderTabButton('compliance', <Shield size={18} color={activeTab === 'compliance' ? colors.text : colors.textSecondary} />, 'Compliance')}
+          {renderTabButton('settings', <Settings size={18} color={activeTab === 'settings' ? colors.text : colors.textSecondary} />, 'Settings')}
+        </ScrollView>
       </View>
-      
-      {activeTab === 'overview' && renderOverview()}
-      {activeTab === 'drivers' && renderDrivers()}
-      {activeTab === 'vehicles' && renderVehicles()}
-      {activeTab === 'compliance' && renderCompliance()}
-      
-      <FleetSettingsModal
-        visible={settingsVisible}
-        onClose={() => setSettingsVisible(false)}
-      />
+
+      {activeTab === 'overview' && renderOverviewTab()}
+      {activeTab === 'drivers' && renderDriversTab()}
+      {activeTab === 'branding' && renderBrandingTab()}
+      {activeTab === 'compliance' && renderComplianceTab()}
+      {activeTab === 'settings' && renderSettingsTab()}
     </View>
   );
 }
@@ -276,84 +338,64 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
-  noAccessContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 40,
-  },
-  noAccessText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: colors.text,
-    marginTop: 16,
-    textAlign: 'center',
-  },
-  noAccessSubtext: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    marginTop: 8,
-    textAlign: 'center',
-  },
-  settingsButton: {
-    padding: 8,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 16,
-    backgroundColor: colors.backgroundLight,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  companyLogo: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 12,
-  },
-  companyInfo: {
-    flex: 1,
-  },
-  companyName: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: colors.text,
-  },
-  companyDetails: {
-    fontSize: 14,
-    color: colors.textSecondary,
-    marginTop: 2,
-  },
   tabBar: {
-    flexDirection: 'row',
     backgroundColor: colors.backgroundLight,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
   tabButton: {
-    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    paddingHorizontal: 16,
     paddingVertical: 12,
+    marginRight: 8,
+    borderRadius: 8,
     gap: 6,
-  },
-  activeTabButton: {
-    borderBottomWidth: 2,
-    borderBottomColor: colors.primaryLight,
   },
   tabButtonText: {
     fontSize: 14,
     color: colors.textSecondary,
-  },
-  activeTabButtonText: {
-    color: colors.text,
-    fontWeight: '600',
+    fontWeight: '500',
   },
   tabContent: {
     flex: 1,
+    paddingHorizontal: 16,
+  },
+  fleetHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    backgroundColor: colors.backgroundLight,
+    borderRadius: 12,
     padding: 16,
+    marginTop: 16,
+    marginBottom: 16,
+  },
+  fleetName: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: 4,
+  },
+  fleetDetails: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    marginBottom: 2,
+  },
+  fleetStatus: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  statusIndicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginRight: 6,
+  },
+  statusText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.text,
   },
   statsGrid: {
     flexDirection: 'row',
@@ -361,38 +403,147 @@ const styles = StyleSheet.create({
     gap: 12,
     marginBottom: 16,
   },
-  performanceGrid: {
+  sectionHeader: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    marginBottom: 24,
-  },
-  section: {
-    marginBottom: 24,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 16,
+    marginBottom: 12,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
     color: colors.text,
-    marginBottom: 12,
+  },
+  addButton: {
+    flexDirection: 'row',
+    backgroundColor: colors.primaryLight,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    alignItems: 'center',
+    gap: 6,
+  },
+  addButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.text,
+  },
+  complianceSection: {
+    marginTop: 16,
+  },
+  complianceCard: {
+    backgroundColor: colors.backgroundLight,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
   },
   complianceHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: colors.backgroundLight,
-    padding: 16,
-    borderRadius: 12,
     marginBottom: 16,
   },
-  complianceScore: {
-    fontSize: 18,
+  complianceTitle: {
+    fontSize: 16,
     fontWeight: '600',
     color: colors.text,
+    marginLeft: 8,
+    flex: 1,
   },
-  complianceIndicator: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+  complianceStatus: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  complianceStatusText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: colors.text,
+  },
+  complianceMetrics: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  complianceMetric: {
+    alignItems: 'center',
+  },
+  metricValue: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: colors.text,
+  },
+  metricLabel: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  alertsList: {
+    backgroundColor: colors.backgroundLight,
+    borderRadius: 12,
+    padding: 16,
+  },
+  alertsTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: 12,
+  },
+  alertItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  alertContent: {
+    flex: 1,
+    marginLeft: 12,
+  },
+  alertText: {
+    fontSize: 14,
+    color: colors.text,
+    marginBottom: 2,
+  },
+  alertTime: {
+    fontSize: 12,
+    color: colors.textSecondary,
+  },
+  settingsSection: {
+    marginTop: 16,
+  },
+  settingGroup: {
+    backgroundColor: colors.backgroundLight,
+    borderRadius: 12,
+    marginBottom: 16,
+    overflow: 'hidden',
+  },
+  settingGroupTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text,
+    padding: 16,
+    paddingBottom: 8,
+  },
+  settingItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  settingContent: {
+    flex: 1,
+    marginRight: 16,
+  },
+  settingLabel: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: colors.text,
+    marginBottom: 2,
+  },
+  settingDescription: {
+    fontSize: 14,
+    color: colors.textSecondary,
   },
 });

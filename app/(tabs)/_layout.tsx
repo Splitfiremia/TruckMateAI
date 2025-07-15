@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { BarChart, Clipboard, Home, Receipt, Settings } from "lucide-react-native";
+import { BarChart, Clipboard, Home, Receipt, Settings, Users } from "lucide-react-native";
 import React from "react";
 
 import { colors } from "@/constants/colors";
@@ -49,6 +49,13 @@ export default function TabLayout() {
         options={{
           title: "Receipts",
           tabBarIcon: ({ color }) => <Receipt color={color} size={22} />,
+        }}
+      />
+      <Tabs.Screen
+        name="fleet"
+        options={{
+          title: "Fleet Admin",
+          tabBarIcon: ({ color }) => <Users color={color} size={22} />,
         }}
       />
       <Tabs.Screen
