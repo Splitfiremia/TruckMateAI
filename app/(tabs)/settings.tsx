@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Switch, Alert } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Switch, Alert, Modal, TextInput } from 'react-native';
 import { Stack } from 'expo-router';
-import { User, Truck, Bell, Shield, HelpCircle, LogOut, ChevronRight, AlertTriangle } from 'lucide-react-native';
+import { User, Truck, Bell, Shield, HelpCircle, LogOut, ChevronRight, AlertTriangle, X, Save } from 'lucide-react-native';
 
 import { colors } from '@/constants/colors';
 import { driverInfo } from '@/constants/mockData';
@@ -9,10 +9,18 @@ import VoiceCommandButton from '@/components/VoiceCommandButton';
 import CommandResponseModal from '@/components/CommandResponseModal';
 import { useVoiceCommandStore } from '@/store/voiceCommandStore';
 import { useSettingsStore } from '@/store/settingsStore';
+import { useLogbookStore } from '@/store/logbookStore';
 
 export default function SettingsScreen() {
   const [commandModalVisible, setCommandModalVisible] = useState(false);
+  const [personalInfoModalVisible, setPersonalInfoModalVisible] = useState(false);
+  const [vehicleSettingsModalVisible, setVehicleSettingsModalVisible] = useState(false);
+  const [notificationModalVisible, setNotificationModalVisible] = useState(false);
+  const [privacyModalVisible, setPrivacyModalVisible] = useState(false);
+  const [helpModalVisible, setHelpModalVisible] = useState(false);
+  
   const { lastCommand, lastResponse } = useVoiceCommandStore();
+  const { driverStatus, updateDriverStatus } = useLogbookStore();
   const { 
     autoTrackDriving,
     voiceCommands,
@@ -20,7 +28,9 @@ export default function SettingsScreen() {
     complianceAlerts,
     dataSync,
     darkMode,
-
+    emergencyContacts,
+    speedLimitAlerts,
+    fatigueMonitoring,
     updateSetting 
   } = useSettingsStore();
   
@@ -31,7 +41,9 @@ export default function SettingsScreen() {
     complianceAlerts,
     dataSync,
     darkMode,
-
+    emergencyContacts,
+    speedLimitAlerts,
+    fatigueMonitoring,
   };
   
   const toggleSetting = (setting: keyof typeof settings) => {
@@ -40,6 +52,25 @@ export default function SettingsScreen() {
   
   const handleCommandProcessed = () => {
     setCommandModalVisible(true);
+  };
+  
+  const handleLogout = () => {
+    Alert.alert(
+      'Log Out',
+      'Are you sure you want to log out?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Log Out', 
+          style: 'destructive',
+          onPress: () => {
+            // Reset driver status and navigate to login
+            updateDriverStatus('off_duty');
+            Alert.alert('Logged Out', 'You have been successfully logged out.');
+          }
+        }
+      ]
+    );
   };
   
   const renderSettingSwitch = (
@@ -153,8 +184,25 @@ export default function SettingsScreen() {
           <Text style={styles.sectionTitle}>Safety Settings</Text>
         </View>
         
-
-        
+        <View style={styles.settingsCard}>
+          {renderSettingSwitch(
+            'emergencyContacts',
+            'Emergency Contacts',
+            'Enable emergency contact notifications'
+          )}
+          
+          {renderSettingSwitch(
+            'speedLimitAlerts',
+            'Speed Limit Alerts',
+            'Get alerts when exceeding speed limits'
+          )}
+          
+          {renderSettingSwitch(
+            'fatigueMonitoring',
+            'Fatigue Monitoring',
+            'Monitor driving patterns for fatigue signs'
+          )}
+        </View>
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Account</Text>
         </View>
@@ -163,35 +211,35 @@ export default function SettingsScreen() {
           {renderSettingLink(
             <User size={20} color={colors.primaryLight} />,
             'Personal Information',
-            () => {}
+            () => setPersonalInfoModalVisible(true)
           )}
           
           {renderSettingLink(
             <Truck size={20} color={colors.primaryLight} />,
             'Vehicle Settings',
-            () => {}
+            () => setVehicleSettingsModalVisible(true)
           )}
           
           {renderSettingLink(
             <Bell size={20} color={colors.primaryLight} />,
             'Notification Preferences',
-            () => {}
+            () => setNotificationModalVisible(true)
           )}
           
           {renderSettingLink(
             <Shield size={20} color={colors.primaryLight} />,
             'Privacy & Security',
-            () => {}
+            () => setPrivacyModalVisible(true)
           )}
           
           {renderSettingLink(
             <HelpCircle size={20} color={colors.primaryLight} />,
             'Help & Support',
-            () => {}
+            () => setHelpModalVisible(true)
           )}
         </View>
         
-        <TouchableOpacity style={styles.logoutButton}>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <LogOut size={20} color={colors.danger} />
           <Text style={styles.logoutText}>Log Out</Text>
         </TouchableOpacity>
@@ -211,6 +259,351 @@ export default function SettingsScreen() {
         command={lastCommand}
         response={lastResponse}
       />
+      
+      {/* Personal Information Modal */}
+      <Modal
+        visible={personalInfoModalVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Personal Information</Text>
+            <TouchableOpacity onPress={() => setPersonalInfoModalVisible(false)}>
+              <X size={24} color={colors.text} />
+            </TouchableOpacity>
+          </View>
+          
+          <ScrollView style={styles.modalContent}>
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Full Name</Text>
+              <TextInput
+                style={styles.textInput}
+                value={driverInfo.name}
+                placeholder="Enter your full name"
+                placeholderTextColor={colors.textSecondary}
+              />
+            </View>
+            
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Company</Text>
+              <TextInput
+                style={styles.textInput}
+                value={driverInfo.company}
+                placeholder="Enter company name"
+                placeholderTextColor={colors.textSecondary}
+              />
+            </View>
+            
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>CDL Number</Text>
+              <TextInput
+                style={styles.textInput}
+                value={driverInfo.licenseNumber}
+                placeholder="Enter CDL number"
+                placeholderTextColor={colors.textSecondary}
+              />
+            </View>
+            
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Phone Number</Text>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Enter phone number"
+                placeholderTextColor={colors.textSecondary}
+                keyboardType="phone-pad"
+              />
+            </View>
+            
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Email Address</Text>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Enter email address"
+                placeholderTextColor={colors.textSecondary}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+            </View>
+          </ScrollView>
+          
+          <TouchableOpacity style={styles.saveButton}>
+            <Save size={20} color={colors.background} />
+            <Text style={styles.saveButtonText}>Save Changes</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+      
+      {/* Vehicle Settings Modal */}
+      <Modal
+        visible={vehicleSettingsModalVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Vehicle Settings</Text>
+            <TouchableOpacity onPress={() => setVehicleSettingsModalVisible(false)}>
+              <X size={24} color={colors.text} />
+            </TouchableOpacity>
+          </View>
+          
+          <ScrollView style={styles.modalContent}>
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Vehicle Make</Text>
+              <TextInput
+                style={styles.textInput}
+                placeholder="e.g., Freightliner"
+                placeholderTextColor={colors.textSecondary}
+              />
+            </View>
+            
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Vehicle Model</Text>
+              <TextInput
+                style={styles.textInput}
+                placeholder="e.g., Cascadia"
+                placeholderTextColor={colors.textSecondary}
+              />
+            </View>
+            
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Vehicle Year</Text>
+              <TextInput
+                style={styles.textInput}
+                placeholder="e.g., 2023"
+                placeholderTextColor={colors.textSecondary}
+                keyboardType="numeric"
+              />
+            </View>
+            
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>License Plate</Text>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Enter license plate"
+                placeholderTextColor={colors.textSecondary}
+                autoCapitalize="characters"
+              />
+            </View>
+            
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>VIN Number</Text>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Enter VIN number"
+                placeholderTextColor={colors.textSecondary}
+                autoCapitalize="characters"
+              />
+            </View>
+          </ScrollView>
+          
+          <TouchableOpacity style={styles.saveButton}>
+            <Save size={20} color={colors.background} />
+            <Text style={styles.saveButtonText}>Save Changes</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+      
+      {/* Notification Preferences Modal */}
+      <Modal
+        visible={notificationModalVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Notification Preferences</Text>
+            <TouchableOpacity onPress={() => setNotificationModalVisible(false)}>
+              <X size={24} color={colors.text} />
+            </TouchableOpacity>
+          </View>
+          
+          <ScrollView style={styles.modalContent}>
+            <Text style={styles.sectionSubtitle}>Push Notifications</Text>
+            <View style={styles.notificationCard}>
+              {renderSettingSwitch(
+                'pushNotifications',
+                'Enable Push Notifications',
+                'Receive notifications on your device'
+              )}
+              
+              {renderSettingSwitch(
+                'complianceAlerts',
+                'Compliance Alerts',
+                'Get notified about compliance issues'
+              )}
+            </View>
+            
+            <Text style={styles.sectionSubtitle}>Email Notifications</Text>
+            <View style={styles.notificationCard}>
+              <View style={styles.settingItem}>
+                <View style={styles.settingContent}>
+                  <Text style={styles.settingLabel}>Weekly Reports</Text>
+                  <Text style={styles.settingDescription}>Receive weekly driving reports</Text>
+                </View>
+                <Switch
+                  value={true}
+                  onValueChange={() => {}}
+                  trackColor={{ false: colors.border, true: colors.primaryLight }}
+                  thumbColor={colors.background}
+                  ios_backgroundColor={colors.border}
+                />
+              </View>
+              
+              <View style={styles.settingItem}>
+                <View style={styles.settingContent}>
+                  <Text style={styles.settingLabel}>Maintenance Reminders</Text>
+                  <Text style={styles.settingDescription}>Get vehicle maintenance alerts</Text>
+                </View>
+                <Switch
+                  value={true}
+                  onValueChange={() => {}}
+                  trackColor={{ false: colors.border, true: colors.primaryLight }}
+                  thumbColor={colors.background}
+                  ios_backgroundColor={colors.border}
+                />
+              </View>
+            </View>
+          </ScrollView>
+          
+          <TouchableOpacity style={styles.saveButton}>
+            <Save size={20} color={colors.background} />
+            <Text style={styles.saveButtonText}>Save Preferences</Text>
+          </TouchableOpacity>
+        </View>
+      </Modal>
+      
+      {/* Privacy & Security Modal */}
+      <Modal
+        visible={privacyModalVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Privacy & Security</Text>
+            <TouchableOpacity onPress={() => setPrivacyModalVisible(false)}>
+              <X size={24} color={colors.text} />
+            </TouchableOpacity>
+          </View>
+          
+          <ScrollView style={styles.modalContent}>
+            <Text style={styles.sectionSubtitle}>Data Privacy</Text>
+            <View style={styles.privacyCard}>
+              <View style={styles.settingItem}>
+                <View style={styles.settingContent}>
+                  <Text style={styles.settingLabel}>Location Tracking</Text>
+                  <Text style={styles.settingDescription}>Allow app to track your location</Text>
+                </View>
+                <Switch
+                  value={true}
+                  onValueChange={() => {}}
+                  trackColor={{ false: colors.border, true: colors.primaryLight }}
+                  thumbColor={colors.background}
+                  ios_backgroundColor={colors.border}
+                />
+              </View>
+              
+              <View style={styles.settingItem}>
+                <View style={styles.settingContent}>
+                  <Text style={styles.settingLabel}>Analytics</Text>
+                  <Text style={styles.settingDescription}>Share usage data to improve the app</Text>
+                </View>
+                <Switch
+                  value={false}
+                  onValueChange={() => {}}
+                  trackColor={{ false: colors.border, true: colors.primaryLight }}
+                  thumbColor={colors.background}
+                  ios_backgroundColor={colors.border}
+                />
+              </View>
+            </View>
+            
+            <Text style={styles.sectionSubtitle}>Security</Text>
+            <View style={styles.privacyCard}>
+              <TouchableOpacity style={styles.securityOption}>
+                <Text style={styles.settingLabel}>Change Password</Text>
+                <ChevronRight size={20} color={colors.textSecondary} />
+              </TouchableOpacity>
+              
+              <TouchableOpacity style={styles.securityOption}>
+                <Text style={styles.settingLabel}>Two-Factor Authentication</Text>
+                <ChevronRight size={20} color={colors.textSecondary} />
+              </TouchableOpacity>
+              
+              <TouchableOpacity style={styles.securityOption}>
+                <Text style={styles.settingLabel}>Download My Data</Text>
+                <ChevronRight size={20} color={colors.textSecondary} />
+              </TouchableOpacity>
+              
+              <TouchableOpacity style={[styles.securityOption, styles.dangerOption]}>
+                <Text style={[styles.settingLabel, styles.dangerText]}>Delete Account</Text>
+                <ChevronRight size={20} color={colors.danger} />
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </View>
+      </Modal>
+      
+      {/* Help & Support Modal */}
+      <Modal
+        visible={helpModalVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Help & Support</Text>
+            <TouchableOpacity onPress={() => setHelpModalVisible(false)}>
+              <X size={24} color={colors.text} />
+            </TouchableOpacity>
+          </View>
+          
+          <ScrollView style={styles.modalContent}>
+            <View style={styles.helpCard}>
+              <TouchableOpacity style={styles.helpOption}>
+                <Text style={styles.settingLabel}>Frequently Asked Questions</Text>
+                <ChevronRight size={20} color={colors.textSecondary} />
+              </TouchableOpacity>
+              
+              <TouchableOpacity style={styles.helpOption}>
+                <Text style={styles.settingLabel}>Contact Support</Text>
+                <ChevronRight size={20} color={colors.textSecondary} />
+              </TouchableOpacity>
+              
+              <TouchableOpacity style={styles.helpOption}>
+                <Text style={styles.settingLabel}>Report a Bug</Text>
+                <ChevronRight size={20} color={colors.textSecondary} />
+              </TouchableOpacity>
+              
+              <TouchableOpacity style={styles.helpOption}>
+                <Text style={styles.settingLabel}>Feature Request</Text>
+                <ChevronRight size={20} color={colors.textSecondary} />
+              </TouchableOpacity>
+              
+              <TouchableOpacity style={styles.helpOption}>
+                <Text style={styles.settingLabel}>Terms of Service</Text>
+                <ChevronRight size={20} color={colors.textSecondary} />
+              </TouchableOpacity>
+              
+              <TouchableOpacity style={styles.helpOption}>
+                <Text style={styles.settingLabel}>Privacy Policy</Text>
+                <ChevronRight size={20} color={colors.textSecondary} />
+              </TouchableOpacity>
+            </View>
+            
+            <View style={styles.supportInfo}>
+              <Text style={styles.supportTitle}>Need immediate help?</Text>
+              <Text style={styles.supportText}>Call our 24/7 support line:</Text>
+              <Text style={styles.supportPhone}>1-800-TRUCKMATE</Text>
+              
+              <Text style={styles.supportText}>Or email us at:</Text>
+              <Text style={styles.supportEmail}>support@truckmate.com</Text>
+            </View>
+          </ScrollView>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -379,5 +772,141 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 20,
     alignSelf: 'center',
+  },
+  // Modal Styles
+  modalContainer: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  modalContent: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+  },
+  inputGroup: {
+    marginBottom: 20,
+  },
+  inputLabel: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: colors.text,
+    marginBottom: 8,
+  },
+  textInput: {
+    backgroundColor: colors.backgroundLight,
+    borderRadius: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: colors.text,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  saveButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primaryLight,
+    borderRadius: 12,
+    paddingVertical: 16,
+    marginHorizontal: 16,
+    marginBottom: 16,
+  },
+  saveButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.background,
+    marginLeft: 8,
+  },
+  sectionSubtitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: 12,
+    marginTop: 8,
+  },
+  notificationCard: {
+    backgroundColor: colors.backgroundLight,
+    borderRadius: 12,
+    marginBottom: 24,
+    overflow: 'hidden',
+  },
+  privacyCard: {
+    backgroundColor: colors.backgroundLight,
+    borderRadius: 12,
+    marginBottom: 24,
+    overflow: 'hidden',
+  },
+  securityOption: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  dangerOption: {
+    borderBottomWidth: 0,
+  },
+  dangerText: {
+    color: colors.danger,
+  },
+  helpCard: {
+    backgroundColor: colors.backgroundLight,
+    borderRadius: 12,
+    marginBottom: 24,
+    overflow: 'hidden',
+  },
+  helpOption: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  supportInfo: {
+    backgroundColor: colors.backgroundLight,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 24,
+  },
+  supportTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: 8,
+  },
+  supportText: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    marginBottom: 4,
+  },
+  supportPhone: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.primaryLight,
+    marginBottom: 12,
+  },
+  supportEmail: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.primaryLight,
   },
 });

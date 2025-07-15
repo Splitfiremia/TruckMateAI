@@ -11,10 +11,13 @@ interface SettingsState {
   dataSync: boolean;
   darkMode: boolean;
   
-
+  // Safety Settings
+  emergencyContacts: boolean;
+  speedLimitAlerts: boolean;
+  fatigueMonitoring: boolean;
   
   // Actions
-  updateSetting: (key: keyof Omit<SettingsState, 'updateSetting'>, value: boolean) => void;
+  updateSetting: (key: keyof Omit<SettingsState, 'updateSetting' | 'resetSettings'>, value: boolean) => void;
   resetSettings: () => void;
 }
 
@@ -25,7 +28,9 @@ const defaultSettings = {
   complianceAlerts: true,
   dataSync: true,
   darkMode: true,
-
+  emergencyContacts: true,
+  speedLimitAlerts: true,
+  fatigueMonitoring: true,
 };
 
 export const useSettingsStore = create<SettingsState>()(persist(
