@@ -16,6 +16,10 @@ interface SettingsState {
   speedLimitAlerts: boolean;
   fatigueMonitoring: boolean;
   
+  // Weather Settings
+  weatherAlertsEnabled: boolean;
+  severeWeatherOnly: boolean;
+  
   // Actions
   updateSetting: (key: keyof Omit<SettingsState, 'updateSetting' | 'resetSettings'>, value: boolean) => void;
   resetSettings: () => void;
@@ -31,6 +35,8 @@ const defaultSettings = {
   emergencyContacts: true,
   speedLimitAlerts: true,
   fatigueMonitoring: true,
+  weatherAlertsEnabled: true,
+  severeWeatherOnly: false,
 };
 
 export const useSettingsStore = create<SettingsState>()(persist(

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Switch, Alert, Modal, TextInput } from 'react-native';
 import { Stack } from 'expo-router';
-import { User, Truck, Bell, Shield, HelpCircle, LogOut, ChevronRight, AlertTriangle, X, Save } from 'lucide-react-native';
+import { User, Truck, Bell, Shield, HelpCircle, LogOut, ChevronRight, AlertTriangle, X, Save, Cloud } from 'lucide-react-native';
 
 import { colors } from '@/constants/colors';
 import { driverInfo } from '@/constants/mockData';
@@ -31,6 +31,8 @@ export default function SettingsScreen() {
     emergencyContacts,
     speedLimitAlerts,
     fatigueMonitoring,
+    weatherAlertsEnabled,
+    severeWeatherOnly,
     updateSetting 
   } = useSettingsStore();
   
@@ -44,6 +46,8 @@ export default function SettingsScreen() {
     emergencyContacts,
     speedLimitAlerts,
     fatigueMonitoring,
+    weatherAlertsEnabled,
+    severeWeatherOnly,
   };
   
   const toggleSetting = (setting: keyof typeof settings) => {
@@ -201,6 +205,24 @@ export default function SettingsScreen() {
             'fatigueMonitoring',
             'Fatigue Monitoring',
             'Monitor driving patterns for fatigue signs'
+          )}
+        </View>
+        
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Weather Settings</Text>
+        </View>
+        
+        <View style={styles.settingsCard}>
+          {renderSettingSwitch(
+            'weatherAlertsEnabled',
+            'Weather Alerts',
+            'Receive NOAA weather alerts for your location'
+          )}
+          
+          {renderSettingSwitch(
+            'severeWeatherOnly',
+            'Severe Weather Only',
+            'Only show severe and extreme weather alerts'
           )}
         </View>
         <View style={styles.sectionHeader}>

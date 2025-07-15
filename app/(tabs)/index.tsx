@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import { Stack } from 'expo-router';
-import { Mic, Camera, Clock, AlertTriangle, Truck, DollarSign, Clipboard, Upload, Shield } from 'lucide-react-native';
+import { Mic, Camera, Clock, AlertTriangle, Truck, DollarSign, Clipboard, Upload, Shield, Cloud } from 'lucide-react-native';
 
 import { colors } from '@/constants/colors';
 import { ComplianceViolationPrediction } from '@/types';
@@ -26,6 +26,10 @@ import { ComplianceNotificationSystem } from '@/components/ComplianceNotificatio
 import { useVoiceCommandStore } from '@/store/voiceCommandStore';
 import { useInspectionStore } from '@/store/inspectionStore';
 import { usePredictiveComplianceStore } from '@/store/predictiveComplianceStore';
+import { WeatherCard } from '@/components/WeatherCard';
+import { WeatherAlertsModal } from '@/components/WeatherAlertsModal';
+import { WeatherForecastModal } from '@/components/WeatherForecastModal';
+import { WeatherNotificationSystem } from '@/components/WeatherNotificationSystem';
 
 export default function DashboardScreen() {
   const [statusModalVisible, setStatusModalVisible] = useState(false);
@@ -39,6 +43,8 @@ export default function DashboardScreen() {
   const [violationAlertVisible, setViolationAlertVisible] = useState(false);
   const [currentViolationPrediction, setCurrentViolationPrediction] = useState<ComplianceViolationPrediction | null>(null);
   const [isBeginningTrip, setIsBeginningTrip] = useState(false);
+  const [weatherAlertsVisible, setWeatherAlertsVisible] = useState(false);
+  const [weatherForecastVisible, setWeatherForecastVisible] = useState(false);
   
   const { lastCommand, lastResponse } = useVoiceCommandStore();
   const { isInspectionRequired, inspectionInProgress, checkInspectionRequirement } = useInspectionStore();
@@ -131,6 +137,8 @@ export default function DashboardScreen() {
         
         <StatusCard onStatusChange={handleStatusCardPress} />
         
+        <WeatherCard onPress={() => setWeatherForecastVisible(true)} />
+        
         <ComplianceAlert />
         
         {/* Real-Time Compliance Monitor */}
@@ -191,6 +199,13 @@ export default function DashboardScreen() {
             onPress={() => handleActionWithInspectionCheck(() => setPredictiveComplianceVisible(true))}
             color={isInspectionRequired ? colors.border : (violationPredictions.length > 0 ? colors.warning : colors.primaryLight)}
             disabled={isInspectionRequired}
+          />
+          
+          <QuickActionButton 
+            icon={<Cloud size={20} color={colors.text} />}
+            label="Weather"
+            onPress={() => setWeatherForecastVisible(true)}
+            color={colors.primaryLight}
           />
         </View>
         
@@ -320,6 +335,24 @@ export default function DashboardScreen() {
           if (alert.type === 'Violation Prevention') {
             setPredictiveComplianceVisible(true);
           }
+        }}
+      />
+      
+      {/* Weather Modals */}
+      <WeatherAlertsModal
+        visible={weatherAlertsVisible}
+        onClose={() => setWeatherAlertsVisible(false)}
+      />
+      
+      <WeatherForecastModal
+        visible={weatherForecastVisible}
+        onClose={() => setWeatherForecastVisible(false)}
+      />
+      
+      {/* Weather Notification System */}
+      <WeatherNotificationSystem
+        onNotificationPress={(alert) => {
+          setWeatherAlertsVisible(true);
         }}
       />
     </View>
