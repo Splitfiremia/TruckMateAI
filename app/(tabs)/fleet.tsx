@@ -204,7 +204,7 @@ export default function FleetAdminScreen() {
             </View>
           </View>
         </View>
-      </div>
+      </View>
     </ScrollView>
   );
 
