@@ -1,5 +1,25 @@
 export type DutyStatus = 'Off Duty' | 'Sleeper Berth' | 'Driving' | 'On Duty Not Driving';
 
+export interface StatusChangeLog {
+  id: string;
+  timestamp: string;
+  fromStatus: DutyStatus;
+  toStatus: DutyStatus;
+  location: string;
+  tripId?: string;
+  reason?: string;
+}
+
+export interface BreakLog {
+  id: string;
+  startTime: string;
+  endTime?: string;
+  duration?: number; // in hours
+  location: string;
+  tripId?: string;
+  type: '30-minute' | 'off-duty' | 'sleeper-berth';
+}
+
 export type ComplianceStatus = 'Good Standing' | 'Warning' | 'Violation';
 
 export type ReceiptType = 'Fuel' | 'Toll' | 'Maintenance' | 'Other';

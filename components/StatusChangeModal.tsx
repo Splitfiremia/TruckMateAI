@@ -17,7 +17,7 @@ export default function StatusChangeModal({
   onClose, 
   onInspectionRequired 
 }: StatusChangeModalProps) {
-  const { changeStatus, startBreak, currentStatus } = useLogbookStore();
+  const { changeStatus, startBreak, endBreak, currentStatus, isOnBreak, startTrip } = useLogbookStore();
   const { canStartDriving, isInspectionRequired } = useInspectionStore();
   
   const handleStatusChange = (status: DutyStatus) => {
@@ -25,7 +25,17 @@ export default function StatusChangeModal({
     const isBeginningTrip = status === 'Driving' && 
       (currentStatus === 'Off Duty' || currentStatus === 'Sleeper Berth');
     
-    // Show inspection recommendation for trip beginning
+    // End break if currently on break
+    if (isOnBreak && status !== 'Off Duty' && status !== 'Sleeper Berth') {
+      endBreak();
+    }
+    
+    // Start a new trip if beginning to drive
+    if (isBeginningTrip) {
+      startTrip();
+    }
+    
+    // Show inspection recommendation for trip beginning (but don't block)
     if (status === 'Driving' && isBeginningTrip && isInspectionRequired) {
       Alert.alert(
         'Trip Start - Pre-Trip Inspection Recommended',
@@ -92,7 +102,13 @@ export default function StatusChangeModal({
   };
   
   const handleStartBreak = () => {
-    startBreak();
+    if (isOnBreak) {
+      endBreak();
+      Alert.alert('Break Ended', 'Your break has been logged and ended.');
+    } else {
+      startBreak();
+      Alert.alert('Break Started', '30-minute break has been started and will be logged.');
+    }
     onClose();
   };
   
@@ -170,7 +186,9 @@ export default function StatusChangeModal({
             style={styles.breakButton}
             onPress={handleStartBreak}
           >
-            <Text style={styles.breakButtonText}>Start 30-Minute Break</Text>
+            <Text style={styles.breakButtonText}>
+              {isOnBreak ? 'End Break' : 'Start 30-Minute Break'}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>

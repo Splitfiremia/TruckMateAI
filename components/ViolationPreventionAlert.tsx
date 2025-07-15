@@ -185,6 +185,7 @@ export const ViolationPreventionAlert: React.FC<ViolationPreventionAlertProps> =
       driverId: 'current-driver', // In real app, get from auth
       documentedInTrip: true,
       tripId: currentTripId || undefined,
+      supervisorApproval: undefined,
       riskAcknowledged,
       estimatedFineAccepted: fineAccepted
     };
@@ -192,9 +193,18 @@ export const ViolationPreventionAlert: React.FC<ViolationPreventionAlertProps> =
     const success = await overrideViolationPrediction(prediction.id, override);
     
     if (success) {
+      // Log the override in the logbook store for record keeping
+      const { logViolationOverride } = useLogbookStore.getState();
+      logViolationOverride(
+        override, 
+        prediction.type, 
+        prediction.severity === 'Critical' ? 'Critical' : prediction.severity === 'Warning' ? 'High' : 'Medium',
+        prediction.estimatedFine
+      );
+      
       Alert.alert(
         'Override Applied',
-        'Violation override has been documented in your trip log. Continue with caution.',
+        'Violation override has been documented in your driver logs. Continue with caution.',
         [{ text: 'OK', onPress: () => {
           setShowOverrideModal(false);
           onActionTaken('override');
@@ -366,6 +376,40 @@ export const ViolationPreventionAlert: React.FC<ViolationPreventionAlertProps> =
               </TouchableOpacity>
             )}
 
+            {/* Override Section */}
+            {prediction.canOverride && !prediction.overrideInfo && (
+              <View style={styles.overrideSection}>
+                <Text style={styles.overrideTitle}>Override Available</Text>
+                <Text style={styles.overrideDescription}>
+                  This violation can be overridden with proper documentation. 
+                  Maximum 3 overrides per week allowed. Override will be recorded in driver logs.
+                </Text>
+                <TouchableOpacity 
+                  style={styles.overrideButton}
+                  onPress={handleOverrideRequest}
+                >
+                  <Shield size={16} color="white" />
+                  <Text style={styles.overrideButtonText}>Request Override</Text>
+                </TouchableOpacity>
+              </View>
+            )}
+            
+            {/* Override Applied Section */}
+            {prediction.overrideInfo && (
+              <View style={styles.overrideAppliedSection}>
+                <View style={styles.overrideAppliedHeader}>
+                  <CheckCircle size={16} color={colors.primary} />
+                  <Text style={styles.overrideAppliedTitle}>Override Applied</Text>
+                </View>
+                <Text style={styles.overrideAppliedText}>
+                  Documented in driver logs at {new Date(prediction.overrideInfo.timestamp).toLocaleTimeString()}
+                </Text>
+                <Text style={styles.overrideReason}>
+                  Reason: {prediction.overrideInfo.reason}
+                </Text>
+              </View>
+            )}
+
             {/* Fine Information */}
             {prediction.estimatedFine && (
               <View style={styles.fineSection}>
@@ -378,6 +422,95 @@ export const ViolationPreventionAlert: React.FC<ViolationPreventionAlertProps> =
           </LinearGradient>
         </Animated.View>
       </View>
+      
+      {/* Override Request Modal */}
+      <Modal
+        visible={showOverrideModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowOverrideModal(false)}
+      >
+        <View style={styles.overrideModalOverlay}>
+          <View style={styles.overrideModalContainer}>
+            <View style={styles.overrideModalHeader}>
+              <Text style={styles.overrideModalTitle}>Request Violation Override</Text>
+              <TouchableOpacity 
+                onPress={() => setShowOverrideModal(false)}
+                style={styles.overrideModalClose}
+              >
+                <X size={20} color={colors.textSecondary} />
+              </TouchableOpacity>
+            </View>
+            
+            <Text style={styles.overrideModalWarning}>
+              ⚠️ Warning: Overriding safety violations increases risk and may result in fines. 
+              This action will be permanently recorded in your driver logs.
+            </Text>
+            
+            <View style={styles.overrideFormSection}>
+              <Text style={styles.overrideFormLabel}>Reason for Override *</Text>
+              <TextInput
+                style={styles.overrideReasonInput}
+                value={overrideReason}
+                onChangeText={setOverrideReason}
+                placeholder="Provide detailed justification for this override..."
+                placeholderTextColor={colors.textSecondary}
+                multiline
+                numberOfLines={4}
+              />
+            </View>
+            
+            <View style={styles.overrideCheckboxSection}>
+              <TouchableOpacity 
+                style={styles.overrideCheckbox}
+                onPress={() => setRiskAcknowledged(!riskAcknowledged)}
+              >
+                <View style={[styles.checkbox, riskAcknowledged && styles.checkboxChecked]}>
+                  {riskAcknowledged && <CheckCircle size={12} color="white" />}
+                </View>
+                <Text style={styles.checkboxText}>
+                  I acknowledge the safety risks associated with this override and take full responsibility.
+                </Text>
+              </TouchableOpacity>
+              
+              {prediction.estimatedFine && (
+                <TouchableOpacity 
+                  style={styles.overrideCheckbox}
+                  onPress={() => setFineAccepted(!fineAccepted)}
+                >
+                  <View style={[styles.checkbox, fineAccepted && styles.checkboxChecked]}>
+                    {fineAccepted && <CheckCircle size={12} color="white" />}
+                  </View>
+                  <Text style={styles.checkboxText}>
+                    I understand this may result in a fine of up to ${prediction.estimatedFine.toLocaleString()}.
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
+            
+            <View style={styles.overrideModalActions}>
+              <TouchableOpacity 
+                style={styles.overrideCancelButton}
+                onPress={() => setShowOverrideModal(false)}
+              >
+                <Text style={styles.overrideCancelText}>Cancel</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={[
+                  styles.overrideSubmitButton,
+                  (!overrideReason.trim() || !riskAcknowledged || (prediction.estimatedFine && !fineAccepted)) && 
+                  styles.overrideSubmitButtonDisabled
+                ]}
+                onPress={handleOverrideSubmit}
+                disabled={!overrideReason.trim() || !riskAcknowledged || (prediction.estimatedFine && !fineAccepted)}
+              >
+                <Text style={styles.overrideSubmitText}>Apply Override</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </Modal>
   );
 };

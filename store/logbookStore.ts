@@ -3,6 +3,26 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { DutyStatus, TripOverrideLog, ViolationOverride } from '@/types';
 
+interface StatusChangeLog {
+  id: string;
+  timestamp: string;
+  fromStatus: DutyStatus;
+  toStatus: DutyStatus;
+  location: string;
+  tripId?: string;
+  reason?: string;
+}
+
+interface BreakLog {
+  id: string;
+  startTime: string;
+  endTime?: string;
+  duration?: number; // in hours
+  location: string;
+  tripId?: string;
+  type: '30-minute' | 'off-duty' | 'sleeper-berth';
+}
+
 interface LogbookState {
   currentStatus: DutyStatus;
   statusStartTime: string;
@@ -15,6 +35,8 @@ interface LogbookState {
   violations: number;
   currentTripId: string | null;
   tripOverrideLogs: TripOverrideLog[];
+  statusChangeLogs: StatusChangeLog[];
+  breakLogs: BreakLog[];
   
   // Actions
   changeStatus: (status: DutyStatus, canStartDriving?: boolean) => boolean;
@@ -28,6 +50,10 @@ interface LogbookState {
   logViolationOverride: (override: ViolationOverride, violationType: string, riskLevel: 'Low' | 'Medium' | 'High' | 'Critical', estimatedFine?: number) => void;
   getTripOverrides: (tripId: string) => TripOverrideLog[];
   getWeeklyOverrideCount: () => number;
+  getStatusChangeLogs: (days?: number) => StatusChangeLog[];
+  getBreakLogs: (days?: number) => BreakLog[];
+  getTotalDrivingTime: (days?: number) => number;
+  getTotalOnDutyTime: (days?: number) => number;
 }
 
 export const useLogbookStore = create<LogbookState>()(
@@ -44,38 +70,78 @@ export const useLogbookStore = create<LogbookState>()(
       violations: 0,
       currentTripId: null,
       tripOverrideLogs: [],
+      statusChangeLogs: [],
+      breakLogs: [],
       
       changeStatus: (status, canStartDriving = true) => {
+        const state = get();
+        
         // Prevent driving if inspection not completed
         if (status === 'Driving' && !canStartDriving) {
           return false;
         }
         
-        set({
+        // Log the status change
+        const statusChangeLog: StatusChangeLog = {
+          id: `status-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          timestamp: new Date().toISOString(),
+          fromStatus: state.currentStatus,
+          toStatus: status,
+          location: state.lastLocation,
+          tripId: state.currentTripId || undefined
+        };
+        
+        set(state => ({
           currentStatus: status,
           statusStartTime: new Date().toISOString(),
           isOnBreak: status === 'Off Duty' || status === 'Sleeper Berth',
-        });
+          statusChangeLogs: [statusChangeLog, ...state.statusChangeLogs]
+        }));
         
         return true;
       },
       
-      startBreak: () => set({
-        isOnBreak: true,
-        breakStartTime: new Date().toISOString(),
-        currentStatus: 'Off Duty',
-      }),
+      startBreak: () => {
+        const state = get();
+        const breakLog: BreakLog = {
+          id: `break-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          startTime: new Date().toISOString(),
+          location: state.lastLocation,
+          tripId: state.currentTripId || undefined,
+          type: '30-minute'
+        };
+        
+        set(state => ({
+          isOnBreak: true,
+          breakStartTime: new Date().toISOString(),
+          currentStatus: 'Off Duty',
+          breakLogs: [breakLog, ...state.breakLogs]
+        }));
+      },
       
       endBreak: () => set((state) => {
         const breakStartTime = state.breakStartTime ? new Date(state.breakStartTime) : new Date();
         const now = new Date();
         const breakDuration = (now.getTime() - breakStartTime.getTime()) / (1000 * 60 * 60); // in hours
         
+        // Update the most recent break log with end time and duration
+        const updatedBreakLogs = state.breakLogs.map((log, index) => {
+          if (index === 0 && !log.endTime) {
+            return {
+              ...log,
+              endTime: now.toISOString(),
+              duration: breakDuration
+            };
+          }
+          return log;
+        });
+        
         return {
           isOnBreak: false,
           breakStartTime: null,
           breakTime: state.breakTime + breakDuration,
           currentStatus: 'On Duty Not Driving',
+          breakLogs: updatedBreakLogs
         };
       }),
       
@@ -128,6 +194,45 @@ export const useLogbookStore = create<LogbookState>()(
           new Date(log.timestamp) >= oneWeekAgo
         ).length;
       },
+      
+      getStatusChangeLogs: (days = 7) => {
+        const state = get();
+        const cutoffDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+        return state.statusChangeLogs.filter(log => 
+          new Date(log.timestamp) >= cutoffDate
+        );
+      },
+      
+      getBreakLogs: (days = 7) => {
+        const state = get();
+        const cutoffDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+        return state.breakLogs.filter(log => 
+          new Date(log.startTime) >= cutoffDate
+        );
+      },
+      
+      getTotalDrivingTime: (days = 1) => {
+        const state = get();
+        const cutoffDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+        const drivingLogs = state.statusChangeLogs.filter(log => 
+          log.toStatus === 'Driving' && new Date(log.timestamp) >= cutoffDate
+        );
+        
+        // This is a simplified calculation - in a real app you'd track actual driving time
+        return drivingLogs.length * 2; // Assume 2 hours per driving session on average
+      },
+      
+      getTotalOnDutyTime: (days = 1) => {
+        const state = get();
+        const cutoffDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+        const onDutyLogs = state.statusChangeLogs.filter(log => 
+          (log.toStatus === 'Driving' || log.toStatus === 'On Duty Not Driving') && 
+          new Date(log.timestamp) >= cutoffDate
+        );
+        
+        // This is a simplified calculation - in a real app you'd track actual on-duty time
+        return onDutyLogs.length * 3; // Assume 3 hours per on-duty session on average
+      },
     }),
     {
       name: 'logbook-storage',
@@ -143,7 +248,9 @@ export const useLogbookStore = create<LogbookState>()(
         lastLocation: state.lastLocation,
         violations: state.violations,
         currentTripId: state.currentTripId,
-        tripOverrideLogs: state.tripOverrideLogs
+        tripOverrideLogs: state.tripOverrideLogs,
+        statusChangeLogs: state.statusChangeLogs,
+        breakLogs: state.breakLogs
       })
     }
   )

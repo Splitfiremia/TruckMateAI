@@ -34,6 +34,7 @@ interface PredictiveComplianceState {
   addViolationPrediction: (prediction: ComplianceViolationPrediction) => void;
   resolveViolationPrediction: (id: string) => void;
   overrideViolationPrediction: (id: string, override: ViolationOverride) => Promise<boolean>;
+  canOverrideViolation: (predictionId: string) => boolean;
   addAlert: (alert: PredictiveAlert) => void;
   dismissAlert: (id: string) => void;
   executePreventionAction: (actionId: string) => Promise<void>;
@@ -41,7 +42,6 @@ interface PredictiveComplianceState {
   checkForRuleUpdates: () => Promise<void>;
   getTimeToNextViolation: () => number;
   getRiskLevel: () => 'Low' | 'Medium' | 'High' | 'Critical';
-  canOverrideViolation: (predictionId: string) => boolean;
 }
 
 // Mock DOT Rules Database
