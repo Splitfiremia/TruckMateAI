@@ -38,33 +38,6 @@ export interface Load {
   miles: number;
   totalPay: string;
   status: LoadStatus;
-  hazmat?: HazmatInfo;
-}
-
-export interface HazmatInfo {
-  isHazmat: boolean;
-  unNumber?: string;
-  properShippingName?: string;
-  hazardClass: string;
-  packingGroup?: string;
-  totalQuantity?: string;
-  placards: HazmatPlacard[];
-  emergencyContact?: string;
-  specialInstructions?: string[];
-}
-
-export interface HazmatPlacard {
-  id: string;
-  name: string;
-  class: string;
-  division?: string;
-  color: string;
-  symbol: string;
-  description: string;
-  compatibilityGroup?: string;
-  segregationTable?: string;
-  quantity?: string;
-  imageUrl: string;
 }
 
 export interface ComplianceIssue {
