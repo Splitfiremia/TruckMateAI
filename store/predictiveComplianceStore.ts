@@ -370,6 +370,52 @@ export const usePredictiveComplianceStore = create<PredictiveComplianceState>()(
         }));
       },
 
+      overrideViolationPrediction: async (id, override) => {
+        try {
+          // In a real app, this would make an API call to log the override
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
+          set(state => {
+            const updatedPredictions = state.violationPredictions.map(p => 
+              p.id === id ? { ...p, overrideInfo: override } : p
+            );
+            
+            return {
+              violationPredictions: updatedPredictions,
+              metrics: {
+                ...state.metrics,
+                overridesUsed: state.metrics.overridesUsed + 1,
+                overridesThisWeek: state.metrics.overridesThisWeek + 1
+              }
+            };
+          });
+          
+          // Add alert about the override
+          get().addAlert({
+            id: `alert-override-${Date.now()}`,
+            timestamp: new Date().toISOString(),
+            type: 'Violation Prevention',
+            priority: 'Medium',
+            title: 'Violation Override Applied',
+            message: `Override documented: ${override.reason}`,
+            actionRequired: false,
+            autoResolved: true,
+            expiresAt: new Date(Date.now() + 300000).toISOString() // 5 minutes
+          });
+          
+          return true;
+        } catch (error) {
+          console.error('Failed to override violation prediction:', error);
+          return false;
+        }
+      },
+
+      canOverrideViolation: (predictionId) => {
+        const state = get();
+        const prediction = state.violationPredictions.find(p => p.id === predictionId);
+        return prediction?.canOverride === true;
+      },
+
       addAlert: (alert) => {
         set(state => ({
           activeAlerts: [alert, ...state.activeAlerts.slice(0, 19)] // Keep max 20 alerts

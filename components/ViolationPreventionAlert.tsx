@@ -184,7 +184,7 @@ export const ViolationPreventionAlert: React.FC<ViolationPreventionAlertProps> =
       reason: overrideReason,
       driverId: 'current-driver', // In real app, get from auth
       documentedInTrip: true,
-      tripId: currentTripId,
+      tripId: currentTripId || undefined,
       riskAcknowledged,
       estimatedFineAccepted: fineAccepted
     };
