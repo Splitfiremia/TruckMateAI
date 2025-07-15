@@ -38,6 +38,7 @@ export default function DashboardScreen() {
   const [predictiveComplianceVisible, setPredictiveComplianceVisible] = useState(false);
   const [violationAlertVisible, setViolationAlertVisible] = useState(false);
   const [currentViolationPrediction, setCurrentViolationPrediction] = useState<ComplianceViolationPrediction | null>(null);
+  const [isBeginningTrip, setIsBeginningTrip] = useState(false);
   
   const { lastCommand, lastResponse } = useVoiceCommandStore();
   const { isInspectionRequired, inspectionInProgress, checkInspectionRequirement } = useInspectionStore();
@@ -84,7 +85,8 @@ export default function DashboardScreen() {
     setCommandModalVisible(true);
   };
   
-  const handleInspectionRequired = () => {
+  const handleInspectionRequired = (isBeginningTripFlag: boolean = false) => {
+    setIsBeginningTrip(isBeginningTripFlag);
     setInspectionModalVisible(true);
   };
   
@@ -103,6 +105,7 @@ export default function DashboardScreen() {
   };
   
   const handleStartInspection = () => {
+    setIsBeginningTrip(true); // Assume inspection required modal is for trip start
     setInspectionRequiredModalVisible(false);
     setInspectionModalVisible(true);
   };
@@ -289,6 +292,7 @@ export default function DashboardScreen() {
         visible={inspectionModalVisible}
         onClose={() => setInspectionModalVisible(false)}
         onComplete={handleInspectionComplete}
+        isBeginningTrip={isBeginningTrip}
       />
       
       <InspectionRequiredModal

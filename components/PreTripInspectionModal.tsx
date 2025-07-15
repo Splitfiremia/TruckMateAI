@@ -30,12 +30,14 @@ interface PreTripInspectionModalProps {
   visible: boolean;
   onClose: () => void;
   onComplete: () => void;
+  isBeginningTrip?: boolean; // New prop to indicate if this is the start of a trip
 }
 
 export default function PreTripInspectionModal({ 
   visible, 
   onClose, 
-  onComplete 
+  onComplete,
+  isBeginningTrip = false 
 }: PreTripInspectionModalProps) {
   const [location, setLocation] = useState('Atlanta, GA');
   const [activeCategory, setActiveCategory] = useState(0);
@@ -144,24 +146,25 @@ export default function PreTripInspectionModal({
     }
   };
   
-  // Handle close with hard stop
+  // Handle close with conditional hard stop
   const handleClose = () => {
-    if (!canCompleteInspection()) {
+    // Only enforce hard stop when beginning a trip
+    if (isBeginningTrip && !canCompleteInspection()) {
       Alert.alert(
-        'Inspection Required - Cannot Exit',
-        'You cannot exit the pre-trip inspection until ALL 21 points are completed. This is a federal safety requirement.',
+        'Trip Start - Inspection Required',
+        'You cannot begin your trip until ALL 21 inspection points are completed. This is a federal safety requirement for trip initiation.',
         [
           { text: 'Continue Inspection', style: 'default' },
           { 
-            text: 'Emergency Exit', 
+            text: 'Cancel Trip Start', 
             style: 'destructive',
             onPress: () => {
               Alert.alert(
-                'Emergency Exit Confirmation',
-                'Exiting without completing inspection will prevent you from starting your shift. Are you sure?',
+                'Cancel Trip Confirmation',
+                'Canceling will prevent you from starting your trip. You can complete the inspection later for routine checks.',
                 [
-                  { text: 'Cancel', style: 'cancel' },
-                  { text: 'Exit', style: 'destructive', onPress: onClose }
+                  { text: 'Stay', style: 'cancel' },
+                  { text: 'Cancel Trip', style: 'destructive', onPress: onClose }
                 ]
               );
             }
@@ -170,29 +173,59 @@ export default function PreTripInspectionModal({
       );
       return;
     }
+    
+    // For non-trip inspections, allow exit with warning
+    if (!isBeginningTrip && !canCompleteInspection()) {
+      Alert.alert(
+        'Incomplete Inspection',
+        'This inspection is not complete. You can finish it later, but it will be required before starting a trip.',
+        [
+          { text: 'Continue Later', onPress: onClose },
+          { text: 'Stay', style: 'cancel' }
+        ]
+      );
+      return;
+    }
+    
     onClose();
   };
   
   const handleComplete = () => {
     if (!canCompleteInspection()) {
+      const message = isBeginningTrip 
+        ? `Please complete all ${preTripInspectionItems.reduce((sum, cat) => sum + cat.items.length, 0)} CDL inspection points before starting your trip. This is required by FMCSA regulations for trip initiation.`
+        : `Please complete all ${preTripInspectionItems.reduce((sum, cat) => sum + cat.items.length, 0)} CDL inspection points before finishing. This inspection can be completed later if not starting a trip.`;
+      
       Alert.alert(
         'CDL Inspection Incomplete',
-        `Please complete all ${preTripInspectionItems.reduce((sum, cat) => sum + cat.items.length, 0)} CDL inspection points before finishing. This is required by FMCSA regulations.`,
+        message,
         [{ text: 'OK' }]
       );
       return;
     }
     
     if (hasDefects()) {
+      const defectMessage = isBeginningTrip
+        ? 'This vehicle has defects and cannot be used to start a trip. FMCSA regulations require addressing defects before trip operation. Contact maintenance immediately.'
+        : 'This vehicle has defects and may not be safe to operate. FMCSA regulations require addressing defects before operation. Contact maintenance immediately.';
+      
       Alert.alert(
         'CDL Inspection: Defects Found',
-        'This vehicle has defects and may not be safe to operate. FMCSA regulations require addressing defects before operation. Contact maintenance immediately.',
+        defectMessage,
         [
           { text: 'Cancel', style: 'cancel' },
           { 
-            text: 'Complete with Defects', 
+            text: isBeginningTrip ? 'Cannot Start Trip' : 'Complete with Defects', 
             style: 'destructive',
             onPress: () => {
+              if (isBeginningTrip) {
+                Alert.alert(
+                  'Trip Start Blocked',
+                  'Cannot start trip with vehicle defects. Please resolve defects first.',
+                  [{ text: 'OK' }]
+                );
+                return;
+              }
               completeInspection(location);
               onComplete();
               onClose();
@@ -201,9 +234,13 @@ export default function PreTripInspectionModal({
         ]
       );
     } else {
+      const successMessage = isBeginningTrip
+        ? 'All 21 inspection points passed. Vehicle is safe to operate and trip can begin.'
+        : 'All 21 inspection points passed. Vehicle is safe to operate.';
+      
       Alert.alert(
         'CDL Inspection Complete',
-        'All 21 inspection points passed. Vehicle is safe to operate.',
+        successMessage,
         [
           {
             text: 'Finish',
@@ -319,7 +356,9 @@ export default function PreTripInspectionModal({
             <Clipboard size={24} color={colors.primaryLight} />
             <View>
               <Text style={styles.title}>CDL Pre-Trip Inspection</Text>
-              <Text style={styles.subtitle}>21-Point Safety Checklist</Text>
+              <Text style={styles.subtitle}>
+                {isBeginningTrip ? '21-Point Trip Start Checklist' : '21-Point Safety Checklist'}
+              </Text>
             </View>
           </View>
           <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
@@ -488,12 +527,22 @@ export default function PreTripInspectionModal({
             </View>
           )}
           
-          <View style={styles.hardStopNotice}>
-            <Lock size={16} color={colors.primaryLight} />
-            <Text style={styles.hardStopText}>
-              FMCSA Hard Stop: Complete ALL categories to proceed with shift
-            </Text>
-          </View>
+          {isBeginningTrip && (
+            <View style={styles.hardStopNotice}>
+              <Lock size={16} color={colors.primaryLight} />
+              <Text style={styles.hardStopText}>
+                FMCSA Hard Stop: Complete ALL categories to begin trip
+              </Text>
+            </View>
+          )}
+          
+          {!isBeginningTrip && (
+            <View style={styles.infoContainer}>
+              <Text style={styles.infoText}>
+                Routine inspection - can be completed later if not starting a trip
+              </Text>
+            </View>
+          )}
         </View>
       </View>
     </Modal>

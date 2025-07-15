@@ -9,7 +9,7 @@ import { useInspectionStore } from '@/store/inspectionStore';
 interface StatusChangeModalProps {
   visible: boolean;
   onClose: () => void;
-  onInspectionRequired?: () => void;
+  onInspectionRequired?: (isBeginningTrip: boolean) => void;
 }
 
 export default function StatusChangeModal({ 
@@ -17,22 +17,54 @@ export default function StatusChangeModal({
   onClose, 
   onInspectionRequired 
 }: StatusChangeModalProps) {
-  const { changeStatus, startBreak } = useLogbookStore();
+  const { changeStatus, startBreak, currentStatus } = useLogbookStore();
   const { canStartDriving, isInspectionRequired } = useInspectionStore();
   
   const handleStatusChange = (status: DutyStatus) => {
-    if (status === 'Driving' && isInspectionRequired) {
+    // Determine if this is the beginning of a trip
+    const isBeginningTrip = status === 'Driving' && 
+      (currentStatus === 'Off Duty' || currentStatus === 'Sleeper Berth');
+    
+    // Only enforce hard stop for trip beginning, not all driving status changes
+    if (status === 'Driving' && isBeginningTrip && isInspectionRequired) {
       Alert.alert(
-        'Pre-Trip Inspection Required',
-        'You must complete a pre-trip inspection before you can begin driving.',
+        'Trip Start - Pre-Trip Inspection Required',
+        'You must complete a pre-trip inspection before you can begin your trip. This is required by FMCSA regulations for trip initiation.',
         [
           { text: 'Cancel', style: 'cancel' },
           { 
-            text: 'Start Inspection', 
+            text: 'Start Trip Inspection', 
             onPress: () => {
               onClose();
               if (onInspectionRequired) {
-                onInspectionRequired();
+                onInspectionRequired(isBeginningTrip);
+              }
+            }
+          }
+        ]
+      );
+      return;
+    }
+    
+    // For non-trip driving changes, show warning but allow if inspection exists
+    if (status === 'Driving' && !isBeginningTrip && isInspectionRequired) {
+      Alert.alert(
+        'Inspection Recommended',
+        'A current pre-trip inspection is recommended but not required for status changes during an active trip.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Continue', onPress: () => {
+            const success = changeStatus(status, true); // Allow driving for non-trip changes
+            if (success) {
+              onClose();
+            }
+          }},
+          { 
+            text: 'Do Inspection', 
+            onPress: () => {
+              onClose();
+              if (onInspectionRequired) {
+                onInspectionRequired(false); // Not beginning trip
               }
             }
           }
@@ -46,8 +78,8 @@ export default function StatusChangeModal({
       onClose();
     } else {
       Alert.alert(
-        'Cannot Start Driving',
-        'Pre-trip inspection must be completed first.',
+        'Cannot Change Status',
+        'There was an issue changing your duty status.',
         [{ text: 'OK' }]
       );
     }
@@ -90,7 +122,11 @@ export default function StatusChangeModal({
                 {isInspectionRequired && (
                   <View style={styles.inspectionRequired}>
                     <Shield size={14} color={colors.warning} />
-                    <Text style={styles.inspectionRequiredText}>Inspection required</Text>
+                    <Text style={styles.inspectionRequiredText}>
+                      {(currentStatus === 'Off Duty' || currentStatus === 'Sleeper Berth') 
+                        ? 'Trip inspection required' 
+                        : 'Inspection recommended'}
+                    </Text>
                   </View>
                 )}
               </View>
