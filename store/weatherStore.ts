@@ -228,7 +228,16 @@ export const useWeatherStore = create<WeatherState>()(persist(
         const forecastUrl = pointsData.properties.forecast;
         const forecastData = await fetchNOAAData(forecastUrl);
         
-        const forecast: WeatherForecast[] = forecastData.properties.periods.slice(0, 7).map((period: any) => ({
+        // Group periods by date and take the first one for each date to avoid duplicates
+        const periodsMap = new Map();
+        forecastData.properties.periods.forEach((period: any) => {
+          const date = period.startTime.split('T')[0];
+          if (!periodsMap.has(date)) {
+            periodsMap.set(date, period);
+          }
+        });
+        
+        const forecast: WeatherForecast[] = Array.from(periodsMap.values()).slice(0, 7).map((period: any) => ({
           date: period.startTime.split('T')[0],
           high: period.temperature,
           low: period.temperature - 10, // NOAA doesn't always provide low, estimate

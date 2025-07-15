@@ -198,7 +198,7 @@ export const WeatherForecastModal: React.FC<WeatherForecastModalProps> = ({ visi
               <View style={styles.forecastGrid}>
                 {forecast.map((item, index) => (
                   <ForecastCard
-                    key={item.date}
+                    key={`${item.date}-${index}`}
                     forecast={item}
                     isToday={index === 0}
                   />

@@ -255,7 +255,7 @@ export default function WeatherScreen() {
             {forecast.slice(0, 5).map((item, index) => {
               const ForecastIcon = getWeatherIcon(item.conditions);
               return (
-                <View key={item.date} style={styles.forecastItem}>
+                <View key={`${item.date}-${index}`} style={styles.forecastItem}>
                   <Text style={styles.forecastDay}>{getDayName(item.date)}</Text>
                   <ForecastIcon color={colors.primaryLight} size={24} />
                   <View style={styles.forecastTemps}>
