@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import { Stack } from 'expo-router';
-import { Mic, Camera, Clock, AlertTriangle, Truck, DollarSign, Clipboard, Upload, Shield } from 'lucide-react-native';
+import { Mic, Camera, Clock, AlertTriangle, Truck, DollarSign, Clipboard, Upload, Shield, Lock } from 'lucide-react-native';
 
 import { colors } from '@/constants/colors';
 import { ComplianceViolationPrediction } from '@/types';
@@ -40,7 +40,7 @@ export default function DashboardScreen() {
   const [currentViolationPrediction, setCurrentViolationPrediction] = useState<ComplianceViolationPrediction | null>(null);
   
   const { lastCommand, lastResponse } = useVoiceCommandStore();
-  const { isInspectionRequired, checkInspectionRequirement } = useInspectionStore();
+  const { isInspectionRequired, inspectionInProgress, checkInspectionRequirement } = useInspectionStore();
   const { violationPredictions, activeAlerts, metrics } = usePredictiveComplianceStore();
   
   useEffect(() => {
@@ -69,6 +69,14 @@ export default function DashboardScreen() {
       setInspectionRequiredModalVisible(true);
     } else {
       setStatusModalVisible(true);
+    }
+  };
+  
+  const handleActionWithInspectionCheck = (action: () => void) => {
+    if (isInspectionRequired) {
+      setInspectionRequiredModalVisible(true);
+    } else {
+      action();
     }
   };
   
@@ -136,16 +144,11 @@ export default function DashboardScreen() {
         
         <View style={styles.quickActions}>
           <QuickActionButton 
-            icon={<Clock size={20} color={colors.text} />}
-            label="Change Status"
-            onPress={() => {
-              if (isInspectionRequired) {
-                setInspectionRequiredModalVisible(true);
-              } else {
-                setStatusModalVisible(true);
-              }
-            }}
-            color={colors.primaryLight}
+            icon={<Clock size={20} color={isInspectionRequired ? colors.textSecondary : colors.text} />}
+            label={isInspectionRequired ? "Inspection Required" : "Change Status"}
+            onPress={() => handleActionWithInspectionCheck(() => setStatusModalVisible(true))}
+            color={isInspectionRequired ? colors.border : colors.primaryLight}
+            disabled={isInspectionRequired}
           />
           
           <QuickActionButton 
@@ -156,31 +159,35 @@ export default function DashboardScreen() {
           />
           
           <QuickActionButton 
-            icon={<Camera size={20} color={colors.text} />}
-            label="Scan Receipt"
-            onPress={() => setScannerVisible(true)}
-            color={colors.secondary}
+            icon={<Camera size={20} color={isInspectionRequired ? colors.textSecondary : colors.text} />}
+            label={isInspectionRequired ? "Inspection Required" : "Scan Receipt"}
+            onPress={() => handleActionWithInspectionCheck(() => setScannerVisible(true))}
+            color={isInspectionRequired ? colors.border : colors.secondary}
+            disabled={isInspectionRequired}
           />
           
           <QuickActionButton 
-            icon={<Upload size={20} color={colors.text} />}
-            label="Bulk Upload"
-            onPress={() => setBulkUploadVisible(true)}
-            color={colors.primaryLight}
+            icon={<Upload size={20} color={isInspectionRequired ? colors.textSecondary : colors.text} />}
+            label={isInspectionRequired ? "Inspection Required" : "Bulk Upload"}
+            onPress={() => handleActionWithInspectionCheck(() => setBulkUploadVisible(true))}
+            color={isInspectionRequired ? colors.border : colors.primaryLight}
+            disabled={isInspectionRequired}
           />
           
           <QuickActionButton 
-            icon={<Shield size={20} color={colors.text} />}
-            label="DOT Assistant"
-            onPress={() => setDotAssistantVisible(true)}
-            color={colors.secondary}
+            icon={<Shield size={20} color={isInspectionRequired ? colors.textSecondary : colors.text} />}
+            label={isInspectionRequired ? "Inspection Required" : "DOT Assistant"}
+            onPress={() => handleActionWithInspectionCheck(() => setDotAssistantVisible(true))}
+            color={isInspectionRequired ? colors.border : colors.secondary}
+            disabled={isInspectionRequired}
           />
           
           <QuickActionButton 
-            icon={<AlertTriangle size={20} color={colors.text} />}
-            label="AI Compliance"
-            onPress={() => setPredictiveComplianceVisible(true)}
-            color={violationPredictions.length > 0 ? colors.warning : colors.primaryLight}
+            icon={<AlertTriangle size={20} color={isInspectionRequired ? colors.textSecondary : colors.text} />}
+            label={isInspectionRequired ? "Inspection Required" : "AI Compliance"}
+            onPress={() => handleActionWithInspectionCheck(() => setPredictiveComplianceVisible(true))}
+            color={isInspectionRequired ? colors.border : (violationPredictions.length > 0 ? colors.warning : colors.primaryLight)}
+            disabled={isInspectionRequired}
           />
         </View>
         
@@ -228,6 +235,25 @@ export default function DashboardScreen() {
         
         <View style={styles.footer} />
       </ScrollView>
+      
+      {/* Hard Stop Overlay when inspection is required */}
+      {isInspectionRequired && (
+        <View style={styles.hardStopOverlay}>
+          <View style={styles.hardStopContent}>
+            <Lock size={32} color={colors.danger} />
+            <Text style={styles.hardStopTitle}>System Locked</Text>
+            <Text style={styles.hardStopMessage}>
+              Complete pre-trip inspection to unlock all features
+            </Text>
+            <TouchableOpacity 
+              style={styles.hardStopButton}
+              onPress={() => setInspectionRequiredModalVisible(true)}
+            >
+              <Text style={styles.hardStopButtonText}>Start Inspection</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
       
       <View style={styles.voiceButtonContainer}>
         <VoiceCommandButton onCommandProcessed={handleCommandProcessed} />
@@ -471,5 +497,50 @@ const styles = StyleSheet.create({
   modalCloseText: {
     fontSize: 20,
     color: colors.textSecondary,
+  },
+  hardStopOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 999,
+  },
+  hardStopContent: {
+    backgroundColor: colors.background,
+    borderRadius: 16,
+    padding: 24,
+    alignItems: 'center',
+    width: '80%',
+    borderWidth: 2,
+    borderColor: colors.danger,
+  },
+  hardStopTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: colors.danger,
+    marginTop: 12,
+    marginBottom: 8,
+  },
+  hardStopMessage: {
+    fontSize: 16,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    marginBottom: 20,
+    lineHeight: 22,
+  },
+  hardStopButton: {
+    backgroundColor: colors.primaryLight,
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+  },
+  hardStopButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text,
   },
 });

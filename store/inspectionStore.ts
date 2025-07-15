@@ -10,6 +10,7 @@ interface InspectionState {
   isInspectionRequired: boolean;
   lastInspectionDate: string | null;
   canStartDriving: boolean;
+  inspectionInProgress: boolean;
   
   // Actions
   startInspection: () => void;
@@ -17,9 +18,11 @@ interface InspectionState {
   completeInspection: (location: string, signature?: string) => PreTripInspection;
   resetCurrentInspection: () => void;
   getInspectionProgress: () => { completed: number; total: number; percentage: number };
+  getCategoryProgress: (categoryIndex: number) => { completed: number; total: number; percentage: number };
   hasDefects: () => boolean;
   canCompleteInspection: () => boolean;
   checkInspectionRequirement: () => void;
+  forceExitInspection: () => void;
 }
 
 export const useInspectionStore = create<InspectionState>()(
@@ -30,6 +33,7 @@ export const useInspectionStore = create<InspectionState>()(
       isInspectionRequired: true,
       lastInspectionDate: null,
       canStartDriving: false,
+      inspectionInProgress: false,
       
       startInspection: () => {
         // Initialize all inspection items as unchecked
@@ -46,6 +50,7 @@ export const useInspectionStore = create<InspectionState>()(
           currentInspection: allItems,
           isInspectionRequired: true,
           canStartDriving: false,
+          inspectionInProgress: true,
         });
       },
       
@@ -84,6 +89,7 @@ export const useInspectionStore = create<InspectionState>()(
           isInspectionRequired: false,
           lastInspectionDate: inspection.date,
           canStartDriving: safeToOperate,
+          inspectionInProgress: false,
         }));
         
         return inspection;
@@ -94,6 +100,7 @@ export const useInspectionStore = create<InspectionState>()(
           currentInspection: [],
           isInspectionRequired: true,
           canStartDriving: false,
+          inspectionInProgress: false,
         });
       },
       
@@ -125,6 +132,24 @@ export const useInspectionStore = create<InspectionState>()(
         return completedItems === totalItems;
       },
       
+      getCategoryProgress: (categoryIndex: number) => {
+        const state = get();
+        const category = preTripInspectionItems[categoryIndex];
+        if (!category) return { completed: 0, total: 0, percentage: 0 };
+        
+        const categoryItems = category.items;
+        const completedItems = categoryItems.filter(item => {
+          const inspectionItem = state.currentInspection.find(i => i.itemId === item.id);
+          return inspectionItem && (inspectionItem.status === 'Pass' || inspectionItem.status === 'Fail' || inspectionItem.status === 'Defect');
+        }).length;
+        
+        return {
+          completed: completedItems,
+          total: categoryItems.length,
+          percentage: categoryItems.length > 0 ? Math.round((completedItems / categoryItems.length) * 100) : 0,
+        };
+      },
+      
       checkInspectionRequirement: () => {
         const state = get();
         const today = new Date().toISOString().split('T')[0];
@@ -133,6 +158,14 @@ export const useInspectionStore = create<InspectionState>()(
         set({
           isInspectionRequired: needsInspection,
           canStartDriving: !needsInspection,
+        });
+      },
+      
+      forceExitInspection: () => {
+        set({
+          currentInspection: [],
+          inspectionInProgress: false,
+          // Keep isInspectionRequired as true since inspection wasn't completed
         });
       },
     }),

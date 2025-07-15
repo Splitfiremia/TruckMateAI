@@ -16,7 +16,10 @@ import {
   AlertTriangle, 
   Clipboard,
   MapPin,
-  User
+  User,
+  ChevronRight,
+  ChevronLeft,
+  Lock
 } from 'lucide-react-native';
 import { colors } from '@/constants/colors';
 import { useInspectionStore } from '@/store/inspectionStore';
@@ -38,6 +41,7 @@ export default function PreTripInspectionModal({
   const [activeCategory, setActiveCategory] = useState(0);
   const [notes, setNotes] = useState<{ [key: string]: string }>({});
   const [defectDescriptions, setDefectDescriptions] = useState<{ [key: string]: string }>({});
+  const [attemptedBypass, setAttemptedBypass] = useState(false);
   
   const {
     currentInspection,
@@ -91,6 +95,82 @@ export default function PreTripInspectionModal({
       notes[itemId] || '', 
       text
     );
+  };
+  
+  // Check if current category is complete
+  const isCategoryComplete = (categoryIndex: number) => {
+    const category = preTripInspectionItems[categoryIndex];
+    if (!category) return false;
+    
+    return category.items.every(item => {
+      const status = getItemStatus(item.id);
+      return status === 'Pass' || status === 'Fail' || status === 'Defect';
+    });
+  };
+  
+  // Check if user can proceed to next category
+  const canProceedToNext = () => {
+    return isCategoryComplete(activeCategory);
+  };
+  
+  // Check if user can go back to previous category
+  const canGoBack = () => {
+    return activeCategory > 0;
+  };
+  
+  // Handle next category
+  const handleNextCategory = () => {
+    if (!canProceedToNext()) {
+      setAttemptedBypass(true);
+      Alert.alert(
+        'Category Incomplete - Hard Stop',
+        `You must complete ALL inspection points in "${preTripInspectionItems[activeCategory].category}" before proceeding. This is a FMCSA safety requirement and cannot be bypassed.`,
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+    
+    if (activeCategory < preTripInspectionItems.length - 1) {
+      setActiveCategory(activeCategory + 1);
+      setAttemptedBypass(false);
+    }
+  };
+  
+  // Handle previous category
+  const handlePreviousCategory = () => {
+    if (canGoBack()) {
+      setActiveCategory(activeCategory - 1);
+      setAttemptedBypass(false);
+    }
+  };
+  
+  // Handle close with hard stop
+  const handleClose = () => {
+    if (!canCompleteInspection()) {
+      Alert.alert(
+        'Inspection Required - Cannot Exit',
+        'You cannot exit the pre-trip inspection until ALL 21 points are completed. This is a federal safety requirement.',
+        [
+          { text: 'Continue Inspection', style: 'default' },
+          { 
+            text: 'Emergency Exit', 
+            style: 'destructive',
+            onPress: () => {
+              Alert.alert(
+                'Emergency Exit Confirmation',
+                'Exiting without completing inspection will prevent you from starting your shift. Are you sure?',
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  { text: 'Exit', style: 'destructive', onPress: onClose }
+                ]
+              );
+            }
+          }
+        ]
+      );
+      return;
+    }
+    onClose();
   };
   
   const handleComplete = () => {
@@ -242,7 +322,7 @@ export default function PreTripInspectionModal({
               <Text style={styles.subtitle}>21-Point Safety Checklist</Text>
             </View>
           </View>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+          <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
             <X size={24} color={colors.text} />
           </TouchableOpacity>
         </View>
@@ -278,35 +358,123 @@ export default function PreTripInspectionModal({
           />
         </View>
         
-        <View style={styles.categoryTabs}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {preTripInspectionItems.map((category, index) => (
-              <TouchableOpacity
+        {/* Step-by-step category navigation */}
+        <View style={styles.stepNavigation}>
+          <View style={styles.stepHeader}>
+            <Text style={styles.stepTitle}>
+              Step {activeCategory + 1} of {preTripInspectionItems.length}
+            </Text>
+            <Text style={styles.stepSubtitle}>
+              {preTripInspectionItems[activeCategory]?.category}
+            </Text>
+          </View>
+          
+          <View style={styles.stepProgress}>
+            {preTripInspectionItems.map((_, index) => (
+              <View
                 key={index}
                 style={[
-                  styles.categoryTab,
-                  activeCategory === index && styles.activeCategoryTab
+                  styles.stepDot,
+                  index === activeCategory && styles.activeStepDot,
+                  isCategoryComplete(index) && styles.completedStepDot,
+                  index > activeCategory && !isCategoryComplete(index - 1) && styles.lockedStepDot
                 ]}
-                onPress={() => setActiveCategory(index)}
               >
-                <Text style={[
-                  styles.categoryTabText,
-                  activeCategory === index && styles.activeCategoryTabText
-                ]}>
-                  {category.category}
-                </Text>
-              </TouchableOpacity>
+                {isCategoryComplete(index) ? (
+                  <CheckCircle size={12} color={colors.text} />
+                ) : index > activeCategory && !isCategoryComplete(index - 1) ? (
+                  <Lock size={10} color={colors.textSecondary} />
+                ) : (
+                  <Text style={styles.stepNumber}>{index + 1}</Text>
+                )}
+              </View>
             ))}
-          </ScrollView>
+          </View>
+          
+          {attemptedBypass && (
+            <View style={styles.bypassWarning}>
+              <AlertTriangle size={16} color={colors.danger} />
+              <Text style={styles.bypassWarningText}>
+                Complete all items in this category to proceed
+              </Text>
+            </View>
+          )}
         </View>
         
         <ScrollView style={styles.inspectionContent}>
           <View style={styles.categorySection}>
-            <Text style={styles.categoryTitle}>
-              {preTripInspectionItems[activeCategory]?.category}
-            </Text>
+            <View style={styles.categoryHeader}>
+              <Text style={styles.categoryTitle}>
+                {preTripInspectionItems[activeCategory]?.category}
+              </Text>
+              <View style={styles.categoryProgress}>
+                <Text style={styles.categoryProgressText}>
+                  {preTripInspectionItems[activeCategory]?.items.filter(item => {
+                    const status = getItemStatus(item.id);
+                    return status === 'Pass' || status === 'Fail' || status === 'Defect';
+                  }).length} / {preTripInspectionItems[activeCategory]?.items.length} Complete
+                </Text>
+              </View>
+            </View>
             
             {preTripInspectionItems[activeCategory]?.items.map(renderInspectionItem)}
+            
+            {/* Navigation buttons */}
+            <View style={styles.navigationButtons}>
+              <TouchableOpacity
+                style={[
+                  styles.navButton,
+                  styles.backButton,
+                  !canGoBack() && styles.disabledNavButton
+                ]}
+                onPress={handlePreviousCategory}
+                disabled={!canGoBack()}
+              >
+                <ChevronLeft size={20} color={canGoBack() ? colors.text : colors.textSecondary} />
+                <Text style={[
+                  styles.navButtonText,
+                  !canGoBack() && styles.disabledNavButtonText
+                ]}>
+                  Previous
+                </Text>
+              </TouchableOpacity>
+              
+              {activeCategory < preTripInspectionItems.length - 1 ? (
+                <TouchableOpacity
+                  style={[
+                    styles.navButton,
+                    styles.nextButton,
+                    !canProceedToNext() && styles.disabledNavButton
+                  ]}
+                  onPress={handleNextCategory}
+                  disabled={!canProceedToNext()}
+                >
+                  <Text style={[
+                    styles.navButtonText,
+                    !canProceedToNext() && styles.disabledNavButtonText
+                  ]}>
+                    Next Category
+                  </Text>
+                  <ChevronRight size={20} color={canProceedToNext() ? colors.text : colors.textSecondary} />
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  style={[
+                    styles.navButton,
+                    styles.completeButton,
+                    !canCompleteInspection() && styles.disabledNavButton,
+                    hasDefects() && { backgroundColor: colors.warning }
+                  ]}
+                  onPress={handleComplete}
+                  disabled={!canCompleteInspection()}
+                >
+                  <User size={20} color={colors.text} />
+                  <Text style={styles.navButtonText}>
+                    {hasDefects() ? 'Complete with Defects' : 'Complete Inspection'}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
         </ScrollView>
         
@@ -320,28 +488,12 @@ export default function PreTripInspectionModal({
             </View>
           )}
           
-          {!canCompleteInspection() && (
-            <View style={styles.infoContainer}>
-              <Text style={styles.infoText}>
-                Complete all {preTripInspectionItems.reduce((sum, cat) => sum + cat.items.length, 0)} CDL inspection points to finish
-              </Text>
-            </View>
-          )}
-          
-          <TouchableOpacity
-            style={[
-              styles.completeButton,
-              !canCompleteInspection() && styles.disabledButton,
-              hasDefects() && { backgroundColor: colors.warning }
-            ]}
-            onPress={handleComplete}
-            disabled={!canCompleteInspection()}
-          >
-            <User size={20} color={colors.text} />
-            <Text style={styles.completeButtonText}>
-              {hasDefects() ? 'Complete CDL Inspection with Defects' : 'Complete CDL Inspection'}
+          <View style={styles.hardStopNotice}>
+            <Lock size={16} color={colors.primaryLight} />
+            <Text style={styles.hardStopText}>
+              FMCSA Hard Stop: Complete ALL categories to proceed with shift
             </Text>
-          </TouchableOpacity>
+          </View>
         </View>
       </View>
     </Modal>
@@ -585,5 +737,138 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: colors.text,
+  },
+  stepNavigation: {
+    backgroundColor: colors.backgroundLight,
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  stepHeader: {
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  stepTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.primaryLight,
+  },
+  stepSubtitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.text,
+    marginTop: 4,
+  },
+  stepProgress: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+  },
+  stepDot: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: colors.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  activeStepDot: {
+    backgroundColor: colors.primaryLight,
+  },
+  completedStepDot: {
+    backgroundColor: colors.secondary,
+  },
+  lockedStepDot: {
+    backgroundColor: colors.border,
+    opacity: 0.5,
+  },
+  stepNumber: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  bypassWarning: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 12,
+  },
+  bypassWarningText: {
+    fontSize: 14,
+    color: colors.danger,
+    marginLeft: 8,
+    fontWeight: '500',
+  },
+  categoryHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  categoryProgress: {
+    backgroundColor: colors.backgroundLight,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  categoryProgressText: {
+    fontSize: 12,
+    color: colors.primaryLight,
+    fontWeight: '600',
+  },
+  navigationButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 24,
+    gap: 12,
+  },
+  navButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    gap: 8,
+    flex: 1,
+  },
+  backButton: {
+    backgroundColor: colors.backgroundLight,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  nextButton: {
+    backgroundColor: colors.primaryLight,
+  },
+  completeButton: {
+    backgroundColor: colors.secondary,
+  },
+  disabledNavButton: {
+    backgroundColor: colors.border,
+    opacity: 0.5,
+  },
+  navButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  disabledNavButtonText: {
+    color: colors.textSecondary,
+  },
+  hardStopNotice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  hardStopText: {
+    fontSize: 14,
+    color: colors.primaryLight,
+    marginLeft: 8,
+    fontWeight: '500',
   },
 });

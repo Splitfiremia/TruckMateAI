@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
-import { AlertTriangle, Clipboard, Shield } from 'lucide-react-native';
+import { AlertTriangle, Clipboard, Shield, Lock } from 'lucide-react-native';
 import { colors } from '@/constants/colors';
 
 interface InspectionRequiredModalProps {
@@ -17,6 +17,7 @@ export default function InspectionRequiredModal({
       visible={visible}
       transparent={true}
       animationType="fade"
+      onRequestClose={() => {}} // Prevent back button from closing
     >
       <View style={styles.overlay}>
         <View style={styles.container}>
@@ -24,25 +25,38 @@ export default function InspectionRequiredModal({
             <AlertTriangle size={48} color={colors.warning} />
           </View>
           
-          <Text style={styles.title}>Pre-Trip Inspection Required</Text>
+          <Text style={styles.title}>HARD STOP: Pre-Trip Inspection Required</Text>
           
           <Text style={styles.message}>
-            Federal regulations require a pre-trip inspection before you can begin driving. 
-            This ensures your vehicle is safe and compliant with DOT standards.
+            <Text style={styles.boldText}>FMCSA Federal Regulation:</Text> You cannot begin your driving shift without completing a full 21-point CDL pre-trip inspection. This is a mandatory safety requirement.
           </Text>
+          
+          <View style={styles.hardStopNotice}>
+            <Lock size={16} color={colors.danger} />
+            <Text style={styles.hardStopText}>
+              System Locked - No Bypass Available
+            </Text>
+          </View>
           
           <View style={styles.requirementsList}>
             <View style={styles.requirementItem}>
               <Clipboard size={20} color={colors.primaryLight} />
               <Text style={styles.requirementText}>
-                Complete all inspection items
+                Complete ALL 21 CDL inspection points
               </Text>
             </View>
             
             <View style={styles.requirementItem}>
               <Shield size={20} color={colors.primaryLight} />
               <Text style={styles.requirementText}>
-                Document any defects found
+                Step-by-step category completion
+              </Text>
+            </View>
+            
+            <View style={styles.requirementItem}>
+              <AlertTriangle size={20} color={colors.warning} />
+              <Text style={styles.requirementText}>
+                Document any defects or failures
               </Text>
             </View>
           </View>
@@ -56,7 +70,7 @@ export default function InspectionRequiredModal({
           </TouchableOpacity>
           
           <Text style={styles.disclaimer}>
-            You cannot begin driving until the inspection is completed
+            <Text style={styles.boldText}>WARNING:</Text> Attempting to bypass this inspection violates federal safety regulations and may result in penalties.
           </Text>
         </View>
       </View>
@@ -140,5 +154,25 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     textAlign: 'center',
     fontStyle: 'italic',
+  },
+  boldText: {
+    fontWeight: '600',
+    color: colors.text,
+  },
+  hardStopNotice: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: colors.danger,
+  },
+  hardStopText: {
+    fontSize: 14,
+    color: colors.danger,
+    marginLeft: 8,
+    fontWeight: '600',
   },
 });

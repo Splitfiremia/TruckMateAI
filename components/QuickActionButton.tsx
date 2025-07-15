@@ -9,6 +9,7 @@ interface QuickActionButtonProps {
   onPress: () => void;
   style?: ViewStyle;
   color?: string;
+  disabled?: boolean;
 }
 
 export default function QuickActionButton({ 
@@ -16,18 +17,34 @@ export default function QuickActionButton({
   label, 
   onPress, 
   style,
-  color = colors.primaryLight
+  color = colors.primaryLight,
+  disabled = false
 }: QuickActionButtonProps) {
   return (
     <TouchableOpacity 
-      style={[styles.container, { borderColor: color }, style]}
-      onPress={onPress}
-      activeOpacity={0.7}
+      style={[
+        styles.container, 
+        { borderColor: color }, 
+        disabled && styles.disabledContainer,
+        style
+      ]}
+      onPress={disabled ? undefined : onPress}
+      activeOpacity={disabled ? 1 : 0.7}
+      disabled={disabled}
     >
-      <View style={[styles.iconContainer, { backgroundColor: color }]}>
+      <View style={[
+        styles.iconContainer, 
+        { backgroundColor: color },
+        disabled && styles.disabledIconContainer
+      ]}>
         {icon}
       </View>
-      <Text style={styles.label}>{label}</Text>
+      <Text style={[
+        styles.label,
+        disabled && styles.disabledLabel
+      ]}>
+        {label}
+      </Text>
     </TouchableOpacity>
   );
 }
@@ -57,5 +74,15 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: colors.text,
     textAlign: 'center',
+  },
+  disabledContainer: {
+    opacity: 0.5,
+    backgroundColor: colors.border,
+  },
+  disabledIconContainer: {
+    backgroundColor: colors.border,
+  },
+  disabledLabel: {
+    color: colors.textSecondary,
   },
 });
