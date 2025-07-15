@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import { Stack } from 'expo-router';
-import { Mic, Camera, Clock, AlertTriangle, Truck, DollarSign, Clipboard } from 'lucide-react-native';
+import { Mic, Camera, Clock, AlertTriangle, Truck, DollarSign, Clipboard, Upload } from 'lucide-react-native';
 
 import { colors } from '@/constants/colors';
 import { driverInfo, upcomingLoads, weeklyStats } from '@/constants/mockData';
@@ -13,6 +13,7 @@ import VoiceCommandButton from '@/components/VoiceCommandButton';
 import StatusChangeModal from '@/components/StatusChangeModal';
 import CommandResponseModal from '@/components/CommandResponseModal';
 import ReceiptScanner from '@/components/ReceiptScanner';
+import BulkReceiptUpload from '@/components/BulkReceiptUpload';
 import PreTripInspectionModal from '@/components/PreTripInspectionModal';
 import InspectionRequiredModal from '@/components/InspectionRequiredModal';
 import { useVoiceCommandStore } from '@/store/voiceCommandStore';
@@ -22,6 +23,7 @@ export default function DashboardScreen() {
   const [statusModalVisible, setStatusModalVisible] = useState(false);
   const [commandModalVisible, setCommandModalVisible] = useState(false);
   const [scannerVisible, setScannerVisible] = useState(false);
+  const [bulkUploadVisible, setBulkUploadVisible] = useState(false);
   const [inspectionModalVisible, setInspectionModalVisible] = useState(false);
   const [inspectionRequiredModalVisible, setInspectionRequiredModalVisible] = useState(false);
   
@@ -121,10 +123,10 @@ export default function DashboardScreen() {
           />
           
           <QuickActionButton 
-            icon={<AlertTriangle size={20} color={colors.text} />}
-            label="Log Inspection"
-            onPress={() => {}}
-            color={colors.warning}
+            icon={<Upload size={20} color={colors.text} />}
+            label="Bulk Upload"
+            onPress={() => setBulkUploadVisible(true)}
+            color={colors.primaryLight}
           />
         </View>
         
@@ -193,6 +195,14 @@ export default function DashboardScreen() {
       <ReceiptScanner
         visible={scannerVisible}
         onClose={() => setScannerVisible(false)}
+      />
+      
+      <BulkReceiptUpload
+        visible={bulkUploadVisible}
+        onClose={() => setBulkUploadVisible(false)}
+        onUploadComplete={(receipts) => {
+          console.log('Bulk upload completed:', receipts.length, 'receipts');
+        }}
       />
       
       <PreTripInspectionModal

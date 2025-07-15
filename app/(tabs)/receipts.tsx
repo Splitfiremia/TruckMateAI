@@ -1,12 +1,14 @@
 import React, { useState, useMemo } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, FlatList } from 'react-native';
 import { Stack } from 'expo-router';
-import { Camera, Filter, Receipt as ReceiptIcon, Fuel, Truck, DollarSign } from 'lucide-react-native';
+import { Camera, Filter, Receipt as ReceiptIcon, Fuel, Truck, DollarSign, Upload, MoreHorizontal } from 'lucide-react-native';
 
 import { colors } from '@/constants/colors';
 import { useReceiptStore } from '@/store/receiptStore';
 import ReceiptCard from '@/components/ReceiptCard';
 import ReceiptScanner from '@/components/ReceiptScanner';
+import BulkReceiptUpload from '@/components/BulkReceiptUpload';
+import ReceiptUploadOptions from '@/components/ReceiptUploadOptions';
 import VoiceCommandButton from '@/components/VoiceCommandButton';
 import CommandResponseModal from '@/components/CommandResponseModal';
 import { useVoiceCommandStore } from '@/store/voiceCommandStore';
@@ -15,7 +17,9 @@ import { Receipt, ReceiptType } from '@/types';
 export default function ReceiptsScreen() {
   const [activeFilter, setActiveFilter] = useState<ReceiptType | 'All'>('All');
   const [scannerVisible, setScannerVisible] = useState(false);
+  const [bulkUploadVisible, setBulkUploadVisible] = useState(false);
   const [commandModalVisible, setCommandModalVisible] = useState(false);
+  const [uploadOptionsVisible, setUploadOptionsVisible] = useState(false);
   const { lastCommand, lastResponse } = useVoiceCommandStore();
   const { receipts, getTotalByCategory } = useReceiptStore();
   
@@ -37,6 +41,10 @@ export default function ReceiptsScreen() {
   const handleScanComplete = (receipt: Receipt) => {
     // In a real app, we might navigate to a receipt detail screen
     console.log('Receipt scanned:', receipt);
+  };
+  
+  const handleBulkUploadComplete = (receipts: Receipt[]) => {
+    console.log('Bulk upload completed:', receipts.length, 'receipts');
   };
   
   const renderFilterButton = (type: ReceiptType | 'All', icon: React.ReactNode, label: string) => (
@@ -63,12 +71,14 @@ export default function ReceiptsScreen() {
         options={{ 
           title: 'Receipts & Expenses',
           headerRight: () => (
-            <TouchableOpacity 
-              style={styles.headerButton}
-              onPress={() => setScannerVisible(true)}
-            >
-              <Camera size={22} color={colors.text} />
-            </TouchableOpacity>
+            <View style={styles.headerActions}>
+              <TouchableOpacity 
+                style={styles.headerButton}
+                onPress={() => setUploadOptionsVisible(true)}
+              >
+                <MoreHorizontal size={22} color={colors.text} />
+              </TouchableOpacity>
+            </View>
           ),
         }} 
       />
@@ -120,13 +130,15 @@ export default function ReceiptsScreen() {
         <View style={styles.emptyState}>
           <ReceiptIcon size={48} color={colors.textSecondary} />
           <Text style={styles.emptyStateText}>No receipts found</Text>
-          <TouchableOpacity 
-            style={styles.scanButton}
-            onPress={() => setScannerVisible(true)}
-          >
-            <Camera size={20} color={colors.text} />
-            <Text style={styles.scanButtonText}>Scan Receipt</Text>
-          </TouchableOpacity>
+          <View style={styles.emptyActions}>
+            <TouchableOpacity 
+              style={styles.uploadButton}
+              onPress={() => setUploadOptionsVisible(true)}
+            >
+              <Upload size={20} color={colors.text} />
+              <Text style={styles.uploadButtonText}>Upload Receipts</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       ) : (
         <FlatList
@@ -149,6 +161,21 @@ export default function ReceiptsScreen() {
         onScanComplete={handleScanComplete}
       />
       
+      <BulkReceiptUpload
+        visible={bulkUploadVisible}
+        onClose={() => setBulkUploadVisible(false)}
+        onUploadComplete={handleBulkUploadComplete}
+      />
+      
+      <ReceiptUploadOptions
+        visible={uploadOptionsVisible}
+        onClose={() => setUploadOptionsVisible(false)}
+        onCameraPress={() => setScannerVisible(true)}
+        onGalleryPress={() => setScannerVisible(true)}
+        onFilePress={() => setScannerVisible(true)}
+        onBulkUploadPress={() => setBulkUploadVisible(true)}
+      />
+      
       <CommandResponseModal
         visible={commandModalVisible}
         onClose={() => setCommandModalVisible(false)}
@@ -163,6 +190,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    gap: 8,
   },
   headerButton: {
     padding: 8,
@@ -229,7 +260,11 @@ const styles = StyleSheet.create({
     marginTop: 16,
     marginBottom: 24,
   },
-  scanButton: {
+  emptyActions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  uploadButton: {
     flexDirection: 'row',
     backgroundColor: colors.primaryLight,
     borderRadius: 12,
@@ -238,7 +273,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
-  scanButtonText: {
+  uploadButtonText: {
     fontSize: 16,
     fontWeight: '600',
     color: colors.text,

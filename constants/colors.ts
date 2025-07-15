@@ -4,6 +4,7 @@ export const colors = {
   secondary: "#10B981", // Green for success/compliance
   warning: "#F59E0B", // Amber for warnings
   danger: "#EF4444", // Red for violations/errors
+  error: "#EF4444", // Red for errors (alias for danger)
   background: "#0F172A", // Very dark blue background
   backgroundLight: "#1E293B", // Slightly lighter background
   text: "#F1F5F9", // Light text

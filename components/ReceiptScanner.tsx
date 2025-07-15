@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, Image, ActivityIndicator } from 'react-native';
-import { Camera, X, Check, Receipt as ReceiptIcon } from 'lucide-react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, Image, ActivityIndicator, Alert, Platform } from 'react-native';
+import { Camera, X, Check, Receipt as ReceiptIcon, Upload, ImageIcon, FileText } from 'lucide-react-native';
+import * as ImagePicker from 'expo-image-picker';
+import * as DocumentPicker from 'expo-document-picker';
 import { colors } from '@/constants/colors';
 import { useReceiptStore } from '@/store/receiptStore';
 import { Receipt, ReceiptType } from '@/types';
@@ -9,37 +11,153 @@ interface ReceiptScannerProps {
   visible: boolean;
   onClose: () => void;
   onScanComplete?: (receipt: Receipt) => void;
+  initialMode?: 'camera' | 'gallery' | 'file';
 }
 
-export default function ReceiptScanner({ visible, onClose, onScanComplete }: ReceiptScannerProps) {
+export default function ReceiptScanner({ visible, onClose, onScanComplete, initialMode }: ReceiptScannerProps) {
   const [scanning, setScanning] = useState(false);
   const [scanned, setScanned] = useState(false);
   const [mockReceipt, setMockReceipt] = useState<Receipt | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const { addReceipt } = useReceiptStore();
   
-  const handleScan = () => {
+  const processReceiptImage = (imageUri: string) => {
     setScanning(true);
+    setSelectedImage(imageUri);
     
-    // Simulate scanning process
+    // Simulate OCR processing with different receipt types
     setTimeout(() => {
-      const mockReceiptData: Receipt = {
-        id: `R-${Math.floor(Math.random() * 100000)}`,
-        type: "Fuel" as ReceiptType,
-        vendor: "Love's Travel Stop",
-        location: "Atlanta, GA",
-        date: new Date().toISOString().split('T')[0],
-        amount: 187.45,
-        gallons: 56.8,
-        pricePerGallon: 3.29,
-        state: "GA",
-        category: "Fuel",
-        imageUrl: "https://images.unsplash.com/photo-1622644989151-33a3ced5ec8a?q=80&w=1000",
-      };
+      const receiptTypes = ['Fuel', 'Toll', 'Maintenance'] as ReceiptType[];
+      const randomType = receiptTypes[Math.floor(Math.random() * receiptTypes.length)];
+      
+      let mockReceiptData: Receipt;
+      
+      switch (randomType) {
+        case 'Fuel':
+          mockReceiptData = {
+            id: `R-${Math.floor(Math.random() * 100000)}`,
+            type: 'Fuel',
+            vendor: "Love's Travel Stop",
+            location: "Atlanta, GA",
+            date: new Date().toISOString().split('T')[0],
+            amount: 187.45,
+            gallons: 56.8,
+            pricePerGallon: 3.29,
+            state: "GA",
+            category: "Fuel",
+            imageUrl: imageUri,
+          };
+          break;
+        case 'Toll':
+          mockReceiptData = {
+            id: `R-${Math.floor(Math.random() * 100000)}`,
+            type: 'Toll',
+            vendor: "E-ZPass",
+            location: "I-95 Delaware",
+            date: new Date().toISOString().split('T')[0],
+            amount: 12.50,
+            state: "DE",
+            category: "Tolls",
+            imageUrl: imageUri,
+          };
+          break;
+        case 'Maintenance':
+          mockReceiptData = {
+            id: `R-${Math.floor(Math.random() * 100000)}`,
+            type: 'Maintenance',
+            vendor: "TA Truck Service",
+            location: "Memphis, TN",
+            date: new Date().toISOString().split('T')[0],
+            amount: 245.80,
+            state: "TN",
+            category: "Maintenance",
+            service: "Oil Change & Filter",
+            imageUrl: imageUri,
+          };
+          break;
+        default:
+          mockReceiptData = {
+            id: `R-${Math.floor(Math.random() * 100000)}`,
+            type: 'Other',
+            vendor: "Unknown Vendor",
+            location: "Unknown Location",
+            date: new Date().toISOString().split('T')[0],
+            amount: 25.00,
+            category: "Other",
+            imageUrl: imageUri,
+          };
+      }
       
       setMockReceipt(mockReceiptData);
       setScanning(false);
       setScanned(true);
     }, 2000);
+  };
+  
+  const handleCameraCapture = async () => {
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission needed', 'Camera permission is required to scan receipts');
+        return;
+      }
+      
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [3, 4],
+        quality: 0.8,
+      });
+      
+      if (!result.canceled && result.assets[0]) {
+        processReceiptImage(result.assets[0].uri);
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to capture image');
+    }
+  };
+  
+  const handleGalleryPick = async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('Permission needed', 'Gallery permission is required to select images');
+        return;
+      }
+      
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [3, 4],
+        quality: 0.8,
+      });
+      
+      if (!result.canceled && result.assets[0]) {
+        processReceiptImage(result.assets[0].uri);
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to select image');
+    }
+  };
+  
+  const handleDocumentPick = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ['image/*', 'application/pdf'],
+        copyToCacheDirectory: true,
+      });
+      
+      if (!result.canceled && result.assets[0]) {
+        const asset = result.assets[0];
+        if (asset.mimeType?.startsWith('image/')) {
+          processReceiptImage(asset.uri);
+        } else {
+          Alert.alert('Unsupported format', 'Please select an image file for receipt scanning');
+        }
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to select document');
+    }
   };
   
   const handleSave = () => {
@@ -58,8 +176,26 @@ export default function ReceiptScanner({ visible, onClose, onScanComplete }: Rec
     setScanning(false);
     setScanned(false);
     setMockReceipt(null);
+    setSelectedImage(null);
     onClose();
   };
+  
+  // Auto-trigger based on initial mode
+  React.useEffect(() => {
+    if (visible && initialMode) {
+      switch (initialMode) {
+        case 'camera':
+          handleCameraCapture();
+          break;
+        case 'gallery':
+          handleGalleryPick();
+          break;
+        case 'file':
+          handleDocumentPick();
+          break;
+      }
+    }
+  }, [visible, initialMode]);
   
   return (
     <Modal
@@ -82,23 +218,49 @@ export default function ReceiptScanner({ visible, onClose, onScanComplete }: Rec
               <View style={styles.instructionsContainer}>
                 <ReceiptIcon size={48} color={colors.primaryLight} />
                 <Text style={styles.instructions}>
-                  Position receipt within frame and ensure good lighting for best results
+                  Upload or capture a receipt to automatically extract expense data
                 </Text>
-                <TouchableOpacity 
-                  style={styles.scanButton}
-                  onPress={handleScan}
-                >
-                  <Camera size={20} color={colors.text} />
-                  <Text style={styles.scanButtonText}>Scan Receipt</Text>
-                </TouchableOpacity>
+                
+                <View style={styles.uploadOptions}>
+                  <TouchableOpacity 
+                    style={styles.uploadButton}
+                    onPress={handleCameraCapture}
+                  >
+                    <Camera size={24} color={colors.text} />
+                    <Text style={styles.uploadButtonText}>Camera</Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity 
+                    style={styles.uploadButton}
+                    onPress={handleGalleryPick}
+                  >
+                    <ImageIcon size={24} color={colors.text} />
+                    <Text style={styles.uploadButtonText}>Gallery</Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity 
+                    style={styles.uploadButton}
+                    onPress={handleDocumentPick}
+                  >
+                    <FileText size={24} color={colors.text} />
+                    <Text style={styles.uploadButtonText}>Files</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             )}
             
             {scanning && (
               <View style={styles.scanningContainer}>
+                {selectedImage && (
+                  <Image 
+                    source={{ uri: selectedImage }} 
+                    style={styles.processingImage}
+                    resizeMode="contain"
+                  />
+                )}
                 <ActivityIndicator size="large" color={colors.primaryLight} />
-                <Text style={styles.scanningText}>Scanning receipt...</Text>
-                <Text style={styles.scanningSubtext}>Extracting data with AI</Text>
+                <Text style={styles.scanningText}>Processing receipt...</Text>
+                <Text style={styles.scanningSubtext}>Extracting data with AI OCR</Text>
               </View>
             )}
             
@@ -209,19 +371,29 @@ const styles = StyleSheet.create({
     marginTop: 16,
     marginBottom: 32,
   },
-  scanButton: {
+  uploadOptions: {
     flexDirection: 'row',
+    gap: 16,
+  },
+  uploadButton: {
     backgroundColor: colors.primaryLight,
     borderRadius: 12,
-    paddingVertical: 14,
-    paddingHorizontal: 24,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
     alignItems: 'center',
+    minWidth: 80,
+    gap: 8,
   },
-  scanButtonText: {
-    fontSize: 16,
+  uploadButtonText: {
+    fontSize: 14,
     fontWeight: '600',
     color: colors.text,
-    marginLeft: 8,
+  },
+  processingImage: {
+    width: 200,
+    height: 150,
+    borderRadius: 8,
+    marginBottom: 16,
   },
   scanningContainer: {
     flex: 1,
