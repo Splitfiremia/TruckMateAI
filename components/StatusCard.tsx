@@ -1,9 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Clock, AlertTriangle } from 'lucide-react-native';
+import { Clock, AlertTriangle, Shield } from 'lucide-react-native';
 import { colors } from '@/constants/colors';
 import { DutyStatus } from '@/types';
 import { useLogbookStore } from '@/store/logbookStore';
+import { useInspectionStore } from '@/store/inspectionStore';
 
 interface StatusCardProps {
   onStatusChange?: () => void;
@@ -11,6 +12,7 @@ interface StatusCardProps {
 
 export default function StatusCard({ onStatusChange }: StatusCardProps) {
   const { currentStatus, drivingHoursToday, isOnBreak } = useLogbookStore();
+  const { isInspectionRequired, canStartDriving } = useInspectionStore();
   
   const getStatusColor = (status: DutyStatus) => {
     switch (status) {
@@ -71,7 +73,21 @@ export default function StatusCard({ onStatusChange }: StatusCardProps) {
       <View style={styles.header}>
         <View style={[styles.statusIndicator, { backgroundColor: getStatusColor(currentStatus) }]} />
         <Text style={styles.statusText}>{currentStatus}</Text>
+        {isInspectionRequired && (
+          <View style={styles.inspectionWarning}>
+            <Shield size={16} color={colors.warning} />
+          </View>
+        )}
       </View>
+      
+      {isInspectionRequired && (
+        <View style={styles.inspectionAlert}>
+          <AlertTriangle size={16} color={colors.warning} />
+          <Text style={styles.inspectionAlertText}>
+            Pre-trip inspection required before driving
+          </Text>
+        </View>
+      )}
       
       <View style={styles.infoRow}>
         <View style={styles.infoItem}>
@@ -131,6 +147,24 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: colors.text,
+    flex: 1,
+  },
+  inspectionWarning: {
+    padding: 4,
+  },
+  inspectionAlert: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+    padding: 8,
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  inspectionAlertText: {
+    fontSize: 14,
+    color: colors.warning,
+    marginLeft: 8,
+    flex: 1,
   },
   infoRow: {
     flexDirection: 'row',

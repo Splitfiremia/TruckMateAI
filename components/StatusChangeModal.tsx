@@ -1,21 +1,56 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
-import { X, Truck, Clock, Bed, Coffee } from 'lucide-react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, Alert } from 'react-native';
+import { X, Truck, Clock, Bed, Coffee, Shield } from 'lucide-react-native';
 import { colors } from '@/constants/colors';
 import { DutyStatus } from '@/types';
 import { useLogbookStore } from '@/store/logbookStore';
+import { useInspectionStore } from '@/store/inspectionStore';
 
 interface StatusChangeModalProps {
   visible: boolean;
   onClose: () => void;
+  onInspectionRequired?: () => void;
 }
 
-export default function StatusChangeModal({ visible, onClose }: StatusChangeModalProps) {
+export default function StatusChangeModal({ 
+  visible, 
+  onClose, 
+  onInspectionRequired 
+}: StatusChangeModalProps) {
   const { changeStatus, startBreak } = useLogbookStore();
+  const { canStartDriving, isInspectionRequired } = useInspectionStore();
   
   const handleStatusChange = (status: DutyStatus) => {
-    changeStatus(status);
-    onClose();
+    if (status === 'Driving' && isInspectionRequired) {
+      Alert.alert(
+        'Pre-Trip Inspection Required',
+        'You must complete a pre-trip inspection before you can begin driving.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { 
+            text: 'Start Inspection', 
+            onPress: () => {
+              onClose();
+              if (onInspectionRequired) {
+                onInspectionRequired();
+              }
+            }
+          }
+        ]
+      );
+      return;
+    }
+    
+    const success = changeStatus(status, canStartDriving);
+    if (success) {
+      onClose();
+    } else {
+      Alert.alert(
+        'Cannot Start Driving',
+        'Pre-trip inspection must be completed first.',
+        [{ text: 'OK' }]
+      );
+    }
   };
   
   const handleStartBreak = () => {
@@ -41,13 +76,24 @@ export default function StatusChangeModal({ visible, onClose }: StatusChangeModa
           
           <View style={styles.options}>
             <TouchableOpacity 
-              style={styles.option}
+              style={[
+                styles.option,
+                isInspectionRequired && styles.disabledOption
+              ]}
               onPress={() => handleStatusChange('Driving')}
             >
               <View style={[styles.iconContainer, { backgroundColor: colors.primaryLight }]}>
                 <Truck size={24} color={colors.text} />
               </View>
-              <Text style={styles.optionText}>Driving</Text>
+              <View style={styles.optionContent}>
+                <Text style={styles.optionText}>Driving</Text>
+                {isInspectionRequired && (
+                  <View style={styles.inspectionRequired}>
+                    <Shield size={14} color={colors.warning} />
+                    <Text style={styles.inspectionRequiredText}>Inspection required</Text>
+                  </View>
+                )}
+              </View>
             </TouchableOpacity>
             
             <TouchableOpacity 
@@ -135,6 +181,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
+  disabledOption: {
+    opacity: 0.6,
+  },
   iconContainer: {
     width: 44,
     height: 44,
@@ -143,9 +192,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginRight: 16,
   },
+  optionContent: {
+    flex: 1,
+  },
   optionText: {
     fontSize: 16,
     color: colors.text,
+  },
+  inspectionRequired: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  inspectionRequiredText: {
+    fontSize: 12,
+    color: colors.warning,
+    marginLeft: 4,
   },
   breakButton: {
     backgroundColor: colors.primaryLight,

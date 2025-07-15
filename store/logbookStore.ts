@@ -15,7 +15,7 @@ interface LogbookState {
   violations: number;
   
   // Actions
-  changeStatus: (status: DutyStatus) => void;
+  changeStatus: (status: DutyStatus, canStartDriving?: boolean) => boolean;
   startBreak: () => void;
   endBreak: () => void;
   updateLocation: (location: string) => void;
@@ -25,7 +25,7 @@ interface LogbookState {
 
 export const useLogbookStore = create<LogbookState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       currentStatus: 'Off Duty',
       statusStartTime: new Date().toISOString(),
       drivingHoursToday: 0,
@@ -36,11 +36,20 @@ export const useLogbookStore = create<LogbookState>()(
       lastLocation: 'Atlanta, GA',
       violations: 0,
       
-      changeStatus: (status) => set({
-        currentStatus: status,
-        statusStartTime: new Date().toISOString(),
-        isOnBreak: status === 'Off Duty' || status === 'Sleeper Berth',
-      }),
+      changeStatus: (status, canStartDriving = true) => {
+        // Prevent driving if inspection not completed
+        if (status === 'Driving' && !canStartDriving) {
+          return false;
+        }
+        
+        set({
+          currentStatus: status,
+          statusStartTime: new Date().toISOString(),
+          isOnBreak: status === 'Off Duty' || status === 'Sleeper Berth',
+        });
+        
+        return true;
+      },
       
       startBreak: () => set({
         isOnBreak: true,

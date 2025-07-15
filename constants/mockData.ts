@@ -331,3 +331,83 @@ export const mockMaintenanceItems = [
     notes: "Front pads at 40% remaining",
   },
 ];
+
+export const preTripInspectionItems = [
+  {
+    category: "Engine Compartment",
+    items: [
+      { id: "engine_oil", label: "Engine Oil Level", required: true },
+      { id: "coolant", label: "Coolant Level", required: true },
+      { id: "power_steering", label: "Power Steering Fluid", required: true },
+      { id: "windshield_washer", label: "Windshield Washer Fluid", required: true },
+      { id: "battery", label: "Battery & Connections", required: true },
+      { id: "belts_hoses", label: "Belts & Hoses", required: true },
+    ],
+  },
+  {
+    category: "Air Brake System",
+    items: [
+      { id: "air_compressor", label: "Air Compressor", required: true },
+      { id: "air_lines", label: "Air Lines & Fittings", required: true },
+      { id: "brake_chambers", label: "Brake Chambers", required: true },
+      { id: "slack_adjusters", label: "Slack Adjusters", required: true },
+      { id: "brake_drums", label: "Brake Drums/Rotors", required: true },
+    ],
+  },
+  {
+    category: "Steering System",
+    items: [
+      { id: "steering_wheel", label: "Steering Wheel Play", required: true },
+      { id: "steering_linkage", label: "Steering Linkage", required: true },
+      { id: "power_steering_pump", label: "Power Steering Pump", required: true },
+    ],
+  },
+  {
+    category: "Suspension System",
+    items: [
+      { id: "leaf_springs", label: "Leaf Springs", required: true },
+      { id: "shock_absorbers", label: "Shock Absorbers", required: true },
+      { id: "u_bolts", label: "U-Bolts", required: true },
+    ],
+  },
+  {
+    category: "Tires & Wheels",
+    items: [
+      { id: "tire_condition", label: "Tire Condition & Tread", required: true },
+      { id: "tire_pressure", label: "Tire Pressure", required: true },
+      { id: "wheel_rims", label: "Wheel Rims", required: true },
+      { id: "lug_nuts", label: "Lug Nuts", required: true },
+    ],
+  },
+  {
+    category: "Lights & Electrical",
+    items: [
+      { id: "headlights", label: "Headlights", required: true },
+      { id: "tail_lights", label: "Tail Lights", required: true },
+      { id: "brake_lights", label: "Brake Lights", required: true },
+      { id: "turn_signals", label: "Turn Signals", required: true },
+      { id: "hazard_lights", label: "Hazard Lights", required: true },
+      { id: "clearance_lights", label: "Clearance Lights", required: true },
+    ],
+  },
+  {
+    category: "Cab & Controls",
+    items: [
+      { id: "mirrors", label: "Mirrors", required: true },
+      { id: "windshield", label: "Windshield", required: true },
+      { id: "wipers", label: "Windshield Wipers", required: true },
+      { id: "horn", label: "Horn", required: true },
+      { id: "seatbelt", label: "Seatbelt", required: true },
+      { id: "gauges", label: "Gauges & Warning Lights", required: true },
+    ],
+  },
+  {
+    category: "Coupling System",
+    items: [
+      { id: "fifth_wheel", label: "Fifth Wheel", required: true },
+      { id: "kingpin", label: "Kingpin", required: true },
+      { id: "air_lines_glad", label: "Air Lines (Glad Hands)", required: true },
+      { id: "electrical_cord", label: "Electrical Cord", required: true },
+    ],
+  },
+];

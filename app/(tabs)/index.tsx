@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import { Stack } from 'expo-router';
-import { Mic, Camera, Clock, AlertTriangle, Truck, DollarSign } from 'lucide-react-native';
+import { Mic, Camera, Clock, AlertTriangle, Truck, DollarSign, Clipboard } from 'lucide-react-native';
 
 import { colors } from '@/constants/colors';
 import { driverInfo, upcomingLoads, weeklyStats } from '@/constants/mockData';
@@ -13,20 +13,56 @@ import VoiceCommandButton from '@/components/VoiceCommandButton';
 import StatusChangeModal from '@/components/StatusChangeModal';
 import CommandResponseModal from '@/components/CommandResponseModal';
 import ReceiptScanner from '@/components/ReceiptScanner';
+import PreTripInspectionModal from '@/components/PreTripInspectionModal';
+import InspectionRequiredModal from '@/components/InspectionRequiredModal';
 import { useVoiceCommandStore } from '@/store/voiceCommandStore';
+import { useInspectionStore } from '@/store/inspectionStore';
 
 export default function DashboardScreen() {
   const [statusModalVisible, setStatusModalVisible] = useState(false);
   const [commandModalVisible, setCommandModalVisible] = useState(false);
   const [scannerVisible, setScannerVisible] = useState(false);
+  const [inspectionModalVisible, setInspectionModalVisible] = useState(false);
+  const [inspectionRequiredModalVisible, setInspectionRequiredModalVisible] = useState(false);
+  
   const { lastCommand, lastResponse } = useVoiceCommandStore();
+  const { isInspectionRequired, checkInspectionRequirement } = useInspectionStore();
+  
+  useEffect(() => {
+    // Check if inspection is required when component mounts
+    checkInspectionRequirement();
+  }, []);
+  
+  useEffect(() => {
+    // Show inspection required modal if needed
+    if (isInspectionRequired) {
+      setInspectionRequiredModalVisible(true);
+    }
+  }, [isInspectionRequired]);
   
   const handleStatusCardPress = () => {
-    setStatusModalVisible(true);
+    if (isInspectionRequired) {
+      setInspectionRequiredModalVisible(true);
+    } else {
+      setStatusModalVisible(true);
+    }
   };
   
   const handleCommandProcessed = (response: string) => {
     setCommandModalVisible(true);
+  };
+  
+  const handleInspectionRequired = () => {
+    setInspectionModalVisible(true);
+  };
+  
+  const handleInspectionComplete = () => {
+    checkInspectionRequirement();
+  };
+  
+  const handleStartInspection = () => {
+    setInspectionRequiredModalVisible(false);
+    setInspectionModalVisible(true);
   };
   
   return (
@@ -60,8 +96,21 @@ export default function DashboardScreen() {
           <QuickActionButton 
             icon={<Clock size={20} color={colors.text} />}
             label="Change Status"
-            onPress={() => setStatusModalVisible(true)}
+            onPress={() => {
+              if (isInspectionRequired) {
+                setInspectionRequiredModalVisible(true);
+              } else {
+                setStatusModalVisible(true);
+              }
+            }}
             color={colors.primaryLight}
+          />
+          
+          <QuickActionButton 
+            icon={<Clipboard size={20} color={colors.text} />}
+            label="Pre-Trip"
+            onPress={() => setInspectionModalVisible(true)}
+            color={isInspectionRequired ? colors.warning : colors.secondary}
           />
           
           <QuickActionButton 
@@ -76,13 +125,6 @@ export default function DashboardScreen() {
             label="Log Inspection"
             onPress={() => {}}
             color={colors.warning}
-          />
-          
-          <QuickActionButton 
-            icon={<Truck size={20} color={colors.text} />}
-            label="Pre-Trip"
-            onPress={() => {}}
-            color={colors.primaryLight}
           />
         </View>
         
@@ -138,6 +180,7 @@ export default function DashboardScreen() {
       <StatusChangeModal 
         visible={statusModalVisible}
         onClose={() => setStatusModalVisible(false)}
+        onInspectionRequired={handleInspectionRequired}
       />
       
       <CommandResponseModal
@@ -150,6 +193,17 @@ export default function DashboardScreen() {
       <ReceiptScanner
         visible={scannerVisible}
         onClose={() => setScannerVisible(false)}
+      />
+      
+      <PreTripInspectionModal
+        visible={inspectionModalVisible}
+        onClose={() => setInspectionModalVisible(false)}
+        onComplete={handleInspectionComplete}
+      />
+      
+      <InspectionRequiredModal
+        visible={inspectionRequiredModalVisible}
+        onStartInspection={handleStartInspection}
       />
     </View>
   );

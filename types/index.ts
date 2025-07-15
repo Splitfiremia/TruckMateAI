@@ -6,6 +6,8 @@ export type ReceiptType = 'Fuel' | 'Toll' | 'Maintenance' | 'Other';
 
 export type LoadStatus = 'Pending' | 'Confirmed' | 'In Progress' | 'Completed' | 'Cancelled';
 
+export type InspectionStatus = 'Pass' | 'Fail' | 'Defect';
+
 export interface Receipt {
   id: string;
   type: ReceiptType;
@@ -84,4 +86,36 @@ export interface MaintenanceItem {
 export interface VoiceCommand {
   command: string;
   action: string;
+}
+
+export interface InspectionItem {
+  id: string;
+  label: string;
+  required: boolean;
+}
+
+export interface InspectionCategory {
+  category: string;
+  items: InspectionItem[];
+}
+
+export interface InspectionResult {
+  itemId: string;
+  status: InspectionStatus;
+  notes?: string;
+  defectDescription?: string;
+}
+
+export interface PreTripInspection {
+  id: string;
+  date: string;
+  driverId: string;
+  vehicleId: string;
+  location: string;
+  results: InspectionResult[];
+  overallStatus: InspectionStatus;
+  signature?: string;
+  completedAt: string;
+  defectsFound: number;
+  safeToOperate: boolean;
 }
