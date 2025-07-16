@@ -207,7 +207,7 @@ export default function DashboardScreen() {
   
   // Use custom branding if available
   const welcomeMessage = settings.welcomeMessage || 'Welcome back';
-  const appName = settings.appName || 'TruckLogPro';
+  const appName = settings.appName || 'TruckMate AI';
   const companyName = settings.companyName || user?.companyName;
   
   return (
