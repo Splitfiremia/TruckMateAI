@@ -6,11 +6,29 @@ export const colors = {
   warning: "#F59E0B", // Amber for warnings
   danger: "#EF4444", // Red for violations/errors
   error: "#EF4444", // Red for errors (alias for danger)
-  background: "#0F172A", // Very dark blue background
-  backgroundLight: "#1E293B", // Slightly lighter background
-  surface: "#1E293B", // Surface color (alias for backgroundLight)
-  text: "#F1F5F9", // Light text
-  textSecondary: "#94A3B8", // Secondary text
+  white: "#FFFFFF",
+  
+  // Background colors
+  background: {
+    primary: "#0F172A", // Very dark blue background
+    secondary: "#1E293B", // Slightly lighter background
+  },
+  
+  // Text colors
+  text: {
+    primary: "#F1F5F9", // Light text
+    secondary: "#94A3B8", // Secondary text
+  },
+  
+  // Status colors
+  status: {
+    success: "#10B981",
+    warning: "#F59E0B",
+    error: "#EF4444",
+  },
+  
+  // Border and surface
   border: "#334155", // Border color
+  surface: "#1E293B", // Surface color
   card: "#1E293B", // Card background
 };

@@ -1,1 +1,237 @@
-import { VehicleDiagnostics, MaintenanceHistory, RepairShop } from '@/types';\n\n// Mock diagnostic data generator\nexport const generateMockDiagnostics = (): VehicleDiagnostics => {\n  const baseValues = {\n    engineRpm: 1800,\n    engineTemp: 195,\n    oilPressure: 45,\n    fuelLevel: 0.6,\n    batteryVoltage: 12.6,\n    coolantTemp: 185,\n    transmissionTemp: 180,\n    brakeSystemPressure: 85,\n    tirePressure: {\n      frontLeft: 35,\n      frontRight: 35,\n      rearLeft: 35,\n      rearRight: 35\n    }\n  };\n\n  // Add some realistic variation\n  const variation = {\n    engineRpm: (Math.random() - 0.5) * 400,\n    engineTemp: (Math.random() - 0.5) * 30,\n    oilPressure: (Math.random() - 0.5) * 20,\n    fuelLevel: (Math.random() - 0.5) * 0.4,\n    batteryVoltage: (Math.random() - 0.5) * 1.0,\n    coolantTemp: (Math.random() - 0.5) * 30,\n    transmissionTemp: (Math.random() - 0.5) * 40,\n    brakeSystemPressure: (Math.random() - 0.5) * 30,\n    tirePressure: {\n      frontLeft: (Math.random() - 0.5) * 10,\n      frontRight: (Math.random() - 0.5) * 10,\n      rearLeft: (Math.random() - 0.5) * 10,\n      rearRight: (Math.random() - 0.5) * 10\n    }\n  };\n\n  // Occasionally simulate issues\n  const hasIssue = Math.random() < 0.3;\n  let faultCodes: string[] = [];\n  \n  if (hasIssue) {\n    const possibleCodes = ['P0171', 'P0300', 'P0420', 'P0128', 'P0442', 'P0455'];\n    faultCodes = [possibleCodes[Math.floor(Math.random() * possibleCodes.length)]];\n    \n    // Adjust values to reflect issues\n    if (faultCodes.includes('P0171')) {\n      variation.engineTemp += 15; // Running lean, higher temp\n    }\n    if (faultCodes.includes('P0300')) {\n      variation.engineRpm -= 200; // Misfire, lower RPM\n    }\n    if (faultCodes.includes('P0128')) {\n      variation.coolantTemp -= 20; // Thermostat stuck open\n    }\n  }\n\n  return {\n    id: `diag-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,\n    vehicleId: 'truck-001',\n    timestamp: new Date().toISOString(),\n    engineRpm: Math.max(800, baseValues.engineRpm + variation.engineRpm),\n    engineTemp: Math.max(160, Math.min(250, baseValues.engineTemp + variation.engineTemp)),\n    oilPressure: Math.max(20, Math.min(80, baseValues.oilPressure + variation.oilPressure)),\n    fuelLevel: Math.max(0.05, Math.min(1.0, baseValues.fuelLevel + variation.fuelLevel)),\n    batteryVoltage: Math.max(11.5, Math.min(14.5, baseValues.batteryVoltage + variation.batteryVoltage)),\n    coolantTemp: Math.max(160, Math.min(220, baseValues.coolantTemp + variation.coolantTemp)),\n    transmissionTemp: Math.max(140, Math.min(250, baseValues.transmissionTemp + variation.transmissionTemp)),\n    brakeSystemPressure: Math.max(60, Math.min(120, baseValues.brakeSystemPressure + variation.brakeSystemPressure)),\n    tirePressure: {\n      frontLeft: Math.max(25, Math.min(45, baseValues.tirePressure.frontLeft + variation.tirePressure.frontLeft)),\n      frontRight: Math.max(25, Math.min(45, baseValues.tirePressure.frontRight + variation.tirePressure.frontRight)),\n      rearLeft: Math.max(25, Math.min(45, baseValues.tirePressure.rearLeft + variation.tirePressure.rearLeft)),\n      rearRight: Math.max(25, Math.min(45, baseValues.tirePressure.rearRight + variation.tirePressure.rearRight))\n    },\n    mileage: 125000 + Math.floor(Math.random() * 50000),\n    faultCodes,\n    location: {\n      latitude: 33.4484 + (Math.random() - 0.5) * 0.1,\n      longitude: -112.0740 + (Math.random() - 0.5) * 0.1,\n      address: 'Phoenix, AZ'\n    }\n  };\n};\n\n// Mock maintenance history\nexport const mockMaintenanceHistory: MaintenanceHistory[] = [\n  {\n    id: 'maint-001',\n    vehicleId: 'truck-001',\n    date: '2024-01-15',\n    mileage: 120000,\n    type: 'Preventive',\n    component: 'Engine Oil',\n    description: 'Oil change and filter replacement',\n    cost: 180,\n    shopName: 'TruckCare Pro',\n    shopLocation: 'Phoenix, AZ',\n    partsReplaced: ['Oil Filter', 'Engine Oil (15W-40)'],\n    laborHours: 1.5,\n    warranty: {\n      parts: '6 months',\n      labor: '30 days'\n    },\n    nextServiceDue: '2024-04-15',\n    nextServiceMileage: 135000\n  },\n  {\n    id: 'maint-002',\n    vehicleId: 'truck-001',\n    date: '2024-02-20',\n    mileage: 122500,\n    type: 'Repair',\n    component: 'Brake Pads',\n    description: 'Front brake pad replacement',\n    cost: 450,\n    shopName: 'Highway Truck Service',\n    shopLocation: 'Phoenix, AZ',\n    partsReplaced: ['Front Brake Pads', 'Brake Hardware Kit'],\n    laborHours: 3,\n    warranty: {\n      parts: '12 months',\n      labor: '90 days'\n    }\n  },\n  {\n    id: 'maint-003',\n    vehicleId: 'truck-001',\n    date: '2024-03-10',\n    mileage: 124800,\n    type: 'Inspection',\n    component: 'DOT Annual',\n    description: 'Annual DOT inspection',\n    cost: 125,\n    shopName: 'Desert Fleet Maintenance',\n    shopLocation: 'Phoenix, AZ',\n    partsReplaced: [],\n    laborHours: 2,\n    warranty: {\n      parts: 'N/A',\n      labor: 'N/A'\n    }\n  }\n];\n\n// Mock repair shops\nexport const mockRepairShops: RepairShop[] = [\n  {\n    id: 'shop-001',\n    name: 'TruckCare Pro',\n    address: '1234 Highway 95, Phoenix, AZ 85001',\n    phone: '(602) 555-0123',\n    rating: 4.8,\n    reviewCount: 127,\n    specialties: ['Brake Systems', 'Engine Repair', 'Transmission', 'Preventive Maintenance'],\n    distance: 2.3,\n    estimatedCost: 420,\n    availability: 'Same Day',\n    certifications: ['ASE Certified', 'Cummins Authorized', 'Volvo Certified'],\n    workingHours: {\n      monday: '7:00 AM - 6:00 PM',\n      tuesday: '7:00 AM - 6:00 PM',\n      wednesday: '7:00 AM - 6:00 PM',\n      thursday: '7:00 AM - 6:00 PM',\n      friday: '7:00 AM - 6:00 PM',\n      saturday: '8:00 AM - 4:00 PM',\n      sunday: 'Closed'\n    }\n  },\n  {\n    id: 'shop-002',\n    name: 'Highway Truck Service',\n    address: '5678 Industrial Blvd, Phoenix, AZ 85003',\n    phone: '(602) 555-0456',\n    rating: 4.5,\n    reviewCount: 89,\n    specialties: ['Cooling Systems', 'Electrical', 'Preventive Maintenance', 'Tire Service'],\n    distance: 4.7,\n    estimatedCost: 480,\n    availability: 'Next Day',\n    certifications: ['ASE Certified', 'Volvo Certified', 'Detroit Diesel Authorized'],\n    workingHours: {\n      monday: '6:00 AM - 7:00 PM',\n      tuesday: '6:00 AM - 7:00 PM',\n      wednesday: '6:00 AM - 7:00 PM',\n      thursday: '6:00 AM - 7:00 PM',\n      friday: '6:00 AM - 7:00 PM',\n      saturday: '7:00 AM - 5:00 PM',\n      sunday: '9:00 AM - 3:00 PM'\n    }\n  },\n  {\n    id: 'shop-003',\n    name: 'Desert Fleet Maintenance',\n    address: '9012 Truck Route 17, Phoenix, AZ 85007',\n    phone: '(602) 555-0789',\n    rating: 4.6,\n    reviewCount: 203,\n    specialties: ['Fleet Service', 'Tire Service', 'DOT Inspections', 'Emergency Repair'],\n    distance: 6.1,\n    estimatedCost: 395,\n    availability: '2-3 Days',\n    certifications: ['ASE Certified', 'Peterbilt Authorized', 'DOT Inspector', 'Michelin Certified'],\n    workingHours: {\n      monday: '24/7',\n      tuesday: '24/7',\n      wednesday: '24/7',\n      thursday: '24/7',\n      friday: '24/7',\n      saturday: '24/7',\n      sunday: '24/7'\n    }\n  },\n  {\n    id: 'shop-004',\n    name: 'Phoenix Truck & Trailer',\n    address: '3456 Commerce Dr, Phoenix, AZ 85009',\n    phone: '(602) 555-0321',\n    rating: 4.3,\n    reviewCount: 156,\n    specialties: ['Transmission Repair', 'Differential Service', 'Clutch Repair', 'Engine Overhaul'],\n    distance: 8.2,\n    estimatedCost: 520,\n    availability: '1 Week+',\n    certifications: ['ASE Certified', 'Allison Authorized', 'Eaton Certified'],\n    workingHours: {\n      monday: '7:00 AM - 5:00 PM',\n      tuesday: '7:00 AM - 5:00 PM',\n      wednesday: '7:00 AM - 5:00 PM',\n      thursday: '7:00 AM - 5:00 PM',\n      friday: '7:00 AM - 5:00 PM',\n      saturday: 'Closed',\n      sunday: 'Closed'\n    }\n  },\n  {\n    id: 'shop-005',\n    name: 'Southwest Mobile Repair',\n    address: 'Mobile Service - Phoenix Metro Area',\n    phone: '(602) 555-0654',\n    rating: 4.7,\n    reviewCount: 92,\n    specialties: ['Mobile Service', 'Emergency Repair', 'Roadside Assistance', 'Basic Maintenance'],\n    distance: 0, // Mobile service\n    estimatedCost: 380,\n    availability: 'Same Day',\n    certifications: ['ASE Certified', 'Mobile Service Certified'],\n    workingHours: {\n      monday: '24/7 Emergency',\n      tuesday: '24/7 Emergency',\n      wednesday: '24/7 Emergency',\n      thursday: '24/7 Emergency',\n      friday: '24/7 Emergency',\n      saturday: '24/7 Emergency',\n      sunday: '24/7 Emergency'\n    }\n  }\n];\n\n// Component failure patterns for AI prediction\nexport const componentFailurePatterns = {\n  'Brake Pads': {\n    averageLifespan: 60000, // miles\n    warningThreshold: 0.2, // 20% remaining\n    criticalThreshold: 0.1, // 10% remaining\n    symptoms: [\n      'Squealing or grinding noise when braking',\n      'Longer stopping distances',\n      'Brake pedal feels soft or spongy',\n      'Vibration when braking',\n      'Brake warning light'\n    ],\n    causes: [\n      'Normal wear and tear',\n      'Aggressive driving',\n      'Heavy loads',\n      'Mountain driving',\n      'Poor brake fluid quality'\n    ]\n  },\n  'Thermostat': {\n    averageLifespan: 100000,\n    warningThreshold: 0.3,\n    criticalThreshold: 0.15,\n    symptoms: [\n      'Engine running too hot or too cold',\n      'Coolant temperature fluctuating',\n      'Poor fuel economy',\n      'White smoke from exhaust',\n      'Heater not working properly'\n    ],\n    causes: [\n      'Age and wear',\n      'Contaminated coolant',\n      'Overheating episodes',\n      'Poor maintenance',\n      'Manufacturing defect'\n    ]\n  },\n  'Air Filter': {\n    averageLifespan: 30000,\n    warningThreshold: 0.4,\n    criticalThreshold: 0.2,\n    symptoms: [\n      'Reduced engine performance',\n      'Poor fuel economy',\n      'Black smoke from exhaust',\n      'Engine misfiring',\n      'Check engine light'\n    ],\n    causes: [\n      'Dusty driving conditions',\n      'Normal accumulation',\n      'Poor quality filter',\n      'Extended service intervals'\n    ]\n  },\n  'Battery': {\n    averageLifespan: 48, // months\n    warningThreshold: 0.25,\n    criticalThreshold: 0.1,\n    symptoms: [\n      'Slow engine cranking',\n      'Dim headlights',\n      'Dashboard warning lights',\n      'Electrical issues',\n      'Battery case swelling'\n    ],\n    causes: [\n      'Age and sulfation',\n      'Extreme temperatures',\n      'Overcharging',\n      'Deep discharge cycles',\n      'Vibration damage'\n    ]\n  },\n  'Transmission Filter': {\n    averageLifespan: 50000,\n    warningThreshold: 0.3,\n    criticalThreshold: 0.15,\n    symptoms: [\n      'Transmission slipping',\n      'Delayed shifting',\n      'Burnt transmission fluid smell',\n      'Unusual noises',\n      'Transmission overheating'\n    ],\n    causes: [\n      'Contaminated fluid',\n      'Normal wear',\n      'Overheating',\n      'Poor maintenance',\n      'Heavy towing'\n    ]\n  }\n};\n\n// Maintenance cost estimates by component\nexport const maintenanceCosts = {\n  'Brake Pads': { min: 350, max: 600, average: 475 },\n  'Thermostat': { min: 200, max: 400, average: 300 },\n  'Air Filter': { min: 50, max: 120, average: 85 },\n  'Battery': { min: 150, max: 350, average: 250 },\n  'Transmission Filter': { min: 180, max: 320, average: 250 },\n  'Oil Change': { min: 120, max: 250, average: 185 },\n  'Coolant Flush': { min: 100, max: 200, average: 150 },\n  'Tire Replacement': { min: 800, max: 1500, average: 1150 },\n  'Fuel Filter': { min: 80, max: 150, average: 115 },\n  'Serpentine Belt': { min: 90, max: 180, average: 135 }\n};
+import { VehicleDiagnostics, MaintenanceHistory, RepairShop } from '@/types';
+
+// Mock diagnostic data generator
+export const generateMockDiagnostics = (): VehicleDiagnostics => {
+  const baseValues = {
+    engineRpm: 1800,
+    engineTemp: 195,
+    oilPressure: 45,
+    fuelLevel: 0.6,
+    batteryVoltage: 12.6,
+    coolantTemp: 185,
+    transmissionTemp: 180,
+    brakeSystemPressure: 85,
+    tirePressure: {
+      frontLeft: 35,
+      frontRight: 35,
+      rearLeft: 35,
+      rearRight: 35
+    }
+  };
+
+  // Add some realistic variation
+  const variation = {
+    engineRpm: (Math.random() - 0.5) * 400,
+    engineTemp: (Math.random() - 0.5) * 30,
+    oilPressure: (Math.random() - 0.5) * 20,
+    fuelLevel: (Math.random() - 0.5) * 0.4,
+    batteryVoltage: (Math.random() - 0.5) * 1.0,
+    coolantTemp: (Math.random() - 0.5) * 30,
+    transmissionTemp: (Math.random() - 0.5) * 40,
+    brakeSystemPressure: (Math.random() - 0.5) * 30,
+    tirePressure: {
+      frontLeft: (Math.random() - 0.5) * 10,
+      frontRight: (Math.random() - 0.5) * 10,
+      rearLeft: (Math.random() - 0.5) * 10,
+      rearRight: (Math.random() - 0.5) * 10
+    }
+  };
+
+  // Occasionally simulate issues
+  const hasIssue = Math.random() < 0.3;
+  let faultCodes: string[] = [];
+  
+  if (hasIssue) {
+    const possibleCodes = ['P0171', 'P0300', 'P0420', 'P0128', 'P0442', 'P0455'];
+    faultCodes = [possibleCodes[Math.floor(Math.random() * possibleCodes.length)]];
+    
+    // Adjust values to reflect issues
+    if (faultCodes.includes('P0171')) {
+      variation.engineTemp += 15; // Running lean, higher temp
+    }
+    if (faultCodes.includes('P0300')) {
+      variation.engineRpm -= 200; // Misfire, lower RPM
+    }
+    if (faultCodes.includes('P0128')) {
+      variation.coolantTemp -= 20; // Thermostat stuck open
+    }
+  }
+
+  return {
+    id: `diag-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+    vehicleId: 'truck-001',
+    timestamp: new Date().toISOString(),
+    engineRpm: Math.max(800, baseValues.engineRpm + variation.engineRpm),
+    engineTemp: Math.max(160, Math.min(250, baseValues.engineTemp + variation.engineTemp)),
+    oilPressure: Math.max(20, Math.min(80, baseValues.oilPressure + variation.oilPressure)),
+    fuelLevel: Math.max(0.05, Math.min(1.0, baseValues.fuelLevel + variation.fuelLevel)),
+    batteryVoltage: Math.max(11.5, Math.min(14.5, baseValues.batteryVoltage + variation.batteryVoltage)),
+    coolantTemp: Math.max(160, Math.min(220, baseValues.coolantTemp + variation.coolantTemp)),
+    transmissionTemp: Math.max(140, Math.min(250, baseValues.transmissionTemp + variation.transmissionTemp)),
+    brakeSystemPressure: Math.max(60, Math.min(120, baseValues.brakeSystemPressure + variation.brakeSystemPressure)),
+    tirePressure: {
+      frontLeft: Math.max(25, Math.min(45, baseValues.tirePressure.frontLeft + variation.tirePressure.frontLeft)),
+      frontRight: Math.max(25, Math.min(45, baseValues.tirePressure.frontRight + variation.tirePressure.frontRight)),
+      rearLeft: Math.max(25, Math.min(45, baseValues.tirePressure.rearLeft + variation.tirePressure.rearLeft)),
+      rearRight: Math.max(25, Math.min(45, baseValues.tirePressure.rearRight + variation.tirePressure.rearRight))
+    },
+    mileage: 487650 + Math.floor(Math.random() * 100), // Simulate mileage increase
+    faultCodes,
+    location: {
+      latitude: 33.4484 + (Math.random() - 0.5) * 0.1,
+      longitude: -112.0740 + (Math.random() - 0.5) * 0.1,
+      address: 'Phoenix, AZ'
+    }
+  };
+};
+
+// Mock maintenance history
+export const mockMaintenanceHistory: MaintenanceHistory[] = [
+  {
+    id: 'mh-001',
+    vehicleId: 'truck-001',
+    date: '2024-01-15',
+    mileage: 485200,
+    type: 'Preventive',
+    component: 'Engine',
+    description: 'A-Service: Oil change, filters, inspection',
+    cost: 450,
+    shopName: 'TruckCare Pro',
+    shopLocation: 'Phoenix, AZ',
+    partsReplaced: ['Engine Oil Filter', 'Air Filter', 'Fuel Filter'],
+    laborHours: 2.5,
+    warranty: {
+      parts: '6 months',
+      labor: '6 months'
+    },
+    nextServiceDue: '2024-07-15',
+    nextServiceMileage: 510200
+  },
+  {
+    id: 'mh-002',
+    vehicleId: 'truck-001',
+    date: '2023-10-08',
+    mileage: 472100,
+    type: 'Repair',
+    component: 'Brakes',
+    description: 'Front brake pad replacement',
+    cost: 680,
+    shopName: 'Highway Truck Service',
+    shopLocation: 'Phoenix, AZ',
+    partsReplaced: ['Front Brake Pads', 'Brake Hardware Kit'],
+    laborHours: 3.0,
+    warranty: {
+      parts: '12 months',
+      labor: '6 months'
+    }
+  },
+  {
+    id: 'mh-003',
+    vehicleId: 'truck-001',
+    date: '2023-07-22',
+    mileage: 465800,
+    type: 'Preventive',
+    component: 'Transmission',
+    description: 'Transmission service and fluid change',
+    cost: 320,
+    shopName: 'Desert Fleet Maintenance',
+    shopLocation: 'Phoenix, AZ',
+    partsReplaced: ['Transmission Filter', 'Transmission Fluid'],
+    laborHours: 2.0,
+    warranty: {
+      parts: '6 months',
+      labor: '3 months'
+    }
+  },
+  {
+    id: 'mh-004',
+    vehicleId: 'truck-001',
+    date: '2023-05-10',
+    mileage: 458900,
+    type: 'Emergency',
+    component: 'Cooling System',
+    description: 'Radiator hose replacement - emergency repair',
+    cost: 180,
+    shopName: 'Roadside Truck Repair',
+    shopLocation: 'Flagstaff, AZ',
+    partsReplaced: ['Upper Radiator Hose', 'Hose Clamps'],
+    laborHours: 1.5,
+    warranty: {
+      parts: '3 months',
+      labor: '30 days'
+    }
+  }
+];
+
+// Mock repair shops
+export const mockRepairShops: RepairShop[] = [
+  {
+    id: 'shop-1',
+    name: 'TruckCare Pro',
+    address: '1234 Highway 95, Phoenix, AZ 85001',
+    phone: '(602) 555-0123',
+    rating: 4.8,
+    reviewCount: 127,
+    specialties: ['Brake Systems', 'Engine Repair', 'Transmission'],
+    distance: 2.3,
+    estimatedCost: 420,
+    availability: 'Same Day',
+    certifications: ['ASE Certified', 'Cummins Authorized'],
+    truckFaxCertified: true,
+    workingHours: {
+      monday: '7:00 AM - 6:00 PM',
+      tuesday: '7:00 AM - 6:00 PM',
+      wednesday: '7:00 AM - 6:00 PM',
+      thursday: '7:00 AM - 6:00 PM',
+      friday: '7:00 AM - 6:00 PM',
+      saturday: '8:00 AM - 4:00 PM',
+      sunday: 'Closed'
+    }
+  },
+  {
+    id: 'shop-2',
+    name: 'Highway Truck Service',
+    address: '5678 Industrial Blvd, Phoenix, AZ 85003',
+    phone: '(602) 555-0456',
+    rating: 4.5,
+    reviewCount: 89,
+    specialties: ['Cooling Systems', 'Electrical', 'Preventive Maintenance'],
+    distance: 4.7,
+    estimatedCost: 480,
+    availability: 'Next Day',
+    certifications: ['ASE Certified', 'Volvo Certified'],
+    truckFaxCertified: false,
+    workingHours: {
+      monday: '6:00 AM - 7:00 PM',
+      tuesday: '6:00 AM - 7:00 PM',
+      wednesday: '6:00 AM - 7:00 PM',
+      thursday: '6:00 AM - 7:00 PM',
+      friday: '6:00 AM - 7:00 PM',
+      saturday: '7:00 AM - 5:00 PM',
+      sunday: '9:00 AM - 3:00 PM'
+    }
+  },
+  {
+    id: 'shop-3',
+    name: 'Desert Fleet Maintenance',
+    address: '9012 Truck Route 17, Phoenix, AZ 85007',
+    phone: '(602) 555-0789',
+    rating: 4.6,
+    reviewCount: 203,
+    specialties: ['Fleet Service', 'Tire Service', 'DOT Inspections'],
+    distance: 6.1,
+    estimatedCost: 395,
+    availability: '2-3 Days',
+    certifications: ['ASE Certified', 'Peterbilt Authorized', 'DOT Inspector'],
+    truckFaxCertified: true,
+    workingHours: {
+      monday: '24/7',
+      tuesday: '24/7',
+      wednesday: '24/7',
+      thursday: '24/7',
+      friday: '24/7',
+      saturday: '24/7',
+      sunday: '24/7'
+    }
+  }
+];

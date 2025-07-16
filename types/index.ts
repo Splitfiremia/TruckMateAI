@@ -338,7 +338,7 @@ export interface MaintenancePrediction {
   estimatedMiles: number;
   confidence: number; // 0-100
   confidenceLevel: number; // 0-100
-  severity: 'high' | 'medium' | 'low';
+  severity: 'Critical' | 'High' | 'Medium' | 'Low' | 'high' | 'medium' | 'low';
   estimatedCost: number;
   symptoms: string[];
   recommendations: string[];
@@ -566,6 +566,14 @@ export interface TruckFaxPredictiveInsights {
   recommendedActions: TruckFaxRecommendation[];
   dataConfidence: number; // 0-100
   lastUpdated: string;
+  accuracyImprovement: number;
+  earlyDetectionDays: number;
+  estimatedSavings: number;
+  riskFactors: {
+    component: string;
+    description: string;
+    severity: 'high' | 'medium' | 'low';
+  }[];
 }
 
 export interface TruckFaxMaintenancePrediction {
@@ -647,4 +655,31 @@ export interface TruckFaxAPIResponse<T> {
     rateLimitRemaining: number;
     dataFreshness: string;
   };
+}
+
+// Additional TruckFax Integration Types
+export interface TruckFaxData {
+  vin: string;
+  make: string;
+  model: string;
+  year: number;
+  engine: string;
+  mileage: number;
+  maintenanceHistory: {
+    date: string;
+    mileage: number;
+    description: string;
+    cost: number;
+  }[];
+}
+
+export interface TruckFaxInsights {
+  accuracyImprovement: number;
+  earlyDetectionDays: number;
+  estimatedSavings: number;
+  riskFactors: {
+    component: string;
+    description: string;
+    severity: 'high' | 'medium' | 'low';
+  }[];
 }

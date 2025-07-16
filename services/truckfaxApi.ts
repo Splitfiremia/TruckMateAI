@@ -364,7 +364,22 @@ class TruckFaxAPIService {
         }
       ],
       dataConfidence: 87,
-      lastUpdated: new Date().toISOString()
+      lastUpdated: new Date().toISOString(),
+      accuracyImprovement: 23,
+      earlyDetectionDays: 14,
+      estimatedSavings: 3500,
+      riskFactors: [
+        {
+          component: 'Turbocharger',
+          description: 'High mileage and operating conditions indicate increased failure risk',
+          severity: 'high'
+        },
+        {
+          component: 'Transmission Clutch',
+          description: 'Automated transmission showing wear patterns typical for mileage',
+          severity: 'medium'
+        }
+      ]
     };
   }
 

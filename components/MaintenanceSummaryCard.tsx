@@ -1,1 +1,222 @@
-import React from 'react';\nimport {\n  View,\n  Text,\n  StyleSheet,\n  TouchableOpacity\n} from 'react-native';\nimport {\n  Wrench,\n  AlertTriangle,\n  Clock,\n  TrendingUp,\n  ChevronRight,\n  Activity\n} from 'lucide-react-native';\nimport { router } from 'expo-router';\n\nimport { colors } from '@/constants/colors';\nimport { usePredictiveMaintenanceStore } from '@/store/predictiveMaintenanceStore';\n\nconst MaintenanceSummaryCard: React.FC = () => {\n  const {\n    vehicleHealth,\n    alerts,\n    predictions,\n    isAnalyzing,\n    lastAnalysis\n  } = usePredictiveMaintenanceStore();\n\n  const activeAlerts = alerts.filter(alert => !alert.dismissed && !alert.resolvedAt);\n  const criticalAlerts = activeAlerts.filter(alert => alert.priority === 'Critical');\n  const upcomingMaintenance = predictions.filter(pred => pred.milesUntilFailure < 5000);\n\n  const getHealthColor = (score: number) => {\n    if (score >= 85) return colors.secondary;\n    if (score >= 70) return colors.warning;\n    return colors.danger;\n  };\n\n  const getHealthStatus = (score: number) => {\n    if (score >= 85) return 'Excellent';\n    if (score >= 70) return 'Good';\n    return 'Needs Attention';\n  };\n\n  const handlePress = () => {\n    router.push('/(tabs)/maintenance');\n  };\n\n  if (!vehicleHealth && !isAnalyzing && activeAlerts.length === 0) {\n    return (\n      <TouchableOpacity style={styles.container} onPress={handlePress}>\n        <View style={styles.header}>\n          <View style={styles.titleRow}>\n            <Wrench color={colors.primaryLight} size={20} />\n            <Text style={styles.title}>AI Maintenance</Text>\n          </View>\n          <ChevronRight color={colors.textSecondary} size={16} />\n        </View>\n        <Text style={styles.noDataText}>\n          Tap to start AI-powered predictive maintenance analysis\n        </Text>\n      </TouchableOpacity>\n    );\n  }\n\n  return (\n    <TouchableOpacity style={styles.container} onPress={handlePress}>\n      <View style={styles.header}>\n        <View style={styles.titleRow}>\n          <Wrench color={colors.primaryLight} size={20} />\n          <Text style={styles.title}>AI Maintenance</Text>\n          {isAnalyzing && <Activity color={colors.primaryLight} size={16} />}\n        </View>\n        <ChevronRight color={colors.textSecondary} size={16} />\n      </View>\n\n      {/* Vehicle Health Score */}\n      {vehicleHealth && (\n        <View style={styles.healthSection}>\n          <View style={styles.healthScore}>\n            <Text style={[\n              styles.scoreText,\n              { color: getHealthColor(vehicleHealth.overallScore) }\n            ]}>\n              {vehicleHealth.overallScore}\n            </Text>\n            <Text style={styles.scoreLabel}>Health Score</Text>\n          </View>\n          <View style={styles.healthDetails}>\n            <Text style={styles.healthStatus}>\n              {getHealthStatus(vehicleHealth.overallScore)}\n            </Text>\n            <Text style={styles.reliabilityText}>\n              {vehicleHealth.predictedReliability}% reliability next 30 days\n            </Text>\n          </View>\n        </View>\n      )}\n\n      {/* Alerts Summary */}\n      <View style={styles.alertsSection}>\n        <View style={styles.alertsGrid}>\n          <View style={styles.alertItem}>\n            <AlertTriangle \n              color={criticalAlerts.length > 0 ? colors.danger : colors.textSecondary} \n              size={16} \n            />\n            <Text style={[\n              styles.alertNumber,\n              { color: criticalAlerts.length > 0 ? colors.danger : colors.textSecondary }\n            ]}>\n              {criticalAlerts.length}\n            </Text>\n            <Text style={styles.alertLabel}>Critical</Text>\n          </View>\n          \n          <View style={styles.alertItem}>\n            <Clock \n              color={upcomingMaintenance.length > 0 ? colors.warning : colors.textSecondary} \n              size={16} \n            />\n            <Text style={[\n              styles.alertNumber,\n              { color: upcomingMaintenance.length > 0 ? colors.warning : colors.textSecondary }\n            ]}>\n              {upcomingMaintenance.length}\n            </Text>\n            <Text style={styles.alertLabel}>Upcoming</Text>\n          </View>\n          \n          <View style={styles.alertItem}>\n            <TrendingUp \n              color={predictions.length > 0 ? colors.primaryLight : colors.textSecondary} \n              size={16} \n            />\n            <Text style={[\n              styles.alertNumber,\n              { color: predictions.length > 0 ? colors.primaryLight : colors.textSecondary }\n            ]}>\n              {predictions.length}\n            </Text>\n            <Text style={styles.alertLabel}>Predictions</Text>\n          </View>\n        </View>\n      </View>\n\n      {/* Most Urgent Alert */}\n      {activeAlerts.length > 0 && (\n        <View style={styles.urgentAlert}>\n          <AlertTriangle \n            color={activeAlerts[0].priority === 'Critical' ? colors.danger : colors.warning} \n            size={14} \n          />\n          <Text style={styles.urgentAlertText} numberOfLines={1}>\n            {activeAlerts[0].title}: {activeAlerts[0].message}\n          </Text>\n        </View>\n      )}\n\n      {/* Next Predicted Maintenance */}\n      {upcomingMaintenance.length > 0 && (\n        <View style={styles.nextMaintenance}>\n          <Wrench color={colors.primaryLight} size={14} />\n          <Text style={styles.nextMaintenanceText} numberOfLines={1}>\n            Next: {upcomingMaintenance[0].componentName} in {upcomingMaintenance[0].milesUntilFailure.toLocaleString()} miles\n          </Text>\n        </View>\n      )}\n\n      {/* Analysis Status */}\n      <View style={styles.footer}>\n        <Text style={styles.analysisStatus}>\n          {isAnalyzing ? 'Analyzing vehicle data...' :\n           lastAnalysis ? `Last analysis: ${new Date(lastAnalysis).toLocaleTimeString()}` :\n           'Tap to run AI analysis'}\n        </Text>\n      </View>\n    </TouchableOpacity>\n  );\n};\n\nconst styles = StyleSheet.create({\n  container: {\n    backgroundColor: colors.card,\n    borderRadius: 12,\n    padding: 16,\n    marginBottom: 16,\n  },\n  header: {\n    flexDirection: 'row',\n    justifyContent: 'space-between',\n    alignItems: 'center',\n    marginBottom: 16,\n  },\n  titleRow: {\n    flexDirection: 'row',\n    alignItems: 'center',\n    gap: 8,\n  },\n  title: {\n    color: colors.text,\n    fontSize: 16,\n    fontWeight: '600',\n  },\n  noDataText: {\n    color: colors.textSecondary,\n    fontSize: 14,\n    textAlign: 'center',\n    paddingVertical: 20,\n  },\n  healthSection: {\n    flexDirection: 'row',\n    alignItems: 'center',\n    marginBottom: 16,\n    paddingBottom: 16,\n    borderBottomWidth: 1,\n    borderBottomColor: colors.border,\n  },\n  healthScore: {\n    alignItems: 'center',\n    marginRight: 16,\n  },\n  scoreText: {\n    fontSize: 24,\n    fontWeight: 'bold',\n  },\n  scoreLabel: {\n    color: colors.textSecondary,\n    fontSize: 10,\n    marginTop: 2,\n  },\n  healthDetails: {\n    flex: 1,\n  },\n  healthStatus: {\n    color: colors.text,\n    fontSize: 14,\n    fontWeight: '600',\n    marginBottom: 4,\n  },\n  reliabilityText: {\n    color: colors.textSecondary,\n    fontSize: 12,\n  },\n  alertsSection: {\n    marginBottom: 16,\n  },\n  alertsGrid: {\n    flexDirection: 'row',\n    justifyContent: 'space-around',\n  },\n  alertItem: {\n    alignItems: 'center',\n    gap: 4,\n  },\n  alertNumber: {\n    fontSize: 16,\n    fontWeight: 'bold',\n  },\n  alertLabel: {\n    color: colors.textSecondary,\n    fontSize: 10,\n  },\n  urgentAlert: {\n    flexDirection: 'row',\n    alignItems: 'center',\n    gap: 8,\n    backgroundColor: colors.backgroundLight,\n    padding: 8,\n    borderRadius: 6,\n    marginBottom: 8,\n  },\n  urgentAlertText: {\n    color: colors.text,\n    fontSize: 12,\n    flex: 1,\n  },\n  nextMaintenance: {\n    flexDirection: 'row',\n    alignItems: 'center',\n    gap: 8,\n    backgroundColor: colors.backgroundLight,\n    padding: 8,\n    borderRadius: 6,\n    marginBottom: 8,\n  },\n  nextMaintenanceText: {\n    color: colors.text,\n    fontSize: 12,\n    flex: 1,\n  },\n  footer: {\n    paddingTop: 8,\n    borderTopWidth: 1,\n    borderTopColor: colors.border,\n  },\n  analysisStatus: {\n    color: colors.textSecondary,\n    fontSize: 11,\n    textAlign: 'center',\n  },\n});\n\nexport default MaintenanceSummaryCard;
+import React from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity
+} from 'react-native';
+import {
+  Wrench,
+  AlertTriangle,
+  Clock,
+  TrendingUp,
+  ChevronRight,
+  Activity
+} from 'lucide-react-native';
+import { router } from 'expo-router';
+
+import { colors } from '@/constants/colors';
+import { usePredictiveMaintenanceStore } from '@/store/predictiveMaintenanceStore';
+
+const MaintenanceSummaryCard: React.FC = () => {
+  const {
+    vehicleHealth,
+    alerts,
+    predictions,
+    isAnalyzing,
+    lastAnalysis
+  } = usePredictiveMaintenanceStore();
+
+  const activeAlerts = alerts.filter(alert => !alert.dismissed && !alert.resolvedAt);
+  const criticalAlerts = activeAlerts.filter(alert => alert.priority === 'Critical');
+  const upcomingMaintenance = predictions.filter(pred => pred.milesUntilFailure < 5000);
+
+  const getHealthColor = (score: number) => {
+    if (score >= 85) return colors.secondary;
+    if (score >= 70) return colors.warning;
+    return colors.danger;
+  };
+
+  const getHealthStatus = (score: number) => {
+    if (score >= 85) return 'Excellent';
+    if (score >= 70) return 'Good';
+    return 'Needs Attention';
+  };
+
+  const handlePress = () => {
+    router.push('/(tabs)/maintenance');
+  };
+
+  if (!vehicleHealth && !isAnalyzing && activeAlerts.length === 0) {
+    return (
+      <TouchableOpacity style={styles.container} onPress={handlePress}>
+        <View style={styles.header}>
+          <View style={styles.titleRow}>
+            <Wrench color={colors.primary} size={20} />
+            <Text style={styles.title}>AI Maintenance</Text>
+          </View>
+          <ChevronRight color={colors.text.secondary} size={16} />
+        </View>
+        <Text style={styles.noDataText}>
+          Tap to start AI-powered predictive maintenance analysis
+        </Text>
+      </TouchableOpacity>
+    );
+  }
+
+  return (
+    <TouchableOpacity style={styles.container} onPress={handlePress}>
+      <View style={styles.header}>
+        <View style={styles.titleRow}>
+          <Wrench color={colors.primary} size={20} />
+          <Text style={styles.title}>AI Maintenance</Text>
+        </View>
+        <ChevronRight color={colors.text.secondary} size={16} />
+      </View>
+
+      {isAnalyzing && (
+        <View style={styles.analyzingContainer}>
+          <Activity size={16} color={colors.primary} />
+          <Text style={styles.analyzingText}>Analyzing vehicle data...</Text>
+        </View>
+      )}
+
+      {vehicleHealth && (
+        <View style={styles.healthSection}>
+          <View style={styles.healthHeader}>
+            <Text style={styles.healthLabel}>Overall Health</Text>
+            <Text style={[styles.healthScore, { color: getHealthColor(vehicleHealth.overallScore) }]}>
+              {vehicleHealth.overallScore}%
+            </Text>
+          </View>
+          <Text style={[styles.healthStatus, { color: getHealthColor(vehicleHealth.overallScore) }]}>
+            {getHealthStatus(vehicleHealth.overallScore)}
+          </Text>
+        </View>
+      )}
+
+      {criticalAlerts.length > 0 && (
+        <View style={styles.alertsSection}>
+          <View style={styles.alertHeader}>
+            <AlertTriangle size={16} color={colors.status.error} />
+            <Text style={styles.alertText}>
+              {criticalAlerts.length} Critical Alert{criticalAlerts.length > 1 ? 's' : ''}
+            </Text>
+          </View>
+        </View>
+      )}
+
+      {upcomingMaintenance.length > 0 && (
+        <View style={styles.maintenanceSection}>
+          <View style={styles.maintenanceHeader}>
+            <Clock size={16} color={colors.status.warning} />
+            <Text style={styles.maintenanceText}>
+              {upcomingMaintenance.length} Upcoming Maintenance
+            </Text>
+          </View>
+        </View>
+      )}
+
+      {lastAnalysis && (
+        <Text style={styles.lastUpdate}>
+          Last updated: {new Date(lastAnalysis).toLocaleTimeString()}
+        </Text>
+      )}
+    </TouchableOpacity>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: colors.background.secondary,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text.primary,
+  },
+  noDataText: {
+    fontSize: 14,
+    color: colors.text.secondary,
+    lineHeight: 20,
+  },
+  analyzingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
+  analyzingText: {
+    fontSize: 14,
+    color: colors.text.secondary,
+  },
+  healthSection: {
+    marginBottom: 12,
+  },
+  healthHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  healthLabel: {
+    fontSize: 14,
+    color: colors.text.secondary,
+  },
+  healthScore: {
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  healthStatus: {
+    fontSize: 12,
+    fontWeight: '500',
+    textAlign: 'right',
+  },
+  alertsSection: {
+    marginBottom: 12,
+  },
+  alertHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  alertText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.status.error,
+  },
+  maintenanceSection: {
+    marginBottom: 12,
+  },
+  maintenanceHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  maintenanceText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.status.warning,
+  },
+  lastUpdate: {
+    fontSize: 12,
+    color: colors.text.secondary,
+    textAlign: 'right',
+  },
+});
+
+export default MaintenanceSummaryCard;

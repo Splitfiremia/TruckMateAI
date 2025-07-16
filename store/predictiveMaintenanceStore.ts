@@ -62,7 +62,7 @@ interface PredictiveMaintenanceState {
   dismissAlert: (alertId: string) => void;
   resolveAlert: (alertId: string) => void;
   addMaintenanceRecord: (record: MaintenanceHistory) => void;
-  findNearbyShops: (component: string, location: { lat: number; lng: number }) => Promise<void>;
+  findNearbyShops: (component?: string, location?: { lat: number; lng: number }) => Promise<void>;
   updateSettings: (settings: Partial<Pick<PredictiveMaintenanceState, 'alertsEnabled' | 'predictionSensitivity' | 'autoScheduleMaintenance'>>) => void;
   addPreferredShop: (shopId: string) => void;
   removePreferredShop: (shopId: string) => void;
@@ -123,16 +123,20 @@ const analyzeVehicleData = async (
       const prediction: MaintenancePrediction = {
         id: `tf-pred-${Date.now()}-${tfPrediction.component.toLowerCase().replace(/\s+/g, '-')}`,
         vehicleId: latest.vehicleId,
+        component: tfPrediction.component,
         componentType: tfPrediction.component as any,
         componentName: tfPrediction.component,
         currentCondition: Math.max(0, 100 - (tfPrediction.severity === 'Critical' ? 80 : tfPrediction.severity === 'High' ? 60 : tfPrediction.severity === 'Medium' ? 40 : 20)),
         predictedFailureDate: tfPrediction.predictedFailureWindow.mostLikely,
         milesUntilFailure: tfPrediction.mileageWindow.mostLikely - latest.mileage,
+        estimatedMiles: tfPrediction.mileageWindow.mostLikely - latest.mileage,
+        confidence: tfPrediction.confidence,
         confidenceLevel: tfPrediction.confidence,
         severity: tfPrediction.severity,
         estimatedCost: tfPrediction.estimatedCost.total,
         symptoms: [`TruckFax Analysis: ${tfPrediction.component} showing wear patterns`],
         recommendations: tfPrediction.basedOnFactors.map(factor => `Address: ${factor}`),
+        description: `AI predicts ${tfPrediction.component.toLowerCase()} maintenance needed based on TruckFax data analysis`,
         preventiveMaintenance: tfPrediction.preventiveOptions.map((option, index) => ({
           id: `tf-prev-${index}`,
           action: option.action,
@@ -177,16 +181,20 @@ const analyzeVehicleData = async (
     const prediction: MaintenancePrediction = {
       id: `pred-${Date.now()}-brakes`,
       vehicleId: latest.vehicleId,
+      component: 'Brake Pads',
       componentType: 'Brakes',
       componentName: 'Brake Pads',
       currentCondition: 65,
       predictedFailureDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString(),
       milesUntilFailure: 2500,
+      estimatedMiles: 2500,
+      confidence: 87,
       confidenceLevel: 87,
       severity: 'High',
       estimatedCost: 450,
       symptoms: ['Reduced brake pressure', 'Longer stopping distances', 'Brake pedal feels soft'],
       recommendations: ['Schedule brake inspection within 2 weeks', 'Avoid heavy loads', 'Check brake fluid level'],
+      description: 'AI analysis indicates brake pads are approaching replacement threshold based on pressure readings',
       preventiveMaintenance: [
         {
           id: 'prev-1',
@@ -229,16 +237,20 @@ const analyzeVehicleData = async (
     const prediction: MaintenancePrediction = {
       id: `pred-${Date.now()}-cooling`,
       vehicleId: latest.vehicleId,
+      component: 'Thermostat',
       componentType: 'Cooling System',
       componentName: 'Thermostat',
       currentCondition: 70,
       predictedFailureDate: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString(),
       milesUntilFailure: 3200,
+      estimatedMiles: 3200,
+      confidence: 78,
       confidenceLevel: 78,
       severity: 'Medium',
       estimatedCost: 280,
       symptoms: ['Engine running hot', 'Coolant temperature fluctuating', 'Reduced fuel efficiency'],
       recommendations: ['Monitor coolant levels daily', 'Check for leaks', 'Schedule cooling system inspection'],
+      description: 'Engine temperature patterns suggest thermostat replacement needed to prevent overheating',
       preventiveMaintenance: [
         {
           id: 'prev-2',
@@ -512,11 +524,11 @@ export const usePredictiveMaintenanceStore = create<PredictiveMaintenanceState>(
         }));
       },
       
-      findNearbyShops: async (component: string, location: { lat: number; lng: number }) => {
+      findNearbyShops: async (component?: string, location?: { lat: number; lng: number }) => {
         set({ isLoadingShops: true });
         
         try {
-          const shops = await findRepairShops(component, location);
+          const shops = await findRepairShops(component || 'General', location || { lat: 33.4484, lng: -112.0740 });
           set({ nearbyShops: shops, isLoadingShops: false });
         } catch (error) {
           console.error('Failed to find nearby shops:', error);
