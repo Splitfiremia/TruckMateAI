@@ -1,37 +1,37 @@
 export const colors = {
-  primary: "#1E3A8A", // Dark blue
-  primaryLight: "#3B82F6", // Lighter blue
-  secondary: "#10B981", // Green for success/compliance
-  success: "#10B981", // Green for success (alias for secondary)
-  warning: "#F59E0B", // Amber for warnings
-  danger: "#EF4444", // Red for violations/errors
-  error: "#EF4444", // Red for errors (alias for danger)
+  primary: "#3B82F6", // Professional blue
+  primaryLight: "#93C5FD", // Light blue
+  secondary: "#1E40AF", // Deep blue
+  success: "#059669", // Professional green
+  warning: "#D97706", // Professional amber
+  danger: "#DC2626", // Professional red
+  error: "#DC2626", // Professional red (alias for danger)
   white: "#FFFFFF",
-  black: "#000000",
-  textSecondary: "#94A3B8", // Secondary text color
-  backgroundSecondary: "#1E293B", // Secondary background
+  black: "#0F172A", // Deep slate
+  textSecondary: "#475569", // Slate gray
+  backgroundSecondary: "#F1F5F9", // Light blue-gray
   
   // Background colors
   background: {
-    primary: "#0F172A", // Very dark blue background
-    secondary: "#1E293B", // Slightly lighter background
+    primary: "#F8FAFC", // Very light blue-gray background
+    secondary: "#F1F5F9", // Light blue-gray background
   },
   
   // Text colors
   text: {
-    primary: "#F1F5F9", // Light text
-    secondary: "#94A3B8", // Secondary text
+    primary: "#0F172A", // Deep slate text
+    secondary: "#475569", // Slate gray text
   },
   
   // Status colors
   status: {
-    success: "#10B981",
-    warning: "#F59E0B",
-    error: "#EF4444",
+    success: "#059669",
+    warning: "#D97706",
+    error: "#DC2626",
   },
   
   // Border and surface
-  border: "#334155", // Border color
-  surface: "#1E293B", // Surface color
-  card: "#1E293B", // Card background
+  border: "#CBD5E1", // Light slate border
+  surface: "#F1F5F9", // Light blue surface
+  card: "#FFFFFF", // White card background
 };
