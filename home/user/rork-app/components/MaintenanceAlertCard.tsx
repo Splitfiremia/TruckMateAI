@@ -130,11 +130,7 @@ const MaintenanceAlertCard: React.FC<MaintenanceAlertCardProps> = ({
         <Text style={styles.timestamp}>
           {new Date(alert.createdAt).toLocaleDateString()}
         </Text>
-        {alert.confidence && (
-          <Text style={styles.confidence}>
-            {Math.round(alert.confidence * 100)}% confidence
-          </Text>
-        )}
+
       </View>
     </View>
   );
@@ -168,7 +164,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
     marginLeft: 8,
     marginRight: 12,
     flex: 1,
@@ -202,7 +198,7 @@ const styles = StyleSheet.create({
   },
   detailText: {
     fontSize: 14,
-    color: colors.text,
+    color: colors.text.primary,
     marginLeft: 8,
   },
   costText: {

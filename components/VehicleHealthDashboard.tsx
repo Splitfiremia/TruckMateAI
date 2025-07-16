@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
   },
   scoreDetailText: {
     fontSize: 14,
-    color: colors.text,
+    color: colors.text.primary,
     fontWeight: '500',
   },
   quickStats: {
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
   statNumber: {
     fontSize: 18,
     fontWeight: '700',
-    color: colors.text,
+    color: colors.text.primary,
   },
   statLabel: {
     fontSize: 12,
@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
     marginBottom: 12,
   },
   systemsList: {
@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
   systemName: {
     fontSize: 14,
     fontWeight: '500',
-    color: colors.text,
+    color: colors.text.primary,
   },
   systemScore: {
     alignItems: 'flex-end',

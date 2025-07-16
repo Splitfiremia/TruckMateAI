@@ -7,7 +7,9 @@ export const colors = {
   danger: "#EF4444", // Red for violations/errors
   error: "#EF4444", // Red for errors (alias for danger)
   white: "#FFFFFF",
+  black: "#000000",
   textSecondary: "#94A3B8", // Secondary text color
+  backgroundSecondary: "#1E293B", // Secondary background
   
   // Background colors
   background: {

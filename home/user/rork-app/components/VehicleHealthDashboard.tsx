@@ -213,13 +213,13 @@ const styles = StyleSheet.create({
   },
   scoreDetailText: {
     fontSize: 14,
-    color: colors.text,
+    color: colors.text.primary,
     marginLeft: 8,
   },
   quickStats: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    backgroundColor: colors.background,
+    backgroundColor: colors.background.secondary,
     borderRadius: 12,
     padding: 16,
   },
@@ -229,7 +229,7 @@ const styles = StyleSheet.create({
   statNumber: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: colors.text,
+    color: colors.text.primary,
     marginTop: 4,
   },
   statLabel: {
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
     marginBottom: 16,
   },
   systemsList: {
@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: colors.background,
+    backgroundColor: colors.background.secondary,
     borderRadius: 12,
     padding: 16,
   },
@@ -264,7 +264,7 @@ const styles = StyleSheet.create({
   },
   systemName: {
     fontSize: 16,
-    color: colors.text,
+    color: colors.text.primary,
     marginLeft: 12,
   },
   systemScore: {

@@ -74,7 +74,7 @@ const PredictiveMaintenanceCard: React.FC<PredictiveMaintenanceCardProps> = ({
     >
       <View style={styles.header}>
         <View style={styles.titleSection}>
-          <Text style={styles.systemName}>{prediction.system}</Text>
+          <Text style={styles.systemName}>{prediction.component}</Text>
           <View style={[styles.severityBadge, { backgroundColor: severityColor + '20' }]}>
             <Text style={[styles.severityText, { color: severityColor }]}>
               {prediction.severity}
@@ -119,11 +119,11 @@ const PredictiveMaintenanceCard: React.FC<PredictiveMaintenanceCardProps> = ({
       <View style={styles.actionSection}>
         <View style={styles.actionInfo}>
           <Wrench color={colors.primary} size={16} />
-          <Text style={styles.actionText}>{prediction.recommendedAction}</Text>
+          <Text style={styles.actionText}>{prediction.recommendations[0] || 'Schedule maintenance'}</Text>
         </View>
         <View style={[styles.confidenceBadge, { backgroundColor: colors.primaryLight + '20' }]}>
           <Text style={[styles.confidenceText, { color: colors.primary }]}>
-            {prediction.confidence}% confidence
+            {prediction.confidenceLevel}% confidence
           </Text>
         </View>
       </View>
@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
   systemName: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
   },
   severityBadge: {
     paddingHorizontal: 8,
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
   },
   detailText: {
     fontSize: 14,
-    color: colors.text,
+    color: colors.text.primary,
   },
   actionSection: {
     flexDirection: 'row',
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
   actionText: {
     fontSize: 14,
     fontWeight: '500',
-    color: colors.text,
+    color: colors.text.primary,
     flex: 1,
   },
   confidenceBadge: {
