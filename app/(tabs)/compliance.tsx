@@ -30,6 +30,7 @@ import { ComplianceViolationPrediction } from '@/types';
 import { PredictiveComplianceDashboard } from '@/components/PredictiveComplianceDashboard';
 import { DOTRuleUpdates } from '@/components/DOTRuleUpdates';
 import { ViolationPreventionAlert } from '@/components/ViolationPreventionAlert';
+import { ComplianceNotificationSystem } from '@/components/ComplianceNotificationSystem';
 import { usePredictiveComplianceStore } from '@/store/predictiveComplianceStore';
 import { useLogbookStore } from '@/store/logbookStore';
 
@@ -207,7 +208,7 @@ export default function ComplianceScreen() {
           style={styles.settingButton}
           onPress={() => {
             const testPrediction: ComplianceViolationPrediction = {
-              id: `test-${Date.now()}`,
+              id: `test-break-${Date.now()}`,
               type: 'Break',
               severity: 'Critical',
               timeToViolation: 15, // 15 minutes
@@ -216,7 +217,7 @@ export default function ComplianceScreen() {
               message: 'Test violation: 30-minute break required in 15 minutes',
               recommendations: ['Find nearest rest area', 'Take 30-minute break'],
               preventionActions: [{
-                id: 'test-action',
+                id: 'test-action-break',
                 type: 'Break',
                 title: 'Take Break',
                 description: 'Start required break',
@@ -232,9 +233,112 @@ export default function ComplianceScreen() {
         >
           <AlertTriangle size={20} color={colors.warning} />
           <View style={styles.settingButtonInfo}>
-            <Text style={styles.settingButtonTitle}>Test Violation Alert</Text>
+            <Text style={styles.settingButtonTitle}>Test Break Violation</Text>
             <Text style={styles.settingButtonDescription}>
-              Trigger a test violation alert to test override functionality
+              Test 30-minute break violation alert with override option
+            </Text>
+          </View>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.settingButton}
+          onPress={() => {
+            const testPrediction: ComplianceViolationPrediction = {
+              id: `test-driving-${Date.now()}`,
+              type: 'HOS',
+              severity: 'Critical',
+              timeToViolation: 5, // 5 minutes
+              currentValue: 10.9,
+              thresholdValue: 11,
+              message: 'CRITICAL: 11-hour driving limit will be exceeded in 5 minutes',
+              recommendations: ['Stop driving immediately', 'Find safe parking', 'Take 10-hour rest'],
+              preventionActions: [{
+                id: 'test-action-stop',
+                type: 'Route',
+                title: 'Find Parking',
+                description: 'Locate nearest safe parking area',
+                urgency: 'Immediate',
+                estimatedTime: 10,
+                automated: true
+              }],
+              estimatedFine: 1150,
+              canOverride: false // Cannot override driving limits
+            };
+            handleViolationAlert(testPrediction);
+          }}
+        >
+          <XCircle size={20} color={colors.error} />
+          <View style={styles.settingButtonInfo}>
+            <Text style={styles.settingButtonTitle}>Test Driving Limit</Text>
+            <Text style={styles.settingButtonDescription}>
+              Test 11-hour driving limit violation (no override allowed)
+            </Text>
+          </View>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.settingButton}
+          onPress={() => {
+            const testPrediction: ComplianceViolationPrediction = {
+              id: `test-window-${Date.now()}`,
+              type: 'HOS',
+              severity: 'Warning',
+              timeToViolation: 45, // 45 minutes
+              currentValue: 13.25,
+              thresholdValue: 14,
+              message: 'Warning: 14-hour window expires in 45 minutes',
+              recommendations: ['Complete current trip', 'Plan 10-hour reset'],
+              preventionActions: [{
+                id: 'test-action-plan',
+                type: 'Route',
+                title: 'Plan Reset Location',
+                description: 'Find location for 10-hour off-duty period',
+                urgency: 'Soon',
+                estimatedTime: 20,
+                automated: true
+              }],
+              estimatedFine: 1150,
+              canOverride: false
+            };
+            handleViolationAlert(testPrediction);
+          }}
+        >
+          <Clock size={20} color={colors.warning} />
+          <View style={styles.settingButtonInfo}>
+            <Text style={styles.settingButtonTitle}>Test 14-Hour Window</Text>
+            <Text style={styles.settingButtonDescription}>
+              Test 14-hour window warning (no override allowed)
+            </Text>
+          </View>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.settingButton}
+          onPress={() => {
+            // Test notification system by adding alerts directly
+            const testAlert = {
+              id: `test-notification-${Date.now()}`,
+              timestamp: new Date().toISOString(),
+              type: 'Violation Prevention' as const,
+              priority: 'Critical' as const,
+              title: 'Test Notification System',
+              message: 'This is a test notification to verify the notification system is working properly.',
+              actionRequired: true,
+              autoResolved: false,
+              expiresAt: new Date(Date.now() + 300000).toISOString() // 5 minutes
+            };
+            
+            const { addAlert } = usePredictiveComplianceStore.getState();
+            addAlert(testAlert);
+            
+            Alert.alert('Test Notification', 'A test notification has been added to the system. Check the top of the screen.');
+          }}
+        >
+          <Bell size={20} color={colors.primary} />
+          <View style={styles.settingButtonInfo}>
+            <Text style={styles.settingButtonTitle}>Test Notification System</Text>
+            <Text style={styles.settingButtonDescription}>
+              Test the notification banner system
             </Text>
           </View>
         </TouchableOpacity>
@@ -435,6 +539,14 @@ export default function ComplianceScreen() {
         {activeTab === 'rules' && renderRuleUpdates()}
         {activeTab === 'settings' && renderSettings()}
       </View>
+
+      {/* Notification System */}
+      <ComplianceNotificationSystem 
+        onNotificationPress={(alert) => {
+          console.log('Notification pressed:', alert);
+          // You can handle notification press here
+        }}
+      />
 
       {/* Violation Prevention Alert */}
       {currentViolationPrediction && (
