@@ -31,6 +31,7 @@ import { WeatherAlertsModal } from '@/components/WeatherAlertsModal';
 import { WeatherForecastModal } from '@/components/WeatherForecastModal';
 import { WeatherNotificationSystem } from '@/components/WeatherNotificationSystem';
 import MaintenanceSummaryCard from '@/components/MaintenanceSummaryCard';
+import AIAssistantFAB from '@/components/AIAssistantFAB';
 import { useUserStore } from '@/store/userStore';
 import { useBrandingStore } from '@/store/brandingStore';
 import { useLogbookStore } from '@/store/logbookStore';
@@ -464,6 +465,8 @@ export default function DashboardScreen() {
       <View style={styles.voiceButtonContainer}>
         <VoiceCommandButton onCommandProcessed={handleCommandProcessed} />
       </View>
+      
+      <AIAssistantFAB bottom={180} right={20} />
       
       <StatusChangeModal 
         visible={statusModalVisible}
