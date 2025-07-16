@@ -688,61 +688,6 @@ export interface TruckFaxInsights {
   }[];
 }
 
-// Geotab Integration Types
-export interface GeotabCredentials {
-  username: string;
-  password: string;
-  database: string;
-  server: string;
-}
-
-export interface GeotabDevice {
-  id: string;
-  name: string;
-  serialNumber: string;
-  vehicleIdentificationNumber: string;
-  licensePlate: string;
-  lastLocation: {
-    latitude: number;
-    longitude: number;
-    address?: string;
-  };
-  status: 'Online' | 'Offline' | 'Unknown';
-  lastUpdate: string;
-}
-
-export interface GeotabAlert {
-  id: string;
-  deviceId: string;
-  message: string;
-  severity: 'Low' | 'Medium' | 'High' | 'Critical';
-  type: 'Safety' | 'Maintenance' | 'Compliance' | 'Operational';
-  timestamp: string;
-  location?: {
-    latitude: number;
-    longitude: number;
-    address?: string;
-  };
-  acknowledged: boolean;
-  actionRequired: boolean;
-}
-
-export interface WeighStationBypassResponse {
-  requestId: string;
-  deviceId: string;
-  weighStationId: string;
-  weighStationName: string;
-  location: {
-    latitude: number;
-    longitude: number;
-    address?: string;
-  };
-  bypassGranted: boolean;
-  reason?: string;
-  validUntil: string;
-  timestamp: string;
-}
-
 // Google Maps Route Optimization Types
 export interface RouteWaypoint {
   id: string;
