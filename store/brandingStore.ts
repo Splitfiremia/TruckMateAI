@@ -58,7 +58,7 @@ const defaultBranding: BrandingSettings = {
   primaryColor: '#3B82F6',
   secondaryColor: '#10B981',
   accentColor: '#F59E0B',
-  supportEmail: 'support@trucklogpro.com',
+  supportEmail: 'support@truckmateai.com',
   supportPhone: '(555) 123-4567',
   showCompanyLogo: false,
   customSplashScreen: false,

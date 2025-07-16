@@ -283,7 +283,7 @@ export default function OnboardingScreen() {
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <Text style={styles.title}>Welcome to TruckLogPro</Text>
+          <Text style={styles.title}>Welcome to TruckMate AI</Text>
           <View style={styles.progressIndicator}>
             <View style={[styles.progressDot, currentStep === 'role-selection' && styles.progressDotActive]} />
             <View style={[styles.progressDot, currentStep === 'profile-setup' && styles.progressDotActive]} />

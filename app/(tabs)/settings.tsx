@@ -315,7 +315,7 @@ export default function SettingsScreen() {
           <Text style={styles.logoutText}>Sign Out</Text>
         </TouchableOpacity>
         
-        <Text style={styles.versionText}>TruckLogPro v1.0.0</Text>
+        <Text style={styles.versionText}>TruckMate AI v1.0.0</Text>
         
         <View style={styles.footer} />
       </ScrollView>
