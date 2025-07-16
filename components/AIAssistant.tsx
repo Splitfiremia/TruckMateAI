@@ -397,13 +397,13 @@ export default function AIAssistant({ onClose, showHeader = true }: AIAssistantP
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.background.primary,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.background,
+    backgroundColor: colors.background.primary,
     padding: 20,
   },
   loadingTitle: {
@@ -559,7 +559,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 16,
     color: colors.text.primary,
-    backgroundColor: colors.background,
+    backgroundColor: colors.background.primary,
     maxHeight: 100,
   },
   inputActions: {
