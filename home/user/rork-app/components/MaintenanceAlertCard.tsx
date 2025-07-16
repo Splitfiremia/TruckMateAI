@@ -69,17 +69,15 @@ const MaintenanceAlertCard: React.FC<MaintenanceAlertCardProps> = ({
         <View style={styles.titleRow}>
           <TypeIcon color={priorityColor} size={18} />
           <Text style={styles.title}>{alert.title}</Text>
-          <View style={[styles.priorityBadge, { backgroundColor: priorityColor + '20' }]}>
-            <Text style={[styles.priorityText, { color: priorityColor }]}>
-              {alert.priority}
-            </Text>
+          <View style={[styles.priorityBadge, { backgroundColor: priorityColor }]}>
+            <Text style={styles.priorityText}>{alert.priority}</Text>
           </View>
         </View>
         <TouchableOpacity
           style={styles.dismissButton}
           onPress={() => onDismiss(alert.id)}
         >
-          <X color={colors.text.secondary} size={16} />
+          <X color={colors.textSecondary} size={20} />
         </TouchableOpacity>
       </View>
 
@@ -88,14 +86,14 @@ const MaintenanceAlertCard: React.FC<MaintenanceAlertCardProps> = ({
       <View style={styles.details}>
         {alert.component && (
           <View style={styles.detailItem}>
-            <Wrench color={colors.text.secondary} size={14} />
+            <Wrench color={colors.textSecondary} size={16} />
             <Text style={styles.detailText}>Component: {alert.component}</Text>
           </View>
         )}
         
         {alert.milesUntilFailure && (
           <View style={styles.detailItem}>
-            <Clock color={colors.text.secondary} size={14} />
+            <Clock color={colors.textSecondary} size={16} />
             <Text style={styles.detailText}>
               {alert.milesUntilFailure > 0 
                 ? `${alert.milesUntilFailure.toLocaleString()} miles remaining`
@@ -114,46 +112,65 @@ const MaintenanceAlertCard: React.FC<MaintenanceAlertCardProps> = ({
         )}
       </View>
 
-      {alert.nearbyShops.length > 0 && (
-        <TouchableOpacity style={styles.shopsButton} onPress={handleViewShops}>
-          <MapPin color={colors.primary} size={16} />
-          <Text style={styles.shopsButtonText}>
-            View {alert.nearbyShops.length} Nearby Shop{alert.nearbyShops.length > 1 ? 's' : ''}
-          </Text>
-        </TouchableOpacity>
-      )}
+      <View style={styles.actions}>
+        {alert.nearbyShops.length > 0 && (
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={handleViewShops}
+          >
+            <MapPin color={colors.primary} size={16} />
+            <Text style={styles.actionButtonText}>
+              View {alert.nearbyShops.length} Nearby Shops
+            </Text>
+          </TouchableOpacity>
+        )}
+      </View>
 
-      <Text style={styles.timestamp}>
-        {new Date(alert.createdAt).toLocaleString()}
-      </Text>
+      <View style={styles.footer}>
+        <Text style={styles.timestamp}>
+          {new Date(alert.createdAt).toLocaleDateString()}
+        </Text>
+        {alert.confidence && (
+          <Text style={styles.confidence}>
+            {Math.round(alert.confidence * 100)}% confidence
+          </Text>
+        )}
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.background.secondary,
+    backgroundColor: colors.surface,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
     borderLeftWidth: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 8,
+    marginBottom: 12,
   },
   titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
     flex: 1,
+    marginRight: 12,
   },
   title: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text.primary,
+    color: colors.text,
+    marginLeft: 8,
+    marginRight: 12,
     flex: 1,
   },
   priorityBadge: {
@@ -164,52 +181,68 @@ const styles = StyleSheet.create({
   priorityText: {
     fontSize: 12,
     fontWeight: '600',
+    color: colors.surface,
   },
   dismissButton: {
     padding: 4,
   },
   description: {
     fontSize: 14,
-    color: colors.text.secondary,
+    color: colors.textSecondary,
+    marginBottom: 16,
     lineHeight: 20,
-    marginBottom: 12,
   },
   details: {
-    gap: 8,
-    marginBottom: 12,
+    marginBottom: 16,
   },
   detailItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    marginBottom: 8,
   },
   detailText: {
     fontSize: 14,
-    color: colors.text.secondary,
+    color: colors.text,
+    marginLeft: 8,
   },
   costText: {
     fontSize: 14,
     fontWeight: '600',
     color: colors.primary,
   },
-  shopsButton: {
+  actions: {
+    marginBottom: 12,
+  },
+  actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    backgroundColor: colors.primary + '10',
+    backgroundColor: colors.primaryLight + '20',
     borderRadius: 8,
     padding: 12,
     marginBottom: 8,
   },
-  shopsButtonText: {
+  actionButtonText: {
     fontSize: 14,
     fontWeight: '500',
     color: colors.primary,
+    marginLeft: 8,
+  },
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
   },
   timestamp: {
     fontSize: 12,
-    color: colors.text.secondary,
-    textAlign: 'right',
+    color: colors.textSecondary,
+  },
+  confidence: {
+    fontSize: 12,
+    color: colors.secondary,
+    fontWeight: '500',
   },
 });
 

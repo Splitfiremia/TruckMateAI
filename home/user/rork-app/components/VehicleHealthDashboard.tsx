@@ -112,29 +112,42 @@ const VehicleHealthDashboard: React.FC<VehicleHealthDashboardProps> = ({
         </View>
       </View>
 
-      {/* System Health Details */}
-      <View style={styles.systemsContainer}>
+      {/* System Health Breakdown */}
+      <View style={styles.systemsSection}>
         <Text style={styles.sectionTitle}>System Health</Text>
-        <View style={styles.systemsGrid}>
+        <View style={styles.systemsList}>
           {Object.entries(vehicleHealth.systemHealth).map(([system, score]) => {
-            const SystemIcon = getHealthIcon(score);
+            const SystemHealthIcon = getHealthIcon(score);
             const systemColor = getHealthColor(score);
             
             return (
               <TouchableOpacity
                 key={system}
-                style={styles.systemCard}
+                style={styles.systemItem}
                 onPress={() => onSystemPress?.(system)}
               >
-                <View style={styles.systemHeader}>
-                  <SystemIcon color={systemColor} size={16} />
+                <View style={styles.systemInfo}>
+                  <SystemHealthIcon color={systemColor} size={20} />
                   <Text style={styles.systemName}>
                     {getSystemDisplayName(system)}
                   </Text>
                 </View>
-                <Text style={[styles.systemScore, { color: systemColor }]}>
-                  {score}%
-                </Text>
+                <View style={styles.systemScore}>
+                  <Text style={[styles.scoreValue, { color: systemColor }]}>
+                    {score}
+                  </Text>
+                  <View style={styles.scoreBar}>
+                    <View 
+                      style={[
+                        styles.scoreBarFill, 
+                        { 
+                          width: `${score}%`, 
+                          backgroundColor: systemColor 
+                        }
+                      ]} 
+                    />
+                  </View>
+                </View>
               </TouchableOpacity>
             );
           })}
@@ -142,27 +155,35 @@ const VehicleHealthDashboard: React.FC<VehicleHealthDashboardProps> = ({
       </View>
 
       {/* Last Updated */}
-      <Text style={styles.lastUpdated}>
-        Last updated: {new Date(vehicleHealth.lastUpdated).toLocaleString()}
-      </Text>
+      <View style={styles.lastUpdated}>
+        <Clock color={colors.textSecondary} size={14} />
+        <Text style={styles.lastUpdatedText}>
+          Last updated: {new Date(vehicleHealth.lastUpdated).toLocaleString()}
+        </Text>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.background.secondary,
+    backgroundColor: colors.surface,
     borderRadius: 16,
-    padding: 16,
+    padding: 20,
     marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   },
   overallHealth: {
-    marginBottom: 20,
+    marginBottom: 24,
   },
   scoreSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
   },
   scoreCircle: {
     width: 80,
@@ -171,93 +192,113 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
+    marginRight: 20,
   },
   scoreText: {
     fontSize: 24,
-    fontWeight: '700',
+    fontWeight: 'bold',
   },
   scoreLabel: {
     fontSize: 12,
-    color: colors.text.secondary,
+    color: colors.textSecondary,
     marginTop: 2,
   },
   scoreDetails: {
     flex: 1,
-    gap: 8,
   },
   scoreDetailItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    marginBottom: 8,
   },
   scoreDetailText: {
     fontSize: 14,
-    color: colors.text.primary,
-    fontWeight: '500',
+    color: colors.text,
+    marginLeft: 8,
   },
   quickStats: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    backgroundColor: colors.background.primary,
+    backgroundColor: colors.background,
     borderRadius: 12,
-    padding: 12,
+    padding: 16,
   },
   statItem: {
     alignItems: 'center',
-    gap: 4,
   },
   statNumber: {
     fontSize: 18,
-    fontWeight: '700',
-    color: colors.text.primary,
+    fontWeight: 'bold',
+    color: colors.text,
+    marginTop: 4,
   },
   statLabel: {
     fontSize: 12,
-    color: colors.text.secondary,
+    color: colors.textSecondary,
+    marginTop: 2,
   },
-  systemsContainer: {
-    marginBottom: 16,
+  systemsSection: {
+    marginBottom: 20,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '600',
-    color: colors.text.primary,
-    marginBottom: 12,
+    color: colors.text,
+    marginBottom: 16,
   },
-  systemsGrid: {
+  systemsList: {
+    gap: 12,
+  },
+  systemItem: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  systemCard: {
-    backgroundColor: colors.background.primary,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: colors.background,
     borderRadius: 12,
-    padding: 12,
-    width: '48%',
-    minWidth: 140,
+    padding: 16,
   },
-  systemHeader: {
+  systemInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 8,
-  },
-  systemName: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: colors.text.primary,
     flex: 1,
   },
-  systemScore: {
+  systemName: {
     fontSize: 16,
-    fontWeight: '700',
-    textAlign: 'right',
+    color: colors.text,
+    marginLeft: 12,
+  },
+  systemScore: {
+    alignItems: 'flex-end',
+    minWidth: 60,
+  },
+  scoreValue: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  scoreBar: {
+    width: 50,
+    height: 4,
+    backgroundColor: colors.border,
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  scoreBarFill: {
+    height: '100%',
+    borderRadius: 2,
   },
   lastUpdated: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  lastUpdatedText: {
     fontSize: 12,
-    color: colors.text.secondary,
-    textAlign: 'center',
+    color: colors.textSecondary,
+    marginLeft: 6,
   },
 });
 
