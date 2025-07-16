@@ -238,29 +238,25 @@ class GoogleMapsService {
   private generateMockTruckRestrictions(): TruckRestriction[] {
     const restrictions: TruckRestriction[] = [
       {
-        id: '1',
         type: 'height',
         value: 13.6,
-        unit: 'feet',
+        description: 'Low bridge - 13\'6" clearance',
         location: {
           latitude: 40.7505,
           longitude: -73.9934,
           address: 'Bridge on Route 9'
         },
-        description: 'Low bridge - 13\'6" clearance',
         severity: 'warning',
       },
       {
-        id: '2',
         type: 'weight',
         value: 80000,
-        unit: 'pounds',
+        description: 'Weight limit 40 tons',
         location: {
           latitude: 40.7831,
           longitude: -73.9712,
           address: 'Local road restriction'
         },
-        description: 'Weight limit 40 tons',
         severity: 'restriction',
       },
     ];
