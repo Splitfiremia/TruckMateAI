@@ -33,6 +33,14 @@ export default function TabLayout() {
         tabBarStyle: {
           backgroundColor: activeColors.background,
           borderTopColor: activeColors.border,
+          height: 85,
+          paddingBottom: 8,
+          paddingTop: 8,
+        },
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: '500',
+          marginTop: 2,
         },
         headerStyle: {
           backgroundColor: activeColors.background,
@@ -47,42 +55,42 @@ export default function TabLayout() {
         name="index"
         options={{
           title: "Dashboard",
-          tabBarIcon: ({ color }) => <Home color={color} size={22} />,
+          tabBarIcon: ({ color }) => <Home color={color} size={20} />,
         }}
       />
       <Tabs.Screen
         name="logbook"
         options={{
           title: "Logbook",
-          tabBarIcon: ({ color }) => <Clipboard color={color} size={22} />,
+          tabBarIcon: ({ color }) => <Clipboard color={color} size={20} />,
         }}
       />
       <Tabs.Screen
         name="loads"
         options={{
           title: "Loads",
-          tabBarIcon: ({ color }) => <BarChart color={color} size={22} />,
+          tabBarIcon: ({ color }) => <BarChart color={color} size={20} />,
         }}
       />
       <Tabs.Screen
         name="receipts"
         options={{
           title: "Receipts",
-          tabBarIcon: ({ color }) => <Receipt color={color} size={22} />,
+          tabBarIcon: ({ color }) => <Receipt color={color} size={20} />,
         }}
       />
       <Tabs.Screen
         name="compliance"
         options={{
-          title: "AI Compliance",
-          tabBarIcon: ({ color }) => <Shield color={color} size={22} />,
+          title: "Compliance",
+          tabBarIcon: ({ color }) => <Shield color={color} size={20} />,
         }}
       />
       <Tabs.Screen
         name="weather"
         options={{
           title: "Weather",
-          tabBarIcon: ({ color }) => <Cloud color={color} size={22} />,
+          tabBarIcon: ({ color }) => <Cloud color={color} size={20} />,
         }}
       />
       {/* Fleet tab only visible for fleet companies */}
@@ -90,8 +98,8 @@ export default function TabLayout() {
         <Tabs.Screen
           name="fleet"
           options={{
-            title: "Fleet Admin",
-            tabBarIcon: ({ color }) => <Users color={color} size={22} />,
+            title: "Fleet",
+            tabBarIcon: ({ color }) => <Users color={color} size={20} />,
           }}
         />
       )}
@@ -107,22 +115,22 @@ export default function TabLayout() {
       <Tabs.Screen
         name="maintenance"
         options={{
-          title: "AI Maintenance",
-          tabBarIcon: ({ color }) => <Wrench color={color} size={22} />,
+          title: "Maintenance",
+          tabBarIcon: ({ color }) => <Wrench color={color} size={20} />,
         }}
       />
       <Tabs.Screen
         name="integrations"
         options={{
           title: "Integrations",
-          tabBarIcon: ({ color }) => <Zap color={color} size={22} />,
+          tabBarIcon: ({ color }) => <Zap color={color} size={20} />,
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
           title: "Settings",
-          tabBarIcon: ({ color }) => <Settings color={color} size={22} />,
+          tabBarIcon: ({ color }) => <Settings color={color} size={20} />,
         }}
       />
     </Tabs>
