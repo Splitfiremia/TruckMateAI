@@ -11,7 +11,7 @@ import {
 import { Stack } from 'expo-router';
 import { Plus, Zap, Search, Filter } from 'lucide-react-native';
 import { colors } from '@/constants/colors';
-import { useIntegrationStore } from '@/store/integrationStore';
+import { useIntegrationStore, Integration } from '@/store/integrationStore';
 import { IntegrationCard } from '@/components/IntegrationCard';
 import { IntegrationConnectionModal } from '@/components/IntegrationConnectionModal';
 import { AutomationCard } from '@/components/AutomationCard';
@@ -35,7 +35,7 @@ export default function IntegrationsScreen() {
   } = useIntegrationStore();
   
   const [activeTab, setActiveTab] = useState<TabType>('integrations');
-  const [selectedIntegration, setSelectedIntegration] = useState(null);
+  const [selectedIntegration, setSelectedIntegration] = useState<Integration | null>(null);
   const [showConnectionModal, setShowConnectionModal] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   
