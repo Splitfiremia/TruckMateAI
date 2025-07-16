@@ -138,7 +138,7 @@ export default function StatusChangeModal({
               onPress={() => handleStatusChange('Driving')}
             >
               <View style={[styles.iconContainer, { backgroundColor: colors.primaryLight }]}>
-                <Truck size={24} color={colors.text.primary} />
+                <Truck size={24} color={colors.white} />
               </View>
               <View style={styles.optionContent}>
                 <Text style={styles.optionText}>Driving</Text>
@@ -150,7 +150,7 @@ export default function StatusChangeModal({
               onPress={() => handleStatusChange('On Duty Not Driving')}
             >
               <View style={[styles.iconContainer, { backgroundColor: colors.warning }]}>
-                <Clock size={24} color={colors.text.primary} />
+                <Clock size={24} color={colors.white} />
               </View>
               <Text style={styles.optionText}>On Duty (Not Driving)</Text>
             </TouchableOpacity>
@@ -159,8 +159,8 @@ export default function StatusChangeModal({
               style={styles.option}
               onPress={() => handleStatusChange('Sleeper Berth')}
             >
-              <View style={[styles.iconContainer, { backgroundColor: colors.textSecondary }]}>
-                <Bed size={24} color={colors.text.primary} />
+              <View style={[styles.iconContainer, { backgroundColor: colors.text.secondary }]}>
+                <Bed size={24} color={colors.white} />
               </View>
               <Text style={styles.optionText}>Sleeper Berth</Text>
             </TouchableOpacity>
@@ -170,7 +170,7 @@ export default function StatusChangeModal({
               onPress={() => handleStatusChange('Off Duty')}
             >
               <View style={[styles.iconContainer, { backgroundColor: colors.secondary }]}>
-                <Coffee size={24} color={colors.text.primary} />
+                <Coffee size={24} color={colors.white} />
               </View>
               <Text style={styles.optionText}>Off Duty</Text>
             </TouchableOpacity>
@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   breakButton: {
-    backgroundColor: colors.primaryLight,
+    backgroundColor: colors.primary,
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: 'center',
@@ -267,6 +267,6 @@ const styles = StyleSheet.create({
   breakButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text.primary,
+    color: colors.white,
   },
 });
