@@ -59,21 +59,23 @@ export const DrivewyzeWeighStationCard: React.FC<DrivewyzeWeighStationCardProps>
           {station.distance.toFixed(1)} miles away
         </Text>
       )}
-      <Text style={styles.location}>{station.location.address}</Text>
-      {station.status === 'open' && (
-        <View style={styles.hoursContainer}>
-          <Clock size={14} color={colors.text.secondary} />
-          <Text style={styles.hoursText}>
-            Open: {station.operatingHours[Object.keys(station.operatingHours)[0]]}
-          </Text>
-        </View>
-      )}
+      <View style={styles.details}>
+        <Text style={styles.location}>{station.location.address}</Text>
+        {station.status === 'open' && station.operatingHours && (
+          <View style={styles.hoursContainer}>
+            <Clock size={14} color={colors.text.secondary} />
+            <Text style={styles.hoursText}>
+              Open until {station.operatingHours[new Date().toLocaleString('en-us', { weekday: 'long' }).toLowerCase()] || 'Unknown'}
+            </Text>
+          </View>
+        )}
+      </View>
       {onBypassRequest && station.status === 'bypass_available' && station.bypassEligible && (
         <TouchableOpacity onPress={onBypassRequest} style={styles.bypassButton}>
-          <Text style={styles.bypassButtonText}>Request Bypass</Text>
+          <Text style={styles.bypassText}>Request Bypass</Text>
         </TouchableOpacity>
       )}
-    </View>
+    </TouchableOpacity>
   );
 };
 
@@ -81,8 +83,9 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.card,
     borderRadius: 12,
-    padding: 16,
+    marginHorizontal: 16,
     marginBottom: 16,
+    padding: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -96,26 +99,28 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   title: {
-    flex: 1,
     fontSize: 16,
     fontWeight: '600',
     color: colors.text.primary,
+    flex: 1,
   },
   distance: {
     fontSize: 14,
     color: colors.text.secondary,
     marginBottom: 8,
   },
+  details: {
+    marginBottom: 12,
+  },
   location: {
     fontSize: 14,
     color: colors.text.secondary,
-    marginBottom: 8,
+    marginBottom: 4,
   },
   hoursContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    marginBottom: 12,
   },
   hoursText: {
     fontSize: 13,
@@ -123,12 +128,11 @@ const styles = StyleSheet.create({
   },
   bypassButton: {
     backgroundColor: colors.primary,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
+    padding: 10,
     borderRadius: 8,
     alignItems: 'center',
   },
-  bypassButtonText: {
+  bypassText: {
     color: colors.white,
     fontSize: 14,
     fontWeight: '500',
