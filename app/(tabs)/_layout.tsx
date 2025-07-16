@@ -1,5 +1,5 @@
 import { Tabs, Redirect } from "expo-router";
-import { BarChart, Clipboard, Home, Receipt, Settings, Users, Shield, Cloud, Zap, Wrench, Navigation } from "lucide-react-native";
+import { BarChart, Clipboard, Home, Receipt, Settings, Users, Shield, Cloud, Zap, Wrench, Navigation, MapPin } from "lucide-react-native";
 import React from "react";
 
 import { colors } from "@/constants/colors";
@@ -69,6 +69,13 @@ export default function TabLayout() {
         options={{
           title: "Routes",
           tabBarIcon: ({ color }) => <Navigation color={color} size={22} />,
+        }}
+      />
+      <Tabs.Screen
+        name="drivewyze"
+        options={{
+          title: "Drivewyze",
+          tabBarIcon: ({ color }) => <MapPin color={color} size={22} />,
         }}
       />
       <Tabs.Screen
