@@ -9,16 +9,15 @@ import {
   RefreshControl,
 } from 'react-native';
 import { Stack } from 'expo-router';
-import { Plus, Zap, Search, Filter, Truck } from 'lucide-react-native';
+import { Plus, Zap, Search, Filter } from 'lucide-react-native';
 import { colors } from '@/constants/colors';
 import { useIntegrationStore, Integration } from '@/store/integrationStore';
 import { IntegrationCard } from '@/components/IntegrationCard';
 import { IntegrationConnectionModal } from '@/components/IntegrationConnectionModal';
 import { AutomationCard } from '@/components/AutomationCard';
 import { AutomationTemplateCard } from '@/components/AutomationTemplateCard';
-import { GeotabIntegration } from '@/components/GeotabIntegration';
 
-type TabType = 'integrations' | 'automations' | 'templates' | 'geotab';
+type TabType = 'integrations' | 'automations' | 'templates';
 
 export default function IntegrationsScreen() {
   const {
@@ -42,7 +41,6 @@ export default function IntegrationsScreen() {
   
   const connectedIntegrations = integrations.filter(i => i.isConnected);
   const availableIntegrations = integrations.filter(i => !i.isConnected);
-  const geotabIntegration = integrations.find(i => i.id === 'geotab');
   
   const handleConnect = (integration: any) => {
     setSelectedIntegration(integration);
@@ -142,9 +140,6 @@ export default function IntegrationsScreen() {
     setRefreshing(true);
     // Simulate refresh
     await new Promise(resolve => setTimeout(resolve, 1000));
-    if (geotabIntegration?.isConnected) {
-      await syncIntegration('geotab');
-    }
     setRefreshing(false);
   };
   
@@ -256,28 +251,6 @@ export default function IntegrationsScreen() {
     </View>
   );
   
-  const renderGeotabTab = () => (
-    <View style={styles.section}>
-      {geotabIntegration?.isConnected ? (
-        <GeotabIntegration />
-      ) : (
-        <View style={styles.emptyState}>
-          <Truck color={colors.textSecondary} size={48} />
-          <Text style={styles.emptyStateTitle}>Geotab Not Connected</Text>
-          <Text style={styles.emptyStateText}>
-            Connect your Geotab account to access Drivewyze weigh station bypass and safety alerts.
-          </Text>
-          <TouchableOpacity 
-            style={styles.connectGeotabButton}
-            onPress={() => handleConnect(geotabIntegration)}
-          >
-            <Text style={styles.connectGeotabButtonText}>Connect Geotab</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-    </View>
-  );
-  
   return (
     <View style={styles.container}>
       <Stack.Screen 
@@ -300,7 +273,6 @@ export default function IntegrationsScreen() {
         {renderTabButton('integrations', 'Integrations', Search)}
         {renderTabButton('automations', 'Automations', Zap)}
         {renderTabButton('templates', 'Templates', Plus)}
-        {geotabIntegration && renderTabButton('geotab', 'Geotab', Truck)}
       </View>
       
       <ScrollView 
@@ -310,7 +282,7 @@ export default function IntegrationsScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor={colors.primary}
+            tintColor={colors.primary.primary}
           />
         }
       >
@@ -323,7 +295,6 @@ export default function IntegrationsScreen() {
         {activeTab === 'integrations' && renderIntegrationsTab()}
         {activeTab === 'automations' && renderAutomationsTab()}
         {activeTab === 'templates' && renderTemplatesTab()}
-        {activeTab === 'geotab' && renderGeotabTab()}
       </ScrollView>
       
       <IntegrationConnectionModal
@@ -358,7 +329,6 @@ const styles = StyleSheet.create({
     margin: 16,
     borderRadius: 12,
     padding: 4,
-    flexWrap: 'wrap',
   },
   tabButton: {
     flex: 1,
@@ -366,10 +336,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,
-    paddingHorizontal: 8,
+    paddingHorizontal: 16,
     borderRadius: 8,
     gap: 6,
-    minWidth: '22%',
   },
   activeTabButton: {
     backgroundColor: colors.background.primary,
@@ -380,7 +349,7 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   activeTabButtonText: {
-    color: colors.primary,
+    color: colors.primary.primary,
   },
   content: {
     flex: 1,
@@ -405,7 +374,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: colors.primary + '20',
+    backgroundColor: colors.primary.primary + '20',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -437,17 +406,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 20,
     maxWidth: 280,
-  },
-  connectGeotabButton: {
-    backgroundColor: colors.primary,
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-    marginTop: 16,
-  },
-  connectGeotabButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
   },
 });

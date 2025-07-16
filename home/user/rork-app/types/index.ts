@@ -688,6 +688,61 @@ export interface TruckFaxInsights {
   }[];
 }
 
+// Geotab Integration Types
+export interface GeotabCredentials {
+  username: string;
+  password: string;
+  database: string;
+  server: string;
+}
+
+export interface GeotabDevice {
+  id: string;
+  name: string;
+  serialNumber: string;
+  vehicleIdentificationNumber: string;
+  licensePlate: string;
+  lastLocation: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+  };
+  status: 'Online' | 'Offline' | 'Unknown';
+  lastUpdate: string;
+}
+
+export interface GeotabAlert {
+  id: string;
+  deviceId: string;
+  message: string;
+  severity: 'Low' | 'Medium' | 'High' | 'Critical';
+  type: 'Safety' | 'Maintenance' | 'Compliance' | 'Operational';
+  timestamp: string;
+  location?: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+  };
+  acknowledged: boolean;
+  actionRequired: boolean;
+}
+
+export interface WeighStationBypassResponse {
+  requestId: string;
+  deviceId: string;
+  weighStationId: string;
+  weighStationName: string;
+  location: {
+    latitude: number;
+    longitude: number;
+    address?: string;
+  };
+  bypassGranted: boolean;
+  reason?: string;
+  validUntil: string;
+  timestamp: string;
+}
+
 // Google Maps Route Optimization Types
 export interface RouteWaypoint {
   id: string;
@@ -825,60 +880,4 @@ export interface GoogleMapsConfig {
   enableTruckRestrictions: boolean;
   updateInterval: number; // minutes
   maxAlternativeRoutes: number;
-}
-
-// Geotab API Integration Types
-export interface Integration {
-  id: string;
-  name: string;
-  description: string;
-  icon: string;
-  category: 'ELD' | 'TMS' | 'Fuel' | 'Maintenance' | 'Accounting' | 'Other' | 'Safety';
-  isConnected: boolean;
-  lastSync?: string;
-  connectionDetails?: Record<string, any>;
-  supportedActions: string[];
-  supportedTriggers: string[];
-}
-
-export interface GeotabCredentials {
-  username: string;
-  password: string;
-  database: string;
-  server?: string;
-}
-
-export interface GeotabDevice {
-  id: string;
-  name: string;
-  vin: string;
-  licensePlate: string;
-  lastLocation: {
-    latitude: number;
-    longitude: number;
-    address: string;
-  };
-  lastUpdated: string;
-}
-
-export interface GeotabAlert {
-  id: string;
-  deviceId: string;
-  type: string;
-  message: string;
-  severity: 'low' | 'medium' | 'high';
-  location: {
-    latitude: number;
-    longitude: number;
-    address: string;
-  };
-  timestamp: string;
-}
-
-export interface WeighStationBypassResponse {
-  deviceId: string;
-  requestId: string;
-  status: 'pending' | 'approved' | 'denied';
-  message: string;
-  validUntil?: string;
 }

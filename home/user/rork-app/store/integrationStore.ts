@@ -1,13 +1,15 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { geotabService } from '@/services/geotabService';
-import { GeotabCredentials, GeotabDevice, GeotabAlert, WeighStationBypassResponse } from '@/types';
+import * as geotabService from '../services/geotabService';
+import { GeotabCredentials, GeotabDevice, GeotabAlert, WeighStationBypassResponse } from '../types/index';
+import * as geotabService from '../services/geotabService';
+import { GeotabCredentials, GeotabDevice, GeotabAlert, WeighStationBypassResponse } from '../types/index';
 
 export interface Integration {
   id: string;
   name: string;
-  type: 'email' | 'messaging' | 'storage' | 'crm' | 'calendar' | 'other' | 'safety';
+  type: 'email' | 'messaging' | 'storage' | 'crm' | 'calendar' | 'other';
   icon: string;
   description: string;
   isConnected: boolean;
@@ -61,11 +63,11 @@ interface IntegrationState {
   integrations: Integration[];
   automations: Automation[];
   templates: IntegrationTemplate[];
+  isLoading: boolean;
+  error: string | null;
   geotabDevices: GeotabDevice[];
   geotabAlerts: GeotabAlert[];
   geotabBypassResponses: WeighStationBypassResponse[];
-  isLoading: boolean;
-  error: string | null;
   
   // Actions
   addIntegration: (integration: Omit<Integration, 'id' | 'connectedAt'>) => void;
@@ -81,10 +83,9 @@ interface IntegrationState {
   
   syncIntegration: (id: string) => Promise<void>;
   testConnection: (id: string) => Promise<boolean>;
-  
   fetchGeotabDevices: () => Promise<void>;
   fetchGeotabAlerts: () => Promise<void>;
-  requestWeighStationBypass: (deviceId: string) => Promise<WeighStationBypassResponse>;
+  requestWeighStationBypass: (deviceId: string, weighStationId: string) => Promise<void>;
   
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
@@ -158,9 +159,9 @@ const defaultIntegrations: Integration[] = [
   {
     id: 'geotab',
     name: 'Geotab Drivewyze',
-    type: 'safety',
+    type: 'other',
     icon: 'Truck',
-    description: 'Integrate with Geotab for GPS-based weigh station bypass and safety alerts',
+    description: 'Integrate with Geotab for GPS tracking, weigh station bypass, and safety alerts',
     isConnected: false,
   },
 ];
@@ -202,15 +203,6 @@ const defaultTemplates: IntegrationTemplate[] = [
     actions: [{ integration: 'google-calendar', action: 'create_event' }],
     popular: false,
   },
-  {
-    id: 'geotab-bypass-alert',
-    name: 'Weigh Station Bypass Alert',
-    description: 'Send notification when weigh station bypass is approved',
-    category: 'Safety',
-    trigger: { integration: 'geotab', event: 'bypass_approved' },
-    actions: [{ integration: 'slack', action: 'send_message' }],
-    popular: false,
-  },
 ];
 
 export const useIntegrationStore = create<IntegrationState>()(persist(
@@ -218,11 +210,11 @@ export const useIntegrationStore = create<IntegrationState>()(persist(
     integrations: defaultIntegrations,
     automations: [],
     templates: defaultTemplates,
+    isLoading: false,
+    error: null,
     geotabDevices: [],
     geotabAlerts: [],
     geotabBypassResponses: [],
-    isLoading: false,
-    error: null,
     
     addIntegration: (integration) => {
       const newIntegration: Integration = {
@@ -270,13 +262,6 @@ export const useIntegrationStore = create<IntegrationState>()(persist(
           throw new Error('Failed to connect. Please check your credentials.');
         }
         
-        if (id === 'geotab') {
-          const success = await geotabService.connect(credentials as GeotabCredentials);
-          if (!success) {
-            throw new Error('Failed to connect to Geotab. Please check your credentials.');
-          }
-        }
-        
         get().updateIntegration(id, {
           isConnected: true,
           connectedAt: new Date(),
@@ -298,14 +283,6 @@ export const useIntegrationStore = create<IntegrationState>()(persist(
     },
     
     disconnectIntegration: (id) => {
-      if (id === 'geotab') {
-        geotabService.disconnect();
-        set({
-          geotabDevices: [],
-          geotabAlerts: [],
-          geotabBypassResponses: []
-        });
-      }
       get().updateIntegration(id, {
         isConnected: false,
         connectedAt: undefined,
@@ -357,11 +334,6 @@ export const useIntegrationStore = create<IntegrationState>()(persist(
         // Simulate sync operation
         await new Promise(resolve => setTimeout(resolve, 1500));
         
-        if (id === 'geotab' && geotabService.getConnectionStatus()) {
-          await get().fetchGeotabDevices();
-          await get().fetchGeotabAlerts();
-        }
-        
         get().updateIntegration(id, {
           lastSync: new Date(),
         });
@@ -405,46 +377,65 @@ export const useIntegrationStore = create<IntegrationState>()(persist(
       }
     },
     
+    setLoading: (loading) => set({ isLoading: loading }),
+    setError: (error) => set({ error }),
     fetchGeotabDevices: async () => {
       set({ isLoading: true, error: null });
       try {
-        const devices = await geotabService.getDevices();
-        set({ geotabDevices: devices, isLoading: false });
-      } catch (err) {
-        set({ error: 'Failed to fetch Geotab devices', isLoading: false });
+        const integration = get().integrations.find(i => i.id === 'geotab');
+        if (!integration || !integration.isConnected) {
+          throw new Error('Geotab integration not connected');
+        }
+        const credentials = integration.config as GeotabCredentials;
+        const devices = await geotabService.getDevices(credentials);
+        set({ geotabDevices: devices });
+      } catch (error) {
+        set({ 
+          error: error instanceof Error ? error.message : 'Failed to fetch Geotab devices' 
+        });
+      } finally {
+        set({ isLoading: false });
       }
     },
-    
     fetchGeotabAlerts: async () => {
       set({ isLoading: true, error: null });
       try {
-        const alerts = await geotabService.getAlerts();
-        set({ geotabAlerts: alerts, isLoading: false });
-      } catch (err) {
-        set({ error: 'Failed to fetch Geotab alerts', isLoading: false });
+        const integration = get().integrations.find(i => i.id === 'geotab');
+        if (!integration || !integration.isConnected) {
+          throw new Error('Geotab integration not connected');
+        }
+        const credentials = integration.config as GeotabCredentials;
+        const alerts = await geotabService.getAlerts(credentials);
+        set({ geotabAlerts: alerts });
+      } catch (error) {
+        set({ 
+          error: error instanceof Error ? error.message : 'Failed to fetch Geotab alerts' 
+        });
+      } finally {
+        set({ isLoading: false });
       }
     },
-    
-    requestWeighStationBypass: async (deviceId) => {
+    requestWeighStationBypass: async (deviceId, weighStationId) => {
       set({ isLoading: true, error: null });
       try {
-        const response = await geotabService.requestWeighStationBypass(deviceId);
-        set({
-          geotabBypassResponses: [
-            ...get().geotabBypassResponses.filter(r => r.deviceId !== deviceId),
-            response
-          ],
-          isLoading: false
+        const integration = get().integrations.find(i => i.id === 'geotab');
+        if (!integration || !integration.isConnected) {
+          throw new Error('Geotab integration not connected');
+        }
+        const credentials = integration.config as GeotabCredentials;
+        const response = await geotabService.requestWeighStationBypass(credentials, deviceId, weighStationId);
+        set((state) => ({
+          geotabBypassResponses: [...state.geotabBypassResponses, response],
+        }));
+      } catch (error) {
+        set({ 
+          error: error instanceof Error ? error.message : 'Failed to request weigh station bypass' 
         });
-        return response;
-      } catch (err) {
-        set({ error: 'Failed to request weigh station bypass', isLoading: false });
-        throw err;
+        throw error;
+      } finally {
+        set({ isLoading: false });
       }
     },
-    
-    setLoading: (loading) => set({ isLoading: loading }),
-    setError: (error) => set({ error }),
   }),
   {
     name: 'integration-storage',
@@ -452,6 +443,8 @@ export const useIntegrationStore = create<IntegrationState>()(persist(
     partialize: (state) => ({
       integrations: state.integrations,
       automations: state.automations,
+      geotabDevices: state.geotabDevices,
+      geotabAlerts: state.geotabAlerts,
       geotabBypassResponses: state.geotabBypassResponses,
     }),
   }

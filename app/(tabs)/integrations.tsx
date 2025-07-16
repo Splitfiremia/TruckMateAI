@@ -282,7 +282,7 @@ export default function IntegrationsScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor={colors.primary}
+            tintColor={colors.primary.primary}
           />
         }
       >
@@ -349,7 +349,7 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
   activeTabButtonText: {
-    color: colors.primary,
+    color: colors.primary.primary,
   },
   content: {
     flex: 1,
@@ -374,7 +374,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: colors.primary + '20',
+    backgroundColor: colors.primary.primary + '20',
     justifyContent: 'center',
     alignItems: 'center',
   },

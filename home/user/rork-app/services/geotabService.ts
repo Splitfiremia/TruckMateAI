@@ -1,101 +1,140 @@
-import { GeotabCredentials, GeotabDevice, GeotabAlert, WeighStationBypassResponse } from '@/types';
+import { GeotabCredentials, GeotabDevice, GeotabAlert, WeighStationBypassResponse } from '../types/index';
 
-// Mock API for development purposes
-export class GeotabService {
-  private credentials: GeotabCredentials | null = null;
-  private isConnected: boolean = false;
-
-  async connect(credentials: GeotabCredentials): Promise<boolean> {
-    try {
-      // Simulate API call to authenticate with Geotab
-      console.log('Connecting to Geotab with credentials:', credentials);
-      this.credentials = credentials;
-      this.isConnected = true;
-      return true;
-    } catch (error) {
-      console.error('Failed to connect to Geotab:', error);
-      this.isConnected = false;
-      return false;
-    }
-  }
-
-  async disconnect(): Promise<void> {
-    this.credentials = null;
-    this.isConnected = false;
-  }
-
-  async getDevices(): Promise<GeotabDevice[]> {
-    if (!this.isConnected) {
-      throw new Error('Not connected to Geotab');
-    }
-
-    // Mock data for devices
-    return [
-      {
-        id: 'device1',
-        name: 'Truck 1',
-        vin: '1FUJGLDR0CSBN1234',
-        licensePlate: 'ABC-1234',
-        lastLocation: { latitude: 40.7128, longitude: -74.0060, address: 'New York, NY' },
-        lastUpdated: new Date().toISOString(),
+// Mock API for Geotab integration
+export async function getDevices(credentials: GeotabCredentials): Promise<GeotabDevice[]> {
+  // Simulate network request
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
+  // Return mock data
+  return [
+    {
+      id: 'device1',
+      name: 'Truck 001',
+      serialNumber: 'GT123456789',
+      vehicleIdentificationNumber: '1FUJGLDR0JL123456',
+      licensePlate: 'TRK-1234',
+      lastLocation: {
+        latitude: 40.7128,
+        longitude: -74.0060,
+        address: '123 Main St, New York, NY',
       },
-      {
-        id: 'device2',
-        name: 'Truck 2',
-        vin: '1FUJGLDR0CSBN5678',
-        licensePlate: 'XYZ-5678',
-        lastLocation: { latitude: 34.0522, longitude: -118.2437, address: 'Los Angeles, CA' },
-        lastUpdated: new Date().toISOString(),
+      status: 'Online',
+      lastUpdate: new Date().toISOString(),
+    },
+    {
+      id: 'device2',
+      name: 'Truck 002',
+      serialNumber: 'GT987654321',
+      vehicleIdentificationNumber: '1FUJGLDR0JL654321',
+      licensePlate: 'TRK-5678',
+      lastLocation: {
+        latitude: 34.0522,
+        longitude: -118.2437,
+        address: '456 Oak Ave, Los Angeles, CA',
       },
-    ];
-  }
-
-  async getAlerts(): Promise<GeotabAlert[]> {
-    if (!this.isConnected) {
-      throw new Error('Not connected to Geotab');
-    }
-
-    // Mock data for alerts
-    return [
-      {
-        id: 'alert1',
-        deviceId: 'device1',
-        type: 'Safety Alert',
-        message: 'Hard braking detected',
-        severity: 'high',
-        location: { latitude: 40.7128, longitude: -74.0060, address: 'New York, NY' },
-        timestamp: new Date().toISOString(),
+      status: 'Online',
+      lastUpdate: new Date(Date.now() - 3600000).toISOString(),
+    },
+    {
+      id: 'device3',
+      name: 'Truck 003',
+      serialNumber: 'GT112233445',
+      vehicleIdentificationNumber: '1FUJGLDR0JL112233',
+      licensePlate: 'TRK-9012',
+      lastLocation: {
+        latitude: 41.8781,
+        longitude: -87.6298,
+        address: '789 Pine Rd, Chicago, IL',
       },
-      {
-        id: 'alert2',
-        deviceId: 'device2',
-        type: 'Weigh Station Alert',
-        message: 'Weigh station ahead in 5 miles',
-        severity: 'medium',
-        location: { latitude: 34.0522, longitude: -118.2437, address: 'Los Angeles, CA' },
-        timestamp: new Date().toISOString(),
-      },
-    ];
-  }
-
-  async requestWeighStationBypass(deviceId: string): Promise<WeighStationBypassResponse> {
-    if (!this.isConnected) {
-      throw new Error('Not connected to Geotab');
-    }
-
-    // Mock response for weigh station bypass request
-    return {
-      deviceId,
-      requestId: `req_${Math.random().toString(36).substring(7)}`,
-      status: 'approved',
-      message: 'Bypass approved for weigh station at current location',
-      validUntil: new Date(Date.now() + 30 * 60000).toISOString(), // Valid for 30 minutes
-    };
-  }
-
-  getConnectionStatus(): boolean {
-    return this.isConnected;
-  }
+      status: 'Offline',
+      lastUpdate: new Date(Date.now() - 86400000).toISOString(),
+    },
+  ];
 }
 
-export const geotabService = new GeotabService();
+export async function getAlerts(credentials: GeotabCredentials): Promise<GeotabAlert[]> {
+  // Simulate network request
+  await new Promise(resolve => setTimeout(resolve, 800));
+  
+  // Return mock data
+  return [
+    {
+      id: 'alert1',
+      deviceId: 'device1',
+      message: 'Speeding detected: 75 mph in 65 mph zone',
+      severity: 'Medium',
+      type: 'Safety',
+      timestamp: new Date(Date.now() - 1800000).toISOString(),
+      location: {
+        latitude: 40.7128,
+        longitude: -74.0060,
+        address: 'I-95 Near Exit 12',
+      },
+      acknowledged: false,
+      actionRequired: true,
+    },
+    {
+      id: 'alert2',
+      deviceId: 'device2',
+      message: 'HOS Violation: Driving time exceeded',
+      severity: 'High',
+      type: 'Compliance',
+      timestamp: new Date(Date.now() - 3600000).toISOString(),
+      location: {
+        latitude: 34.0522,
+        longitude: -118.2437,
+        address: 'I-10 Near Exit 45',
+      },
+      acknowledged: false,
+      actionRequired: true,
+    },
+    {
+      id: 'alert3',
+      deviceId: 'device1',
+      message: 'Maintenance due: Oil change in 500 miles',
+      severity: 'Low',
+      type: 'Maintenance',
+      timestamp: new Date(Date.now() - 86400000).toISOString(),
+      acknowledged: true,
+      actionRequired: false,
+    },
+    {
+      id: 'alert4',
+      deviceId: 'device3',
+      message: 'Device offline for 24 hours',
+      severity: 'Critical',
+      type: 'Operational',
+      timestamp: new Date(Date.now() - 90000000).toISOString(),
+      acknowledged: false,
+      actionRequired: true,
+    },
+  ];
+}
+
+export async function requestWeighStationBypass(
+  credentials: GeotabCredentials, 
+  deviceId: string, 
+  weighStationId: string
+): Promise<WeighStationBypassResponse> {
+  // Simulate network request
+  await new Promise(resolve => setTimeout(resolve, 1200));
+  
+  // Mock logic for bypass response
+  const bypassGranted = Math.random() > 0.3; // 70% chance of approval
+  
+  return {
+    requestId: `req_${Date.now()}`,
+    deviceId,
+    weighStationId,
+    weighStationName: 'I-80 Weigh Station #42',
+    location: {
+      latitude: 41.2524,
+      longitude: -95.8995,
+      address: 'I-80 Mile Marker 440',
+    },
+    bypassGranted,
+    reason: bypassGranted ? 'Vehicle pre-cleared based on safety record' : 'Random inspection required',
+    validUntil: new Date(Date.now() + 3600000).toISOString(), // Valid for 1 hour
+    timestamp: new Date().toISOString(),
+  };
+}
