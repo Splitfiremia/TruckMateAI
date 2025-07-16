@@ -30,6 +30,7 @@ import { WeatherCard } from '@/components/WeatherCard';
 import { WeatherAlertsModal } from '@/components/WeatherAlertsModal';
 import { WeatherForecastModal } from '@/components/WeatherForecastModal';
 import { WeatherNotificationSystem } from '@/components/WeatherNotificationSystem';
+import MaintenanceSummaryCard from '@/components/MaintenanceSummaryCard';
 import { useUserStore } from '@/store/userStore';
 import { useBrandingStore } from '@/store/brandingStore';
 import { useLogbookStore } from '@/store/logbookStore';
@@ -340,6 +341,8 @@ export default function DashboardScreen() {
         </View>
         
         <WeatherCard onPress={() => setWeatherForecastVisible(true)} />
+        
+        <MaintenanceSummaryCard />
         
         <ComplianceAlert />
         

@@ -297,3 +297,165 @@ export interface TripOverrideLog {
     notes?: string;
   };
 }
+
+// Predictive Maintenance Types
+export interface VehicleDiagnostics {
+  id: string;
+  vehicleId: string;
+  timestamp: string;
+  engineRpm: number;
+  engineTemp: number;
+  oilPressure: number;
+  fuelLevel: number;
+  batteryVoltage: number;
+  coolantTemp: number;
+  transmissionTemp: number;
+  brakeSystemPressure: number;
+  tirePressure: {
+    frontLeft: number;
+    frontRight: number;
+    rearLeft: number;
+    rearRight: number;
+  };
+  mileage: number;
+  faultCodes: string[];
+  location: {
+    latitude: number;
+    longitude: number;
+    address: string;
+  };
+}
+
+export interface MaintenancePrediction {
+  id: string;
+  vehicleId: string;
+  componentType: 'Engine' | 'Transmission' | 'Brakes' | 'Tires' | 'Battery' | 'Cooling System' | 'Fuel System' | 'Electrical';
+  componentName: string;
+  currentCondition: number; // 0-100 (100 = perfect condition)
+  predictedFailureDate: string;
+  milesUntilFailure: number;
+  confidenceLevel: number; // 0-100
+  severity: 'Critical' | 'High' | 'Medium' | 'Low';
+  estimatedCost: number;
+  symptoms: string[];
+  recommendations: string[];
+  preventiveMaintenance: PreventiveAction[];
+  basedOnData: {
+    diagnosticReadings: number;
+    historicalPatterns: boolean;
+    manufacturerSpecs: boolean;
+    weatherConditions: boolean;
+    drivingPatterns: boolean;
+  };
+}
+
+export interface PreventiveAction {
+  id: string;
+  action: string;
+  urgency: 'Immediate' | 'This Week' | 'This Month' | 'Next Service';
+  estimatedTime: string;
+  estimatedCost: number;
+  canDelay: boolean;
+  delayRisk: string;
+}
+
+export interface MaintenanceAlert {
+  id: string;
+  vehicleId: string;
+  type: 'Prediction' | 'Immediate' | 'Scheduled' | 'Overdue';
+  priority: 'Critical' | 'High' | 'Medium' | 'Low';
+  title: string;
+  message: string;
+  component: string;
+  actionRequired: boolean;
+  dueDate: string;
+  estimatedCost: number;
+  nearbyShops: RepairShop[];
+  dismissed: boolean;
+  dismissedAt?: string;
+  resolvedAt?: string;
+}
+
+export interface RepairShop {
+  id: string;
+  name: string;
+  address: string;
+  phone: string;
+  rating: number;
+  reviewCount: number;
+  specialties: string[];
+  distance: number;
+  estimatedCost: number;
+  availability: 'Same Day' | 'Next Day' | '2-3 Days' | '1 Week+';
+  certifications: string[];
+  workingHours: {
+    monday: string;
+    tuesday: string;
+    wednesday: string;
+    thursday: string;
+    friday: string;
+    saturday: string;
+    sunday: string;
+  };
+}
+
+export interface MaintenanceHistory {
+  id: string;
+  vehicleId: string;
+  date: string;
+  mileage: number;
+  type: 'Preventive' | 'Repair' | 'Emergency' | 'Inspection';
+  component: string;
+  description: string;
+  cost: number;
+  shopName: string;
+  shopLocation: string;
+  partsReplaced: string[];
+  laborHours: number;
+  warranty: {
+    parts: string;
+    labor: string;
+  };
+  nextServiceDue?: string;
+  nextServiceMileage?: number;
+}
+
+export interface VehicleHealth {
+  vehicleId: string;
+  overallScore: number; // 0-100
+  lastUpdated: string;
+  criticalIssues: number;
+  upcomingMaintenance: number;
+  systemHealth: {
+    engine: number;
+    transmission: number;
+    brakes: number;
+    tires: number;
+    electrical: number;
+    cooling: number;
+    fuel: number;
+  };
+  predictedReliability: number; // 0-100 for next 30 days
+  recommendedActions: string[];
+}
+
+export interface TelematiicsData {
+  vehicleId: string;
+  timestamp: string;
+  speed: number;
+  acceleration: number;
+  braking: number;
+  idleTime: number;
+  fuelConsumption: number;
+  engineLoad: number;
+  gpsLocation: {
+    latitude: number;
+    longitude: number;
+  };
+  drivingScore: number;
+  harshEvents: {
+    acceleration: number;
+    braking: number;
+    cornering: number;
+  };
+}
