@@ -8,8 +8,27 @@ import {
   Platform,
   Dimensions,
 } from 'react-native';
-import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from 'react-native-maps';
-import MapViewDirections from 'react-native-maps-directions';
+
+// Conditionally import react-native-maps only on native platforms
+let MapView: any = null;
+let Marker: any = null;
+let Polyline: any = null;
+let PROVIDER_GOOGLE: any = null;
+let MapViewDirections: any = null;
+
+if (Platform.OS !== 'web') {
+  const maps = require('react-native-maps');
+  MapView = maps.default;
+  Marker = maps.Marker;
+  Polyline = maps.Polyline;
+  PROVIDER_GOOGLE = maps.PROVIDER_GOOGLE;
+  
+  try {
+    MapViewDirections = require('react-native-maps-directions').default;
+  } catch (e) {
+    console.warn('react-native-maps-directions not available');
+  }
+}
 import {
   Navigation,
   MapPin,
@@ -39,7 +58,7 @@ const RouteOptimizationMap: React.FC<RouteOptimizationMapProps> = ({
   onWaypointPress,
   onMapPress,
 }) => {
-  const mapRef = useRef<MapView>(null);
+  const mapRef = useRef<any>(null);
   const [mapReady, setMapReady] = useState(false);
   
   const {
@@ -197,15 +216,15 @@ const RouteOptimizationMap: React.FC<RouteOptimizationMapProps> = ({
   };
 
   const renderRoute = () => {
-    if (!currentRoute || waypoints.length < 2) return null;
+    if (!currentRoute || waypoints.length < 2 || Platform.OS === 'web') return null;
 
     const coordinates = waypoints.map(wp => ({
       latitude: wp.latitude,
       longitude: wp.longitude,
     }));
 
-    if (Platform.OS === 'web') {
-      // Fallback for web - simple polyline
+    // Simple polyline for basic route display
+    if (!MapViewDirections) {
       return (
         <Polyline
           coordinates={coordinates}
@@ -215,7 +234,7 @@ const RouteOptimizationMap: React.FC<RouteOptimizationMapProps> = ({
       );
     }
 
-    // Use MapViewDirections for native platforms
+    // Use MapViewDirections for native platforms when available
     return (
       <MapViewDirections
         origin={coordinates[0]}
@@ -238,26 +257,75 @@ const RouteOptimizationMap: React.FC<RouteOptimizationMapProps> = ({
     );
   };
 
+  // Web fallback component
+  const WebMapFallback = () => (
+    <View style={[styles.map, styles.webFallback]}>
+      <View style={styles.webFallbackContent}>
+        <MapPin size={48} color={colors.primary} />
+        <Text style={styles.webFallbackTitle}>Map View</Text>
+        <Text style={styles.webFallbackText}>
+          Interactive maps are not available on web.
+          {waypoints.length > 0 && (
+            `\n\nWaypoints (${waypoints.length}):`
+          )}
+        </Text>
+        {waypoints.length > 0 && (
+          <View style={styles.waypointsList}>
+            {waypoints.map((waypoint, index) => (
+              <View key={waypoint.id} style={styles.waypointItem}>
+                <Text style={styles.waypointNumber}>{index + 1}</Text>
+                <View style={styles.waypointInfo}>
+                  <Text style={styles.waypointAddress}>{waypoint.address}</Text>
+                  <Text style={styles.waypointType}>{waypoint.type}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
+        {currentRoute && (
+          <View style={styles.webRouteInfo}>
+            <Text style={styles.webRouteTitle}>Route Summary</Text>
+            <Text style={styles.webRouteDetail}>
+              Distance: {currentRoute.totalDistance.toFixed(1)} mi
+            </Text>
+            <Text style={styles.webRouteDetail}>
+              Duration: {Math.floor(currentRoute.totalDuration / 60)}h {Math.floor(currentRoute.totalDuration % 60)}m
+            </Text>
+            <Text style={styles.webRouteDetail}>
+              Fuel Cost: ${currentRoute.estimatedFuelCost.toFixed(2)}
+            </Text>
+          </View>
+        )}
+      </View>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
-      <MapView
-        ref={mapRef}
-        style={styles.map}
-        provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
-        initialRegion={region}
-        showsTraffic={showTraffic}
-        showsBuildings={false}
-        showsIndoors={false}
-        onMapReady={() => setMapReady(true)}
-        onPress={(event) => {
-          onMapPress?.(event.nativeEvent.coordinate);
-        }}
-      >
-        {renderWaypoints()}
-        {renderFuelStops()}
-        {renderWeatherAlerts()}
-        {renderRoute()}
-      </MapView>
+      {Platform.OS === 'web' ? (
+        <WebMapFallback />
+      ) : (
+        MapView && (
+          <MapView
+            ref={mapRef}
+            style={styles.map}
+            provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
+            initialRegion={region}
+            showsTraffic={showTraffic}
+            showsBuildings={false}
+            showsIndoors={false}
+            onMapReady={() => setMapReady(true)}
+            onPress={(event) => {
+              onMapPress?.(event.nativeEvent.coordinate);
+            }}
+          >
+            {renderWaypoints()}
+            {renderFuelStops()}
+            {renderWeatherAlerts()}
+            {renderRoute()}
+          </MapView>
+        )
+      )}
 
       {/* Control Panel */}
       <View style={styles.controlPanel}>
@@ -327,8 +395,8 @@ const RouteOptimizationMap: React.FC<RouteOptimizationMapProps> = ({
         </View>
       </View>
 
-      {/* Route Info */}
-      {currentRoute && (
+      {/* Route Info - Only show on native platforms */}
+      {Platform.OS !== 'web' && currentRoute && (
         <View style={styles.routeInfo}>
           <View style={styles.routeInfoRow}>
             <Text style={styles.routeInfoLabel}>Distance:</Text>
@@ -483,6 +551,84 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: colors.text.primary,
+  },
+  webFallback: {
+    backgroundColor: colors.background.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  webFallbackContent: {
+    alignItems: 'center',
+    padding: 32,
+    maxWidth: 400,
+  },
+  webFallbackTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: colors.text.primary,
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  webFallbackText: {
+    fontSize: 16,
+    color: colors.text.secondary,
+    textAlign: 'center',
+    lineHeight: 24,
+  },
+  waypointsList: {
+    width: '100%',
+    marginTop: 24,
+    gap: 12,
+  },
+  waypointItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.card,
+    padding: 12,
+    borderRadius: 8,
+    gap: 12,
+  },
+  waypointNumber: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: colors.primary,
+    color: colors.white,
+    textAlign: 'center',
+    lineHeight: 24,
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  waypointInfo: {
+    flex: 1,
+  },
+  waypointAddress: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.text.primary,
+  },
+  waypointType: {
+    fontSize: 12,
+    color: colors.text.secondary,
+    textTransform: 'capitalize',
+  },
+  webRouteInfo: {
+    width: '100%',
+    marginTop: 24,
+    padding: 16,
+    backgroundColor: colors.card,
+    borderRadius: 12,
+  },
+  webRouteTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: colors.text.primary,
+    marginBottom: 8,
+  },
+  webRouteDetail: {
+    fontSize: 14,
+    color: colors.text.secondary,
+    marginBottom: 4,
   },
 });
 
