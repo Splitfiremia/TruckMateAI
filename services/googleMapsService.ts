@@ -1,1 +1,267 @@
-import { Platform } from 'react-native';\nimport {\n  RouteWaypoint,\n  OptimizedRoute,\n  RouteOptimizationPreferences,\n  TrafficIncident,\n  FuelStop,\n  TruckRestriction,\n  WeatherAlert,\n} from '@/types';\n\n// Mock Google Maps API key - in production, this should be from environment variables\nconst GOOGLE_MAPS_API_KEY = 'YOUR_GOOGLE_MAPS_API_KEY';\n\nclass GoogleMapsService {\n  private apiKey: string;\n\n  constructor(apiKey: string = GOOGLE_MAPS_API_KEY) {\n    this.apiKey = apiKey;\n  }\n\n  /**\n   * Geocode an address to get coordinates\n   */\n  async geocodeAddress(address: string): Promise<{ latitude: number; longitude: number } | null> {\n    try {\n      // Mock implementation - in production, use Google Geocoding API\n      if (Platform.OS === 'web') {\n        // For web, you could use the Geocoding API directly\n        console.log('Geocoding address:', address);\n      }\n      \n      // Return mock coordinates for demo\n      return {\n        latitude: 40.7128 + (Math.random() - 0.5) * 10,\n        longitude: -74.0060 + (Math.random() - 0.5) * 10,\n      };\n    } catch (error) {\n      console.error('Geocoding failed:', error);\n      return null;\n    }\n  }\n\n  /**\n   * Reverse geocode coordinates to get address\n   */\n  async reverseGeocode(latitude: number, longitude: number): Promise<string | null> {\n    try {\n      // Mock implementation\n      return `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;\n    } catch (error) {\n      console.error('Reverse geocoding failed:', error);\n      return null;\n    }\n  }\n\n  /**\n   * Optimize route with multiple waypoints\n   */\n  async optimizeRoute(\n    waypoints: RouteWaypoint[],\n    preferences: RouteOptimizationPreferences\n  ): Promise<OptimizedRoute | null> {\n    try {\n      // Mock optimization logic\n      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API delay\n\n      const totalDistance = waypoints.length * 150 + Math.random() * 200;\n      const baseTime = totalDistance / (preferences.avoidHighways ? 45 : 65); // mph\n      const totalDuration = baseTime * 60; // Convert to minutes\n\n      // Apply preferences\n      let fuelCost = (totalDistance / preferences.mpg) * 3.85;\n      if (preferences.prioritizeFuel) {\n        fuelCost *= 0.9; // 10% fuel savings\n      }\n\n      let tollCosts = 0;\n      if (!preferences.avoidTolls) {\n        tollCosts = Math.random() * 50;\n      }\n\n      const optimizedRoute: OptimizedRoute = {\n        id: `route_${Date.now()}`,\n        waypoints,\n        totalDistance,\n        totalDuration,\n        estimatedFuelCost: fuelCost,\n        tollCosts,\n        routePolyline: this.generateMockPolyline(waypoints),\n        trafficConditions: this.getRandomTrafficCondition(),\n        weatherAlerts: [],\n        truckRestrictions: [],\n        optimizationScore: this.calculateOptimizationScore(preferences),\n        createdAt: new Date().toISOString(),\n        lastUpdated: new Date().toISOString(),\n      };\n\n      return optimizedRoute;\n    } catch (error) {\n      console.error('Route optimization failed:', error);\n      return null;\n    }\n  }\n\n  /**\n   * Get real-time traffic data\n   */\n  async getTrafficData(route: OptimizedRoute): Promise<TrafficIncident[]> {\n    try {\n      // Mock traffic incidents\n      const incidents: TrafficIncident[] = [\n        {\n          id: `traffic_${Date.now()}`,\n          type: 'construction',\n          severity: 'minor',\n          description: 'Lane closure for road work',\n          location: {\n            latitude: route.waypoints[0].latitude + 0.1,\n            longitude: route.waypoints[0].longitude + 0.1,\n            address: 'Highway construction zone',\n          },\n          estimatedDelay: Math.floor(Math.random() * 30) + 5,\n          startTime: new Date().toISOString(),\n          alternativeRoute: 'Take alternate route via local roads',\n        },\n      ];\n\n      return incidents;\n    } catch (error) {\n      console.error('Failed to get traffic data:', error);\n      return [];\n    }\n  }\n\n  /**\n   * Find nearby fuel stops\n   */\n  async findNearbyFuelStops(\n    latitude: number,\n    longitude: number,\n    radius: number = 25\n  ): Promise<FuelStop[]> {\n    try {\n      // Mock fuel stops\n      const fuelStops: FuelStop[] = [\n        {\n          id: 'fuel_pilot_1',\n          name: 'Pilot Travel Center',\n          brand: 'Pilot',\n          address: '123 Highway 95, Exit 42',\n          latitude: latitude + (Math.random() - 0.5) * 0.2,\n          longitude: longitude + (Math.random() - 0.5) * 0.2,\n          currentPrice: 3.45 + Math.random() * 0.3,\n          amenities: ['Restaurant', 'Showers', 'Parking', 'ATM'],\n          truckParking: true,\n          showers: true,\n          restaurant: true,\n          distance: Math.random() * radius,\n          detourTime: Math.floor(Math.random() * 20) + 5,\n          rating: 3.5 + Math.random() * 1.5,\n          reviewCount: Math.floor(Math.random() * 2000) + 100,\n        },\n        {\n          id: 'fuel_ta_1',\n          name: 'TA Travel Center',\n          brand: 'TravelCenters',\n          address: '456 Interstate 80, Mile 15',\n          latitude: latitude + (Math.random() - 0.5) * 0.2,\n          longitude: longitude + (Math.random() - 0.5) * 0.2,\n          currentPrice: 3.52 + Math.random() * 0.3,\n          amenities: ['Food Court', 'Laundry', 'Parking'],\n          truckParking: true,\n          showers: false,\n          restaurant: true,\n          distance: Math.random() * radius,\n          detourTime: Math.floor(Math.random() * 20) + 5,\n          rating: 3.5 + Math.random() * 1.5,\n          reviewCount: Math.floor(Math.random() * 2000) + 100,\n        },\n      ];\n\n      return fuelStops.sort((a, b) => a.distance - b.distance);\n    } catch (error) {\n      console.error('Failed to find fuel stops:', error);\n      return [];\n    }\n  }\n\n  /**\n   * Get truck restrictions along route\n   */\n  async getTruckRestrictions(route: OptimizedRoute): Promise<TruckRestriction[]> {\n    try {\n      // Mock truck restrictions\n      const restrictions: TruckRestriction[] = [\n        {\n          type: 'height',\n          value: 13.5,\n          description: 'Low bridge - 13\\'6\" clearance',\n          location: {\n            latitude: route.waypoints[0].latitude + 0.05,\n            longitude: route.waypoints[0].longitude + 0.05,\n            address: 'Bridge on Route 1',\n          },\n          severity: 'restriction',\n        },\n      ];\n\n      return restrictions;\n    } catch (error) {\n      console.error('Failed to get truck restrictions:', error);\n      return [];\n    }\n  }\n\n  /**\n   * Get weather alerts along route\n   */\n  async getWeatherAlerts(route: OptimizedRoute): Promise<WeatherAlert[]> {\n    try {\n      // Mock weather alerts\n      const alerts: WeatherAlert[] = [\n        {\n          id: `weather_${Date.now()}`,\n          type: 'rain',\n          severity: 'moderate',\n          description: 'Heavy rain expected, reduced visibility',\n          location: {\n            latitude: route.waypoints[Math.floor(route.waypoints.length / 2)].latitude,\n            longitude: route.waypoints[Math.floor(route.waypoints.length / 2)].longitude,\n            address: 'Midpoint of route',\n          },\n          startTime: new Date().toISOString(),\n          endTime: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),\n          impact: 'medium',\n        },\n      ];\n\n      return alerts;\n    } catch (error) {\n      console.error('Failed to get weather alerts:', error);\n      return [];\n    }\n  }\n\n  /**\n   * Calculate ETA with real-time traffic\n   */\n  async calculateETA(\n    route: OptimizedRoute,\n    currentLocation: { latitude: number; longitude: number }\n  ): Promise<{ eta: string; delay: number }> {\n    try {\n      // Mock ETA calculation\n      const baseETA = new Date(Date.now() + route.totalDuration * 60 * 1000);\n      const trafficDelay = Math.floor(Math.random() * 30); // 0-30 minutes delay\n      const actualETA = new Date(baseETA.getTime() + trafficDelay * 60 * 1000);\n\n      return {\n        eta: actualETA.toISOString(),\n        delay: trafficDelay,\n      };\n    } catch (error) {\n      console.error('Failed to calculate ETA:', error);\n      return {\n        eta: new Date(Date.now() + route.totalDuration * 60 * 1000).toISOString(),\n        delay: 0,\n      };\n    }\n  }\n\n  // Helper methods\n  private generateMockPolyline(waypoints: RouteWaypoint[]): string {\n    // In a real implementation, this would be the encoded polyline from Google Maps\n    return waypoints.map(wp => `${wp.latitude},${wp.longitude}`).join('|');\n  }\n\n  private getRandomTrafficCondition(): 'light' | 'moderate' | 'heavy' {\n    const conditions = ['light', 'moderate', 'heavy'] as const;\n    return conditions[Math.floor(Math.random() * conditions.length)];\n  }\n\n  private calculateOptimizationScore(preferences: RouteOptimizationPreferences): number {\n    let score = 75; // Base score\n    \n    if (preferences.prioritizeTime) score += 10;\n    if (preferences.prioritizeFuel) score += 8;\n    if (preferences.preferTruckRoutes) score += 12;\n    if (preferences.avoidTolls) score -= 5; // Might increase distance\n    \n    return Math.min(100, score + Math.random() * 10);\n  }\n}\n\nexport const googleMapsService = new GoogleMapsService();\nexport default GoogleMapsService;
+import { Platform } from 'react-native';
+import {
+  RouteWaypoint,
+  OptimizedRoute,
+  RouteOptimizationPreferences,
+  TrafficIncident,
+  FuelStop,
+  TruckRestriction,
+  WeatherAlert,
+} from '@/types';
+
+// Mock Google Maps API key - in production, this should be from environment variables
+const GOOGLE_MAPS_API_KEY = 'YOUR_GOOGLE_MAPS_API_KEY';
+
+class GoogleMapsService {
+  private apiKey: string;
+
+  constructor(apiKey: string = GOOGLE_MAPS_API_KEY) {
+    this.apiKey = apiKey;
+  }
+
+  /**
+   * Geocode an address to get coordinates
+   */
+  async geocodeAddress(address: string): Promise<{ latitude: number; longitude: number } | null> {
+    try {
+      // Mock implementation - in production, use Google Geocoding API
+      if (Platform.OS === 'web') {
+        // For web, you could use the Geocoding API directly
+        console.log('Geocoding address:', address);
+      }
+      
+      // Return mock coordinates for demo
+      return {
+        latitude: 40.7128 + (Math.random() - 0.5) * 10,
+        longitude: -74.0060 + (Math.random() - 0.5) * 10,
+      };
+    } catch (error) {
+      console.error('Geocoding failed:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Reverse geocode coordinates to get address
+   */
+  async reverseGeocode(latitude: number, longitude: number): Promise<string | null> {
+    try {
+      // Mock implementation
+      return `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+    } catch (error) {
+      console.error('Reverse geocoding failed:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Optimize route with multiple waypoints
+   */
+  async optimizeRoute(
+    waypoints: RouteWaypoint[],
+    preferences: RouteOptimizationPreferences
+  ): Promise<OptimizedRoute | null> {
+    try {
+      // Mock optimization logic
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API delay
+
+      const totalDistance = waypoints.length * 150 + Math.random() * 200;
+      const totalDuration = totalDistance * 1.2 + Math.random() * 60;
+      const fuelCost = totalDistance * 0.35 + Math.random() * 50;
+
+      // Generate optimized waypoint order
+      const optimizedWaypoints = [...waypoints].sort(() => Math.random() - 0.5);
+
+      return {
+        waypoints: optimizedWaypoints,
+        totalDistance: Math.round(totalDistance),
+        totalDuration: Math.round(totalDuration),
+        estimatedFuelCost: Math.round(fuelCost * 100) / 100,
+        routePolyline: 'mock_polyline_data',
+        trafficIncidents: this.generateMockTrafficIncidents(),
+        fuelStops: this.generateMockFuelStops(waypoints),
+        truckRestrictions: this.generateMockTruckRestrictions(),
+        weatherAlerts: this.generateMockWeatherAlerts(),
+        tollCosts: Math.round(Math.random() * 50 * 100) / 100,
+        co2Emissions: Math.round(totalDistance * 2.3 * 100) / 100,
+      };
+    } catch (error) {
+      console.error('Route optimization failed:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Get real-time traffic information
+   */
+  async getTrafficInfo(route: string): Promise<TrafficIncident[]> {
+    try {
+      // Mock traffic data
+      return this.generateMockTrafficIncidents();
+    } catch (error) {
+      console.error('Failed to get traffic info:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Find fuel stops along route
+   */
+  async findFuelStops(
+    waypoints: RouteWaypoint[],
+    fuelRange: number = 300
+  ): Promise<FuelStop[]> {
+    try {
+      return this.generateMockFuelStops(waypoints);
+    } catch (error) {
+      console.error('Failed to find fuel stops:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Get truck restrictions for route
+   */
+  async getTruckRestrictions(route: string): Promise<TruckRestriction[]> {
+    try {
+      return this.generateMockTruckRestrictions();
+    } catch (error) {
+      console.error('Failed to get truck restrictions:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Calculate distance between two points
+   */
+  calculateDistance(
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+  ): number {
+    const R = 3959; // Earth's radius in miles
+    const dLat = this.toRadians(lat2 - lat1);
+    const dLon = this.toRadians(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(this.toRadians(lat1)) *
+        Math.cos(this.toRadians(lat2)) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  private toRadians(degrees: number): number {
+    return degrees * (Math.PI / 180);
+  }
+
+  private generateMockTrafficIncidents(): TrafficIncident[] {
+    const incidents: TrafficIncident[] = [
+      {
+        id: '1',
+        type: 'accident',
+        severity: 'moderate',
+        description: 'Multi-vehicle accident on I-95 North',
+        location: 'I-95 North, Mile 45',
+        coordinates: { latitude: 40.7589, longitude: -73.9851 },
+        estimatedDelay: 25,
+        startTime: new Date(Date.now() - 30 * 60 * 1000),
+        endTime: new Date(Date.now() + 45 * 60 * 1000),
+      },
+      {
+        id: '2',
+        type: 'construction',
+        severity: 'low',
+        description: 'Lane closure for road maintenance',
+        location: 'Route 287, Mile 12',
+        coordinates: { latitude: 40.6892, longitude: -74.3444 },
+        estimatedDelay: 10,
+        startTime: new Date(Date.now() - 2 * 60 * 60 * 1000),
+        endTime: new Date(Date.now() + 4 * 60 * 60 * 1000),
+      },
+    ];
+
+    return incidents;
+  }
+
+  private generateMockFuelStops(waypoints: RouteWaypoint[]): FuelStop[] {
+    const fuelStops: FuelStop[] = [
+      {
+        id: '1',
+        name: 'TravelCenters of America',
+        address: '123 Highway Blvd, Anytown, ST 12345',
+        coordinates: { latitude: 40.7282, longitude: -74.0776 },
+        fuelPrice: 3.89,
+        amenities: ['restaurant', 'shower', 'parking', 'wifi'],
+        truckFriendly: true,
+        rating: 4.2,
+        distanceFromRoute: 0.5,
+        estimatedDetour: 8,
+      },
+      {
+        id: '2',
+        name: 'Pilot Flying J',
+        address: '456 Truck Stop Way, Somewhere, ST 67890',
+        coordinates: { latitude: 40.6501, longitude: -73.9496 },
+        fuelPrice: 3.92,
+        amenities: ['restaurant', 'convenience_store', 'parking'],
+        truckFriendly: true,
+        rating: 4.0,
+        distanceFromRoute: 1.2,
+        estimatedDetour: 12,
+      },
+    ];
+
+    return fuelStops;
+  }
+
+  private generateMockTruckRestrictions(): TruckRestriction[] {
+    const restrictions: TruckRestriction[] = [
+      {
+        id: '1',
+        type: 'height',
+        value: 13.6,
+        unit: 'feet',
+        location: 'Bridge on Route 9',
+        coordinates: { latitude: 40.7505, longitude: -73.9934 },
+        description: 'Low bridge - 13\'6" clearance',
+        severity: 'high',
+      },
+      {
+        id: '2',
+        type: 'weight',
+        value: 80000,
+        unit: 'pounds',
+        location: 'Local road restriction',
+        coordinates: { latitude: 40.7831, longitude: -73.9712 },
+        description: 'Weight limit 40 tons',
+        severity: 'moderate',
+      },
+    ];
+
+    return restrictions;
+  }
+
+  private generateMockWeatherAlerts(): WeatherAlert[] {
+    const alerts: WeatherAlert[] = [
+      {
+        id: '1',
+        type: 'snow',
+        severity: 'moderate',
+        title: 'Winter Weather Advisory',
+        description: 'Snow expected 2-4 inches',
+        area: 'Northern New Jersey',
+        startTime: new Date(Date.now() + 2 * 60 * 60 * 1000),
+        endTime: new Date(Date.now() + 8 * 60 * 60 * 1000),
+        impact: 'Reduced visibility and slippery roads',
+      },
+    ];
+
+    return alerts;
+  }
+}
+
+export const googleMapsService = new GoogleMapsService();
+export default GoogleMapsService;
