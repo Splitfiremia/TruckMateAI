@@ -234,9 +234,7 @@ export default function DashboardScreen() {
             <Text style={styles.subGreeting}>
               {companyName || driverInfo.company}
             </Text>
-            {!settings.hideDefaultBranding && (
-              <Text style={styles.welcomeMessage}>{welcomeMessage}</Text>
-            )}
+            <Text style={styles.welcomeMessage}>{welcomeMessage}</Text>
           </View>
         </View>
         

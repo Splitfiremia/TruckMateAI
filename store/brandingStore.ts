@@ -53,8 +53,8 @@ export interface BrandingPreset {
 
 const defaultBranding: BrandingSettings = {
   companyName: 'Your Company',
-  appName: 'TruckLogPro',
-  welcomeMessage: 'Welcome to your professional trucking companion',
+  appName: 'TruckMate AI',
+  welcomeMessage: 'Welcome to TruckMate AI',
   primaryColor: '#3B82F6',
   secondaryColor: '#10B981',
   accentColor: '#F59E0B',
