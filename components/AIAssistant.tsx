@@ -63,4 +63,526 @@ export default function AIAssistant({ onClose, showHeader = true }: AIAssistantP
   const [recording, setRecording] = useState<Audio.Recording | null>(null);
   const [settingsVisible, setSettingsVisible] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
-  const pulseAnim = useRef(new Animated.Value(1)).current;\n\n  const activeConversation = conversations.find(conv => conv.id === activeConversationId);\n  const messages = activeConversation?.messages || [];\n\n  useEffect(() => {\n    if (!activeConversationId && conversations.length === 0) {\n      createConversation('New Chat');\n    }\n  }, [activeConversationId, conversations.length, createConversation]);\n\n  useEffect(() => {\n    if (!isModelLoaded) {\n      initializeAI();\n    }\n  }, [isModelLoaded]);\n\n  useEffect(() => {\n    if (isRecording) {\n      startPulseAnimation();\n    } else {\n      stopPulseAnimation();\n    }\n  }, [isRecording]);\n\n  const initializeAI = async () => {\n    try {\n      await aiService.initializeModel('small', (progress) => {\n        setModelLoadingProgress(progress);\n      });\n      setModelLoaded(true);\n    } catch (error) {\n      Alert.alert('Error', 'Failed to initialize AI model');\n    }\n  };\n\n  const startPulseAnimation = () => {\n    Animated.loop(\n      Animated.sequence([\n        Animated.timing(pulseAnim, {\n          toValue: 1.2,\n          duration: 800,\n          useNativeDriver: true,\n        }),\n        Animated.timing(pulseAnim, {\n          toValue: 1,\n          duration: 800,\n          useNativeDriver: true,\n        }),\n      ])\n    ).start();\n  };\n\n  const stopPulseAnimation = () => {\n    pulseAnim.setValue(1);\n  };\n\n  const sendMessage = async (text: string, type: 'text' | 'voice' = 'text') => {\n    if (!text.trim() || !activeConversationId) return;\n\n    // Add user message\n    addMessage(activeConversationId, {\n      role: 'user',\n      content: text,\n      type,\n    });\n\n    setProcessing(true);\n\n    try {\n      // Get conversation history for context\n      const conversationHistory = messages.slice(-10).map(msg => ({\n        role: msg.role,\n        content: msg.content,\n      }));\n\n      // Generate AI response\n      const response = await aiService.generateResponse(\n        text,\n        truckingContext,\n        conversationHistory\n      );\n\n      // Add AI response\n      addMessage(activeConversationId, {\n        role: 'assistant',\n        content: response,\n        type: 'text',\n      });\n\n      // Speak response if auto-speak is enabled\n      if (autoSpeak && voiceEnabled && Platform.OS !== 'web') {\n        speakText(response);\n      }\n    } catch (error) {\n      Alert.alert('Error', 'Failed to generate response');\n    } finally {\n      setProcessing(false);\n    }\n  };\n\n  const handleSendText = () => {\n    sendMessage(inputText);\n    setInputText('');\n  };\n\n  const startVoiceRecording = async () => {\n    if (Platform.OS === 'web') {\n      Alert.alert('Voice Recording', 'Voice recording is not available on web');\n      return;\n    }\n\n    try {\n      const permission = await Audio.requestPermissionsAsync();\n      if (!permission.granted) {\n        Alert.alert('Permission Required', 'Microphone permission is required for voice input');\n        return;\n      }\n\n      await Audio.setAudioModeAsync({\n        allowsRecordingIOS: true,\n        playsInSilentModeIOS: true,\n      });\n\n      const { recording } = await Audio.Recording.createAsync(\n        Audio.RecordingOptionsPresets.HIGH_QUALITY\n      );\n\n      setRecording(recording);\n      setRecording(true);\n    } catch (error) {\n      Alert.alert('Error', 'Failed to start recording');\n    }\n  };\n\n  const stopVoiceRecording = async () => {\n    if (!recording) return;\n\n    try {\n      setRecording(false);\n      await recording.stopAndUnloadAsync();\n      \n      if (Platform.OS !== 'web') {\n        await Audio.setAudioModeAsync({\n          allowsRecordingIOS: false,\n        });\n      }\n\n      // In a real implementation, you would transcribe the audio here\n      // For demo purposes, we'll simulate voice input\n      const simulatedTranscription = \"What's my remaining drive time?\";\n      sendMessage(simulatedTranscription, 'voice');\n      \n      setRecording(null);\n    } catch (error) {\n      Alert.alert('Error', 'Failed to process voice input');\n    }\n  };\n\n  const speakText = async (text: string) => {\n    if (Platform.OS === 'web') return;\n\n    try {\n      setSpeaking(true);\n      await Speech.speak(text, {\n        language: 'en-US',\n        pitch: 1.0,\n        rate: 0.9,\n        onDone: () => setSpeaking(false),\n        onError: () => setSpeaking(false),\n      });\n    } catch (error) {\n      setSpeaking(false);\n    }\n  };\n\n  const stopSpeaking = () => {\n    if (Platform.OS !== 'web') {\n      Speech.stop();\n    }\n    setSpeaking(false);\n  };\n\n  const renderMessage = (message: AIMessage, index: number) => {\n    const isUser = message.role === 'user';\n    const isVoice = message.type === 'voice';\n\n    return (\n      <View key={message.id} style={[styles.messageContainer, isUser ? styles.userMessage : styles.assistantMessage]}>\n        <View style={styles.messageHeader}>\n          {isUser ? (\n            <User size={16} color={colors.text.secondary} />\n          ) : (\n            <Bot size={16} color={colors.primaryLight} />\n          )}\n          <Text style={styles.messageRole}>\n            {isUser ? 'You' : 'AI Assistant'}\n          </Text>\n          {isVoice && <Mic size={12} color={colors.text.secondary} />}\n        </View>\n        <Text style={[styles.messageText, isUser ? styles.userMessageText : styles.assistantMessageText]}>\n          {message.content}\n        </Text>\n        <Text style={styles.messageTime}>\n          {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}\n        </Text>\n      </View>\n    );\n  };\n\n  if (!isModelLoaded) {\n    return (\n      <View style={styles.loadingContainer}>\n        <Bot size={48} color={colors.primaryLight} />\n        <Text style={styles.loadingTitle}>Initializing AI Assistant</Text>\n        <View style={styles.progressBar}>\n          <View style={[styles.progressFill, { width: `${modelLoadingProgress * 100}%` }]} />\n        </View>\n        <Text style={styles.loadingText}>\n          {Math.round(modelLoadingProgress * 100)}% Complete\n        </Text>\n      </View>\n    );\n  }\n\n  return (\n    <View style={styles.container}>\n      {showHeader && (\n        <View style={styles.header}>\n          <View style={styles.headerLeft}>\n            <Bot size={24} color={colors.primaryLight} />\n            <Text style={styles.headerTitle}>AI Trucking Assistant</Text>\n          </View>\n          <View style={styles.headerRight}>\n            {isSpeaking && (\n              <TouchableOpacity onPress={stopSpeaking} style={styles.headerButton}>\n                <VolumeX size={20} color={colors.text.secondary} />\n              </TouchableOpacity>\n            )}\n            <TouchableOpacity style={styles.headerButton}>\n              <SettingsIcon size={20} color={colors.text.secondary} />\n            </TouchableOpacity>\n          </View>\n        </View>\n      )}\n\n      <ScrollView\n        ref={scrollViewRef}\n        style={styles.messagesContainer}\n        contentContainerStyle={styles.messagesContent}\n        onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}\n      >\n        {messages.length === 0 ? (\n          <View style={styles.emptyState}>\n            <MessageSquare size={48} color={colors.text.secondary} />\n            <Text style={styles.emptyStateTitle}>Welcome to your AI Assistant</Text>\n            <Text style={styles.emptyStateText}>\n              I can help you with Hours of Service, route planning, weather conditions, maintenance, and compliance questions.\n            </Text>\n          </View>\n        ) : (\n          messages.map(renderMessage)\n        )}\n        \n        {isProcessing && (\n          <View style={[styles.messageContainer, styles.assistantMessage]}>\n            <View style={styles.messageHeader}>\n              <Bot size={16} color={colors.primaryLight} />\n              <Text style={styles.messageRole}>AI Assistant</Text>\n            </View>\n            <View style={styles.typingIndicator}>\n              <Loader size={16} color={colors.primaryLight} />\n              <Text style={styles.typingText}>Thinking...</Text>\n            </View>\n          </View>\n        )}\n      </ScrollView>\n\n      <View style={styles.inputContainer}>\n        <View style={styles.inputRow}>\n          <TextInput\n            style={styles.textInput}\n            value={inputText}\n            onChangeText={setInputText}\n            placeholder=\"Ask me anything about trucking...\"\n            placeholderTextColor={colors.text.secondary}\n            multiline\n            maxLength={500}\n            editable={!isProcessing}\n          />\n          \n          {voiceEnabled && Platform.OS !== 'web' && (\n            <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>\n              <TouchableOpacity\n                style={[styles.voiceButton, isRecording && styles.voiceButtonActive]}\n                onPressIn={startVoiceRecording}\n                onPressOut={stopVoiceRecording}\n                disabled={isProcessing}\n              >\n                {isRecording ? (\n                  <MicOff size={20} color={colors.white} />\n                ) : (\n                  <Mic size={20} color={colors.primaryLight} />\n                )}\n              </TouchableOpacity>\n            </Animated.View>\n          )}\n          \n          <TouchableOpacity\n            style={[styles.sendButton, (!inputText.trim() || isProcessing) && styles.sendButtonDisabled]}\n            onPress={handleSendText}\n            disabled={!inputText.trim() || isProcessing}\n          >\n            <Send size={20} color={inputText.trim() && !isProcessing ? colors.white : colors.text.secondary} />\n          </TouchableOpacity>\n        </View>\n      </View>\n    </View>\n  );\n}\n\nconst styles = StyleSheet.create({\n  container: {\n    flex: 1,\n    backgroundColor: colors.background.primary,\n  },\n  loadingContainer: {\n    flex: 1,\n    justifyContent: 'center',\n    alignItems: 'center',\n    backgroundColor: colors.background.primary,\n    padding: 20,\n  },\n  loadingTitle: {\n    fontSize: 18,\n    fontWeight: '600',\n    color: colors.text.primary,\n    marginTop: 16,\n    marginBottom: 20,\n  },\n  progressBar: {\n    width: '100%',\n    height: 4,\n    backgroundColor: colors.background.secondary,\n    borderRadius: 2,\n    overflow: 'hidden',\n  },\n  progressFill: {\n    height: '100%',\n    backgroundColor: colors.primaryLight,\n  },\n  loadingText: {\n    fontSize: 14,\n    color: colors.text.secondary,\n    marginTop: 8,\n  },\n  header: {\n    flexDirection: 'row',\n    justifyContent: 'space-between',\n    alignItems: 'center',\n    padding: 16,\n    borderBottomWidth: 1,\n    borderBottomColor: colors.border,\n    backgroundColor: colors.background.primary,\n  },\n  headerLeft: {\n    flexDirection: 'row',\n    alignItems: 'center',\n  },\n  headerTitle: {\n    fontSize: 18,\n    fontWeight: '600',\n    color: colors.text.primary,\n    marginLeft: 8,\n  },\n  headerRight: {\n    flexDirection: 'row',\n    alignItems: 'center',\n  },\n  headerButton: {\n    padding: 8,\n    marginLeft: 8,\n  },\n  messagesContainer: {\n    flex: 1,\n  },\n  messagesContent: {\n    padding: 16,\n  },\n  emptyState: {\n    flex: 1,\n    justifyContent: 'center',\n    alignItems: 'center',\n    paddingVertical: 60,\n  },\n  emptyStateTitle: {\n    fontSize: 18,\n    fontWeight: '600',\n    color: colors.text.primary,\n    marginTop: 16,\n    marginBottom: 8,\n  },\n  emptyStateText: {\n    fontSize: 14,\n    color: colors.text.secondary,\n    textAlign: 'center',\n    lineHeight: 20,\n    paddingHorizontal: 20,\n  },\n  messageContainer: {\n    marginBottom: 16,\n    padding: 12,\n    borderRadius: 12,\n    maxWidth: '85%',\n  },\n  userMessage: {\n    alignSelf: 'flex-end',\n    backgroundColor: colors.primaryLight,\n  },\n  assistantMessage: {\n    alignSelf: 'flex-start',\n    backgroundColor: colors.background.secondary,\n  },\n  messageHeader: {\n    flexDirection: 'row',\n    alignItems: 'center',\n    marginBottom: 4,\n  },\n  messageRole: {\n    fontSize: 12,\n    fontWeight: '600',\n    color: colors.text.secondary,\n    marginLeft: 4,\n    marginRight: 8,\n  },\n  messageText: {\n    fontSize: 15,\n    lineHeight: 20,\n    marginBottom: 4,\n  },\n  userMessageText: {\n    color: colors.white,\n  },\n  assistantMessageText: {\n    color: colors.text.primary,\n  },\n  messageTime: {\n    fontSize: 11,\n    color: colors.text.secondary,\n    opacity: 0.7,\n  },\n  typingIndicator: {\n    flexDirection: 'row',\n    alignItems: 'center',\n  },\n  typingText: {\n    fontSize: 14,\n    color: colors.text.secondary,\n    marginLeft: 8,\n    fontStyle: 'italic',\n  },\n  inputContainer: {\n    padding: 16,\n    borderTopWidth: 1,\n    borderTopColor: colors.border,\n    backgroundColor: colors.background.primary,\n  },\n  inputRow: {\n    flexDirection: 'row',\n    alignItems: 'flex-end',\n  },\n  textInput: {\n    flex: 1,\n    borderWidth: 1,\n    borderColor: colors.border,\n    borderRadius: 20,\n    paddingHorizontal: 16,\n    paddingVertical: 12,\n    fontSize: 15,\n    color: colors.text.primary,\n    backgroundColor: colors.background.secondary,\n    maxHeight: 100,\n    marginRight: 8,\n  },\n  voiceButton: {\n    width: 44,\n    height: 44,\n    borderRadius: 22,\n    backgroundColor: colors.background.secondary,\n    justifyContent: 'center',\n    alignItems: 'center',\n    marginRight: 8,\n    borderWidth: 2,\n    borderColor: colors.primaryLight,\n  },\n  voiceButtonActive: {\n    backgroundColor: colors.primaryLight,\n  },\n  sendButton: {\n    width: 44,\n    height: 44,\n    borderRadius: 22,\n    backgroundColor: colors.primaryLight,\n    justifyContent: 'center',\n    alignItems: 'center',\n  },\n  sendButtonDisabled: {\n    backgroundColor: colors.background.secondary,\n  },\n});
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  const activeConversation = conversations.find(conv => conv.id === activeConversationId);
+  const messages = activeConversation?.messages || [];
+
+  useEffect(() => {
+    if (!activeConversationId && conversations.length === 0) {
+      createConversation('New Chat');
+    }
+  }, [activeConversationId, conversations.length, createConversation]);
+
+  useEffect(() => {
+    if (!isModelLoaded) {
+      initializeAI();
+    }
+  }, [isModelLoaded]);
+
+  useEffect(() => {
+    if (isRecording) {
+      startPulseAnimation();
+    } else {
+      stopPulseAnimation();
+    }
+  }, [isRecording]);
+
+  const initializeAI = async () => {
+    try {
+      await aiService.initializeModel('small', (progress) => {
+        setModelLoadingProgress(progress);
+      });
+      setModelLoaded(true);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to initialize AI model');
+    }
+  };
+
+  const startPulseAnimation = () => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.2,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  };
+
+  const stopPulseAnimation = () => {
+    pulseAnim.setValue(1);
+  };
+
+  const sendMessage = async (text: string, type: 'text' | 'voice' = 'text') => {
+    if (!text.trim() || !activeConversationId) return;
+
+    // Add user message
+    addMessage(activeConversationId, {
+      role: 'user',
+      content: text,
+      type,
+    });
+
+    setProcessing(true);
+
+    try {
+      // Get conversation history for context
+      const conversationHistory = messages.slice(-10).map(msg => ({
+        role: msg.role,
+        content: msg.content,
+      }));
+
+      // Generate AI response
+      const response = await aiService.generateResponse(
+        text,
+        truckingContext,
+        conversationHistory
+      );
+
+      // Add AI response
+      addMessage(activeConversationId, {
+        role: 'assistant',
+        content: response,
+        type: 'text',
+      });
+
+      // Auto-speak if enabled
+      if (autoSpeak && voiceEnabled) {
+        speakText(response);
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to get AI response');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const startRecording = async () => {
+    if (Platform.OS === 'web') {
+      Alert.alert('Voice Input', 'Voice recording is not available on web');
+      return;
+    }
+
+    try {
+      const permission = await Audio.requestPermissionsAsync();
+      if (permission.status !== 'granted') {
+        Alert.alert('Permission Required', 'Please grant microphone permission');
+        return;
+      }
+
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
+
+      const { recording } = await Audio.Recording.createAsync(
+        Audio.RecordingOptionsPresets.HIGH_QUALITY
+      );
+      setRecording(recording);
+      setRecording(true);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to start recording');
+    }
+  };
+
+  const stopRecording = async () => {
+    if (!recording) return;
+
+    try {
+      setRecording(false);
+      await recording.stopAndUnloadAsync();
+      const uri = recording.getURI();
+      
+      if (uri) {
+        // In a real app, you would transcribe the audio here
+        // For now, we'll just show a placeholder
+        Alert.alert('Voice Input', 'Voice transcription would happen here');
+      }
+      
+      setRecording(null);
+    } catch (error) {
+      Alert.alert('Error', 'Failed to stop recording');
+    }
+  };
+
+  const speakText = async (text: string) => {
+    if (!voiceEnabled) return;
+
+    try {
+      setSpeaking(true);
+      await Speech.speak(text, {
+        language: 'en-US',
+        pitch: 1.0,
+        rate: 0.9,
+      });
+    } catch (error) {
+      console.error('Speech error:', error);
+    } finally {
+      setSpeaking(false);
+    }
+  };
+
+  const renderMessage = (message: AIMessage, index: number) => {
+    const isUser = message.role === 'user';
+    const isVoice = message.type === 'voice';
+
+    return (
+      <View key={index} style={[styles.messageContainer, isUser ? styles.userMessage : styles.assistantMessage]}>
+        <View style={styles.messageHeader}>
+          {isUser ? (
+            <User size={16} color={colors.primary} />
+          ) : (
+            <Bot size={16} color={colors.secondary} />
+          )}
+          <Text style={styles.messageRole}>
+            {isUser ? 'You' : 'AI Assistant'}
+          </Text>
+          {isVoice && (
+            <Volume2 size={14} color={colors.text.secondary} style={styles.voiceIcon} />
+          )}
+        </View>
+        <Text style={[styles.messageText, isUser ? styles.userMessageText : styles.assistantMessageText]}>
+          {message.content}
+        </Text>
+        {!isUser && (
+          <TouchableOpacity
+            style={styles.speakButton}
+            onPress={() => speakText(message.content)}
+            disabled={isSpeaking}
+          >
+            {isSpeaking ? (
+              <VolumeX size={16} color={colors.text.secondary} />
+            ) : (
+              <Volume2 size={16} color={colors.text.secondary} />
+            )}
+          </TouchableOpacity>
+        )}
+      </View>
+    );
+  };
+
+  if (!isModelLoaded) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Bot size={48} color={colors.primary} />
+        <Text style={styles.loadingTitle}>Initializing AI Assistant</Text>
+        <Text style={styles.loadingText}>
+          Loading model... {Math.round(modelLoadingProgress * 100)}%
+        </Text>
+        <View style={styles.progressBar}>
+          <View style={[styles.progressFill, { width: `${modelLoadingProgress * 100}%` }]} />
+        </View>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      {showHeader && (
+        <View style={styles.header}>
+          <View style={styles.headerLeft}>
+            <Bot size={24} color={colors.primary} />
+            <Text style={styles.headerTitle}>AI Assistant</Text>
+          </View>
+          <View style={styles.headerRight}>
+            <TouchableOpacity
+              style={styles.headerButton}
+              onPress={() => setSettingsVisible(true)}
+            >
+              <SettingsIcon size={20} color={colors.text.secondary} />
+            </TouchableOpacity>
+            {onClose && (
+              <TouchableOpacity
+                style={styles.headerButton}
+                onPress={onClose}
+              >
+                <Text style={styles.closeButton}>×</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+      )}
+
+      <ScrollView
+        ref={scrollViewRef}
+        style={styles.messagesContainer}
+        contentContainerStyle={styles.messagesContent}
+        onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
+      >
+        {messages.length === 0 ? (
+          <View style={styles.emptyState}>
+            <MessageSquare size={48} color={colors.text.secondary} />
+            <Text style={styles.emptyStateTitle}>Welcome to AI Assistant</Text>
+            <Text style={styles.emptyStateText}>
+              I'm here to help with trucking questions, HOS compliance, weather updates, and more.
+            </Text>
+          </View>
+        ) : (
+          messages.map(renderMessage)
+        )}
+        
+        {isProcessing && (
+          <View style={[styles.messageContainer, styles.assistantMessage]}>
+            <View style={styles.messageHeader}>
+              <Bot size={16} color={colors.secondary} />
+              <Text style={styles.messageRole}>AI Assistant</Text>
+            </View>
+            <View style={styles.typingIndicator}>
+              <Loader size={16} color={colors.secondary} />
+              <Text style={styles.typingText}>Thinking...</Text>
+            </View>
+          </View>
+        )}
+      </ScrollView>
+
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles.textInput}
+          value={inputText}
+          onChangeText={setInputText}
+          placeholder="Ask me anything about trucking..."
+          placeholderTextColor={colors.text.secondary}
+          multiline
+          maxLength={500}
+        />
+        <View style={styles.inputActions}>
+          {voiceEnabled && (
+            <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
+              <TouchableOpacity
+                style={[styles.actionButton, isRecording && styles.recordingButton]}
+                onPress={isRecording ? stopRecording : startRecording}
+                disabled={isProcessing}
+              >
+                {isRecording ? (
+                  <MicOff size={20} color={colors.white} />
+                ) : (
+                  <Mic size={20} color={colors.text.secondary} />
+                )}
+              </TouchableOpacity>
+            </Animated.View>
+          )}
+          <TouchableOpacity
+            style={[styles.actionButton, styles.sendButton]}
+            onPress={() => {
+              if (inputText.trim()) {
+                sendMessage(inputText);
+                setInputText('');
+              }
+            }}
+            disabled={!inputText.trim() || isProcessing}
+          >
+            <Send size={20} color={colors.white} />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <Modal
+        visible={settingsVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
+        <AIAssistantSettings onClose={() => setSettingsVisible(false)} />
+      </Modal>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.background,
+    padding: 20,
+  },
+  loadingTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: colors.text.primary,
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  loadingText: {
+    fontSize: 16,
+    color: colors.text.secondary,
+    marginBottom: 20,
+  },
+  progressBar: {
+    width: '100%',
+    height: 4,
+    backgroundColor: colors.border,
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: colors.primary,
+    borderRadius: 2,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.text.primary,
+    marginLeft: 8,
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  headerButton: {
+    padding: 8,
+    marginLeft: 8,
+  },
+  closeButton: {
+    fontSize: 24,
+    color: colors.text.secondary,
+    fontWeight: '300',
+  },
+  messagesContainer: {
+    flex: 1,
+  },
+  messagesContent: {
+    padding: 16,
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 60,
+  },
+  emptyStateTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: colors.text.primary,
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  emptyStateText: {
+    fontSize: 16,
+    color: colors.text.secondary,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  messageContainer: {
+    marginBottom: 16,
+    padding: 12,
+    borderRadius: 12,
+    maxWidth: '85%',
+  },
+  userMessage: {
+    alignSelf: 'flex-end',
+    backgroundColor: colors.primary,
+  },
+  assistantMessage: {
+    alignSelf: 'flex-start',
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  messageHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  messageRole: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.text.secondary,
+    marginLeft: 6,
+  },
+  voiceIcon: {
+    marginLeft: 6,
+  },
+  messageText: {
+    fontSize: 16,
+    lineHeight: 22,
+  },
+  userMessageText: {
+    color: colors.white,
+  },
+  assistantMessageText: {
+    color: colors.text.primary,
+  },
+  speakButton: {
+    alignSelf: 'flex-end',
+    marginTop: 8,
+    padding: 4,
+  },
+  typingIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  typingText: {
+    fontSize: 14,
+    color: colors.text.secondary,
+    marginLeft: 8,
+    fontStyle: 'italic',
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  textInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: colors.text.primary,
+    backgroundColor: colors.background,
+    maxHeight: 100,
+  },
+  inputActions: {
+    flexDirection: 'row',
+    marginLeft: 8,
+  },
+  actionButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border,
+    marginLeft: 8,
+  },
+  recordingButton: {
+    backgroundColor: colors.error,
+    borderColor: colors.error,
+  },
+  sendButton: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+});
