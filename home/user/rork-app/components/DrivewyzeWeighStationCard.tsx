@@ -47,101 +47,33 @@ export const DrivewyzeWeighStationCard: React.FC<DrivewyzeWeighStationCardProps>
     }
   };
 
-  const getStatusText = () => {
-    switch (station.status) {
-      case 'open':
-        return 'Open';
-      case 'closed':
-        return 'Closed';
-      case 'bypass_available':
-        return 'Bypass Available';
-      case 'maintenance':
-        return 'Maintenance';
-      default:
-        return 'Unknown';
-    }
-  };
-
-  const getBypassStatusColor = () => {
-    switch (station.bypassStatus) {
-      case 'approved':
-        return colors.success;
-      case 'denied':
-        return colors.danger;
-      case 'pending':
-        return colors.warning;
-      default:
-        return colors.text.secondary;
-    }
-  };
-
   return (
-    <TouchableOpacity
-      style={styles.container}
-      onPress={onPress}
-      activeOpacity={0.7}
-    >
+    <TouchableOpacity onPress={onPress} style={styles.container}>
       <View style={styles.header}>
-        <View style={styles.locationInfo}>
-          <MapPin size={16} color={colors.text.secondary} />
-          <Text style={styles.stationName} numberOfLines={1}>
-            {station.name}
-          </Text>
-        </View>
-        <View style={[styles.statusBadge, { backgroundColor: getStatusColor() }]}>
-          {getStatusIcon()}
-        </View>
+        <MapPin size={16} color={getStatusColor()} />
+        <Text style={styles.title}>{station.name}</Text>
+        {getStatusIcon()}
       </View>
-
-      <View style={styles.details}>
-        <Text style={styles.address} numberOfLines={1}>
-          {station.location.address}
+      {showDistance && station.distance && (
+        <Text style={styles.distance}>
+          {station.distance.toFixed(1)} miles away
         </Text>
-        
-        <View style={styles.infoRow}>
-          <Text style={[styles.statusText, { color: getStatusColor() }]}>
-            {getStatusText()}
+      )}
+      <Text style={styles.location}>{station.location.address}</Text>
+      {station.status === 'open' && (
+        <View style={styles.hoursContainer}>
+          <Clock size={14} color={colors.text.secondary} />
+          <Text style={styles.hoursText}>
+            Open: {station.operatingHours[Object.keys(station.operatingHours)[0]]}
           </Text>
-          {showDistance && station.distance && (
-            <Text style={styles.distance}>
-              {station.distance.toFixed(1)} mi
-            </Text>
-          )}
         </View>
-
-        {station.bypassEligible && (
-          <View style={styles.bypassInfo}>
-            <Text style={styles.bypassEligible}>
-              Bypass Eligible
-            </Text>
-            {station.bypassStatus && (
-              <Text style={[styles.bypassStatus, { color: getBypassStatusColor() }]}>
-                {station.bypassStatus.charAt(0).toUpperCase() + station.bypassStatus.slice(1)}
-              </Text>
-            )}
-          </View>
-        )}
-
-        {station.operatingHours && (
-          <View style={styles.hoursContainer}>
-            <Clock size={12} color={colors.text.secondary} />
-            <Text style={styles.hours}>
-              {station.operatingHours[new Date().toLocaleLowerCase().slice(0, 3) as keyof typeof station.operatingHours] || 'Hours vary'}
-            </Text>
-          </View>
-        )}
-      </View>
-
+      )}
       {onBypassRequest && station.status === 'bypass_available' && station.bypassEligible && (
-        <TouchableOpacity
-          style={styles.bypassButton}
-          onPress={onBypassRequest}
-          activeOpacity={0.8}
-        >
+        <TouchableOpacity onPress={onBypassRequest} style={styles.bypassButton}>
           <Text style={styles.bypassButtonText}>Request Bypass</Text>
         </TouchableOpacity>
       )}
-    </TouchableOpacity>
+    </View>
   );
 };
 
@@ -150,9 +82,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.card,
     borderRadius: 12,
     padding: 16,
-    marginHorizontal: 16,
-    marginBottom: 12,
-    shadowColor: colors.shadow,
+    marginBottom: 16,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -161,85 +92,45 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  locationInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
     gap: 8,
+    marginBottom: 8,
   },
-  stationName: {
+  title: {
+    flex: 1,
     fontSize: 16,
     fontWeight: '600',
     color: colors.text.primary,
-    flex: 1,
-  },
-  statusBadge: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  details: {
-    gap: 6,
-  },
-  address: {
-    fontSize: 14,
-    color: colors.text.secondary,
-  },
-  infoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  statusText: {
-    fontSize: 14,
-    fontWeight: '500',
   },
   distance: {
     fontSize: 14,
     color: colors.text.secondary,
-    fontWeight: '500',
+    marginBottom: 8,
   },
-  bypassInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingTop: 4,
-  },
-  bypassEligible: {
-    fontSize: 12,
-    color: colors.primary,
-    fontWeight: '500',
-  },
-  bypassStatus: {
-    fontSize: 12,
-    fontWeight: '500',
+  location: {
+    fontSize: 14,
+    color: colors.text.secondary,
+    marginBottom: 8,
   },
   hoursContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    marginTop: 4,
+    gap: 6,
+    marginBottom: 12,
   },
-  hours: {
-    fontSize: 12,
+  hoursText: {
+    fontSize: 13,
     color: colors.text.secondary,
   },
   bypassButton: {
     backgroundColor: colors.primary,
-    borderRadius: 8,
     paddingVertical: 10,
     paddingHorizontal: 16,
-    marginTop: 12,
+    borderRadius: 8,
     alignItems: 'center',
   },
   bypassButtonText: {
     color: colors.white,
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '500',
   },
 });
