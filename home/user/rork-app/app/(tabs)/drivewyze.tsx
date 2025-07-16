@@ -74,12 +74,12 @@ export default function DrivewyzeScreen() {
         { text: 'OK' },
         ...(station.bypassEligible && station.status === 'bypass_available'
           ? [{
-              text: 'Request Bypass',
-              onPress: () => {
-                setSelectedStation(station);
-                setBypassModalVisible(true);
-              },
-            }]
+            text: 'Request Bypass',
+            onPress: () => {
+              setSelectedStation(station);
+              setBypassModalVisible(true);
+            },
+          }]
           : []),
       ]
     );
@@ -181,7 +181,7 @@ export default function DrivewyzeScreen() {
               <View style={styles.emptyState}>
                 <Bell size={48} color={colors.text.secondary} />
                 <Text style={styles.emptyStateText}>No notifications</Text>
-                <Text style={styles.emptyStateSubtext}>You're all caught up!</Text>
+                <Text style={styles.emptyStateSubtext}>You are all caught up!</Text>
               </View>
             ) : (
               notifications.map((notification) => (
