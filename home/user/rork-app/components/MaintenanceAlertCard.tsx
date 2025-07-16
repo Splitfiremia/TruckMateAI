@@ -34,7 +34,7 @@ const MaintenanceAlertCard: React.FC<MaintenanceAlertCardProps> = ({
       case 'High': return colors.warning;
       case 'Medium': return colors.primaryLight;
       case 'Low': return colors.secondary;
-      default: return colors.textSecondary;
+      default: return colors.text.secondary;
     }
   };
 
@@ -132,9 +132,9 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.background.secondary,
     borderRadius: 12,
-    borderLeftWidth: 4,
     padding: 16,
     marginBottom: 12,
+    borderLeftWidth: 4,
   },
   header: {
     flexDirection: 'row',
@@ -195,9 +195,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     backgroundColor: colors.background.primary,
     borderRadius: 8,
-    padding: 12,
     marginBottom: 8,
   },
   shopsButtonText: {

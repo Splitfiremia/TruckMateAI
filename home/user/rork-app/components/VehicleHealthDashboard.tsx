@@ -78,7 +78,7 @@ const VehicleHealthDashboard: React.FC<VehicleHealthDashboardProps> = ({
               <HealthIcon color={healthColor} size={16} />
               <Text style={styles.scoreDetailText}>
                 {vehicleHealth.overallScore >= 85 ? 'Excellent' :
-                vehicleHealth.overallScore >= 70 ? 'Good' : 'Needs Attention'}
+                 vehicleHealth.overallScore >= 70 ? 'Good' : 'Needs Attention'}
               </Text>
             </View>
             <View style={styles.scoreDetailItem}>
@@ -112,35 +112,40 @@ const VehicleHealthDashboard: React.FC<VehicleHealthDashboardProps> = ({
         </View>
       </View>
 
-      {/* System Health Grid */}
-      <View style={styles.systemGrid}>
-        {Object.entries(vehicleHealth.systemHealth).map(([system, score]) => {
-          const SystemIcon = getHealthIcon(score);
-          const systemColor = getHealthColor(score);
-          
-          return (
-            <TouchableOpacity
-              key={system}
-              style={[styles.systemCard, { borderColor: systemColor }]}
-              onPress={() => onSystemPress?.(system)}
-            >
-              <View style={styles.systemHeader}>
-                <SystemIcon color={systemColor} size={18} />
-                <Text style={[styles.systemScore, { color: systemColor }]}>
-                  {score}
-                </Text>
-              </View>
-              <Text style={styles.systemName}>
-                {getSystemDisplayName(system)}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
+      {/* System Health Breakdown */}
+      <View style={styles.systemsSection}>
+        <Text style={styles.sectionTitle}>System Health</Text>
+        <View style={styles.systemsList}>
+          {Object.entries(vehicleHealth.systemHealth).map(([system, score]) => {
+            const SystemIcon = getHealthIcon(score);
+            const systemColor = getHealthColor(score);
+            
+            return (
+              <TouchableOpacity
+                key={system}
+                style={styles.systemItem}
+                onPress={() => onSystemPress?.(system)}
+              >
+                <View style={styles.systemInfo}>
+                  <SystemIcon color={systemColor} size={16} />
+                  <Text style={styles.systemName}>
+                    {getSystemDisplayName(system)}
+                  </Text>
+                </View>
+                <View style={styles.systemScore}>
+                  <Text style={[styles.scoreValue, { color: systemColor }]}>
+                    {score}%
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
       </View>
 
-      {/* Last Analysis */}
-      <Text style={styles.lastAnalysis}>
-        Last analyzed: {new Date(vehicleHealth.lastAnalysis).toLocaleString()}
+      {/* Last Updated */}
+      <Text style={styles.lastUpdated}>
+        Last updated: {new Date(vehicleHealth.lastUpdated).toLocaleString()}
       </Text>
     </View>
   );
@@ -151,6 +156,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background.secondary,
     borderRadius: 16,
     padding: 16,
+    marginBottom: 16,
   },
   overallHealth: {
     marginBottom: 20,
@@ -170,7 +176,7 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   scoreText: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: '700',
   },
   scoreLabel: {
@@ -195,9 +201,9 @@ const styles = StyleSheet.create({
   quickStats: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    backgroundColor: colors.background.primary,
-    borderRadius: 12,
-    padding: 16,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
   },
   statItem: {
     alignItems: 'center',
@@ -212,36 +218,45 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.text.secondary,
   },
-  systemGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
+  systemsSection: {
     marginBottom: 16,
   },
-  systemCard: {
-    flex: 1,
-    minWidth: '45%',
-    backgroundColor: colors.background.primary,
-    borderRadius: 12,
-    borderWidth: 1,
-    padding: 12,
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text.primary,
+    marginBottom: 12,
   },
-  systemHeader: {
+  systemsList: {
+    gap: 8,
+  },
+  systemItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    backgroundColor: colors.background.primary,
+    borderRadius: 8,
   },
-  systemScore: {
-    fontSize: 16,
-    fontWeight: '700',
+  systemInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
   systemName: {
-    fontSize: 12,
-    color: colors.text.secondary,
+    fontSize: 14,
     fontWeight: '500',
+    color: colors.text.primary,
   },
-  lastAnalysis: {
+  systemScore: {
+    alignItems: 'flex-end',
+  },
+  scoreValue: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  lastUpdated: {
     fontSize: 12,
     color: colors.text.secondary,
     textAlign: 'center',
