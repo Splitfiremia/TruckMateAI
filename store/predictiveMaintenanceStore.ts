@@ -9,9 +9,12 @@ import {
   MaintenanceHistory,
   VehicleHealth,
   TelematiicsData,
-  PreventiveAction
+  PreventiveAction,
+  TruckFaxVehicleInfo,
+  TruckFaxPredictiveInsights
 } from '@/types';
 import { generateMockDiagnostics, mockMaintenanceHistory, mockRepairShops } from '@/constants/maintenanceMockData';
+import truckFaxAPI from '@/services/truckfaxApi';
 
 interface PredictiveMaintenanceState {
   // Vehicle diagnostics data
@@ -30,6 +33,12 @@ interface PredictiveMaintenanceState {
   vehicleHealth: VehicleHealth | null;
   telematics: TelematiicsData[];
   
+  // TruckFax Integration
+  truckFaxData: TruckFaxVehicleInfo | null;
+  truckFaxInsights: TruckFaxPredictiveInsights | null;
+  truckFaxEnabled: boolean;
+  vehicleVin: string | null;
+  
   // Settings
   alertsEnabled: boolean;
   predictionSensitivity: 'Conservative' | 'Balanced' | 'Aggressive';
@@ -39,7 +48,9 @@ interface PredictiveMaintenanceState {
   // Loading states
   isAnalyzing: boolean;
   isLoadingShops: boolean;
+  isLoadingTruckFax: boolean;
   lastAnalysis: string | null;
+  lastTruckFaxSync: string | null;
   
   // Simulation
   isSimulating: boolean;
@@ -58,10 +69,22 @@ interface PredictiveMaintenanceState {
   clearOldDiagnostics: () => void;
   startSimulation: () => void;
   stopSimulation: () => void;
+  
+  // TruckFax Actions
+  setVehicleVin: (vin: string) => void;
+  enableTruckFax: () => Promise<void>;
+  disableTruckFax: () => void;
+  syncTruckFaxData: () => Promise<void>;
+  getEnhancedPredictions: () => Promise<void>;
+  findTruckFaxCertifiedShops: (component: string, location: { lat: number; lng: number }) => Promise<void>;
 }
 
-// Mock AI analysis function
-const analyzeVehicleData = async (diagnostics: VehicleDiagnostics[]): Promise<{
+// Enhanced AI analysis function with TruckFax integration
+const analyzeVehicleData = async (
+  diagnostics: VehicleDiagnostics[],
+  truckFaxInsights?: TruckFaxPredictiveInsights | null,
+  truckFaxData?: TruckFaxVehicleInfo | null
+): Promise<{
   predictions: MaintenancePrediction[];
   alerts: MaintenanceAlert[];
   vehicleHealth: VehicleHealth;
@@ -93,6 +116,61 @@ const analyzeVehicleData = async (diagnostics: VehicleDiagnostics[]): Promise<{
   
   const predictions: MaintenancePrediction[] = [];
   const alerts: MaintenanceAlert[] = [];
+  
+  // Integrate TruckFax predictions if available
+  if (truckFaxInsights) {
+    for (const tfPrediction of truckFaxInsights.maintenancePredictions) {
+      const prediction: MaintenancePrediction = {
+        id: `tf-pred-${Date.now()}-${tfPrediction.component.toLowerCase().replace(/\s+/g, '-')}`,
+        vehicleId: latest.vehicleId,
+        componentType: tfPrediction.component as any,
+        componentName: tfPrediction.component,
+        currentCondition: Math.max(0, 100 - (tfPrediction.severity === 'Critical' ? 80 : tfPrediction.severity === 'High' ? 60 : tfPrediction.severity === 'Medium' ? 40 : 20)),
+        predictedFailureDate: tfPrediction.predictedFailureWindow.mostLikely,
+        milesUntilFailure: tfPrediction.mileageWindow.mostLikely - latest.mileage,
+        confidenceLevel: tfPrediction.confidence,
+        severity: tfPrediction.severity,
+        estimatedCost: tfPrediction.estimatedCost.total,
+        symptoms: [`TruckFax Analysis: ${tfPrediction.component} showing wear patterns`],
+        recommendations: tfPrediction.basedOnFactors.map(factor => `Address: ${factor}`),
+        preventiveMaintenance: tfPrediction.preventiveOptions.map((option, index) => ({
+          id: `tf-prev-${index}`,
+          action: option.action,
+          urgency: tfPrediction.severity === 'Critical' ? 'Immediate' : tfPrediction.severity === 'High' ? 'This Week' : 'This Month',
+          estimatedTime: '2-4 hours',
+          estimatedCost: option.cost,
+          canDelay: tfPrediction.severity !== 'Critical',
+          delayRisk: `${100 - option.effectiveness}% chance of component failure`
+        })),
+        basedOnData: {
+          diagnosticReadings: diagnostics.length,
+          historicalPatterns: true,
+          manufacturerSpecs: true,
+          weatherConditions: false,
+          drivingPatterns: true
+        }
+      };
+      predictions.push(prediction);
+      
+      // Create alert for high-priority TruckFax predictions
+      if (tfPrediction.severity === 'Critical' || tfPrediction.severity === 'High') {
+        alerts.push({
+          id: `tf-alert-${Date.now()}-${tfPrediction.component.toLowerCase().replace(/\s+/g, '-')}`,
+          vehicleId: latest.vehicleId,
+          type: 'Prediction',
+          priority: tfPrediction.severity === 'Critical' ? 'Critical' : 'High',
+          title: `TruckFax Alert: ${tfPrediction.component}`,
+          message: `AI predicts ${tfPrediction.component.toLowerCase()} maintenance needed in ~${Math.round(tfPrediction.mileageWindow.mostLikely - latest.mileage)} miles`,
+          component: tfPrediction.component,
+          actionRequired: tfPrediction.severity === 'Critical',
+          dueDate: tfPrediction.predictedFailureWindow.mostLikely,
+          estimatedCost: tfPrediction.estimatedCost.total,
+          nearbyShops: [],
+          dismissed: false
+        });
+      }
+    }
+  }
   
   // Analyze brake system
   if (latest.brakeSystemPressure < 80) {
@@ -346,6 +424,12 @@ export const usePredictiveMaintenanceStore = create<PredictiveMaintenanceState>(
       vehicleHealth: null,
       telematics: [],
       
+      // TruckFax Integration
+      truckFaxData: null,
+      truckFaxInsights: null,
+      truckFaxEnabled: false,
+      vehicleVin: null,
+      
       // Settings
       alertsEnabled: true,
       predictionSensitivity: 'Balanced',
@@ -355,7 +439,9 @@ export const usePredictiveMaintenanceStore = create<PredictiveMaintenanceState>(
       // Loading states
       isAnalyzing: false,
       isLoadingShops: false,
+      isLoadingTruckFax: false,
       lastAnalysis: null,
+      lastTruckFaxSync: null,
       
       // Simulation
       isSimulating: false,
@@ -374,14 +460,18 @@ export const usePredictiveMaintenanceStore = create<PredictiveMaintenanceState>(
       },
       
       runPredictiveAnalysis: async () => {
-        const { diagnostics, isAnalyzing } = get();
+        const { diagnostics, isAnalyzing, truckFaxInsights, truckFaxData } = get();
         
         if (isAnalyzing || diagnostics.length === 0) return;
         
         set({ isAnalyzing: true });
         
         try {
-          const { predictions, alerts, vehicleHealth } = await analyzeVehicleData(diagnostics);
+          const { predictions, alerts, vehicleHealth } = await analyzeVehicleData(
+            diagnostics,
+            truckFaxInsights,
+            truckFaxData
+          );
           
           set({
             predictions,
@@ -497,6 +587,161 @@ export const usePredictiveMaintenanceStore = create<PredictiveMaintenanceState>(
           isSimulating: false,
           simulationInterval: null
         });
+      },
+      
+      // TruckFax Actions
+      setVehicleVin: (vin: string) => {
+        set({ vehicleVin: vin });
+      },
+      
+      enableTruckFax: async () => {
+        const { vehicleVin } = get();
+        
+        if (!vehicleVin) {
+          console.error('Vehicle VIN required for TruckFax integration');
+          return;
+        }
+        
+        set({ isLoadingTruckFax: true });
+        
+        try {
+          // Fetch vehicle info and insights
+          const [vehicleResponse, insightsResponse] = await Promise.all([
+            truckFaxAPI.getVehicleInfo(vehicleVin),
+            truckFaxAPI.getPredictiveInsights(vehicleVin)
+          ]);
+          
+          if (vehicleResponse.success && insightsResponse.success) {
+            set({
+              truckFaxData: vehicleResponse.data!,
+              truckFaxInsights: insightsResponse.data!,
+              truckFaxEnabled: true,
+              lastTruckFaxSync: new Date().toISOString(),
+              isLoadingTruckFax: false
+            });
+            
+            // Merge TruckFax maintenance history
+            if (vehicleResponse.data?.maintenanceRecords) {
+              const truckFaxHistory: MaintenanceHistory[] = vehicleResponse.data.maintenanceRecords.map(record => ({
+                id: `tf-${record.date}-${record.mileage}`,
+                vehicleId: get().currentDiagnostics?.vehicleId || 'truck-001',
+                date: record.date,
+                mileage: record.mileage,
+                type: record.serviceType === 'Preventive Maintenance' ? 'Preventive' : 'Repair',
+                component: record.description.includes('Engine') ? 'Engine' : 'Various',
+                description: record.description,
+                cost: record.cost || 0,
+                shopName: record.shopName || 'Unknown Shop',
+                shopLocation: 'Various',
+                partsReplaced: record.partsReplaced,
+                laborHours: 0,
+                warranty: {
+                  parts: record.warrantyInfo?.duration || 'N/A',
+                  labor: record.warrantyInfo?.duration || 'N/A'
+                }
+              }));
+              
+              set(state => ({
+                maintenanceHistory: [...truckFaxHistory, ...state.maintenanceHistory]
+              }));
+            }
+            
+            // Run enhanced analysis
+            get().runPredictiveAnalysis();
+          } else {
+            console.error('Failed to fetch TruckFax data');
+            set({ isLoadingTruckFax: false });
+          }
+        } catch (error) {
+          console.error('TruckFax integration failed:', error);
+          set({ isLoadingTruckFax: false });
+        }
+      },
+      
+      disableTruckFax: () => {
+        set({
+          truckFaxEnabled: false,
+          truckFaxData: null,
+          truckFaxInsights: null,
+          lastTruckFaxSync: null
+        });
+      },
+      
+      syncTruckFaxData: async () => {
+        const { vehicleVin, truckFaxEnabled } = get();
+        
+        if (!truckFaxEnabled || !vehicleVin) return;
+        
+        set({ isLoadingTruckFax: true });
+        
+        try {
+          const [vehicleResponse, insightsResponse] = await Promise.all([
+            truckFaxAPI.getVehicleInfo(vehicleVin),
+            truckFaxAPI.getPredictiveInsights(vehicleVin)
+          ]);
+          
+          if (vehicleResponse.success && insightsResponse.success) {
+            set({
+              truckFaxData: vehicleResponse.data!,
+              truckFaxInsights: insightsResponse.data!,
+              lastTruckFaxSync: new Date().toISOString(),
+              isLoadingTruckFax: false
+            });
+            
+            // Re-run analysis with updated data
+            get().runPredictiveAnalysis();
+          }
+        } catch (error) {
+          console.error('TruckFax sync failed:', error);
+          set({ isLoadingTruckFax: false });
+        }
+      },
+      
+      getEnhancedPredictions: async () => {
+        const { vehicleVin, currentDiagnostics, truckFaxEnabled } = get();
+        
+        if (!truckFaxEnabled || !vehicleVin || !currentDiagnostics) return;
+        
+        try {
+          const response = await truckFaxAPI.getEnhancedPredictions(vehicleVin, currentDiagnostics);
+          
+          if (response.success && response.data) {
+            set(state => ({
+              predictions: [...state.predictions, ...response.data!]
+            }));
+          }
+        } catch (error) {
+          console.error('Enhanced predictions failed:', error);
+        }
+      },
+      
+      findTruckFaxCertifiedShops: async (component: string, location: { lat: number; lng: number }) => {
+        const { truckFaxEnabled } = get();
+        
+        if (!truckFaxEnabled) {
+          // Fall back to regular shop search
+          return get().findNearbyShops(component, location);
+        }
+        
+        set({ isLoadingShops: true });
+        
+        try {
+          const response = await truckFaxAPI.findCertifiedRepairShops(location, component);
+          
+          if (response.success && response.data) {
+            set({ 
+              nearbyShops: response.data,
+              isLoadingShops: false 
+            });
+          } else {
+            // Fall back to regular shop search
+            get().findNearbyShops(component, location);
+          }
+        } catch (error) {
+          console.error('TruckFax shop search failed:', error);
+          // Fall back to regular shop search
+          get().findNearbyShops(component, location);
+        }
       }
     }),
     {
@@ -507,7 +752,10 @@ export const usePredictiveMaintenanceStore = create<PredictiveMaintenanceState>(
         preferredShops: state.preferredShops,
         alertsEnabled: state.alertsEnabled,
         predictionSensitivity: state.predictionSensitivity,
-        autoScheduleMaintenance: state.autoScheduleMaintenance
+        autoScheduleMaintenance: state.autoScheduleMaintenance,
+        truckFaxEnabled: state.truckFaxEnabled,
+        vehicleVin: state.vehicleVin,
+        lastTruckFaxSync: state.lastTruckFaxSync
       })
     }
   )

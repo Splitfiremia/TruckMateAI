@@ -459,3 +459,187 @@ export interface TelematiicsData {
     cornering: number;
   };
 }
+
+// TruckFax API Integration Types
+export interface TruckFaxVehicleInfo {
+  vin: string;
+  make: string;
+  model: string;
+  year: number;
+  engineType: string;
+  transmissionType: string;
+  mileage: number;
+  lastReportedDate: string;
+  ownershipHistory: TruckFaxOwnership[];
+  accidentHistory: TruckFaxAccident[];
+  maintenanceRecords: TruckFaxMaintenanceRecord[];
+  recallInformation: TruckFaxRecall[];
+  inspectionHistory: TruckFaxInspection[];
+  titleHistory: TruckFaxTitle[];
+  lienHistory: TruckFaxLien[];
+  commercialUse: boolean;
+  fleetVehicle: boolean;
+}
+
+export interface TruckFaxOwnership {
+  ownerType: 'Individual' | 'Commercial' | 'Fleet' | 'Lease';
+  startDate: string;
+  endDate?: string;
+  state: string;
+  estimatedMileage?: number;
+}
+
+export interface TruckFaxAccident {
+  date: string;
+  severity: 'Minor' | 'Moderate' | 'Severe' | 'Total Loss';
+  damageType: string[];
+  estimatedDamage: number;
+  airbagDeployment: boolean;
+  location: string;
+  reportNumber?: string;
+}
+
+export interface TruckFaxMaintenanceRecord {
+  date: string;
+  mileage: number;
+  serviceType: 'Oil Change' | 'Brake Service' | 'Transmission Service' | 'Engine Repair' | 'Preventive Maintenance' | 'Other';
+  description: string;
+  cost?: number;
+  shopName?: string;
+  partsReplaced: string[];
+  warrantyInfo?: {
+    type: string;
+    duration: string;
+    mileageLimit?: number;
+  };
+}
+
+export interface TruckFaxRecall {
+  recallNumber: string;
+  date: string;
+  component: string;
+  description: string;
+  severity: 'Safety' | 'Emissions' | 'Performance';
+  status: 'Open' | 'Completed' | 'Not Applicable';
+  remedy: string;
+}
+
+export interface TruckFaxInspection {
+  date: string;
+  type: 'DOT' | 'State' | 'Annual' | 'Random';
+  result: 'Pass' | 'Fail' | 'Conditional';
+  violations: string[];
+  inspector: string;
+  location: string;
+  nextDueDate?: string;
+}
+
+export interface TruckFaxTitle {
+  issueDate: string;
+  state: string;
+  titleType: 'Clean' | 'Salvage' | 'Flood' | 'Lemon' | 'Rebuilt';
+  brandHistory: string[];
+  mileageReported: number;
+  mileageAccurate: boolean;
+}
+
+export interface TruckFaxLien {
+  lienHolder: string;
+  date: string;
+  amount?: number;
+  status: 'Active' | 'Released' | 'Satisfied';
+  type: 'Purchase' | 'Refinance' | 'Equity';
+}
+
+export interface TruckFaxPredictiveInsights {
+  vehicleId: string;
+  riskScore: number; // 0-100 (higher = more risk)
+  reliabilityScore: number; // 0-100 (higher = more reliable)
+  maintenancePredictions: TruckFaxMaintenancePrediction[];
+  costPredictions: TruckFaxCostPrediction;
+  resaleValueTrend: TruckFaxResaleValue;
+  recommendedActions: TruckFaxRecommendation[];
+  dataConfidence: number; // 0-100
+  lastUpdated: string;
+}
+
+export interface TruckFaxMaintenancePrediction {
+  component: string;
+  predictedFailureWindow: {
+    earliest: string;
+    latest: string;
+    mostLikely: string;
+  };
+  mileageWindow: {
+    earliest: number;
+    latest: number;
+    mostLikely: number;
+  };
+  confidence: number;
+  basedOnFactors: string[];
+  estimatedCost: {
+    parts: number;
+    labor: number;
+    total: number;
+  };
+  severity: 'Critical' | 'High' | 'Medium' | 'Low';
+  preventiveOptions: {
+    action: string;
+    cost: number;
+    effectiveness: number;
+  }[];
+}
+
+export interface TruckFaxCostPrediction {
+  nextYear: {
+    maintenance: number;
+    repairs: number;
+    total: number;
+  };
+  next5Years: {
+    maintenance: number;
+    repairs: number;
+    total: number;
+  };
+  majorComponentReplacements: {
+    component: string;
+    timeframe: string;
+    estimatedCost: number;
+  }[];
+}
+
+export interface TruckFaxResaleValue {
+  currentEstimate: number;
+  oneYearProjection: number;
+  threeYearProjection: number;
+  fiveYearProjection: number;
+  depreciationRate: number;
+  marketFactors: string[];
+}
+
+export interface TruckFaxRecommendation {
+  type: 'Maintenance' | 'Inspection' | 'Repair' | 'Replacement' | 'Monitoring';
+  priority: 'Critical' | 'High' | 'Medium' | 'Low';
+  title: string;
+  description: string;
+  timeframe: string;
+  estimatedCost: number;
+  potentialSavings: number;
+  riskReduction: number;
+}
+
+export interface TruckFaxAPIResponse<T> {
+  success: boolean;
+  data?: T;
+  error?: {
+    code: string;
+    message: string;
+    details?: any;
+  };
+  metadata: {
+    requestId: string;
+    timestamp: string;
+    rateLimitRemaining: number;
+    dataFreshness: string;
+  };
+}
