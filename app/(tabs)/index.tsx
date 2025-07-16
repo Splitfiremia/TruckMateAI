@@ -206,7 +206,7 @@ export default function DashboardScreen() {
   };
   
   // Use custom branding if available
-  const welcomeMessage = settings.welcomeMessage || 'Welcome back';
+  const welcomeMessage = settings.welcomeMessage || 'Welcome to TruckMate AI';
   const appName = settings.appName || 'TruckMate AI';
   const companyName = settings.companyName || user?.companyName;
   
