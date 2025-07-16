@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { BarChart, Clipboard, Home, Receipt, Settings, Users, Shield, Cloud } from "lucide-react-native";
+import { BarChart, Clipboard, Home, Receipt, Settings, Users, Shield, Cloud, Zap } from "lucide-react-native";
 import React from "react";
 
 import { colors } from "@/constants/colors";
@@ -70,6 +70,13 @@ export default function TabLayout() {
         options={{
           title: "Fleet Admin",
           tabBarIcon: ({ color }) => <Users color={color} size={22} />,
+        }}
+      />
+      <Tabs.Screen
+        name="integrations"
+        options={{
+          title: "Integrations",
+          tabBarIcon: ({ color }) => <Zap color={color} size={22} />,
         }}
       />
       <Tabs.Screen
