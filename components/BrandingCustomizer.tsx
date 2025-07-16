@@ -261,7 +261,7 @@ export default function BrandingCustomizer({ onClose }: BrandingCustomizerProps)
         
         <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
           <Save size={20} color={colors.text} />
-          <Text style={styles.saveButtonText}>Save Settings</Text>
+          <Text style={styles.primarySaveButtonText}>Save Settings</Text>
         </TouchableOpacity>
       </View>
       
