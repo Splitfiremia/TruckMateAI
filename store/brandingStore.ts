@@ -30,7 +30,6 @@ export interface BrandingSettings {
 
 interface BrandingState {
   settings: BrandingSettings;
-  isCustomized: boolean;
   
   // Actions
   updateBranding: (updates: Partial<BrandingSettings>) => void;
@@ -109,19 +108,16 @@ export const brandingPresets: BrandingPreset[] = [
 export const useBrandingStore = create<BrandingState>()(persist(
   (set, get) => ({
     settings: defaultBranding,
-    isCustomized: false,
     
     updateBranding: (updates) => {
       set((state) => ({
         settings: { ...state.settings, ...updates },
-        isCustomized: true,
       }));
     },
     
     resetToDefaults: () => {
       set({
         settings: defaultBranding,
-        isCustomized: false,
       });
     },
     
@@ -133,7 +129,6 @@ export const useBrandingStore = create<BrandingState>()(persist(
           secondaryColor: preset.secondaryColor,
           accentColor: preset.accentColor,
         },
-        isCustomized: true,
       }));
     },
     

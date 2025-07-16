@@ -405,7 +405,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     padding: 8,
   },
-  saveButton: {
+  primarySaveButton: {
     flexDirection: 'row',
     backgroundColor: colors.secondary,
     borderRadius: 12,
@@ -417,7 +417,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     gap: 8,
   },
-  saveButtonText: {
+  primarySaveButtonText: {
     fontSize: 16,
     fontWeight: '600',
     color: colors.text,

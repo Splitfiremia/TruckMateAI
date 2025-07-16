@@ -17,7 +17,7 @@ import { useUserStore, UserRole, UserProfile } from '@/store/userStore';
 type OnboardingStep = 'role-selection' | 'profile-setup' | 'company-details';
 
 export default function OnboardingScreen() {
-  const { setUser, completeOnboarding } = useUserStore();
+  const { setUser, completeOnboarding: completeUserOnboarding } = useUserStore();
   const [currentStep, setCurrentStep] = useState<OnboardingStep>('role-selection');
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
   const [formData, setFormData] = useState({
@@ -45,7 +45,7 @@ export default function OnboardingScreen() {
     if (selectedRole === 'fleet-company') {
       setCurrentStep('company-details');
     } else {
-      completeOnboarding();
+      handleCompleteOnboarding();
     }
   };
 
@@ -55,10 +55,10 @@ export default function OnboardingScreen() {
       return;
     }
     
-    completeOnboarding();
+    handleCompleteOnboarding();
   };
 
-  const completeOnboarding = () => {
+  const handleCompleteOnboarding = () => {
     const userProfile: UserProfile = {
       id: Date.now().toString(),
       name: formData.name,
@@ -74,6 +74,7 @@ export default function OnboardingScreen() {
     };
     
     setUser(userProfile);
+    completeUserOnboarding();
     router.replace('/(tabs)');
   };
 

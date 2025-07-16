@@ -167,7 +167,7 @@ export default function FleetAdminScreen() {
           <Text style={styles.brandingSubtitle}>
             Customize your white-label experience
           </Text>
-          {settings.isCustomized && (
+          {settings && (
             <Text style={styles.brandingStatus}>✓ Custom branding active</Text>
           )}
         </View>
