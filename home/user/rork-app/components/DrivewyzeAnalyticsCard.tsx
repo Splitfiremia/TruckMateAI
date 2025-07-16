@@ -55,138 +55,149 @@ export const DrivewyzeAnalyticsCard: React.FC<DrivewyzeAnalyticsCardProps> = ({ 
           </View>
           <Text style={styles.statLabel}>Denied Bypasses</Text>
         </View>
+      </View>
 
-        <View style={styles.statCard}>
-          <View style={styles.statHeader}>
-            <Clock size={20} color={colors.primary} />
-            <Text style={styles.statValue}>{formatTime(analytics.timeSaved)}</Text>
-          </View>
-          <Text style={styles.statLabel}>Time Saved</Text>
-        </View>
+      <View style={styles.divider} />
 
-        <View style={styles.statCard}>
-          <View style={styles.statHeader}>
-            <Fuel size={20} color={colors.success} />
-            <Text style={styles.statValue}>{analytics.fuelSaved.toFixed(1)} gal</Text>
+      <View style={styles.savingsSection}>
+        <Text style={styles.sectionTitle}>Estimated Savings</Text>
+        
+        <View style={styles.savingsGrid}>
+          <View style={styles.savingsItem}>
+            <Clock size={18} color={colors.primary} />
+            <View>
+              <Text style={styles.savingsValue}>{formatTime(analytics.timeSaved)}</Text>
+              <Text style={styles.savingsLabel}>Time Saved</Text>
+            </View>
           </View>
-          <Text style={styles.statLabel}>Fuel Saved</Text>
-        </View>
-
-        <View style={styles.statCard}>
-          <View style={styles.statHeader}>
-            <DollarSign size={20} color={colors.success} />
-            <Text style={styles.statValue}>{formatCurrency(analytics.costSaved)}</Text>
+          
+          <View style={styles.savingsItem}>
+            <Fuel size={18} color={colors.primary} />
+            <View>
+              <Text style={styles.savingsValue}>{analytics.fuelSaved.toFixed(1)} gal</Text>
+              <Text style={styles.savingsLabel}>Fuel Saved</Text>
+            </View>
           </View>
-          <Text style={styles.statLabel}>Cost Saved</Text>
+          
+          <View style={styles.savingsItem}>
+            <DollarSign size={18} color={colors.primary} />
+            <View>
+              <Text style={styles.savingsValue}>{formatCurrency(analytics.costSaved)}</Text>
+              <Text style={styles.savingsLabel}>Cost Saved</Text>
+            </View>
+          </View>
         </View>
       </View>
 
-      <View style={styles.complianceCard}>
-        <Text style={styles.complianceScore}>{analytics.complianceScore}%</Text>
-        <Text style={styles.complianceLabel}>Compliance Score</Text>
-        <Text style={styles.complianceText}>
-          Higher scores improve bypass approval rates
+      <View style={styles.footer}>
+        <Text style={styles.complianceScore}>
+          Compliance Score: <Text style={{ color: colors.success }}>{analytics.complianceScore}%</Text>
+        </Text>
+        <Text style={styles.lastUpdated}>
+          Last updated: {new Date(analytics.lastUpdated).toLocaleString()}
         </Text>
       </View>
-
-      <Text style={styles.lastUpdated}>
-        Last updated: {new Date(analytics.lastUpdated).toLocaleDateString()}
-      </Text>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.card,
-    borderRadius: 12,
     padding: 16,
-    marginHorizontal: 16,
-    marginBottom: 20,
+    borderRadius: 8,
+    backgroundColor: '#ffffff',
+    marginBottom: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: 2,
     elevation: 2,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
     gap: 8,
+    marginBottom: 16,
   },
   title: {
     fontSize: 18,
     fontWeight: '600',
-    color: colors.text.primary,
+    color: '#333333',
   },
   statsGrid: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    marginBottom: 20,
     gap: 12,
+    marginBottom: 16,
   },
   statCard: {
-    backgroundColor: colors.background.primary,
-    borderRadius: 8,
+    flex: 1,
     padding: 12,
-    width: '48%', // Adjust based on spacing and number of items per row
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    backgroundColor: '#f8f8f8',
+    borderRadius: 6,
   },
   statHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
     marginBottom: 4,
   },
   statValue: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text.primary,
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#333333',
   },
   statLabel: {
-    fontSize: 12,
-    color: colors.text.secondary,
-    marginTop: 4,
+    fontSize: 14,
+    color: '#666666',
   },
   statSubtext: {
-    fontSize: 11,
-    color: colors.text.tertiary,
-    marginTop: 2,
+    fontSize: 12,
+    color: '#888888',
+    marginTop: 4,
   },
-  complianceCard: {
-    backgroundColor: colors.primary + '10', // Adding transparency to primary color
-    borderRadius: 8,
-    padding: 16,
-    alignItems: 'center',
+  divider: {
+    height: 1,
+    backgroundColor: '#eeeeee',
+    marginVertical: 16,
+  },
+  savingsSection: {
     marginBottom: 16,
   },
-  complianceScore: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: colors.primary,
-    marginBottom: 4,
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333333',
+    marginBottom: 12,
   },
-  complianceLabel: {
+  savingsGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  savingsItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  savingsValue: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333333',
+  },
+  savingsLabel: {
+    fontSize: 12,
+    color: '#666666',
+  },
+  footer: {
+    marginTop: 8,
+  },
+  complianceScore: {
     fontSize: 14,
     fontWeight: '500',
-    color: colors.text.primary,
+    color: '#333333',
     marginBottom: 4,
-  },
-  complianceText: {
-    fontSize: 12,
-    color: colors.text.secondary,
-    textAlign: 'center',
   },
   lastUpdated: {
     fontSize: 12,
-    color: colors.text.tertiary,
-    textAlign: 'center',
-    marginTop: 8,
+    color: '#888888',
   },
 });
