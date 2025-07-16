@@ -1,1 +1,395 @@
-import React, { useEffect, useState } from 'react';\nimport {\n  View,\n  Text,\n  ScrollView,\n  StyleSheet,\n  TouchableOpacity,\n  RefreshControl,\n  Alert,\n} from 'react-native';\nimport { Stack } from 'expo-router';\nimport { MapPin, Bell, TrendingUp, Settings, Navigation, Clock } from 'lucide-react-native';\nimport { colors } from '@/constants/colors';\nimport { useDrivewyzeStore } from '@/store/drivewyzeStore';\nimport { DrivewyzeWeighStationCard } from '@/components/DrivewyzeWeighStationCard';\nimport { DrivewyzeNotificationCard } from '@/components/DrivewyzeNotificationCard';\nimport { DrivewyzeAnalyticsCard } from '@/components/DrivewyzeAnalyticsCard';\nimport { DrivewyzeBypassModal } from '@/components/DrivewyzeBypassModal';\nimport { DrivewyzeWeighStation } from '@/types';\n\nexport default function DrivewyzeScreen() {\n  const {\n    nearbyStations,\n    notifications,\n    analytics,\n    activeBypass,\n    loading,\n    errors,\n    fetchNearbyWeighStations,\n    fetchNotifications,\n    fetchAnalytics,\n    markNotificationAsRead,\n    clearNotification,\n    clearActiveBypass,\n    clearErrors,\n  } = useDrivewyzeStore();\n\n  const [selectedStation, setSelectedStation] = useState<DrivewyzeWeighStation | null>(null);\n  const [bypassModalVisible, setBypassModalVisible] = useState(false);\n  const [refreshing, setRefreshing] = useState(false);\n  const [activeTab, setActiveTab] = useState<'stations' | 'notifications' | 'analytics'>('stations');\n\n  // Mock current location (Columbus, OH)\n  const currentLocation = {\n    latitude: 39.9612,\n    longitude: -82.9988,\n  };\n\n  useEffect(() => {\n    loadData();\n  }, []);\n\n  const loadData = async () => {\n    await Promise.all([\n      fetchNearbyWeighStations(currentLocation),\n      fetchNotifications(),\n      fetchAnalytics(),\n    ]);\n  };\n\n  const handleRefresh = async () => {\n    setRefreshing(true);\n    await loadData();\n    setRefreshing(false);\n  };\n\n  const handleStationPress = (station: DrivewyzeWeighStation) => {\n    setSelectedStation(station);\n    // Show station details or navigate to detail screen\n    Alert.alert(\n      station.name,\n      `Status: ${station.status}\\nLocation: ${station.location.address}\\nBypass Eligible: ${station.bypassEligible ? 'Yes' : 'No'}`,\n      [\n        { text: 'OK' },\n        ...(station.bypassEligible && station.status === 'bypass_available'\n          ? [{\n              text: 'Request Bypass',\n              onPress: () => {\n                setSelectedStation(station);\n                setBypassModalVisible(true);\n              },\n            }]\n          : []),\n      ]\n    );\n  };\n\n  const handleBypassRequest = (station: DrivewyzeWeighStation) => {\n    setSelectedStation(station);\n    setBypassModalVisible(true);\n  };\n\n  const handleNotificationAction = (action: string) => {\n    switch (action) {\n      case 'request_bypass':\n        // Find the station and open bypass modal\n        const station = nearbyStations.find(s => s.status === 'bypass_available');\n        if (station) {\n          handleBypassRequest(station);\n        }\n        break;\n      case 'view_details':\n        // Navigate to station details\n        break;\n      default:\n        console.log('Unknown action:', action);\n    }\n  };\n\n  const renderTabButton = (tab: 'stations' | 'notifications' | 'analytics', icon: React.ReactNode, label: string) => (\n    <TouchableOpacity\n      style={[styles.tabButton, activeTab === tab && styles.activeTabButton]}\n      onPress={() => setActiveTab(tab)}\n    >\n      {icon}\n      <Text style={[styles.tabButtonText, activeTab === tab && styles.activeTabButtonText]}>\n        {label}\n      </Text>\n      {tab === 'notifications' && notifications.filter(n => n.actionRequired).length > 0 && (\n        <View style={styles.notificationBadge}>\n          <Text style={styles.notificationBadgeText}>\n            {notifications.filter(n => n.actionRequired).length}\n          </Text>\n        </View>\n      )}\n    </TouchableOpacity>\n  );\n\n  const renderContent = () => {\n    switch (activeTab) {\n      case 'stations':\n        return (\n          <View>\n            {activeBypass && (\n              <View style={styles.activeBypassCard}>\n                <View style={styles.activeBypassHeader}>\n                  <Navigation size={20} color={colors.success} />\n                  <Text style={styles.activeBypassTitle}>Active Bypass</Text>\n                  <TouchableOpacity onPress={clearActiveBypass}>\n                    <Text style={styles.clearBypassText}>Clear</Text>\n                  </TouchableOpacity>\n                </View>\n                <Text style={styles.activeBypassMessage}>{activeBypass.message}</Text>\n                {activeBypass.expiresAt && (\n                  <View style={styles.activeBypassExpiry}>\n                    <Clock size={14} color={colors.warning} />\n                    <Text style={styles.activeBypassExpiryText}>\n                      Expires: {new Date(activeBypass.expiresAt).toLocaleTimeString()}\n                    </Text>\n                  </View>\n                )}\n              </View>\n            )}\n            \n            <Text style={styles.sectionTitle}>Nearby Weigh Stations</Text>\n            {nearbyStations.length === 0 ? (\n              <View style={styles.emptyState}>\n                <MapPin size={48} color={colors.text.secondary} />\n                <Text style={styles.emptyStateText}>No weigh stations found nearby</Text>\n                <Text style={styles.emptyStateSubtext}>Try refreshing or check your location</Text>\n              </View>\n            ) : (\n              nearbyStations.map((station) => (\n                <DrivewyzeWeighStationCard\n                  key={station.id}\n                  station={station}\n                  onPress={() => handleStationPress(station)}\n                  onBypassRequest={() => handleBypassRequest(station)}\n                  showDistance\n                />\n              ))\n            )}\n          </View>\n        );\n\n      case 'notifications':\n        return (\n          <View>\n            <Text style={styles.sectionTitle}>Notifications</Text>\n            {notifications.length === 0 ? (\n              <View style={styles.emptyState}>\n                <Bell size={48} color={colors.text.secondary} />\n                <Text style={styles.emptyStateText}>No notifications</Text>\n                <Text style={styles.emptyStateSubtext}>You're all caught up!</Text>\n              </View>\n            ) : (\n              notifications.map((notification) => (\n                <DrivewyzeNotificationCard\n                  key={notification.id}\n                  notification={notification}\n                  onAction={handleNotificationAction}\n                  onDismiss={() => clearNotification(notification.id)}\n                />\n              ))\n            )}\n          </View>\n        );\n\n      case 'analytics':\n        return (\n          <View>\n            {analytics ? (\n              <DrivewyzeAnalyticsCard analytics={analytics} />\n            ) : (\n              <View style={styles.emptyState}>\n                <TrendingUp size={48} color={colors.text.secondary} />\n                <Text style={styles.emptyStateText}>No analytics data</Text>\n                <Text style={styles.emptyStateSubtext}>Data will appear after using Drivewyze</Text>\n              </View>\n            )}\n          </View>\n        );\n\n      default:\n        return null;\n    }\n  };\n\n  return (\n    <View style={styles.container}>\n      <Stack.Screen\n        options={{\n          title: 'Drivewyze',\n          headerStyle: { backgroundColor: colors.background.primary },\n          headerTintColor: colors.text.primary,\n          headerRight: () => (\n            <TouchableOpacity style={styles.headerButton}>\n              <Settings size={24} color={colors.text.primary} />\n            </TouchableOpacity>\n          ),\n        }}\n      />\n\n      <View style={styles.tabContainer}>\n        {renderTabButton('stations', <MapPin size={20} color={activeTab === 'stations' ? colors.white : colors.text.secondary} />, 'Stations')}\n        {renderTabButton('notifications', <Bell size={20} color={activeTab === 'notifications' ? colors.white : colors.text.secondary} />, 'Alerts')}\n        {renderTabButton('analytics', <TrendingUp size={20} color={activeTab === 'analytics' ? colors.white : colors.text.secondary} />, 'Analytics')}\n      </View>\n\n      <ScrollView\n        style={styles.content}\n        refreshControl={\n          <RefreshControl\n            refreshing={refreshing}\n            onRefresh={handleRefresh}\n            tintColor={colors.primary}\n          />\n        }\n        showsVerticalScrollIndicator={false}\n      >\n        {renderContent()}\n        <View style={styles.bottomPadding} />\n      </ScrollView>\n\n      <DrivewyzeBypassModal\n        visible={bypassModalVisible}\n        station={selectedStation}\n        onClose={() => {\n          setBypassModalVisible(false);\n          setSelectedStation(null);\n        }}\n      />\n    </View>\n  );\n}\n\nconst styles = StyleSheet.create({\n  container: {\n    flex: 1,\n    backgroundColor: colors.background.primary,\n  },\n  headerButton: {\n    padding: 8,\n  },\n  tabContainer: {\n    flexDirection: 'row',\n    backgroundColor: colors.card,\n    marginHorizontal: 16,\n    marginTop: 16,\n    borderRadius: 12,\n    padding: 4,\n  },\n  tabButton: {\n    flex: 1,\n    flexDirection: 'row',\n    alignItems: 'center',\n    justifyContent: 'center',\n    paddingVertical: 12,\n    paddingHorizontal: 8,\n    borderRadius: 8,\n    gap: 6,\n    position: 'relative',\n  },\n  activeTabButton: {\n    backgroundColor: colors.primary,\n  },\n  tabButtonText: {\n    fontSize: 14,\n    fontWeight: '500',\n    color: colors.text.secondary,\n  },\n  activeTabButtonText: {\n    color: colors.white,\n  },\n  notificationBadge: {\n    position: 'absolute',\n    top: 4,\n    right: 4,\n    backgroundColor: colors.danger,\n    borderRadius: 10,\n    minWidth: 20,\n    height: 20,\n    alignItems: 'center',\n    justifyContent: 'center',\n  },\n  notificationBadgeText: {\n    fontSize: 12,\n    fontWeight: '600',\n    color: colors.white,\n  },\n  content: {\n    flex: 1,\n    marginTop: 16,\n  },\n  sectionTitle: {\n    fontSize: 18,\n    fontWeight: '600',\n    color: colors.text.primary,\n    marginHorizontal: 16,\n    marginBottom: 12,\n  },\n  activeBypassCard: {\n    backgroundColor: colors.success,\n    marginHorizontal: 16,\n    marginBottom: 20,\n    borderRadius: 12,\n    padding: 16,\n  },\n  activeBypassHeader: {\n    flexDirection: 'row',\n    alignItems: 'center',\n    justifyContent: 'space-between',\n    marginBottom: 8,\n  },\n  activeBypassTitle: {\n    fontSize: 16,\n    fontWeight: '600',\n    color: colors.white,\n    flex: 1,\n    marginLeft: 8,\n  },\n  clearBypassText: {\n    fontSize: 14,\n    fontWeight: '500',\n    color: colors.white,\n    opacity: 0.8,\n  },\n  activeBypassMessage: {\n    fontSize: 14,\n    color: colors.white,\n    marginBottom: 8,\n  },\n  activeBypassExpiry: {\n    flexDirection: 'row',\n    alignItems: 'center',\n    gap: 6,\n  },\n  activeBypassExpiryText: {\n    fontSize: 12,\n    color: colors.white,\n    opacity: 0.9,\n  },\n  emptyState: {\n    alignItems: 'center',\n    justifyContent: 'center',\n    paddingVertical: 60,\n    paddingHorizontal: 32,\n  },\n  emptyStateText: {\n    fontSize: 18,\n    fontWeight: '600',\n    color: colors.text.primary,\n    marginTop: 16,\n    textAlign: 'center',\n  },\n  emptyStateSubtext: {\n    fontSize: 14,\n    color: colors.text.secondary,\n    marginTop: 8,\n    textAlign: 'center',\n  },\n  bottomPadding: {\n    height: 100,\n  },\n});\n
+import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  RefreshControl,
+  Alert,
+} from 'react-native';
+import { Stack } from 'expo-router';
+import { MapPin, Bell, TrendingUp, Settings, Navigation, Clock } from 'lucide-react-native';
+import { colors } from '@/constants/colors';
+import { useDrivewyzeStore } from '@/store/drivewyzeStore';
+import { DrivewyzeWeighStationCard } from '@/components/DrivewyzeWeighStationCard';
+import { DrivewyzeNotificationCard } from '@/components/DrivewyzeNotificationCard';
+import { DrivewyzeAnalyticsCard } from '@/components/DrivewyzeAnalyticsCard';
+import { DrivewyzeBypassModal } from '@/components/DrivewyzeBypassModal';
+import { DrivewyzeWeighStation } from '@/types';
+
+export default function DrivewyzeScreen() {
+  const {
+    nearbyStations,
+    notifications,
+    analytics,
+    activeBypass,
+    loading,
+    errors,
+    fetchNearbyWeighStations,
+    fetchNotifications,
+    fetchAnalytics,
+    markNotificationAsRead,
+    clearNotification,
+    clearActiveBypass,
+    clearErrors,
+  } = useDrivewyzeStore();
+
+  const [selectedStation, setSelectedStation] = useState<DrivewyzeWeighStation | null>(null);
+  const [bypassModalVisible, setBypassModalVisible] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [activeTab, setActiveTab] = useState<'stations' | 'notifications' | 'analytics'>('stations');
+
+  // Mock current location (Columbus, OH)
+  const currentLocation = {
+    latitude: 39.9612,
+    longitude: -82.9988,
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    await Promise.all([
+      fetchNearbyWeighStations(currentLocation),
+      fetchNotifications(),
+      fetchAnalytics(),
+    ]);
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await loadData();
+    setRefreshing(false);
+  };
+
+  const handleStationPress = (station: DrivewyzeWeighStation) => {
+    setSelectedStation(station);
+    // Show station details or navigate to detail screen
+    Alert.alert(
+      station.name,
+      `Status: ${station.status}\nLocation: ${station.location.address}\nBypass Eligible: ${station.bypassEligible ? 'Yes' : 'No'}`,
+      [
+        { text: 'OK' },
+        ...(station.bypassEligible && station.status === 'bypass_available'
+          ? [{
+            text: 'Request Bypass',
+            onPress: () => {
+              setSelectedStation(station);
+              setBypassModalVisible(true);
+            },
+          }]
+          : []),
+      ]
+    );
+  };
+
+  const handleBypassRequest = (station: DrivewyzeWeighStation) => {
+    setSelectedStation(station);
+    setBypassModalVisible(true);
+  };
+
+  const handleNotificationAction = (action: string) => {
+    switch (action) {
+      case 'request_bypass':
+        // Find the station and open bypass modal
+        const station = nearbyStations.find(s => s.status === 'bypass_available');
+        if (station) {
+          handleBypassRequest(station);
+        }
+        break;
+      case 'view_details':
+        // Navigate to station details
+        break;
+      default:
+        console.log('Unknown action:', action);
+    }
+  };
+
+  const renderTabButton = (tab: 'stations' | 'notifications' | 'analytics', icon: React.ReactNode, label: string) => (
+    <TouchableOpacity
+      style={[styles.tabButton, activeTab === tab && styles.activeTabButton]}
+      onPress={() => setActiveTab(tab)}
+    >
+      {icon}
+      <Text style={[styles.tabButtonText, activeTab === tab && styles.activeTabButtonText]}>
+        {label}
+      </Text>
+      {tab === 'notifications' && notifications.filter(n => n.actionRequired).length > 0 && (
+        <View style={styles.notificationBadge}>
+          <Text style={styles.notificationBadgeText}>
+            {notifications.filter(n => n.actionRequired).length}
+          </Text>
+        </View>
+      )}
+    </TouchableOpacity>
+  );
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'stations':
+        return (
+          <View>
+            {activeBypass && (
+              <View style={styles.activeBypassCard}>
+                <View style={styles.activeBypassHeader}>
+                  <Navigation size={20} color={colors.success} />
+                  <Text style={styles.activeBypassTitle}>Active Bypass</Text>
+                  <TouchableOpacity onPress={clearActiveBypass}>
+                    <Text style={styles.clearBypassText}>Clear</Text>
+                  </TouchableOpacity>
+                </View>
+                <Text style={styles.activeBypassMessage}>{activeBypass.message}</Text>
+                {activeBypass.expiresAt && (
+                  <View style={styles.activeBypassExpiry}>
+                    <Clock size={14} color={colors.warning} />
+                    <Text style={styles.activeBypassExpiryText}>
+                      Expires: {new Date(activeBypass.expiresAt).toLocaleTimeString()}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            )}
+            
+            <Text style={styles.sectionTitle}>Nearby Weigh Stations</Text>
+            {nearbyStations.length === 0 ? (
+              <View style={styles.emptyState}>
+                <MapPin size={48} color={colors.text.secondary} />
+                <Text style={styles.emptyStateText}>No weigh stations found nearby</Text>
+                <Text style={styles.emptyStateSubtext}>Try refreshing or check your location</Text>
+              </View>
+            ) : (
+              nearbyStations.map((station) => (
+                <DrivewyzeWeighStationCard
+                  key={station.id}
+                  station={station}
+                  onPress={() => handleStationPress(station)}
+                  onBypassRequest={() => handleBypassRequest(station)}
+                  showDistance
+                />
+              ))
+            )}
+          </View>
+        );
+
+      case 'notifications':
+        return (
+          <View>
+            <Text style={styles.sectionTitle}>Notifications</Text>
+            {notifications.length === 0 ? (
+              <View style={styles.emptyState}>
+                <Bell size={48} color={colors.text.secondary} />
+                <Text style={styles.emptyStateText}>No notifications</Text>
+                <Text style={styles.emptyStateSubtext}>You're all caught up!</Text>
+              </View>
+            ) : (
+              notifications.map((notification) => (
+                <DrivewyzeNotificationCard
+                  key={notification.id}
+                  notification={notification}
+                  onAction={handleNotificationAction}
+                  onDismiss={() => clearNotification(notification.id)}
+                />
+              ))
+            )}
+          </View>
+        );
+
+      case 'analytics':
+        return (
+          <View>
+            {analytics ? (
+              <DrivewyzeAnalyticsCard analytics={analytics} />
+            ) : (
+              <View style={styles.emptyState}>
+                <TrendingUp size={48} color={colors.text.secondary} />
+                <Text style={styles.emptyStateText}>No analytics data</Text>
+                <Text style={styles.emptyStateSubtext}>Data will appear after using Drivewyze</Text>
+              </View>
+            )}
+          </View>
+        );
+
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <View style={styles.container}>
+      <Stack.Screen
+        options={{
+          title: 'Drivewyze',
+          headerStyle: { backgroundColor: colors.background.primary },
+          headerTintColor: colors.text.primary,
+          headerRight: () => (
+            <TouchableOpacity style={styles.headerButton}>
+              <Settings size={24} color={colors.text.primary} />
+            </TouchableOpacity>
+          ),
+        }}
+      />
+
+      <View style={styles.tabContainer}>
+        {renderTabButton('stations', <MapPin size={20} color={activeTab === 'stations' ? colors.white : colors.text.secondary} />, 'Stations')}
+        {renderTabButton('notifications', <Bell size={20} color={activeTab === 'notifications' ? colors.white : colors.text.secondary} />, 'Alerts')}
+        {renderTabButton('analytics', <TrendingUp size={20} color={activeTab === 'analytics' ? colors.white : colors.text.secondary} />, 'Analytics')}
+      </View>
+
+      <ScrollView
+        style={styles.content}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={colors.primary}
+          />
+        }
+        showsVerticalScrollIndicator={false}
+      >
+        {renderContent()}
+        <View style={styles.bottomPadding} />
+      </ScrollView>
+
+      <DrivewyzeBypassModal
+        visible={bypassModalVisible}
+        station={selectedStation}
+        onClose={() => {
+          setBypassModalVisible(false);
+          setSelectedStation(null);
+        }}
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background.primary,
+  },
+  headerButton: {
+    padding: 8,
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    backgroundColor: colors.card,
+    marginHorizontal: 16,
+    marginTop: 16,
+    borderRadius: 12,
+    padding: 4,
+  },
+  tabButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    gap: 6,
+    position: 'relative',
+  },
+  activeTabButton: {
+    backgroundColor: colors.primary,
+  },
+  tabButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.text.secondary,
+  },
+  activeTabButtonText: {
+    color: colors.white,
+  },
+  notificationBadge: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    backgroundColor: colors.danger,
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  notificationBadgeText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.white,
+  },
+  content: {
+    flex: 1,
+    marginTop: 16,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.text.primary,
+    marginHorizontal: 16,
+    marginBottom: 12,
+  },
+  activeBypassCard: {
+    backgroundColor: colors.success,
+    marginHorizontal: 16,
+    marginBottom: 20,
+    borderRadius: 12,
+    padding: 16,
+  },
+  activeBypassHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  activeBypassTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.white,
+    flex: 1,
+    marginLeft: 8,
+  },
+  clearBypassText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.white,
+    opacity: 0.8,
+  },
+  activeBypassMessage: {
+    fontSize: 14,
+    color: colors.white,
+    marginBottom: 8,
+  },
+  activeBypassExpiry: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  activeBypassExpiryText: {
+    fontSize: 12,
+    color: colors.white,
+    opacity: 0.9,
+  },
+  emptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 60,
+    paddingHorizontal: 32,
+  },
+  emptyStateText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.text.primary,
+    marginTop: 16,
+    textAlign: 'center',
+  },
+  emptyStateSubtext: {
+    fontSize: 14,
+    color: colors.text.secondary,
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  bottomPadding: {
+    height: 100,
+  },
+});
