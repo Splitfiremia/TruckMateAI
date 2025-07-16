@@ -182,7 +182,7 @@ export const useDrivewyzeStore = create<DrivewyzeState>()(persist(
       
       try {
         const notifications = await drivewyzeApi.getNotifications();
-        const unreadCount = notifications.filter(n => !n.actionRequired).length;
+        const unreadCount = notifications.filter(n => n.actionRequired).length;
         set((state) => ({
           notifications,
           unreadNotifications: unreadCount,

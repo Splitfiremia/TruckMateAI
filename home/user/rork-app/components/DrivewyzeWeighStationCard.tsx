@@ -15,7 +15,7 @@ export const DrivewyzeWeighStationCard: React.FC<DrivewyzeWeighStationCardProps>
   station,
   onPress,
   onBypassRequest,
-  showDistance = true,
+  showDistance = true
 }) => {
   const getStatusIcon = () => {
     switch (station.status) {
@@ -62,58 +62,100 @@ export const DrivewyzeWeighStationCard: React.FC<DrivewyzeWeighStationCardProps>
     }
   };
 
+  const getBypassStatusColor = () => {
+    switch (station.bypassStatus) {
+      case 'approved':
+        return colors.success;
+      case 'denied':
+        return colors.danger;
+      case 'pending':
+        return colors.warning;
+      default:
+        return colors.text.secondary;
+    }
+  };
+
   return (
-    <TouchableOpacity style={styles.container} onPress={onPress}>
+    <TouchableOpacity
+      style={styles.container}
+      onPress={onPress}
+      activeOpacity={0.7}
+    >
       <View style={styles.header}>
-        <View style={styles.titleRow}>
+        <View style={styles.locationInfo}>
           <MapPin size={16} color={colors.text.secondary} />
-          <Text style={styles.name} numberOfLines={1}>
+          <Text style={styles.stationName} numberOfLines={1}>
             {station.name}
           </Text>
         </View>
         <View style={[styles.statusBadge, { backgroundColor: getStatusColor() }]}>
           {getStatusIcon()}
-          <Text style={styles.statusText}>{getStatusText()}</Text>
         </View>
       </View>
 
-      <View style={styles.content}>
-        <Text style={styles.address} numberOfLines={2}>
+      <View style={styles.details}>
+        <Text style={styles.address} numberOfLines={1}>
           {station.location.address}
         </Text>
         
         {showDistance && station.distance && (
-          <View style={styles.distanceRow}>
-            <Text style={styles.distance}>{station.distance.toFixed(1)} miles away</Text>
+          <View style={styles.distanceContainer}>
+            <Text style={styles.distance}>
+              {station.distance.toFixed(1)} miles away
+            </Text>
           </View>
         )}
 
-        <View style={styles.details}>
-          <View style={styles.detailItem}>
-            <Clock size={14} color={colors.text.secondary} />
-            <Text style={styles.detailText}>
-              {station.operatingHours?.monday || 'Hours vary'}
-            </Text>
-          </View>
+        <View style={styles.statusRow}>
+          <Text style={[styles.statusText, { color: getStatusColor() }]}>
+            {getStatusText()}
+          </Text>
           
           {station.bypassEligible && (
             <View style={styles.bypassInfo}>
               <Text style={styles.bypassText}>Bypass Eligible</Text>
-              {station.status === 'bypass_available' && onBypassRequest && (
-                <TouchableOpacity
-                  style={styles.bypassButton}
-                  onPress={(e) => {
-                    e.stopPropagation();
-                    onBypassRequest();
-                  }}
-                >
-                  <Text style={styles.bypassButtonText}>Request Bypass</Text>
-                </TouchableOpacity>
+              {station.bypassStatus && (
+                <View style={[styles.bypassStatusBadge, { backgroundColor: getBypassStatusColor() }]}>
+                  <Text style={styles.bypassStatusText}>
+                    {station.bypassStatus.charAt(0).toUpperCase() + station.bypassStatus.slice(1)}
+                  </Text>
+                </View>
               )}
             </View>
           )}
         </View>
+
+        {station.operatingHours && (
+          <View style={styles.hoursContainer}>
+            <Clock size={12} color={colors.text.secondary} />
+            <Text style={styles.hoursText}>
+              {station.operatingHours[new Date().toLocaleLowerCase().slice(0, 3) as keyof typeof station.operatingHours] || 'Hours vary'}
+            </Text>
+          </View>
+        )}
+
+        {station.services && station.services.length > 0 && (
+          <View style={styles.servicesContainer}>
+            <Text style={styles.servicesLabel}>Services:</Text>
+            <Text style={styles.servicesText} numberOfLines={1}>
+              {station.services.join(', ')}
+            </Text>
+          </View>
+        )}
       </View>
+
+      {station.bypassEligible && station.status === 'bypass_available' && onBypassRequest && (
+        <TouchableOpacity
+          style={styles.bypassButton}
+          onPress={(e) => {
+            e.stopPropagation();
+            onBypassRequest();
+          }}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.bypassButtonText}>Request Bypass</Text>
+        </TouchableOpacity>
+      )}
     </TouchableOpacity>
   );
 };
@@ -121,10 +163,10 @@ export const DrivewyzeWeighStationCard: React.FC<DrivewyzeWeighStationCardProps>
 const styles = StyleSheet.create({
   container: {
     backgroundColor: colors.card,
-    marginHorizontal: 16,
-    marginBottom: 12,
     borderRadius: 12,
     padding: 16,
+    marginHorizontal: 16,
+    marginBottom: 12,
     shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -137,84 +179,102 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     marginBottom: 12,
   },
-  titleRow: {
+  locationInfo: {
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
-    marginRight: 12,
+    gap: 8,
   },
-  name: {
+  stationName: {
     fontSize: 16,
     fontWeight: '600',
     color: colors.text.primary,
-    marginLeft: 8,
     flex: 1,
   },
   statusBadge: {
-    flexDirection: 'row',
+    borderRadius: 20,
+    padding: 6,
     alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    gap: 4,
+    justifyContent: 'center',
   },
-  statusText: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: colors.white,
-  },
-  content: {
+  details: {
     gap: 8,
   },
   address: {
     fontSize: 14,
     color: colors.text.secondary,
-    lineHeight: 20,
   },
-  distanceRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  distanceContainer: {
+    alignSelf: 'flex-start',
   },
   distance: {
-    fontSize: 13,
+    fontSize: 12,
     color: colors.primary,
     fontWeight: '500',
   },
-  details: {
-    gap: 8,
+  statusRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  detailItem: {
+  statusText: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  bypassInfo: {
+    alignItems: 'flex-end',
+    gap: 4,
+  },
+  bypassText: {
+    fontSize: 12,
+    color: colors.success,
+    fontWeight: '500',
+  },
+  bypassStatusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+  },
+  bypassStatusText: {
+    fontSize: 10,
+    color: colors.white,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+  },
+  hoursContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
   },
-  detailText: {
-    fontSize: 13,
+  hoursText: {
+    fontSize: 12,
+    color: colors.text.secondary,
+  },
+  servicesContainer: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  servicesLabel: {
+    fontSize: 12,
+    color: colors.text.secondary,
+    fontWeight: '500',
+  },
+  servicesText: {
+    fontSize: 12,
     color: colors.text.secondary,
     flex: 1,
   },
-  bypassInfo: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-  },
-  bypassText: {
-    fontSize: 13,
-    color: colors.success,
-    fontWeight: '500',
-  },
   bypassButton: {
     backgroundColor: colors.primary,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
     borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    marginTop: 12,
+    alignItems: 'center',
   },
   bypassButtonText: {
-    fontSize: 12,
-    fontWeight: '600',
     color: colors.white,
+    fontSize: 14,
+    fontWeight: '600',
   },
 });

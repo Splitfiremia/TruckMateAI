@@ -74,12 +74,12 @@ export default function DrivewyzeScreen() {
         { text: 'OK' },
         ...(station.bypassEligible && station.status === 'bypass_available'
           ? [{
-            text: 'Request Bypass',
-            onPress: () => {
-              setSelectedStation(station);
-              setBypassModalVisible(true);
-            },
-          }]
+              text: 'Request Bypass',
+              onPress: () => {
+                setSelectedStation(station);
+                setBypassModalVisible(true);
+              },
+            }]
           : []),
       ]
     );
