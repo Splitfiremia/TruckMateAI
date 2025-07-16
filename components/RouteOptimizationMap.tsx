@@ -244,13 +244,13 @@ const RouteOptimizationMap: React.FC<RouteOptimizationMapProps> = ({
         strokeWidth={4}
         strokeColor={colors.primary}
         optimizeWaypoints={true}
-        onStart={(params) => {
+        onStart={(params: any) => {
           console.log('Route calculation started');
         }}
-        onReady={(result) => {
+        onReady={(result: any) => {
           console.log('Route ready:', result);
         }}
-        onError={(errorMessage) => {
+        onError={(errorMessage: any) => {
           console.error('Route error:', errorMessage);
         }}
       />
@@ -315,7 +315,7 @@ const RouteOptimizationMap: React.FC<RouteOptimizationMapProps> = ({
             showsBuildings={false}
             showsIndoors={false}
             onMapReady={() => setMapReady(true)}
-            onPress={(event) => {
+            onPress={(event: any) => {
               onMapPress?.(event.nativeEvent.coordinate);
             }}
           >
