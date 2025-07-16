@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { TrendingUp, Clock, Fuel, DollarSign, CheckCircle, XCircle } from 'lucide-react-native';
-import type { DrivewyzeAnalytics } from '@/types';
+import { DrivewyzeAnalytics } from '@/types';
 import { colors } from '@/constants/colors';
 
 interface DrivewyzeAnalyticsCardProps {
@@ -51,11 +51,11 @@ export const DrivewyzeAnalyticsCard: React.FC<DrivewyzeAnalyticsCardProps> = ({ 
         <View style={styles.statCard}>
           <View style={styles.statHeader}>
             <XCircle size={20} color={colors.danger} />
-            <Text style={styles.statValue}>{analytics.deniedBypasses}</Text>
+            <Text style={styles.statValue}>{analytics.totalBypassRequests - analytics.approvedBypasses}</Text>
           </View>
           <Text style={styles.statLabel}>Denied Bypasses</Text>
           <Text style={styles.statSubtext}>
-            {analytics.totalBypassRequests} total requests
+            Total requests: {analytics.totalBypassRequests}
           </Text>
         </View>
 
@@ -65,16 +65,20 @@ export const DrivewyzeAnalyticsCard: React.FC<DrivewyzeAnalyticsCardProps> = ({ 
             <Text style={styles.statValue}>{formatTime(analytics.timeSaved)}</Text>
           </View>
           <Text style={styles.statLabel}>Time Saved</Text>
-          <Text style={styles.statSubtext}>Estimated</Text>
+          <Text style={styles.statSubtext}>
+            From successful bypasses
+          </Text>
         </View>
 
         <View style={styles.statCard}>
           <View style={styles.statHeader}>
             <DollarSign size={20} color={colors.success} />
-            <Text style={styles.statValue}>{formatCurrency(analytics.costSavings)}</Text>
+            <Text style={styles.statValue}>{formatCurrency(analytics.fuelSavings)}</Text>
           </View>
-          <Text style={styles.statLabel}>Cost Savings</Text>
-          <Text style={styles.statSubtext}>Estimated</Text>
+          <Text style={styles.statLabel}>Fuel Savings</Text>
+          <Text style={styles.statSubtext}>
+            Estimated savings
+          </Text>
         </View>
       </View>
     </View>
@@ -88,6 +92,10 @@ const styles = StyleSheet.create({
     padding: 16,
     marginVertical: 8,
     elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
   header: {
     flexDirection: 'row',
@@ -98,6 +106,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '600',
+    color: '#333',
   },
   statsGrid: {
     flexDirection: 'row',
@@ -116,20 +125,22 @@ const styles = StyleSheet.create({
   statHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
     marginBottom: 4,
   },
   statValue: {
     fontSize: 16,
     fontWeight: '600',
+    color: '#333',
   },
   statLabel: {
     fontSize: 14,
     fontWeight: '500',
+    color: '#666',
     marginBottom: 2,
   },
   statSubtext: {
     fontSize: 12,
-    color: '#666',
+    color: '#888',
   },
 });
