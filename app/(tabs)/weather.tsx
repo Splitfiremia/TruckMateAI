@@ -67,20 +67,11 @@ export default function WeatherScreen() {
   } = useWeatherStore();
 
   useEffect(() => {
-    const initializeWeather = async () => {
-      if (!locationPermissionGranted) {
-        const granted = await requestLocationPermission();
-        if (granted) {
-          fetchWeatherData();
-          fetchWeatherAlerts();
-        }
-      } else if (currentLocation) {
-        fetchWeatherData();
-        fetchWeatherAlerts();
-      }
-    };
-
-    initializeWeather();
+    // Only fetch weather data if we already have permission and location
+    if (locationPermissionGranted && currentLocation) {
+      fetchWeatherData();
+      fetchWeatherAlerts();
+    }
   }, [locationPermissionGranted, currentLocation]);
 
   const handleRefresh = async () => {

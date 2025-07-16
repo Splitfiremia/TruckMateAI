@@ -26,8 +26,16 @@ export default function BulkReceiptUpload({ visible, onClose, onUploadComplete }
   
   const addImages = async () => {
     try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
+      // Check current permission status first
+      const { status: currentStatus } = await ImagePicker.getMediaLibraryPermissionsAsync();
+      
+      let finalStatus = currentStatus;
+      if (currentStatus !== 'granted') {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        finalStatus = status;
+      }
+      
+      if (finalStatus !== 'granted') {
         Alert.alert('Permission needed', 'Gallery permission is required to select images');
         return;
       }

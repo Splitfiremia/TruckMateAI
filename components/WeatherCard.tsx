@@ -45,20 +45,11 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({ onPress }) => {
   } = useWeatherStore();
 
   useEffect(() => {
-    const initializeWeather = async () => {
-      if (!locationPermissionGranted) {
-        const granted = await requestLocationPermission();
-        if (granted) {
-          fetchWeatherData();
-          fetchWeatherAlerts();
-        }
-      } else if (currentLocation) {
-        fetchWeatherData();
-        fetchWeatherAlerts();
-      }
-    };
-
-    initializeWeather();
+    // Only fetch weather data if we already have permission and location
+    if (locationPermissionGranted && currentLocation) {
+      fetchWeatherData();
+      fetchWeatherAlerts();
+    }
   }, [locationPermissionGranted, currentLocation]);
 
   const handleRefresh = () => {
@@ -70,7 +61,13 @@ export const WeatherCard: React.FC<WeatherCardProps> = ({ onPress }) => {
 
   if (!locationPermissionGranted) {
     return (
-      <TouchableOpacity style={styles.card} onPress={requestLocationPermission}>
+      <TouchableOpacity style={styles.card} onPress={async () => {
+        const granted = await requestLocationPermission();
+        if (granted) {
+          fetchWeatherData();
+          fetchWeatherAlerts();
+        }
+      }}>
         <View style={styles.permissionContainer}>
           <MapPin color={colors.textSecondary} size={24} />
           <Text style={styles.permissionText}>Enable location for weather updates</Text>

@@ -96,8 +96,16 @@ export default function ReceiptScanner({ visible, onClose, onScanComplete, initi
   
   const handleCameraCapture = async () => {
     try {
-      const { status } = await ImagePicker.requestCameraPermissionsAsync();
-      if (status !== 'granted') {
+      // Check current permission status first
+      const { status: currentStatus } = await ImagePicker.getCameraPermissionsAsync();
+      
+      let finalStatus = currentStatus;
+      if (currentStatus !== 'granted') {
+        const { status } = await ImagePicker.requestCameraPermissionsAsync();
+        finalStatus = status;
+      }
+      
+      if (finalStatus !== 'granted') {
         Alert.alert('Permission needed', 'Camera permission is required to scan receipts');
         return;
       }
@@ -119,8 +127,16 @@ export default function ReceiptScanner({ visible, onClose, onScanComplete, initi
   
   const handleGalleryPick = async () => {
     try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== 'granted') {
+      // Check current permission status first
+      const { status: currentStatus } = await ImagePicker.getMediaLibraryPermissionsAsync();
+      
+      let finalStatus = currentStatus;
+      if (currentStatus !== 'granted') {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        finalStatus = status;
+      }
+      
+      if (finalStatus !== 'granted') {
         Alert.alert('Permission needed', 'Gallery permission is required to select images');
         return;
       }

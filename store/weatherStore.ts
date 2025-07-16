@@ -150,7 +150,10 @@ export const useWeatherStore = create<WeatherState>()(persist(
                   });
                   resolve(true);
                 },
-                () => resolve(false)
+                (error) => {
+                  console.log('Geolocation error:', error);
+                  resolve(false);
+                }
               );
             } else {
               resolve(false);
@@ -158,29 +161,47 @@ export const useWeatherStore = create<WeatherState>()(persist(
           });
         }
         
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        const granted = status === 'granted';
+        // Check current permission status first
+        const { status: currentStatus } = await Location.getForegroundPermissionsAsync();
         
-        if (granted) {
-          const location = await Location.getCurrentPositionAsync({});
-          const { latitude, longitude } = location.coords;
-          const locationName = await getLocationName(latitude, longitude);
-          
-          set({
-            currentLocation: {
-              latitude,
-              longitude,
-              city: locationName.city,
-              state: locationName.state
-            },
-            locationPermissionGranted: true
-          });
+        let finalStatus = currentStatus;
+        if (currentStatus !== 'granted') {
+          const { status } = await Location.requestForegroundPermissionsAsync();
+          finalStatus = status;
         }
         
-        set({ locationPermissionGranted: granted });
+        const granted = finalStatus === 'granted';
+        
+        if (granted) {
+          try {
+            const location = await Location.getCurrentPositionAsync({
+              accuracy: Location.Accuracy.Balanced,
+              timeout: 10000,
+            });
+            const { latitude, longitude } = location.coords;
+            const locationName = await getLocationName(latitude, longitude);
+            
+            set({
+              currentLocation: {
+                latitude,
+                longitude,
+                city: locationName.city,
+                state: locationName.state
+              },
+              locationPermissionGranted: true
+            });
+          } catch (locationError) {
+            console.error('Error getting current location:', locationError);
+            set({ locationPermissionGranted: granted });
+          }
+        } else {
+          set({ locationPermissionGranted: granted });
+        }
+        
         return granted;
       } catch (error) {
         console.error('Error requesting location permission:', error);
+        set({ locationPermissionGranted: false });
         return false;
       }
     },
