@@ -176,7 +176,6 @@ export const useWeatherStore = create<WeatherState>()(persist(
           try {
             const location = await Location.getCurrentPositionAsync({
               accuracy: Location.Accuracy.Balanced,
-              timeout: 10000,
             });
             const { latitude, longitude } = location.coords;
             const locationName = await getLocationName(latitude, longitude);
