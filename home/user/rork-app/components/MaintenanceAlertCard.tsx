@@ -30,11 +30,11 @@ const MaintenanceAlertCard: React.FC<MaintenanceAlertCardProps> = ({
 }) => {
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'Critical': return colors.status.error;
-      case 'High': return colors.status.warning;
-      case 'Medium': return colors.primary;
+      case 'Critical': return colors.danger;
+      case 'High': return colors.warning;
+      case 'Medium': return colors.primaryLight;
       case 'Low': return colors.secondary;
-      default: return colors.text.secondary;
+      default: return colors.textSecondary;
     }
   };
 
@@ -69,8 +69,10 @@ const MaintenanceAlertCard: React.FC<MaintenanceAlertCardProps> = ({
         <View style={styles.titleRow}>
           <TypeIcon color={priorityColor} size={18} />
           <Text style={styles.title}>{alert.title}</Text>
-          <View style={[styles.priorityBadge, { backgroundColor: priorityColor }]}>
-            <Text style={styles.priorityText}>{alert.priority}</Text>
+          <View style={[styles.priorityBadge, { backgroundColor: priorityColor + '20' }]}>
+            <Text style={[styles.priorityText, { color: priorityColor }]}>
+              {alert.priority}
+            </Text>
           </View>
         </View>
         <TouchableOpacity
@@ -84,16 +86,21 @@ const MaintenanceAlertCard: React.FC<MaintenanceAlertCardProps> = ({
       <Text style={styles.description}>{alert.description}</Text>
 
       <View style={styles.details}>
-        <View style={styles.detailItem}>
-          <Wrench color={colors.text.secondary} size={14} />
-          <Text style={styles.detailText}>{alert.component}</Text>
-        </View>
+        {alert.component && (
+          <View style={styles.detailItem}>
+            <Wrench color={colors.text.secondary} size={14} />
+            <Text style={styles.detailText}>Component: {alert.component}</Text>
+          </View>
+        )}
         
-        {alert.estimatedMiles && (
+        {alert.milesUntilFailure && (
           <View style={styles.detailItem}>
             <Clock color={colors.text.secondary} size={14} />
             <Text style={styles.detailText}>
-              {alert.estimatedMiles.toLocaleString()} miles
+              {alert.milesUntilFailure > 0 
+                ? `${alert.milesUntilFailure.toLocaleString()} miles remaining`
+                : 'Immediate attention required'
+              }
             </Text>
           </View>
         )}
@@ -115,6 +122,10 @@ const MaintenanceAlertCard: React.FC<MaintenanceAlertCardProps> = ({
           </Text>
         </TouchableOpacity>
       )}
+
+      <Text style={styles.timestamp}>
+        {new Date(alert.createdAt).toLocaleString()}
+      </Text>
     </View>
   );
 };
@@ -147,13 +158,12 @@ const styles = StyleSheet.create({
   },
   priorityBadge: {
     paddingHorizontal: 8,
-    paddingVertical: 2,
+    paddingVertical: 4,
     borderRadius: 12,
   },
   priorityText: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: '600',
-    color: colors.background.primary,
   },
   dismissButton: {
     padding: 4,
@@ -174,7 +184,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   detailText: {
-    fontSize: 13,
+    fontSize: 14,
     color: colors.text.secondary,
   },
   costText: {
@@ -186,17 +196,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    backgroundColor: colors.background.primary,
+    backgroundColor: colors.primary + '10',
     borderRadius: 8,
-    borderWidth: 1,
-    borderColor: colors.primary,
+    padding: 12,
+    marginBottom: 8,
   },
   shopsButtonText: {
     fontSize: 14,
     fontWeight: '500',
     color: colors.primary,
+  },
+  timestamp: {
+    fontSize: 12,
+    color: colors.text.secondary,
+    textAlign: 'right',
   },
 });
 

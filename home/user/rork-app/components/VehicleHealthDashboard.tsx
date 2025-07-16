@@ -29,8 +29,8 @@ const VehicleHealthDashboard: React.FC<VehicleHealthDashboardProps> = ({
 }) => {
   const getHealthColor = (score: number) => {
     if (score >= 85) return colors.secondary;
-    if (score >= 70) return colors.status.warning;
-    return colors.status.error;
+    if (score >= 70) return colors.warning;
+    return colors.danger;
   };
 
   const getHealthIcon = (score: number) => {
@@ -93,17 +93,17 @@ const VehicleHealthDashboard: React.FC<VehicleHealthDashboardProps> = ({
         {/* Quick Stats */}
         <View style={styles.quickStats}>
           <View style={styles.statItem}>
-            <AlertTriangle color={colors.status.error} size={16} />
+            <AlertTriangle color={colors.danger} size={16} />
             <Text style={styles.statNumber}>{vehicleHealth.criticalIssues}</Text>
             <Text style={styles.statLabel}>Critical</Text>
           </View>
           <View style={styles.statItem}>
-            <Clock color={colors.status.warning} size={16} />
+            <Clock color={colors.warning} size={16} />
             <Text style={styles.statNumber}>{vehicleHealth.upcomingMaintenance}</Text>
             <Text style={styles.statLabel}>Upcoming</Text>
           </View>
           <View style={styles.statItem}>
-            <Activity color={colors.primary} size={16} />
+            <Activity color={colors.primaryLight} size={16} />
             <Text style={styles.statNumber}>
               {Object.values(vehicleHealth.systemHealth).filter(score => score < 70).length}
             </Text>
@@ -112,31 +112,29 @@ const VehicleHealthDashboard: React.FC<VehicleHealthDashboardProps> = ({
         </View>
       </View>
 
-      {/* System Health Breakdown */}
-      <View style={styles.systemsSection}>
+      {/* System Health Details */}
+      <View style={styles.systemsContainer}>
         <Text style={styles.sectionTitle}>System Health</Text>
-        <View style={styles.systemsList}>
+        <View style={styles.systemsGrid}>
           {Object.entries(vehicleHealth.systemHealth).map(([system, score]) => {
-            const SystemHealthIcon = getHealthIcon(score);
+            const SystemIcon = getHealthIcon(score);
             const systemColor = getHealthColor(score);
             
             return (
               <TouchableOpacity
                 key={system}
-                style={styles.systemItem}
+                style={styles.systemCard}
                 onPress={() => onSystemPress?.(system)}
               >
-                <View style={styles.systemInfo}>
-                  <SystemHealthIcon color={systemColor} size={16} />
+                <View style={styles.systemHeader}>
+                  <SystemIcon color={systemColor} size={16} />
                   <Text style={styles.systemName}>
                     {getSystemDisplayName(system)}
                   </Text>
                 </View>
-                <View style={styles.systemScore}>
-                  <Text style={[styles.scoreValue, { color: systemColor }]}>
-                    {score}%
-                  </Text>
-                </View>
+                <Text style={[styles.systemScore, { color: systemColor }]}>
+                  {score}%
+                </Text>
               </TouchableOpacity>
             );
           })}
@@ -156,9 +154,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background.secondary,
     borderRadius: 16,
     padding: 16,
+    marginBottom: 16,
   },
   overallHealth: {
-    marginBottom: 24,
+    marginBottom: 20,
   },
   scoreSection: {
     flexDirection: 'row',
@@ -194,14 +193,15 @@ const styles = StyleSheet.create({
   },
   scoreDetailText: {
     fontSize: 14,
-    color: colors.text.secondary,
+    color: colors.text.primary,
+    fontWeight: '500',
   },
   quickStats: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    paddingVertical: 16,
     backgroundColor: colors.background.primary,
     borderRadius: 12,
+    padding: 12,
   },
   statItem: {
     alignItems: 'center',
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.text.secondary,
   },
-  systemsSection: {
+  systemsContainer: {
     marginBottom: 16,
   },
   sectionTitle: {
@@ -225,34 +225,34 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     marginBottom: 12,
   },
-  systemsList: {
+  systemsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
   },
-  systemItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+  systemCard: {
     backgroundColor: colors.background.primary,
-    borderRadius: 8,
+    borderRadius: 12,
+    padding: 12,
+    width: '48%',
+    minWidth: 140,
   },
-  systemInfo: {
+  systemHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 8,
+    marginBottom: 8,
   },
   systemName: {
     fontSize: 14,
     fontWeight: '500',
     color: colors.text.primary,
+    flex: 1,
   },
   systemScore: {
-    alignItems: 'flex-end',
-  },
-  scoreValue: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
+    textAlign: 'right',
   },
   lastUpdated: {
     fontSize: 12,
