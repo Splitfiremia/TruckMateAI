@@ -74,7 +74,7 @@ const PredictiveMaintenanceCard: React.FC<PredictiveMaintenanceCardProps> = ({
     >
       <View style={styles.header}>
         <View style={styles.titleSection}>
-          <Text style={styles.systemName}>{prediction.component}</Text>
+          <Text style={styles.systemName}>{prediction.componentName}</Text>
           <View style={[styles.severityBadge, { backgroundColor: severityColor + '20' }]}>
             <Text style={[styles.severityText, { color: severityColor }]}>
               {prediction.severity}
@@ -133,12 +133,12 @@ const PredictiveMaintenanceCard: React.FC<PredictiveMaintenanceCardProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.white,
+    backgroundColor: colors.card,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
     borderLeftWidth: 4,
-    shadowColor: colors.black,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: colors.backgroundSecondary,
+    borderTopColor: colors.border,
   },
   actionInfo: {
     flex: 1,

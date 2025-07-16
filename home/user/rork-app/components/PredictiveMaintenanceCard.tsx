@@ -128,7 +128,7 @@ const PredictiveMaintenanceCard: React.FC<PredictiveMaintenanceCardProps> = ({
         </View>
         <View style={styles.confidenceSection}>
           <Text style={styles.confidenceText}>
-            {prediction.confidence}% confidence
+            {prediction.confidenceLevel}% confidence
           </Text>
         </View>
       </View>

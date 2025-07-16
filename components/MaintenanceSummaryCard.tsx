@@ -128,7 +128,7 @@ const MaintenanceSummaryCard: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.backgroundSecondary,
+    backgroundColor: colors.card,
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,

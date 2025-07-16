@@ -164,7 +164,7 @@ const MaintenancePage = () => {
                 <View style={styles.statItem}>
                   <TrendingUp size={16} color={colors.text.secondary} />
                   <Text style={styles.statLabel}>Confidence</Text>
-                  <Text style={styles.statValue}>{Math.round(selectedPrediction.confidence * 100)}%</Text>
+                  <Text style={styles.statValue}>{selectedPrediction.confidenceLevel}%</Text>
                 </View>
               </View>
 
