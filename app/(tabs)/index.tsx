@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
 import { Stack } from 'expo-router';
-import { Mic, Camera, Clock, AlertTriangle, Truck, DollarSign, Clipboard, Upload, Shield, Cloud } from 'lucide-react-native';
+import { Mic, Camera, Clock, AlertTriangle, Truck, DollarSign, Clipboard, Upload, Shield, Cloud, Coffee, Bed } from 'lucide-react-native';
 
 import { colors } from '@/constants/colors';
-import { ComplianceViolationPrediction } from '@/types';
+import { ComplianceViolationPrediction, DutyStatus } from '@/types';
 import { driverInfo, upcomingLoads, weeklyStats } from '@/constants/mockData';
 import StatusCard from '@/components/StatusCard';
 import ComplianceAlert from '@/components/ComplianceAlert';
@@ -32,6 +32,7 @@ import { WeatherForecastModal } from '@/components/WeatherForecastModal';
 import { WeatherNotificationSystem } from '@/components/WeatherNotificationSystem';
 import { useUserStore } from '@/store/userStore';
 import { useBrandingStore } from '@/store/brandingStore';
+import { useLogbookStore } from '@/store/logbookStore';
 
 export default function DashboardScreen() {
   const [statusModalVisible, setStatusModalVisible] = useState(false);
@@ -53,6 +54,7 @@ export default function DashboardScreen() {
   const { violationPredictions, activeAlerts, metrics } = usePredictiveComplianceStore();
   const { user, isOwnerOperator, isFleetCompany } = useUserStore();
   const { settings } = useBrandingStore();
+  const { currentStatus, changeStatus, startBreak, endBreak, isOnBreak, startTrip } = useLogbookStore();
   
   useEffect(() => {
     // Check if inspection is required when component mounts
@@ -114,6 +116,89 @@ export default function DashboardScreen() {
     setCurrentViolationPrediction(null);
   };
   
+  const handleQuickStatusChange = (status: DutyStatus) => {
+    // Determine if this is the beginning of a trip
+    const isBeginningTrip = status === 'Driving' && 
+      (currentStatus === 'Off Duty' || currentStatus === 'Sleeper Berth');
+    
+    // End break if currently on break
+    if (isOnBreak && status !== 'Off Duty' && status !== 'Sleeper Berth') {
+      endBreak();
+    }
+    
+    // Start a new trip if beginning to drive
+    if (isBeginningTrip) {
+      startTrip();
+    }
+    
+    // Show inspection recommendation for trip beginning (but don't block)
+    if (status === 'Driving' && isBeginningTrip && isInspectionRequired) {
+      Alert.alert(
+        'Trip Start - Pre-Trip Inspection Recommended',
+        'A pre-trip inspection is recommended before beginning your trip for safety and compliance.',
+        [
+          { text: 'Start Trip Without Inspection', onPress: () => {
+            changeStatus(status, true);
+          }},
+          { 
+            text: 'Do Inspection First', 
+            style: 'cancel',
+            onPress: () => {
+              handleInspectionRequired(isBeginningTrip);
+            }
+          }
+        ]
+      );
+      return;
+    }
+    
+    // For non-trip driving changes, show warning but allow
+    if (status === 'Driving' && !isBeginningTrip && isInspectionRequired) {
+      Alert.alert(
+        'Inspection Recommended',
+        'A current pre-trip inspection is recommended for continued driving.',
+        [
+          { text: 'Continue Without Inspection', onPress: () => {
+            changeStatus(status, true);
+          }},
+          { 
+            text: 'Do Inspection', 
+            style: 'cancel',
+            onPress: () => {
+              handleInspectionRequired(false);
+            }
+          }
+        ]
+      );
+      return;
+    }
+    
+    changeStatus(status, true);
+  };
+  
+  const handleQuickBreakToggle = () => {
+    if (isOnBreak) {
+      endBreak();
+    } else {
+      startBreak();
+    }
+  };
+  
+  const getStatusColor = (status: DutyStatus) => {
+    switch (status) {
+      case 'Driving':
+        return colors.primaryLight;
+      case 'On Duty Not Driving':
+        return colors.warning;
+      case 'Off Duty':
+        return colors.secondary;
+      case 'Sleeper Berth':
+        return colors.textSecondary;
+      default:
+        return colors.textSecondary;
+    }
+  };
+  
   const handleStartInspection = () => {
     setIsBeginningTrip(true); // Assume inspection required modal is for trip start
     setInspectionRequiredModalVisible(false);
@@ -156,6 +241,105 @@ export default function DashboardScreen() {
         </View>
         
         <StatusCard onStatusChange={handleStatusCardPress} />
+        
+        {/* Quick Duty Status Change Section */}
+        <View style={styles.quickStatusSection}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Quick Status Change</Text>
+            <TouchableOpacity onPress={handleStatusCardPress}>
+              <Text style={styles.seeAllText}>More Options</Text>
+            </TouchableOpacity>
+          </View>
+          
+          <View style={styles.quickStatusGrid}>
+            <TouchableOpacity 
+              style={[
+                styles.quickStatusButton,
+                currentStatus === 'Driving' && styles.quickStatusButtonActive,
+                { borderColor: getStatusColor('Driving') }
+              ]}
+              onPress={() => handleQuickStatusChange('Driving')}
+              disabled={isInspectionRequired && currentStatus !== 'Driving'}
+            >
+              <View style={[styles.quickStatusIcon, { backgroundColor: getStatusColor('Driving') }]}>
+                <Truck size={20} color={colors.background} />
+              </View>
+              <Text style={[
+                styles.quickStatusText,
+                currentStatus === 'Driving' && styles.quickStatusTextActive
+              ]}>Driving</Text>
+              {isInspectionRequired && currentStatus !== 'Driving' && (
+                <Shield size={12} color={colors.warning} style={styles.quickStatusWarning} />
+              )}
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={[
+                styles.quickStatusButton,
+                currentStatus === 'On Duty Not Driving' && styles.quickStatusButtonActive,
+                { borderColor: getStatusColor('On Duty Not Driving') }
+              ]}
+              onPress={() => handleQuickStatusChange('On Duty Not Driving')}
+            >
+              <View style={[styles.quickStatusIcon, { backgroundColor: getStatusColor('On Duty Not Driving') }]}>
+                <Clock size={20} color={colors.background} />
+              </View>
+              <Text style={[
+                styles.quickStatusText,
+                currentStatus === 'On Duty Not Driving' && styles.quickStatusTextActive
+              ]}>On Duty</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={[
+                styles.quickStatusButton,
+                currentStatus === 'Off Duty' && styles.quickStatusButtonActive,
+                { borderColor: getStatusColor('Off Duty') }
+              ]}
+              onPress={() => handleQuickStatusChange('Off Duty')}
+            >
+              <View style={[styles.quickStatusIcon, { backgroundColor: getStatusColor('Off Duty') }]}>
+                <Coffee size={20} color={colors.background} />
+              </View>
+              <Text style={[
+                styles.quickStatusText,
+                currentStatus === 'Off Duty' && styles.quickStatusTextActive
+              ]}>Off Duty</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={[
+                styles.quickStatusButton,
+                currentStatus === 'Sleeper Berth' && styles.quickStatusButtonActive,
+                { borderColor: getStatusColor('Sleeper Berth') }
+              ]}
+              onPress={() => handleQuickStatusChange('Sleeper Berth')}
+            >
+              <View style={[styles.quickStatusIcon, { backgroundColor: getStatusColor('Sleeper Berth') }]}>
+                <Bed size={20} color={colors.background} />
+              </View>
+              <Text style={[
+                styles.quickStatusText,
+                currentStatus === 'Sleeper Berth' && styles.quickStatusTextActive
+              ]}>Sleeper</Text>
+            </TouchableOpacity>
+          </View>
+          
+          <TouchableOpacity 
+            style={[
+              styles.breakToggleButton,
+              isOnBreak && styles.breakToggleButtonActive
+            ]}
+            onPress={handleQuickBreakToggle}
+          >
+            <Text style={[
+              styles.breakToggleText,
+              isOnBreak && styles.breakToggleTextActive
+            ]}>
+              {isOnBreak ? '⏹ End Break' : '⏸ Start 30-Min Break'}
+            </Text>
+          </TouchableOpacity>
+        </View>
         
         <WeatherCard onPress={() => setWeatherForecastVisible(true)} />
         
@@ -550,5 +734,78 @@ const styles = StyleSheet.create({
     fontSize: 20,
     color: colors.textSecondary,
   },
-
+  quickStatusSection: {
+    backgroundColor: colors.backgroundLight,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  quickStatusGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+    gap: 8,
+  },
+  quickStatusButton: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    borderWidth: 1.5,
+    borderColor: colors.border,
+    backgroundColor: colors.background,
+    position: 'relative',
+  },
+  quickStatusButtonActive: {
+    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+    borderWidth: 2,
+  },
+  quickStatusIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 6,
+  },
+  quickStatusText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.textSecondary,
+    textAlign: 'center',
+  },
+  quickStatusTextActive: {
+    color: colors.primaryLight,
+  },
+  quickStatusWarning: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+  },
+  breakToggleButton: {
+    backgroundColor: colors.border,
+    borderRadius: 8,
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  breakToggleButtonActive: {
+    backgroundColor: colors.warning,
+    borderColor: colors.warning,
+  },
+  breakToggleText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.textSecondary,
+  },
+  breakToggleTextActive: {
+    color: colors.background,
+  },
 });
