@@ -869,27 +869,18 @@ export interface DrivewyzeWeighStation {
 
 export interface DrivewyzeBypassRequest {
   weighStationId: string;
-  vehicleId: string;
-  driverId: string;
-  currentLocation: {
-    latitude: number;
-    longitude: number;
-  };
   vehicleInfo: {
+    type: string;
     weight: number;
     height: number;
     length: number;
-    width: number;
-    axles: number;
     hazmat: boolean;
   };
-  complianceStatus: {
-    hoursOfService: 'compliant' | 'warning' | 'violation';
-    logbook: 'current' | 'outdated';
-    inspection: 'current' | 'due' | 'overdue';
-    registration: 'valid' | 'expired';
-    insurance: 'valid' | 'expired';
+  driverInfo: {
+    licenseNumber: string;
+    dotNumber: string;
   };
+  timestamp: string;
 }
 
 export interface DrivewyzeBypassResponse {

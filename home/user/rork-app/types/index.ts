@@ -687,3 +687,274 @@ export interface TruckFaxInsights {
     severity: 'high' | 'medium' | 'low';
   }[];
 }
+
+// Google Maps Route Optimization Types
+export interface RouteWaypoint {
+  id: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  type: 'pickup' | 'delivery' | 'fuel' | 'rest' | 'weigh_station';
+  timeWindow?: {
+    start: string;
+    end: string;
+  };
+  serviceTime?: number; // minutes
+  priority?: 'high' | 'medium' | 'low';
+  notes?: string;
+}
+
+export interface OptimizedRoute {
+  id: string;
+  waypoints: RouteWaypoint[];
+  totalDistance: number; // miles
+  totalDuration: number; // minutes
+  estimatedFuelCost: number;
+  tollCosts: number;
+  routePolyline: string;
+  alternativeRoutes?: OptimizedRoute[];
+  trafficConditions: 'light' | 'moderate' | 'heavy';
+  weatherAlerts: WeatherAlert[];
+  truckRestrictions: TruckRestriction[];
+  optimizationScore: number; // 0-100
+  createdAt: string;
+  lastUpdated: string;
+}
+
+export interface TruckRestriction {
+  type: 'height' | 'weight' | 'length' | 'hazmat' | 'no_trucks';
+  value?: number;
+  description: string;
+  location: {
+    latitude: number;
+    longitude: number;
+    address: string;
+  };
+  severity: 'warning' | 'restriction' | 'prohibited';
+}
+
+export interface WeatherAlert {
+  id: string;
+  type: 'snow' | 'ice' | 'rain' | 'wind' | 'fog' | 'extreme_temp';
+  severity: 'minor' | 'moderate' | 'severe' | 'extreme';
+  description: string;
+  location: {
+    latitude: number;
+    longitude: number;
+    address: string;
+  };
+  startTime: string;
+  endTime: string;
+  impact: 'low' | 'medium' | 'high';
+}
+
+export interface RouteOptimizationPreferences {
+  prioritizeTime: boolean;
+  prioritizeFuel: boolean;
+  avoidTolls: boolean;
+  avoidHighways: boolean;
+  preferTruckRoutes: boolean;
+  maxDrivingHours: number;
+  requiredBreakDuration: number; // minutes
+  fuelTankCapacity: number; // gallons
+  mpg: number;
+  truckDimensions: {
+    height: number; // feet
+    width: number; // feet
+    length: number; // feet
+    weight: number; // pounds
+  };
+  hazmatEndorsement: boolean;
+}
+
+export interface TrafficIncident {
+  id: string;
+  type: 'accident' | 'construction' | 'road_closure' | 'weather' | 'event';
+  severity: 'minor' | 'moderate' | 'major';
+  description: string;
+  location: {
+    latitude: number;
+    longitude: number;
+    address: string;
+  };
+  estimatedDelay: number; // minutes
+  startTime: string;
+  estimatedEndTime?: string;
+  alternativeRoute?: string;
+}
+
+export interface FuelStop {
+  id: string;
+  name: string;
+  brand: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  currentPrice: number;
+  amenities: string[];
+  truckParking: boolean;
+  showers: boolean;
+  restaurant: boolean;
+  distance: number; // miles from current location
+  detourTime: number; // additional minutes
+  rating: number;
+  reviewCount: number;
+}
+
+export interface RouteAnalytics {
+  routeId: string;
+  actualDistance: number;
+  actualDuration: number;
+  fuelConsumed: number;
+  tollsPaid: number;
+  delaysEncountered: TrafficIncident[];
+  fuelStopsUsed: FuelStop[];
+  complianceIssues: string[];
+  driverFeedback: {
+    rating: number;
+    comments: string;
+  };
+  accuracyScore: number; // how accurate the prediction was
+  completedAt: string;
+}
+
+export interface GoogleMapsConfig {
+  apiKey: string;
+  enableTraffic: boolean;
+  enableWeather: boolean;
+  enableTruckRestrictions: boolean;
+  updateInterval: number; // minutes
+  maxAlternativeRoutes: number;
+}
+
+// Drivewyze API Types
+export interface DrivewyzeWeighStation {
+  id: string;
+  name: string;
+  location: {
+    latitude: number;
+    longitude: number;
+    address: string;
+    state: string;
+    highway: string;
+    mileMarker?: number;
+  };
+  status: 'open' | 'closed' | 'bypass_available' | 'maintenance';
+  operatingHours: {
+    monday: string;
+    tuesday: string;
+    wednesday: string;
+    thursday: string;
+    friday: string;
+    saturday: string;
+    sunday: string;
+  };
+  bypassEligible: boolean;
+  bypassStatus?: 'approved' | 'denied' | 'pending' | 'not_applicable';
+  services: string[];
+  restrictions: {
+    maxWeight?: number;
+    maxHeight?: number;
+    maxLength?: number;
+    hazmatRestrictions?: string[];
+  };
+  contact: {
+    phone?: string;
+    website?: string;
+  };
+  lastUpdated: string;
+  distance?: number; // miles from current location
+  estimatedArrival?: string;
+}
+
+export interface DrivewyzeBypassRequest {
+  weighStationId: string;
+  vehicleInfo: {
+    type: string;
+    weight: number;
+    height: number;
+    length: number;
+    hazmat: boolean;
+  };
+  driverInfo: {
+    licenseNumber: string;
+    dotNumber: string;
+  };
+  timestamp: string;
+}
+
+export interface DrivewyzeBypassResponse {
+  requestId: string;
+  weighStationId: string;
+  status: 'approved' | 'denied' | 'pending';
+  message: string;
+  instructions?: string;
+  expiresAt?: string;
+  alternativeInstructions?: string;
+  reasonCode?: string;
+  estimatedProcessingTime?: number; // minutes
+}
+
+export interface DrivewyzeNotification {
+  id: string;
+  type: 'bypass_approved' | 'bypass_denied' | 'weigh_station_ahead' | 'status_change' | 'inspection_required';
+  weighStationId: string;
+  title: string;
+  message: string;
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  timestamp: string;
+  expiresAt?: string;
+  actionRequired: boolean;
+  actions?: {
+    label: string;
+    action: string;
+  }[];
+  location?: {
+    latitude: number;
+    longitude: number;
+    distance: number;
+  };
+}
+
+export interface DrivewyzeRoute {
+  id: string;
+  origin: string;
+  destination: string;
+  weighStations: DrivewyzeWeighStation[];
+  totalWeighStations: number;
+  bypassEligibleStations: number;
+  estimatedBypassSavings: {
+    time: number; // minutes
+    fuel: number; // gallons
+    cost: number; // dollars
+  };
+  routeAlerts: DrivewyzeNotification[];
+  lastUpdated: string;
+}
+
+export interface DrivewyzeConfig {
+  apiKey: string;
+  deviceId: string;
+  enableNotifications: boolean;
+  autoBypassRequest: boolean;
+  notificationRadius: number; // miles
+  updateInterval: number; // minutes
+}
+
+export interface DrivewyzeAnalytics {
+  totalBypassRequests: number;
+  approvedBypasses: number;
+  deniedBypasses: number;
+  timeSaved: number; // minutes
+  fuelSaved: number; // gallons
+  costSaved: number; // dollars
+  complianceScore: number; // 0-100
+  lastUpdated: string;
+  monthlyStats: {
+    month: string;
+    bypasses: number;
+    timeSaved: number;
+    fuelSaved: number;
+    costSaved: number;
+  }[];
+}
