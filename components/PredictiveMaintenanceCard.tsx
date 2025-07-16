@@ -1,1 +1,234 @@
-import React from 'react';\nimport {\n  View,\n  Text,\n  StyleSheet,\n  TouchableOpacity\n} from 'react-native';\nimport {\n  Calendar,\n  MapPin,\n  TrendingDown,\n  Wrench,\n  AlertTriangle,\n  Clock,\n  DollarSign\n} from 'lucide-react-native';\n\nimport { colors } from '@/constants/colors';\nimport { MaintenancePrediction } from '@/types';\n\ninterface PredictiveMaintenanceCardProps {\n  prediction: MaintenancePrediction;\n  onPress: (prediction: MaintenancePrediction) => void;\n}\n\nconst PredictiveMaintenanceCard: React.FC<PredictiveMaintenanceCardProps> = ({\n  prediction,\n  onPress\n}) => {\n  const getSeverityColor = (severity: string) => {\n    switch (severity) {\n      case 'Critical': return colors.danger;\n      case 'High': return colors.warning;\n      case 'Medium': return colors.primaryLight;\n      case 'Low': return colors.secondary;\n      default: return colors.textSecondary;\n    }\n  };\n\n  const getUrgencyColor = (milesUntilFailure: number) => {\n    if (milesUntilFailure < 1000) return colors.danger;\n    if (milesUntilFailure < 3000) return colors.warning;\n    return colors.secondary;\n  };\n\n  const getConditionColor = (condition: number) => {\n    if (condition > 70) return colors.secondary;\n    if (condition > 40) return colors.warning;\n    return colors.danger;\n  };\n\n  const formatDate = (dateString: string) => {\n    const date = new Date(dateString);\n    const now = new Date();\n    const diffTime = date.getTime() - now.getTime();\n    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));\n    \n    if (diffDays < 0) return 'Overdue';\n    if (diffDays === 0) return 'Today';\n    if (diffDays === 1) return 'Tomorrow';\n    if (diffDays < 7) return `${diffDays} days`;\n    if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks`;\n    return `${Math.ceil(diffDays / 30)} months`;\n  };\n\n  const severityColor = getSeverityColor(prediction.severity);\n  const urgencyColor = getUrgencyColor(prediction.milesUntilFailure);\n  const conditionColor = getConditionColor(prediction.currentCondition);\n\n  return (\n    <TouchableOpacity\n      style={[styles.container, { borderLeftColor: severityColor }]}\n      onPress={() => onPress(prediction)}\n      activeOpacity={0.7}\n    >\n      {/* Header */}\n      <View style={styles.header}>\n        <View style={styles.titleRow}>\n          <Wrench color={severityColor} size={18} />\n          <Text style={styles.title}>{prediction.componentName}</Text>\n          <View style={[styles.severityBadge, { backgroundColor: severityColor }]}>\n            <Text style={styles.severityText}>{prediction.severity}</Text>\n          </View>\n        </View>\n        <Text style={styles.confidence}>\n          {prediction.confidenceLevel}% confidence\n        </Text>\n      </View>\n\n      {/* Condition Bar */}\n      <View style={styles.conditionSection}>\n        <View style={styles.conditionHeader}>\n          <Text style={styles.conditionLabel}>Current Condition</Text>\n          <Text style={[styles.conditionValue, { color: conditionColor }]}>\n            {prediction.currentCondition}%\n          </Text>\n        </View>\n        <View style={styles.conditionBar}>\n          <View\n            style={[\n              styles.conditionBarFill,\n              {\n                width: `${prediction.currentCondition}%`,\n                backgroundColor: conditionColor\n              }\n            ]}\n          />\n        </View>\n      </View>\n\n      {/* Prediction Details */}\n      <View style={styles.details}>\n        <View style={styles.detailItem}>\n          <Calendar color={colors.textSecondary} size={14} />\n          <Text style={styles.detailLabel}>Predicted failure:</Text>\n          <Text style={[styles.detailValue, { color: urgencyColor }]}>\n            {formatDate(prediction.predictedFailureDate)}\n          </Text>\n        </View>\n        \n        <View style={styles.detailItem}>\n          <MapPin color={colors.textSecondary} size={14} />\n          <Text style={styles.detailLabel}>Miles until failure:</Text>\n          <Text style={[styles.detailValue, { color: urgencyColor }]}>\n            {prediction.milesUntilFailure.toLocaleString()}\n          </Text>\n        </View>\n        \n        <View style={styles.detailItem}>\n          <DollarSign color={colors.textSecondary} size={14} />\n          <Text style={styles.detailLabel}>Estimated cost:</Text>\n          <Text style={styles.costValue}>\n            ${prediction.estimatedCost}\n          </Text>\n        </View>\n      </View>\n\n      {/* Symptoms Preview */}\n      {prediction.symptoms.length > 0 && (\n        <View style={styles.symptomsSection}>\n          <Text style={styles.symptomsTitle}>Key Symptoms:</Text>\n          <Text style={styles.symptomsText} numberOfLines={2}>\n            {prediction.symptoms.slice(0, 2).join(' • ')}\n          </Text>\n        </View>\n      )}\n\n      {/* Preventive Actions */}\n      {prediction.preventiveMaintenance.length > 0 && (\n        <View style={styles.actionsSection}>\n          <View style={styles.actionItem}>\n            <Clock color={colors.primaryLight} size={14} />\n            <Text style={styles.actionText}>\n              {prediction.preventiveMaintenance[0].action}\n            </Text>\n            <View style={[\n              styles.urgencyBadge,\n              {\n                backgroundColor: prediction.preventiveMaintenance[0].urgency === 'Immediate' ? colors.danger :\n                                prediction.preventiveMaintenance[0].urgency === 'This Week' ? colors.warning :\n                                colors.primaryLight\n              }\n            ]}>\n              <Text style={styles.urgencyText}>\n                {prediction.preventiveMaintenance[0].urgency}\n              </Text>\n            </View>\n          </View>\n        </View>\n      )}\n\n      {/* Data Sources */}\n      <View style={styles.dataSourcesSection}>\n        <Text style={styles.dataSourcesTitle}>Based on:</Text>\n        <View style={styles.dataSourcesList}>\n          {prediction.basedOnData.diagnosticReadings > 0 && (\n            <View style={styles.dataSourceBadge}>\n              <Text style={styles.dataSourceText}>\n                {prediction.basedOnData.diagnosticReadings} readings\n              </Text>\n            </View>\n          )}\n          {prediction.basedOnData.historicalPatterns && (\n            <View style={styles.dataSourceBadge}>\n              <Text style={styles.dataSourceText}>History</Text>\n            </View>\n          )}\n          {prediction.basedOnData.manufacturerSpecs && (\n            <View style={styles.dataSourceBadge}>\n              <Text style={styles.dataSourceText}>OEM specs</Text>\n            </View>\n          )}\n          {prediction.basedOnData.drivingPatterns && (\n            <View style={styles.dataSourceBadge}>\n              <Text style={styles.dataSourceText}>Driving patterns</Text>\n            </View>\n          )}\n        </View>\n      </View>\n    </TouchableOpacity>\n  );\n};\n\nconst styles = StyleSheet.create({\n  container: {\n    backgroundColor: colors.card,\n    borderRadius: 12,\n    padding: 16,\n    marginBottom: 12,\n    borderLeftWidth: 4,\n  },\n  header: {\n    marginBottom: 16,\n  },\n  titleRow: {\n    flexDirection: 'row',\n    alignItems: 'center',\n    gap: 8,\n    marginBottom: 4,\n  },\n  title: {\n    color: colors.text,\n    fontSize: 16,\n    fontWeight: '600',\n    flex: 1,\n  },\n  severityBadge: {\n    paddingHorizontal: 8,\n    paddingVertical: 4,\n    borderRadius: 12,\n  },\n  severityText: {\n    color: colors.text,\n    fontSize: 10,\n    fontWeight: '600',\n  },\n  confidence: {\n    color: colors.textSecondary,\n    fontSize: 12,\n  },\n  conditionSection: {\n    marginBottom: 16,\n  },\n  conditionHeader: {\n    flexDirection: 'row',\n    justifyContent: 'space-between',\n    alignItems: 'center',\n    marginBottom: 8,\n  },\n  conditionLabel: {\n    color: colors.textSecondary,\n    fontSize: 12,\n  },\n  conditionValue: {\n    fontSize: 14,\n    fontWeight: '600',\n  },\n  conditionBar: {\n    height: 6,\n    backgroundColor: colors.border,\n    borderRadius: 3,\n  },\n  conditionBarFill: {\n    height: '100%',\n    borderRadius: 3,\n  },\n  details: {\n    gap: 8,\n    marginBottom: 16,\n  },\n  detailItem: {\n    flexDirection: 'row',\n    alignItems: 'center',\n    gap: 8,\n  },\n  detailLabel: {\n    color: colors.textSecondary,\n    fontSize: 12,\n    flex: 1,\n  },\n  detailValue: {\n    fontSize: 12,\n    fontWeight: '500',\n  },\n  costValue: {\n    color: colors.warning,\n    fontSize: 12,\n    fontWeight: '600',\n  },\n  symptomsSection: {\n    marginBottom: 16,\n    paddingTop: 12,\n    borderTopWidth: 1,\n    borderTopColor: colors.border,\n  },\n  symptomsTitle: {\n    color: colors.text,\n    fontSize: 12,\n    fontWeight: '600',\n    marginBottom: 4,\n  },\n  symptomsText: {\n    color: colors.textSecondary,\n    fontSize: 12,\n    lineHeight: 16,\n  },\n  actionsSection: {\n    marginBottom: 16,\n  },\n  actionItem: {\n    flexDirection: 'row',\n    alignItems: 'center',\n    gap: 8,\n    backgroundColor: colors.backgroundLight,\n    padding: 8,\n    borderRadius: 8,\n  },\n  actionText: {\n    color: colors.text,\n    fontSize: 12,\n    flex: 1,\n  },\n  urgencyBadge: {\n    paddingHorizontal: 6,\n    paddingVertical: 2,\n    borderRadius: 8,\n  },\n  urgencyText: {\n    color: colors.text,\n    fontSize: 9,\n    fontWeight: '600',\n  },\n  dataSourcesSection: {\n    paddingTop: 12,\n    borderTopWidth: 1,\n    borderTopColor: colors.border,\n  },\n  dataSourcesTitle: {\n    color: colors.textSecondary,\n    fontSize: 10,\n    marginBottom: 6,\n  },\n  dataSourcesList: {\n    flexDirection: 'row',\n    flexWrap: 'wrap',\n    gap: 6,\n  },\n  dataSourceBadge: {\n    backgroundColor: colors.border,\n    paddingHorizontal: 6,\n    paddingVertical: 2,\n    borderRadius: 6,\n  },\n  dataSourceText: {\n    color: colors.textSecondary,\n    fontSize: 9,\n  },\n});\n\nexport default PredictiveMaintenanceCard;
+import React from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity
+} from 'react-native';
+import {
+  Calendar,
+  MapPin,
+  TrendingDown,
+  Wrench,
+  AlertTriangle,
+  Clock,
+  DollarSign
+} from 'lucide-react-native';
+
+import { colors } from '@/constants/colors';
+import { MaintenancePrediction } from '@/types';
+
+interface PredictiveMaintenanceCardProps {
+  prediction: MaintenancePrediction;
+  onPress: (prediction: MaintenancePrediction) => void;
+}
+
+const PredictiveMaintenanceCard: React.FC<PredictiveMaintenanceCardProps> = ({
+  prediction,
+  onPress
+}) => {
+  const getSeverityColor = (severity: string) => {
+    switch (severity) {
+      case 'Critical': return colors.danger;
+      case 'High': return colors.warning;
+      case 'Medium': return colors.primaryLight;
+      case 'Low': return colors.secondary;
+      default: return colors.textSecondary;
+    }
+  };
+
+  const getUrgencyColor = (milesUntilFailure: number) => {
+    if (milesUntilFailure < 1000) return colors.danger;
+    if (milesUntilFailure < 3000) return colors.warning;
+    return colors.secondary;
+  };
+
+  const getConditionColor = (condition: number) => {
+    if (condition > 70) return colors.secondary;
+    if (condition > 40) return colors.warning;
+    return colors.danger;
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = date.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays < 0) return 'Overdue';
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Tomorrow';
+    if (diffDays < 7) return `${diffDays} days`;
+    if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks`;
+    return `${Math.ceil(diffDays / 30)} months`;
+  };
+
+  const severityColor = getSeverityColor(prediction.severity);
+  const urgencyColor = getUrgencyColor(prediction.milesUntilFailure);
+  const conditionColor = getConditionColor(prediction.currentCondition);
+
+  return (
+    <TouchableOpacity 
+      style={[styles.container, { borderLeftColor: severityColor }]}
+      onPress={() => onPress(prediction)}
+    >
+      <View style={styles.header}>
+        <View style={styles.titleSection}>
+          <Text style={styles.systemName}>{prediction.system}</Text>
+          <View style={[styles.severityBadge, { backgroundColor: severityColor + '20' }]}>
+            <Text style={[styles.severityText, { color: severityColor }]}>
+              {prediction.severity}
+            </Text>
+          </View>
+        </View>
+        <View style={styles.conditionSection}>
+          <Text style={styles.conditionLabel}>Condition</Text>
+          <Text style={[styles.conditionValue, { color: conditionColor }]}>
+            {prediction.currentCondition}%
+          </Text>
+        </View>
+      </View>
+
+      <Text style={styles.description}>{prediction.description}</Text>
+
+      <View style={styles.details}>
+        <View style={styles.detailRow}>
+          <TrendingDown color={urgencyColor} size={16} />
+          <Text style={styles.detailText}>
+            {prediction.milesUntilFailure.toLocaleString()} miles remaining
+          </Text>
+        </View>
+
+        <View style={styles.detailRow}>
+          <Calendar color={colors.textSecondary} size={16} />
+          <Text style={styles.detailText}>
+            Expected: {formatDate(prediction.predictedFailureDate)}
+          </Text>
+        </View>
+
+        {prediction.estimatedCost > 0 && (
+          <View style={styles.detailRow}>
+            <DollarSign color={colors.textSecondary} size={16} />
+            <Text style={styles.detailText}>
+              Est. ${prediction.estimatedCost.toLocaleString()}
+            </Text>
+          </View>
+        )}
+      </View>
+
+      <View style={styles.actionSection}>
+        <View style={styles.actionInfo}>
+          <Wrench color={colors.primary} size={16} />
+          <Text style={styles.actionText}>{prediction.recommendedAction}</Text>
+        </View>
+        <View style={[styles.confidenceBadge, { backgroundColor: colors.primaryLight + '20' }]}>
+          <Text style={[styles.confidenceText, { color: colors.primary }]}>
+            {prediction.confidence}% confidence
+          </Text>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: colors.white,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    borderLeftWidth: 4,
+    shadowColor: colors.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 8,
+  },
+  titleSection: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  systemName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  severityBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  severityText: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  conditionSection: {
+    alignItems: 'flex-end',
+  },
+  conditionLabel: {
+    fontSize: 12,
+    color: colors.textSecondary,
+  },
+  conditionValue: {
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  description: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    marginBottom: 12,
+    lineHeight: 20,
+  },
+  details: {
+    gap: 8,
+    marginBottom: 12,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  detailText: {
+    fontSize: 14,
+    color: colors.text,
+  },
+  actionSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: colors.backgroundSecondary,
+  },
+  actionInfo: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  actionText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.text,
+    flex: 1,
+  },
+  confidenceBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  confidenceText: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+});
+
+export default PredictiveMaintenanceCard;
