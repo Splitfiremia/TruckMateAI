@@ -8,8 +8,9 @@ export const colors = {
   error: "#DC2626", // Professional red (alias for danger)
   white: "#FFFFFF",
   black: "#0F172A", // Deep slate
-  textSecondary: "#475569", // Slate gray
-  backgroundSecondary: "#F1F5F9", // Light blue-gray
+  textSecondary: "#475569", // Slate gray (deprecated - use text.secondary)
+  backgroundSecondary: "#F1F5F9", // Light blue-gray (deprecated - use background.secondary)
+  backgroundLight: "#F1F5F9", // Alias for background.secondary
   
   // Background colors
   background: {

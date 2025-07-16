@@ -468,14 +468,14 @@ export default function LogbookScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.background.primary,
   },
   scrollView: {
     flex: 1,
     paddingHorizontal: 16,
   },
   card: {
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: colors.background.secondary,
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -561,7 +561,7 @@ const styles = StyleSheet.create({
   // Tab Styles
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: colors.background.secondary,
     borderRadius: 12,
     padding: 4,
     marginVertical: 16,
@@ -577,7 +577,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   activeTab: {
-    backgroundColor: colors.background,
+    backgroundColor: colors.background.primary,
   },
   tabText: {
     fontSize: 12,
@@ -594,7 +594,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   currentStatusCard: {
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: colors.background.secondary,
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
@@ -650,7 +650,7 @@ const styles = StyleSheet.create({
     maxHeight: 400,
   },
   logItem: {
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: colors.background.secondary,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -712,7 +712,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     paddingHorizontal: 8,
     paddingVertical: 4,
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: colors.background.secondary,
     borderRadius: 12,
   },
   emptyText: {

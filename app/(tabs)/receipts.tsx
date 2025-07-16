@@ -189,7 +189,7 @@ export default function ReceiptsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.background.primary,
   },
   headerActions: {
     flexDirection: 'row',
@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
   summaryContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: colors.background.secondary,
     marginHorizontal: 16,
     marginTop: 16,
     borderRadius: 12,
@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
   filterButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: colors.background.secondary,
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,

@@ -314,7 +314,7 @@ export default function IntegrationsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.background.primary,
   },
   headerActions: {
     flexDirection: 'row',
@@ -325,7 +325,7 @@ const styles = StyleSheet.create({
   },
   tabs: {
     flexDirection: 'row',
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: colors.background.secondary,
     margin: 16,
     borderRadius: 12,
     padding: 4,
@@ -341,7 +341,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   activeTabButton: {
-    backgroundColor: colors.background,
+    backgroundColor: colors.background.primary,
   },
   tabButtonText: {
     fontSize: 14,

@@ -144,7 +144,7 @@ export default function LoadsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.background.primary,
   },
   searchContainer: {
     flexDirection: 'row',
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: colors.background.secondary,
     borderRadius: 12,
     paddingHorizontal: 12,
   },
@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
   filterButton: {
     width: 44,
     height: 44,
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: colors.background.secondary,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: colors.background.secondary,
     marginHorizontal: 16,
     borderRadius: 12,
     marginBottom: 16,

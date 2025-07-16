@@ -142,13 +142,13 @@ export default function OnboardingScreen() {
         <View style={styles.inputGroup}>
           <Text style={styles.inputLabel}>Full Name *</Text>
           <View style={styles.inputContainer}>
-            <User size={20} color={colors.textSecondary} />
+            <User size={20} color={colors.text.secondary} />
             <TextInput
               style={styles.textInput}
               value={formData.name}
               onChangeText={(text) => updateFormData('name', text)}
               placeholder="Enter your full name"
-              placeholderTextColor={colors.textSecondary}
+              placeholderTextColor={colors.text.secondary}
             />
           </View>
         </View>
@@ -156,13 +156,13 @@ export default function OnboardingScreen() {
         <View style={styles.inputGroup}>
           <Text style={styles.inputLabel}>Email Address *</Text>
           <View style={styles.inputContainer}>
-            <Mail size={20} color={colors.textSecondary} />
+            <Mail size={20} color={colors.text.secondary} />
             <TextInput
               style={styles.textInput}
               value={formData.email}
               onChangeText={(text) => updateFormData('email', text)}
               placeholder="Enter your email"
-              placeholderTextColor={colors.textSecondary}
+              placeholderTextColor={colors.text.secondary}
               keyboardType="email-address"
               autoCapitalize="none"
             />
@@ -172,13 +172,13 @@ export default function OnboardingScreen() {
         <View style={styles.inputGroup}>
           <Text style={styles.inputLabel}>Phone Number</Text>
           <View style={styles.inputContainer}>
-            <Phone size={20} color={colors.textSecondary} />
+            <Phone size={20} color={colors.text.secondary} />
             <TextInput
               style={styles.textInput}
               value={formData.phone}
               onChangeText={(text) => updateFormData('phone', text)}
               placeholder="(555) 123-4567"
-              placeholderTextColor={colors.textSecondary}
+              placeholderTextColor={colors.text.secondary}
               keyboardType="phone-pad"
             />
           </View>
@@ -188,13 +188,13 @@ export default function OnboardingScreen() {
           <View style={styles.inputGroup}>
             <Text style={styles.inputLabel}>CDL Number</Text>
             <View style={styles.inputContainer}>
-              <Hash size={20} color={colors.textSecondary} />
+              <Hash size={20} color={colors.text.secondary} />
               <TextInput
                 style={styles.textInput}
                 value={formData.cdlNumber}
                 onChangeText={(text) => updateFormData('cdlNumber', text)}
                 placeholder="Enter your CDL number"
-                placeholderTextColor={colors.textSecondary}
+                placeholderTextColor={colors.text.secondary}
               />
             </View>
           </View>
@@ -209,7 +209,7 @@ export default function OnboardingScreen() {
               value={formData.dotNumber}
               onChangeText={(text) => updateFormData('dotNumber', text)}
               placeholder="Enter your DOT number"
-              placeholderTextColor={colors.textSecondary}
+              placeholderTextColor={colors.text.secondary}
             />
           </View>
         </View>
@@ -223,7 +223,7 @@ export default function OnboardingScreen() {
               value={formData.mcNumber}
               onChangeText={(text) => updateFormData('mcNumber', text)}
               placeholder="Enter your MC number"
-              placeholderTextColor={colors.textSecondary}
+              placeholderTextColor={colors.text.secondary}
             />
           </View>
         </View>
@@ -246,13 +246,13 @@ export default function OnboardingScreen() {
         <View style={styles.inputGroup}>
           <Text style={styles.inputLabel}>Company Name *</Text>
           <View style={styles.inputContainer}>
-            <Building2 size={20} color={colors.textSecondary} />
+            <Building2 size={20} color={colors.text.secondary} />
             <TextInput
               style={styles.textInput}
               value={formData.companyName}
               onChangeText={(text) => updateFormData('companyName', text)}
               placeholder="Enter your company name"
-              placeholderTextColor={colors.textSecondary}
+              placeholderTextColor={colors.text.secondary}
             />
           </View>
         </View>
@@ -260,13 +260,13 @@ export default function OnboardingScreen() {
         <View style={styles.inputGroup}>
           <Text style={styles.inputLabel}>Fleet Size</Text>
           <View style={styles.inputContainer}>
-            <Truck size={20} color={colors.textSecondary} />
+            <Truck size={20} color={colors.text.secondary} />
             <TextInput
               style={styles.textInput}
               value={formData.fleetSize}
               onChangeText={(text) => updateFormData('fleetSize', text)}
               placeholder="Number of vehicles"
-              placeholderTextColor={colors.textSecondary}
+              placeholderTextColor={colors.text.secondary}
               keyboardType="numeric"
             />
           </View>
@@ -304,7 +304,7 @@ export default function OnboardingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.background.primary,
   },
   scrollContent: {
     flexGrow: 1,
@@ -317,7 +317,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: '700',
-    color: colors.text,
+    color: colors.text.primary,
     marginBottom: 16,
     textAlign: 'center',
   },
@@ -329,7 +329,7 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: colors.textSecondary,
+    backgroundColor: colors.text.secondary,
   },
   progressDotActive: {
     backgroundColor: colors.primary,
@@ -340,13 +340,13 @@ const styles = StyleSheet.create({
   stepTitle: {
     fontSize: 24,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
     marginBottom: 8,
     textAlign: 'center',
   },
   stepSubtitle: {
     fontSize: 16,
-    color: colors.textSecondary,
+    color: colors.text.secondary,
     textAlign: 'center',
     marginBottom: 32,
     lineHeight: 22,
@@ -355,7 +355,7 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   roleCard: {
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: colors.card,
     borderRadius: 16,
     padding: 20,
     alignItems: 'center',
@@ -364,7 +364,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: colors.background,
+    backgroundColor: colors.background.secondary,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
@@ -372,12 +372,12 @@ const styles = StyleSheet.create({
   roleTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
     marginBottom: 8,
   },
   roleDescription: {
     fontSize: 14,
-    color: colors.textSecondary,
+    color: colors.text.secondary,
     textAlign: 'center',
     marginBottom: 16,
     lineHeight: 20,
@@ -387,7 +387,7 @@ const styles = StyleSheet.create({
   },
   roleFeature: {
     fontSize: 14,
-    color: colors.text,
+    color: colors.text.primary,
     marginBottom: 4,
   },
   form: {
@@ -400,12 +400,12 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 16,
     fontWeight: '500',
-    color: colors.text,
+    color: colors.text.primary,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: colors.card,
     borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -414,7 +414,7 @@ const styles = StyleSheet.create({
   textInput: {
     flex: 1,
     fontSize: 16,
-    color: colors.text,
+    color: colors.text.primary,
   },
   continueButton: {
     backgroundColor: colors.primary,
@@ -425,6 +425,6 @@ const styles = StyleSheet.create({
   continueButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
   },
 });

@@ -103,7 +103,7 @@ export default function WeatherScreen() {
             We need access to your location to provide accurate weather information and alerts.
           </Text>
           <TouchableOpacity style={styles.permissionButton} onPress={requestLocationPermission}>
-            <MapPin color={colors.background} size={20} />
+            <MapPin color={colors.white} size={20} />
             <Text style={styles.permissionButtonText}>Grant Location Permission</Text>
           </TouchableOpacity>
         </View>
@@ -289,7 +289,7 @@ export default function WeatherScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.background.primary,
   },
   scrollView: {
     flex: 1,
@@ -325,7 +325,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
   },
   permissionButtonText: {
-    color: colors.background,
+    color: colors.white,
     fontSize: 16,
     fontWeight: '600',
     marginLeft: 8,

@@ -366,10 +366,10 @@ export default function FleetAdminScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.background.primary,
   },
   tabBar: {
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: colors.background.secondary,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
@@ -395,7 +395,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: colors.background.secondary,
     borderRadius: 12,
     padding: 16,
     marginTop: 16,
@@ -463,7 +463,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   complianceCard: {
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: colors.background.secondary,
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -509,7 +509,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   alertsList: {
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: colors.background.secondary,
     borderRadius: 12,
     padding: 16,
   },
@@ -541,7 +541,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   settingGroup: {
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: colors.background.secondary,
     borderRadius: 12,
     marginBottom: 16,
     overflow: 'hidden',
@@ -597,7 +597,7 @@ const styles = StyleSheet.create({
   },
   brandingHeader: {
     flexDirection: 'row',
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: colors.background.secondary,
     borderRadius: 12,
     padding: 16,
     marginTop: 16,

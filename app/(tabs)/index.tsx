@@ -261,7 +261,7 @@ export default function DashboardScreen() {
               disabled={isInspectionRequired && currentStatus !== 'Driving'}
             >
               <View style={[styles.quickStatusIcon, { backgroundColor: getStatusColor('Driving') }]}>
-                <Truck size={20} color={colors.background} />
+                <Truck size={20} color={colors.white} />
               </View>
               <Text style={[
                 styles.quickStatusText,
@@ -281,7 +281,7 @@ export default function DashboardScreen() {
               onPress={() => handleQuickStatusChange('On Duty Not Driving')}
             >
               <View style={[styles.quickStatusIcon, { backgroundColor: getStatusColor('On Duty Not Driving') }]}>
-                <Clock size={20} color={colors.background} />
+                <Clock size={20} color={colors.white} />
               </View>
               <Text style={[
                 styles.quickStatusText,
@@ -298,7 +298,7 @@ export default function DashboardScreen() {
               onPress={() => handleQuickStatusChange('Off Duty')}
             >
               <View style={[styles.quickStatusIcon, { backgroundColor: getStatusColor('Off Duty') }]}>
-                <Coffee size={20} color={colors.background} />
+                <Coffee size={20} color={colors.white} />
               </View>
               <Text style={[
                 styles.quickStatusText,
@@ -315,7 +315,7 @@ export default function DashboardScreen() {
               onPress={() => handleQuickStatusChange('Sleeper Berth')}
             >
               <View style={[styles.quickStatusIcon, { backgroundColor: getStatusColor('Sleeper Berth') }]}>
-                <Bed size={20} color={colors.background} />
+                <Bed size={20} color={colors.white} />
               </View>
               <Text style={[
                 styles.quickStatusText,
@@ -567,7 +567,7 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.background.primary,
   },
   scrollView: {
     flex: 1,
@@ -583,16 +583,16 @@ const styles = StyleSheet.create({
   greeting: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: colors.text,
+    color: colors.text.primary,
   },
   subGreeting: {
     fontSize: 14,
-    color: colors.textSecondary,
+    color: colors.text.secondary,
     marginTop: 4,
   },
   welcomeMessage: {
     fontSize: 12,
-    color: colors.textSecondary,
+    color: colors.text.secondary,
     marginTop: 2,
     fontStyle: 'italic',
   },
@@ -612,7 +612,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
   },
   seeAllText: {
     fontSize: 14,
@@ -627,7 +627,7 @@ const styles = StyleSheet.create({
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: colors.background.secondary,
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -638,7 +638,7 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 18,
     fontWeight: '700',
-    color: colors.text,
+    color: colors.text.primary,
   },
   statValueContainer: {
     flexDirection: 'row',
@@ -646,7 +646,7 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 12,
-    color: colors.textSecondary,
+    color: colors.text.secondary,
     marginTop: 4,
   },
   footer: {
@@ -658,7 +658,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   predictiveComplianceCard: {
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: colors.background.secondary,
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -677,11 +677,11 @@ const styles = StyleSheet.create({
   predictiveTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
   },
   predictiveSubtitle: {
     fontSize: 12,
-    color: colors.textSecondary,
+    color: colors.text.secondary,
     marginTop: 2,
   },
   riskIndicator: {
@@ -693,7 +693,7 @@ const styles = StyleSheet.create({
   },
   riskLabel: {
     fontSize: 10,
-    color: colors.textSecondary,
+    color: colors.text.secondary,
   },
   nextViolation: {
     fontSize: 12,
@@ -706,7 +706,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: colors.background,
+    backgroundColor: colors.background.primary,
     zIndex: 1000,
   },
   modalHeader: {
@@ -721,7 +721,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
   },
   modalCloseButton: {
     width: 32,
@@ -733,10 +733,10 @@ const styles = StyleSheet.create({
   },
   modalCloseText: {
     fontSize: 20,
-    color: colors.textSecondary,
+    color: colors.text.secondary,
   },
   quickStatusSection: {
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: colors.background.secondary,
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -760,7 +760,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1.5,
     borderColor: colors.border,
-    backgroundColor: colors.background,
+    backgroundColor: colors.background.primary,
     position: 'relative',
   },
   quickStatusButtonActive: {
@@ -778,7 +778,7 @@ const styles = StyleSheet.create({
   quickStatusText: {
     fontSize: 12,
     fontWeight: '600',
-    color: colors.textSecondary,
+    color: colors.text.secondary,
     textAlign: 'center',
   },
   quickStatusTextActive: {
@@ -804,9 +804,9 @@ const styles = StyleSheet.create({
   breakToggleText: {
     fontSize: 14,
     fontWeight: '600',
-    color: colors.textSecondary,
+    color: colors.text.secondary,
   },
   breakToggleTextActive: {
-    color: colors.background,
+    color: colors.white,
   },
 });

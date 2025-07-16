@@ -101,7 +101,7 @@ export default function SettingsScreen() {
           value={currentValue}
           onValueChange={() => toggleSetting(setting)}
           trackColor={{ false: colors.border, true: colors.primaryLight }}
-          thumbColor={currentValue ? colors.background : colors.text}
+          thumbColor={currentValue ? colors.white : colors.text.primary}
           ios_backgroundColor={colors.border}
         />
       </View>
@@ -399,7 +399,7 @@ export default function SettingsScreen() {
           </ScrollView>
           
           <TouchableOpacity style={styles.saveButton}>
-            <Save size={20} color={colors.background} />
+            <Save size={20} color={colors.white} />
             <Text style={styles.saveButtonText}>Save Changes</Text>
           </TouchableOpacity>
         </View>
@@ -470,7 +470,7 @@ export default function SettingsScreen() {
           </ScrollView>
           
           <TouchableOpacity style={styles.saveButton}>
-            <Save size={20} color={colors.background} />
+            <Save size={20} color={colors.white} />
             <Text style={styles.saveButtonText}>Save Changes</Text>
           </TouchableOpacity>
         </View>
@@ -517,7 +517,7 @@ export default function SettingsScreen() {
                   value={true}
                   onValueChange={() => {}}
                   trackColor={{ false: colors.border, true: colors.primaryLight }}
-                  thumbColor={colors.background}
+                  thumbColor={colors.white}
                   ios_backgroundColor={colors.border}
                 />
               </View>
@@ -531,7 +531,7 @@ export default function SettingsScreen() {
                   value={true}
                   onValueChange={() => {}}
                   trackColor={{ false: colors.border, true: colors.primaryLight }}
-                  thumbColor={colors.background}
+                  thumbColor={colors.white}
                   ios_backgroundColor={colors.border}
                 />
               </View>
@@ -539,7 +539,7 @@ export default function SettingsScreen() {
           </ScrollView>
           
           <TouchableOpacity style={styles.saveButton}>
-            <Save size={20} color={colors.background} />
+            <Save size={20} color={colors.white} />
             <Text style={styles.saveButtonText}>Save Preferences</Text>
           </TouchableOpacity>
         </View>
@@ -571,7 +571,7 @@ export default function SettingsScreen() {
                   value={true}
                   onValueChange={() => {}}
                   trackColor={{ false: colors.border, true: colors.primaryLight }}
-                  thumbColor={colors.background}
+                  thumbColor={colors.white}
                   ios_backgroundColor={colors.border}
                 />
               </View>
@@ -585,7 +585,7 @@ export default function SettingsScreen() {
                   value={false}
                   onValueChange={() => {}}
                   trackColor={{ false: colors.border, true: colors.primaryLight }}
-                  thumbColor={colors.background}
+                  thumbColor={colors.white}
                   ios_backgroundColor={colors.border}
                 />
               </View>
@@ -722,14 +722,14 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.background.primary,
   },
   scrollView: {
     flex: 1,
     paddingHorizontal: 16,
   },
   profileSection: {
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: colors.background.secondary,
     borderRadius: 12,
     padding: 16,
     marginTop: 16,
@@ -761,7 +761,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   editProfileButton: {
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: colors.background.secondary,
     borderWidth: 1,
     borderColor: colors.primaryLight,
     borderRadius: 8,
@@ -782,7 +782,7 @@ const styles = StyleSheet.create({
     color: colors.text,
   },
   settingsCard: {
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: colors.background.secondary,
     borderRadius: 12,
     marginBottom: 24,
     overflow: 'hidden',
@@ -887,7 +887,7 @@ const styles = StyleSheet.create({
   // Modal Styles
   modalContainer: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.background.primary,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -918,7 +918,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   textInput: {
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: colors.background.secondary,
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -940,7 +940,7 @@ const styles = StyleSheet.create({
   saveButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.background,
+    color: colors.white,
     marginLeft: 8,
   },
   sectionSubtitle: {
@@ -951,13 +951,13 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   notificationCard: {
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: colors.background.secondary,
     borderRadius: 12,
     marginBottom: 24,
     overflow: 'hidden',
   },
   privacyCard: {
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: colors.background.secondary,
     borderRadius: 12,
     marginBottom: 24,
     overflow: 'hidden',
@@ -978,7 +978,7 @@ const styles = StyleSheet.create({
     color: colors.danger,
   },
   helpCard: {
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: colors.background.secondary,
     borderRadius: 12,
     marginBottom: 24,
     overflow: 'hidden',
@@ -993,7 +993,7 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.border,
   },
   supportInfo: {
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: colors.background.secondary,
     borderRadius: 12,
     padding: 16,
     marginBottom: 24,
