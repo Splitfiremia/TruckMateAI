@@ -11,9 +11,9 @@ export default function LogoGeneratorScreen() {
         options={{ 
           title: 'Logo Generator',
           headerStyle: {
-            backgroundColor: colors.background.primary.primary,
+            backgroundColor: colors.background.primary,
           },
-          headerTintColor: colors.text,
+          headerTintColor: colors.text.primary,
         }} 
       />
       <LogoGenerator />
@@ -24,6 +24,6 @@ export default function LogoGeneratorScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background.primary.primary,
+    backgroundColor: colors.background.primary,
   },
 });
