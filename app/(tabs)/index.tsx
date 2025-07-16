@@ -360,7 +360,7 @@ export default function DashboardScreen() {
         
         <View style={styles.quickActions}>
           <QuickActionButton 
-            icon={<Clock size={20} color={isInspectionRequired ? colors.textSecondary : colors.text} />}
+            icon={<Clock size={20} color={isInspectionRequired ? colors.textSecondary : colors.text.primary} />}
             label={isInspectionRequired ? "Inspection Required" : "Change Status"}
             onPress={() => handleActionWithInspectionCheck(() => setStatusModalVisible(true))}
             color={isInspectionRequired ? colors.border : colors.primaryLight}
@@ -368,14 +368,14 @@ export default function DashboardScreen() {
           />
           
           <QuickActionButton 
-            icon={<Clipboard size={20} color={colors.text} />}
+            icon={<Clipboard size={20} color={colors.text.primary} />}
             label="Pre-Trip"
             onPress={() => setInspectionModalVisible(true)}
             color={isInspectionRequired ? colors.warning : colors.secondary}
           />
           
           <QuickActionButton 
-            icon={<Camera size={20} color={isInspectionRequired ? colors.textSecondary : colors.text} />}
+            icon={<Camera size={20} color={isInspectionRequired ? colors.textSecondary : colors.text.primary} />}
             label={isInspectionRequired ? "Inspection Required" : "Scan Receipt"}
             onPress={() => handleActionWithInspectionCheck(() => setScannerVisible(true))}
             color={isInspectionRequired ? colors.border : colors.secondary}
@@ -383,7 +383,7 @@ export default function DashboardScreen() {
           />
           
           <QuickActionButton 
-            icon={<Upload size={20} color={isInspectionRequired ? colors.textSecondary : colors.text} />}
+            icon={<Upload size={20} color={isInspectionRequired ? colors.textSecondary : colors.text.primary} />}
             label={isInspectionRequired ? "Inspection Required" : "Bulk Upload"}
             onPress={() => handleActionWithInspectionCheck(() => setBulkUploadVisible(true))}
             color={isInspectionRequired ? colors.border : colors.primaryLight}
@@ -391,7 +391,7 @@ export default function DashboardScreen() {
           />
           
           <QuickActionButton 
-            icon={<Shield size={20} color={isInspectionRequired ? colors.textSecondary : colors.text} />}
+            icon={<Shield size={20} color={isInspectionRequired ? colors.textSecondary : colors.text.primary} />}
             label={isInspectionRequired ? "Inspection Required" : "DOT Assistant"}
             onPress={() => handleActionWithInspectionCheck(() => setDotAssistantVisible(true))}
             color={isInspectionRequired ? colors.border : colors.secondary}
@@ -399,7 +399,7 @@ export default function DashboardScreen() {
           />
           
           <QuickActionButton 
-            icon={<AlertTriangle size={20} color={isInspectionRequired ? colors.textSecondary : colors.text} />}
+            icon={<AlertTriangle size={20} color={isInspectionRequired ? colors.textSecondary : colors.text.primary} />}
             label={isInspectionRequired ? "Inspection Required" : "AI Compliance"}
             onPress={() => handleActionWithInspectionCheck(() => setPredictiveComplianceVisible(true))}
             color={isInspectionRequired ? colors.border : (violationPredictions.length > 0 ? colors.warning : colors.primaryLight)}
@@ -407,7 +407,7 @@ export default function DashboardScreen() {
           />
           
           <QuickActionButton 
-            icon={<Cloud size={20} color={colors.text} />}
+            icon={<Cloud size={20} color={colors.text.primary} />}
             label="Weather"
             onPress={() => setWeatherForecastVisible(true)}
             color={colors.primaryLight}

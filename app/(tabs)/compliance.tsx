@@ -586,7 +586,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
   },
   headerSubtitle: {
     fontSize: 14,
@@ -614,7 +614,7 @@ const styles = StyleSheet.create({
   quickStatValue: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
   },
   quickStatLabel: {
     fontSize: 12,
@@ -660,7 +660,7 @@ const styles = StyleSheet.create({
   settingsSectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
     marginBottom: 12,
   },
   settingItem: {
@@ -680,7 +680,7 @@ const styles = StyleSheet.create({
   settingTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
   },
   settingDescription: {
     fontSize: 14,
@@ -704,7 +704,7 @@ const styles = StyleSheet.create({
   settingButtonTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
   },
   settingButtonDescription: {
     fontSize: 14,
@@ -729,7 +729,7 @@ const styles = StyleSheet.create({
   statusValue: {
     fontSize: 20,
     fontWeight: '700',
-    color: colors.text,
+    color: colors.text.primary,
   },
   statusLabel: {
     fontSize: 12,

@@ -141,7 +141,7 @@ export default function FleetAdminScreen() {
       <View style={styles.sectionHeader}>
         <Text style={styles.sectionTitle}>Driver Management</Text>
         <TouchableOpacity style={styles.addButton}>
-          <Plus size={20} color={colors.text} />
+          <Plus size={20} color={colors.text.primary} />
           <Text style={styles.addButtonText}>Add Driver</Text>
         </TouchableOpacity>
       </View>
@@ -255,7 +255,7 @@ export default function FleetAdminScreen() {
               value={fleetSettings.enforcePreTrip}
               onValueChange={(value) => updateFleetSettings({ enforcePreTrip: value })}
               trackColor={{ false: colors.border, true: colors.primaryLight }}
-              thumbColor={colors.text}
+              thumbColor={colors.text.primary}
             />
           </View>
           
@@ -268,7 +268,7 @@ export default function FleetAdminScreen() {
               value={fleetSettings.autoHOSTracking}
               onValueChange={(value) => updateFleetSettings({ autoHOSTracking: value })}
               trackColor={{ false: colors.border, true: colors.primaryLight }}
-              thumbColor={colors.text}
+              thumbColor={colors.text.primary}
             />
           </View>
           
@@ -281,7 +281,7 @@ export default function FleetAdminScreen() {
               value={fleetSettings.speedAlerts}
               onValueChange={(value) => updateFleetSettings({ speedAlerts: value })}
               trackColor={{ false: colors.border, true: colors.primaryLight }}
-              thumbColor={colors.text}
+              thumbColor={colors.text.primary}
             />
           </View>
         </View>
@@ -298,7 +298,7 @@ export default function FleetAdminScreen() {
               value={fleetSettings.realtimeAlerts}
               onValueChange={(value) => updateFleetSettings({ realtimeAlerts: value })}
               trackColor={{ false: colors.border, true: colors.primaryLight }}
-              thumbColor={colors.text}
+              thumbColor={colors.text.primary}
             />
           </View>
           
@@ -311,7 +311,7 @@ export default function FleetAdminScreen() {
               value={fleetSettings.dailyReports}
               onValueChange={(value) => updateFleetSettings({ dailyReports: value })}
               trackColor={{ false: colors.border, true: colors.primaryLight }}
-              thumbColor={colors.text}
+              thumbColor={colors.text.primary}
             />
           </View>
         </View>
@@ -328,7 +328,7 @@ export default function FleetAdminScreen() {
               value={fleetSettings.locationTracking}
               onValueChange={(value) => updateFleetSettings({ locationTracking: value })}
               trackColor={{ false: colors.border, true: colors.primaryLight }}
-              thumbColor={colors.text}
+              thumbColor={colors.text.primary}
             />
           </View>
         </View>
@@ -404,7 +404,7 @@ const styles = StyleSheet.create({
   fleetName: {
     fontSize: 20,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
     marginBottom: 4,
   },
   fleetDetails: {
@@ -425,7 +425,7 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 14,
     fontWeight: '500',
-    color: colors.text,
+    color: colors.text.primary,
   },
   statsGrid: {
     flexDirection: 'row',
@@ -443,7 +443,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
   },
   addButton: {
     flexDirection: 'row',
@@ -457,7 +457,7 @@ const styles = StyleSheet.create({
   addButtonText: {
     fontSize: 14,
     fontWeight: '500',
-    color: colors.text,
+    color: colors.text.primary,
   },
   complianceSection: {
     marginTop: 16,
@@ -476,7 +476,7 @@ const styles = StyleSheet.create({
   complianceTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
     marginLeft: 8,
     flex: 1,
   },
@@ -488,7 +488,7 @@ const styles = StyleSheet.create({
   complianceStatusText: {
     fontSize: 12,
     fontWeight: '500',
-    color: colors.text,
+    color: colors.text.primary,
   },
   complianceMetrics: {
     flexDirection: 'row',
@@ -500,7 +500,7 @@ const styles = StyleSheet.create({
   metricValue: {
     fontSize: 20,
     fontWeight: '700',
-    color: colors.text,
+    color: colors.text.primary,
   },
   metricLabel: {
     fontSize: 12,
@@ -516,7 +516,7 @@ const styles = StyleSheet.create({
   alertsTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
     marginBottom: 12,
   },
   alertItem: {
@@ -530,7 +530,7 @@ const styles = StyleSheet.create({
   },
   alertText: {
     fontSize: 14,
-    color: colors.text,
+    color: colors.text.primary,
     marginBottom: 2,
   },
   alertTime: {
@@ -549,7 +549,7 @@ const styles = StyleSheet.create({
   settingGroupTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
     padding: 16,
     paddingBottom: 8,
   },
@@ -569,7 +569,7 @@ const styles = StyleSheet.create({
   settingLabel: {
     fontSize: 16,
     fontWeight: '500',
-    color: colors.text,
+    color: colors.text.primary,
     marginBottom: 2,
   },
   settingDescription: {
@@ -585,7 +585,7 @@ const styles = StyleSheet.create({
   accessDeniedTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
     marginTop: 16,
     marginBottom: 8,
   },
