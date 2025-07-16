@@ -128,7 +128,7 @@ export default function StatusChangeModal({
           <View style={styles.header}>
             <Text style={styles.title}>Change Duty Status</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <X size={24} color={colors.text} />
+              <X size={24} color={colors.text.primary} />
             </TouchableOpacity>
           </View>
           
@@ -138,7 +138,7 @@ export default function StatusChangeModal({
               onPress={() => handleStatusChange('Driving')}
             >
               <View style={[styles.iconContainer, { backgroundColor: colors.primaryLight }]}>
-                <Truck size={24} color={colors.text} />
+                <Truck size={24} color={colors.text.primary} />
               </View>
               <View style={styles.optionContent}>
                 <Text style={styles.optionText}>Driving</Text>
@@ -150,7 +150,7 @@ export default function StatusChangeModal({
               onPress={() => handleStatusChange('On Duty Not Driving')}
             >
               <View style={[styles.iconContainer, { backgroundColor: colors.warning }]}>
-                <Clock size={24} color={colors.text} />
+                <Clock size={24} color={colors.text.primary} />
               </View>
               <Text style={styles.optionText}>On Duty (Not Driving)</Text>
             </TouchableOpacity>
@@ -160,7 +160,7 @@ export default function StatusChangeModal({
               onPress={() => handleStatusChange('Sleeper Berth')}
             >
               <View style={[styles.iconContainer, { backgroundColor: colors.textSecondary }]}>
-                <Bed size={24} color={colors.text} />
+                <Bed size={24} color={colors.text.primary} />
               </View>
               <Text style={styles.optionText}>Sleeper Berth</Text>
             </TouchableOpacity>
@@ -170,7 +170,7 @@ export default function StatusChangeModal({
               onPress={() => handleStatusChange('Off Duty')}
             >
               <View style={[styles.iconContainer, { backgroundColor: colors.secondary }]}>
-                <Coffee size={24} color={colors.text} />
+                <Coffee size={24} color={colors.text.primary} />
               </View>
               <Text style={styles.optionText}>Off Duty</Text>
             </TouchableOpacity>
@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   container: {
-    backgroundColor: colors.background,
+    backgroundColor: colors.background.primary,
     borderRadius: 16,
     width: '85%',
     padding: 20,
