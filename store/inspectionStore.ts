@@ -40,11 +40,11 @@ export const useInspectionStore = create<InspectionState>()(
       shouldShowInspectionPrompt: false,
       
       startInspection: () => {
-        // Initialize all inspection items as unchecked
+        // Initialize all inspection items as unchecked (no status set)
         const allItems = preTripInspectionItems.flatMap(category => 
           category.items.map(item => ({
             itemId: item.id,
-            status: 'Pass' as InspectionStatus,
+            status: undefined as any, // Start with no status selected
             notes: '',
             defectDescription: '',
           }))
@@ -71,7 +71,7 @@ export const useInspectionStore = create<InspectionState>()(
       
       completeInspection: (location, signature) => {
         const state = get();
-        const defectsFound = state.currentInspection.filter(item => item.status === 'Fail').length;
+        const defectsFound = state.currentInspection.filter(item => item.status === 'Fail' || item.status === 'Defect').length;
         const safeToOperate = defectsFound === 0;
         
         const inspection: PreTripInspection = {
@@ -115,7 +115,7 @@ export const useInspectionStore = create<InspectionState>()(
         const state = get();
         const totalItems = preTripInspectionItems.reduce((sum, category) => sum + category.items.length, 0);
         const completedItems = state.currentInspection.filter(item => 
-          item.status === 'Pass' || item.status === 'Fail' || item.status === 'Defect'
+          item.status && (item.status === 'Pass' || item.status === 'Fail' || item.status === 'Defect')
         ).length;
         
         return {
@@ -127,16 +127,17 @@ export const useInspectionStore = create<InspectionState>()(
       
       hasDefects: () => {
         const state = get();
-        return state.currentInspection.some(item => item.status === 'Fail');
+        return state.currentInspection.some(item => item.status && (item.status === 'Fail' || item.status === 'Defect'));
       },
       
       canCompleteInspection: () => {
         const state = get();
         const totalItems = preTripInspectionItems.reduce((sum, category) => sum + category.items.length, 0);
         const completedItems = state.currentInspection.filter(item => 
-          item.status === 'Pass' || item.status === 'Fail' || item.status === 'Defect'
+          item.status && (item.status === 'Pass' || item.status === 'Fail' || item.status === 'Defect')
         ).length;
-        return completedItems === totalItems;
+        // Allow completion if at least 50% of items are completed, or if user explicitly wants to complete
+        return completedItems >= Math.ceil(totalItems * 0.5);
       },
       
       getCategoryProgress: (categoryIndex: number) => {
@@ -147,7 +148,7 @@ export const useInspectionStore = create<InspectionState>()(
         const categoryItems = category.items;
         const completedItems = categoryItems.filter(item => {
           const inspectionItem = state.currentInspection.find(i => i.itemId === item.id);
-          return inspectionItem && (inspectionItem.status === 'Pass' || inspectionItem.status === 'Fail' || inspectionItem.status === 'Defect');
+          return inspectionItem && inspectionItem.status && (inspectionItem.status === 'Pass' || inspectionItem.status === 'Fail' || inspectionItem.status === 'Defect');
         }).length;
         
         return {

@@ -66,9 +66,9 @@ export default function PreTripInspectionModal({
   
   const progress = getInspectionProgress();
   
-  const getItemStatus = (itemId: string): InspectionStatus => {
+  const getItemStatus = (itemId: string): InspectionStatus | undefined => {
     const item = currentInspection.find(i => i.itemId === itemId);
-    return item?.status || 'Pass';
+    return item?.status;
   };
   
   const handleItemStatusChange = (itemId: string, status: InspectionStatus) => {
@@ -109,7 +109,7 @@ export default function PreTripInspectionModal({
     
     return category.items.every(item => {
       const status = getItemStatus(item.id);
-      return status === 'Pass' || status === 'Fail' || status === 'Defect';
+      return status && (status === 'Pass' || status === 'Fail' || status === 'Defect');
     });
   };
   
@@ -200,10 +200,24 @@ export default function PreTripInspectionModal({
   };
   
   const handleComplete = () => {
-    if (!canCompleteInspection()) {
+    const totalItems = preTripInspectionItems.reduce((sum, cat) => sum + cat.items.length, 0);
+    const isFullyComplete = progress.completed === totalItems;
+    
+    if (!isFullyComplete && progress.completed < Math.ceil(totalItems * 0.5)) {
+      Alert.alert(
+        'Insufficient Inspection Progress',
+        `Only ${progress.completed} of ${totalItems} CDL inspection points completed. Please complete at least ${Math.ceil(totalItems * 0.5)} items to finish the inspection.`,
+        [
+          { text: 'Continue Inspection', style: 'cancel' }
+        ]
+      );
+      return;
+    }
+    
+    if (!isFullyComplete) {
       Alert.alert(
         'Incomplete Inspection',
-        `Only ${progress.completed} of ${preTripInspectionItems.reduce((sum, cat) => sum + cat.items.length, 0)} CDL inspection points completed. You can still complete the inspection or finish with current progress.`,
+        `${progress.completed} of ${totalItems} CDL inspection points completed (${progress.percentage}%). You can complete with current progress or continue inspecting.`,
         [
           { text: 'Continue Inspection', style: 'cancel' },
           { 
@@ -285,7 +299,8 @@ export default function PreTripInspectionModal({
   };
   
   const renderStatusButton = (itemId: string, status: InspectionStatus, icon: React.ReactNode, label: string) => {
-    const isSelected = getItemStatus(itemId) === status;
+    const currentStatus = getItemStatus(itemId);
+    const isSelected = currentStatus === status;
     const buttonColor = status === 'Pass' ? colors.secondary : 
                        status === 'Fail' ? colors.danger : colors.warning;
     
@@ -312,12 +327,13 @@ export default function PreTripInspectionModal({
   const renderInspectionItem = (item: any) => {
     const itemStatus = getItemStatus(item.id);
     const showDefectInput = itemStatus === 'Fail' || itemStatus === 'Defect';
-    const isCompleted = itemStatus === 'Pass' || itemStatus === 'Fail' || itemStatus === 'Defect';
+    const isCompleted = itemStatus && (itemStatus === 'Pass' || itemStatus === 'Fail' || itemStatus === 'Defect');
     
     return (
       <View key={item.id} style={[
         styles.inspectionItem,
-        isCompleted && styles.completedItem
+        isCompleted && styles.completedItem,
+        !itemStatus && styles.pendingItem
       ]}>
         <View style={styles.itemHeader}>
           <Text style={styles.itemLabel}>{item.label}</Text>
@@ -410,8 +426,15 @@ export default function PreTripInspectionModal({
               ]} 
             />
           </View>
-          {progress.percentage === 100 && (
+          {progress.percentage === 100 ? (
             <Text style={styles.completionText}>✓ All 21 points completed</Text>
+          ) : (
+            <Text style={styles.progressHint}>
+              {canCompleteInspection() 
+                ? `Ready to complete (${progress.completed}/${progress.total} items)` 
+                : `Complete at least ${Math.ceil(progress.total * 0.5)} items to finish`
+              }
+            </Text>
           )}
 
         </View>
@@ -473,7 +496,7 @@ export default function PreTripInspectionModal({
                 <Text style={styles.categoryProgressText}>
                   {preTripInspectionItems[activeCategory]?.items.filter(item => {
                     const status = getItemStatus(item.id);
-                    return status === 'Pass' || status === 'Fail' || status === 'Defect';
+                    return status && (status === 'Pass' || status === 'Fail' || status === 'Defect');
                   }).length} / {preTripInspectionItems[activeCategory]?.items.length} Complete
                 </Text>
               </View>
@@ -519,12 +542,17 @@ export default function PreTripInspectionModal({
                   style={[
                     styles.navButton,
                     styles.completeButton,
-                    hasDefects() && { backgroundColor: colors.warning }
+                    hasDefects() && { backgroundColor: colors.warning },
+                    !canCompleteInspection() && styles.disabledNavButton
                   ]}
                   onPress={handleComplete}
+                  disabled={!canCompleteInspection()}
                 >
                   <User size={20} color={colors.text} />
-                  <Text style={styles.navButtonText}>
+                  <Text style={[
+                    styles.navButtonText,
+                    !canCompleteInspection() && styles.disabledNavButtonText
+                  ]}>
                     {hasDefects() ? 'Complete with Defects' : 'Complete Inspection'}
                   </Text>
                 </TouchableOpacity>
@@ -634,6 +662,13 @@ const styles = StyleSheet.create({
     marginTop: 4,
     fontWeight: '500',
   },
+  progressHint: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    marginTop: 4,
+    fontStyle: 'italic',
+  },
   locationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -694,6 +729,11 @@ const styles = StyleSheet.create({
   completedItem: {
     borderColor: colors.secondary,
     backgroundColor: 'rgba(34, 197, 94, 0.05)',
+  },
+  pendingItem: {
+    borderColor: colors.primaryLight,
+    backgroundColor: 'rgba(59, 130, 246, 0.05)',
+    borderWidth: 2,
   },
   itemHeader: {
     flexDirection: 'row',

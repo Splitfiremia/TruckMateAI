@@ -121,7 +121,7 @@ export interface InspectionCategory {
 
 export interface InspectionResult {
   itemId: string;
-  status: InspectionStatus;
+  status: InspectionStatus | undefined;
   notes?: string;
   defectDescription?: string;
 }
