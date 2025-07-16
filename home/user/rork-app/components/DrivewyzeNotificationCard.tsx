@@ -48,9 +48,9 @@ export const DrivewyzeNotificationCard: React.FC<DrivewyzeNotificationCardProps>
       <Text style={styles.message}>{notification.message}</Text>
       {notification.actions?.length > 0 && (
         <View style={styles.actions}>
-          {notification.actions.map((action, index) => (
-            <TouchableOpacity key={index} onPress={() => onAction?.(action.action)}>
-              <Text style={styles.actionText}>{action.label}</Text>
+          {notification.actions.map((action) => (
+            <TouchableOpacity key={action} onPress={() => onAction?.(action)}>
+              <Text style={styles.actionText}>{action}</Text>
             </TouchableOpacity>
           ))}
         </View>

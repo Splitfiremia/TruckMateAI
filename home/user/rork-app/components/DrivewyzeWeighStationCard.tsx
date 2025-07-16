@@ -11,12 +11,12 @@ interface DrivewyzeWeighStationCardProps {
   showDistance?: boolean;
 }
 
-export const DrivewyzeWeighStationCard: React.FC<DrivewyzeWeighStationCardProps> = ({
+export const DrivewyzeWeighStationCard = ({
   station,
   onPress,
   onBypassRequest,
   showDistance = true
-}) => {
+}: DrivewyzeWeighStationCardProps) => {
   const getStatusIcon = () => {
     switch (station.status) {
       case 'open': return <CheckCircle size={20} color={colors.success} />;
@@ -45,13 +45,14 @@ export const DrivewyzeWeighStationCard: React.FC<DrivewyzeWeighStationCardProps>
         {getStatusIcon()}
       </View>
       {showDistance && station.distance && (
-        <Text style={styles.distance}>
-          {station.distance.toFixed(1)} miles away
-        </Text>
+        <Text style={styles.distance}>{station.distance.toFixed(1)} miles away</Text>
       )}
       {onBypassRequest && station.status === 'bypass_available' && (
-        <TouchableOpacity onPress={onBypassRequest} style={styles.bypassButton}>
-          <Text style={styles.bypassText}>Request Bypass</Text>
+        <TouchableOpacity 
+          onPress={onBypassRequest}
+          style={[styles.button, { backgroundColor: colors.primary }]}
+        >
+          <Text style={styles.buttonText}>Bypass Request</Text>
         </TouchableOpacity>
       )}
     </TouchableOpacity>
@@ -63,31 +64,32 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 8,
     backgroundColor: '#fff',
-    marginBottom: 8,
+    marginVertical: 8,
     elevation: 2,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 12,
+    marginBottom: 8,
   },
   title: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '600',
     flex: 1,
   },
   distance: {
-    marginTop: 4,
     color: '#666',
+    fontSize: 14,
+    marginTop: 4,
   },
-  bypassButton: {
-    marginTop: 8,
-    padding: 8,
-    backgroundColor: colors.primary,
-    borderRadius: 4,
+  button: {
+    marginTop: 12,
+    padding: 10,
+    borderRadius: 6,
     alignItems: 'center',
   },
-  bypassText: {
+  buttonText: {
     color: '#fff',
     fontWeight: '500',
   },

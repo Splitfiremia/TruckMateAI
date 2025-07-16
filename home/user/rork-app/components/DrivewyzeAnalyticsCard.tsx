@@ -54,6 +54,9 @@ export const DrivewyzeAnalyticsCard: React.FC<DrivewyzeAnalyticsCardProps> = ({ 
             <Text style={styles.statValue}>{analytics.deniedBypasses}</Text>
           </View>
           <Text style={styles.statLabel}>Denied Bypasses</Text>
+          <Text style={styles.statSubtext}>
+            {analytics.totalBypassRequests} total requests
+          </Text>
         </View>
 
         <View style={styles.statCard}>
@@ -62,22 +65,16 @@ export const DrivewyzeAnalyticsCard: React.FC<DrivewyzeAnalyticsCardProps> = ({ 
             <Text style={styles.statValue}>{formatTime(analytics.timeSaved)}</Text>
           </View>
           <Text style={styles.statLabel}>Time Saved</Text>
-        </View>
-
-        <View style={styles.statCard}>
-          <View style={styles.statHeader}>
-            <Fuel size={20} color={colors.warning} />
-            <Text style={styles.statValue}>{analytics.fuelSaved.toFixed(1)} gal</Text>
-          </View>
-          <Text style={styles.statLabel}>Fuel Saved</Text>
+          <Text style={styles.statSubtext}>Estimated</Text>
         </View>
 
         <View style={styles.statCard}>
           <View style={styles.statHeader}>
             <DollarSign size={20} color={colors.success} />
-            <Text style={styles.statValue}>{formatCurrency(analytics.costSaved)}</Text>
+            <Text style={styles.statValue}>{formatCurrency(analytics.costSavings)}</Text>
           </View>
-          <Text style={styles.statLabel}>Cost Saved</Text>
+          <Text style={styles.statLabel}>Cost Savings</Text>
+          <Text style={styles.statSubtext}>Estimated</Text>
         </View>
       </View>
     </View>
@@ -89,7 +86,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 8,
     padding: 16,
-    marginBottom: 16,
+    marginVertical: 8,
     elevation: 2,
   },
   header: {
@@ -101,7 +98,6 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333',
   },
   statsGrid: {
     flexDirection: 'row',
@@ -110,31 +106,30 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   statCard: {
+    flex: 1,
+    minWidth: '45%',
     backgroundColor: '#f9f9f9',
     borderRadius: 6,
     padding: 12,
-    flex: 1,
-    minWidth: 140,
     marginBottom: 8,
   },
   statHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
     marginBottom: 4,
   },
   statValue: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#222',
   },
   statLabel: {
     fontSize: 14,
-    color: '#666',
+    fontWeight: '500',
     marginBottom: 2,
   },
   statSubtext: {
     fontSize: 12,
-    color: '#888',
+    color: '#666',
   },
 });
