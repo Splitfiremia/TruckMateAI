@@ -382,7 +382,7 @@ const MaintenancePage = () => {
           {truckFaxEnabled && (
             <TouchableOpacity
               style={styles.actionButton}
-              onPress={() => findTruckFaxCertifiedShops()}
+              onPress={() => findTruckFaxCertifiedShops('General', { lat: 33.4484, lng: -112.0740 })}
             >
               <Shield size={20} color={colors.primary} />
               <Text style={styles.actionButtonText}>Find TruckFax Certified Shops</Text>
