@@ -30,9 +30,9 @@ const MaintenanceAlertCard: React.FC<MaintenanceAlertCardProps> = ({
 }) => {
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'Critical': return colors.danger;
-      case 'High': return colors.warning;
-      case 'Medium': return colors.primaryLight;
+      case 'Critical': return colors.status.error;
+      case 'High': return colors.status.warning;
+      case 'Medium': return colors.primary;
       case 'Low': return colors.secondary;
       default: return colors.text.secondary;
     }
@@ -84,21 +84,16 @@ const MaintenanceAlertCard: React.FC<MaintenanceAlertCardProps> = ({
       <Text style={styles.description}>{alert.description}</Text>
 
       <View style={styles.details}>
-        {alert.component && (
-          <View style={styles.detailItem}>
-            <Wrench color={colors.text.secondary} size={14} />
-            <Text style={styles.detailText}>Component: {alert.component}</Text>
-          </View>
-        )}
+        <View style={styles.detailItem}>
+          <Wrench color={colors.text.secondary} size={14} />
+          <Text style={styles.detailText}>{alert.component}</Text>
+        </View>
         
-        {alert.milesUntilFailure && (
+        {alert.estimatedMiles && (
           <View style={styles.detailItem}>
             <Clock color={colors.text.secondary} size={14} />
             <Text style={styles.detailText}>
-              {alert.milesUntilFailure > 0 
-                ? `${alert.milesUntilFailure.toLocaleString()} miles remaining`
-                : 'Immediate attention required'
-              }
+              {alert.estimatedMiles.toLocaleString()} miles
             </Text>
           </View>
         )}
@@ -120,10 +115,6 @@ const MaintenanceAlertCard: React.FC<MaintenanceAlertCardProps> = ({
           </Text>
         </TouchableOpacity>
       )}
-
-      <Text style={styles.timestamp}>
-        {new Date(alert.createdAt).toLocaleString()}
-      </Text>
     </View>
   );
 };
@@ -199,17 +190,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     backgroundColor: colors.background.primary,
     borderRadius: 8,
-    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: colors.primary,
   },
   shopsButtonText: {
     fontSize: 14,
     fontWeight: '500',
     color: colors.primary,
-  },
-  timestamp: {
-    fontSize: 12,
-    color: colors.text.secondary,
-    textAlign: 'right',
   },
 });
 
