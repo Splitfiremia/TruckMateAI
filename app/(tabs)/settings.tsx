@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Switch, Alert, Modal, TextInput } from 'react-native';
 import { Stack } from 'expo-router';
-import { User, Truck, Bell, Shield, HelpCircle, LogOut, ChevronRight, AlertTriangle, X, Save, Cloud, Palette, Building2 } from 'lucide-react-native';
+import { User, Truck, Bell, Shield, HelpCircle, LogOut, ChevronRight, AlertTriangle, X, Save, Cloud, Palette, Building2, Sparkles } from 'lucide-react-native';
 
 import { colors } from '@/constants/colors';
 import { driverInfo } from '@/constants/mockData';
 import VoiceCommandButton from '@/components/VoiceCommandButton';
 import CommandResponseModal from '@/components/CommandResponseModal';
 import BrandingCustomizer from '@/components/BrandingCustomizer';
+import LogoGenerator from '@/components/LogoGenerator';
 import { useVoiceCommandStore } from '@/store/voiceCommandStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useLogbookStore } from '@/store/logbookStore';
@@ -22,6 +23,7 @@ export default function SettingsScreen() {
   const [privacyModalVisible, setPrivacyModalVisible] = useState(false);
   const [helpModalVisible, setHelpModalVisible] = useState(false);
   const [showBrandingModal, setShowBrandingModal] = useState(false);
+  const [showLogoGeneratorModal, setShowLogoGeneratorModal] = useState(false);
   
   const { lastCommand, lastResponse } = useVoiceCommandStore();
   const { currentStatus, changeStatus } = useLogbookStore();
@@ -168,8 +170,26 @@ export default function SettingsScreen() {
               'Customize Branding',
               () => setShowBrandingModal(true)
             )}
+            {renderSettingLink(
+              <Sparkles size={20} color={colors.primaryLight} />,
+              'Generate Company Logo',
+              () => setShowLogoGeneratorModal(true)
+            )}
           </View>
         )}
+        
+        {/* Logo Generator Section - Available for all users */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Branding & Design</Text>
+        </View>
+        
+        <View style={styles.settingsCard}>
+          {renderSettingLink(
+            <Sparkles size={20} color={colors.primaryLight} />,
+            'AI Logo Generator',
+            () => setShowLogoGeneratorModal(true)
+          )}
+        </View>
         
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>App Settings</Text>
@@ -673,6 +693,26 @@ export default function SettingsScreen() {
             </TouchableOpacity>
           </View>
           <BrandingCustomizer onClose={() => setShowBrandingModal(false)} />
+        </View>
+      </Modal>
+      
+      {/* Logo Generator Modal */}
+      <Modal
+        visible={showLogoGeneratorModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Logo Generator</Text>
+            <TouchableOpacity
+              style={styles.modalCloseButton}
+              onPress={() => setShowLogoGeneratorModal(false)}
+            >
+              <X size={24} color={colors.text} />
+            </TouchableOpacity>
+          </View>
+          <LogoGenerator />
         </View>
       </Modal>
     </View>
