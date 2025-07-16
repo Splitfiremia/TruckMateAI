@@ -14,11 +14,14 @@ import {
   FileText,
   Eye,
   Edit3,
-  Plus
+  Plus,
+  Building2
 } from 'lucide-react-native';
 
 import { colors } from '@/constants/colors';
 import { useFleetStore } from '@/store/fleetStore';
+import { useUserStore } from '@/store/userStore';
+import { useBrandingStore } from '@/store/brandingStore';
 import FleetDriverCard from '@/components/FleetDriverCard';
 import FleetStatsCard from '@/components/FleetStatsCard';
 import BrandingCustomizer from '@/components/BrandingCustomizer';
@@ -32,12 +35,30 @@ export default function FleetAdminScreen() {
     drivers, 
     fleetStats, 
     complianceOverview,
-    brandingSettings,
     fleetSettings,
     updateFleetSettings,
     addDriver,
     updateDriverStatus
   } = useFleetStore();
+  
+  const { user, isFleetCompany } = useUserStore();
+  const { settings } = useBrandingStore();
+  
+  // Redirect if not fleet company
+  if (!isFleetCompany()) {
+    return (
+      <View style={styles.container}>
+        <Stack.Screen options={{ title: 'Fleet Admin' }} />
+        <View style={styles.accessDenied}>
+          <AlertTriangle size={48} color={colors.warning} />
+          <Text style={styles.accessDeniedTitle}>Access Restricted</Text>
+          <Text style={styles.accessDeniedText}>
+            Fleet management features are only available for Fleet Company accounts.
+          </Text>
+        </View>
+      </View>
+    );
+  }
 
   const renderTabButton = (
     tab: typeof activeTab,
@@ -137,13 +158,22 @@ export default function FleetAdminScreen() {
 
   const renderBrandingTab = () => (
     <ScrollView style={styles.tabContent}>
-      <BrandingCustomizer
-        settings={brandingSettings}
-        onUpdate={(updates) => {
-          // In real app, this would update the branding
-          console.log('Branding updates:', updates);
-        }}
-      />
+      <View style={styles.brandingHeader}>
+        <Building2 size={24} color={settings.primaryColor || colors.primary} />
+        <View style={styles.brandingInfo}>
+          <Text style={[styles.brandingTitle, { color: settings.primaryColor || colors.text }]}>
+            {user?.companyName || 'Your Fleet Company'}
+          </Text>
+          <Text style={styles.brandingSubtitle}>
+            Customize your white-label experience
+          </Text>
+          {settings.isCustomized && (
+            <Text style={styles.brandingStatus}>✓ Custom branding active</Text>
+          )}
+        </View>
+      </View>
+      
+      <BrandingCustomizer />
     </ScrollView>
   );
 
@@ -318,7 +348,7 @@ export default function FleetAdminScreen() {
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {renderTabButton('overview', <BarChart3 size={18} color={activeTab === 'overview' ? colors.text : colors.textSecondary} />, 'Overview')}
           {renderTabButton('drivers', <Users size={18} color={activeTab === 'drivers' ? colors.text : colors.textSecondary} />, 'Drivers')}
-          {renderTabButton('branding', <Palette size={18} color={activeTab === 'branding' ? colors.text : colors.textSecondary} />, 'Branding')}
+          {renderTabButton('branding', <Palette size={18} color={activeTab === 'branding' ? (settings.primaryColor || colors.text) : colors.textSecondary} />, 'White-Label')}
           {renderTabButton('compliance', <Shield size={18} color={activeTab === 'compliance' ? colors.text : colors.textSecondary} />, 'Compliance')}
           {renderTabButton('settings', <Settings size={18} color={activeTab === 'settings' ? colors.text : colors.textSecondary} />, 'Settings')}
         </ScrollView>
@@ -545,5 +575,52 @@ const styles = StyleSheet.create({
   settingDescription: {
     fontSize: 14,
     color: colors.textSecondary,
+  },
+  accessDenied: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 32,
+  },
+  accessDeniedTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: colors.text,
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  accessDeniedText: {
+    fontSize: 16,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+  brandingHeader: {
+    flexDirection: 'row',
+    backgroundColor: colors.backgroundLight,
+    borderRadius: 12,
+    padding: 16,
+    marginTop: 16,
+    marginBottom: 16,
+    alignItems: 'center',
+  },
+  brandingInfo: {
+    marginLeft: 12,
+    flex: 1,
+  },
+  brandingTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 4,
+  },
+  brandingSubtitle: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    marginBottom: 4,
+  },
+  brandingStatus: {
+    fontSize: 12,
+    color: colors.secondary,
+    fontWeight: '500',
   },
 });

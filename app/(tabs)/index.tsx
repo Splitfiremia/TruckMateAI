@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { Stack } from 'expo-router';
 import { Mic, Camera, Clock, AlertTriangle, Truck, DollarSign, Clipboard, Upload, Shield, Cloud } from 'lucide-react-native';
 
@@ -30,6 +30,8 @@ import { WeatherCard } from '@/components/WeatherCard';
 import { WeatherAlertsModal } from '@/components/WeatherAlertsModal';
 import { WeatherForecastModal } from '@/components/WeatherForecastModal';
 import { WeatherNotificationSystem } from '@/components/WeatherNotificationSystem';
+import { useUserStore } from '@/store/userStore';
+import { useBrandingStore } from '@/store/brandingStore';
 
 export default function DashboardScreen() {
   const [statusModalVisible, setStatusModalVisible] = useState(false);
@@ -49,6 +51,8 @@ export default function DashboardScreen() {
   const { lastCommand, lastResponse } = useVoiceCommandStore();
   const { isInspectionRequired, inspectionInProgress, checkInspectionRequirement } = useInspectionStore();
   const { violationPredictions, activeAlerts, metrics } = usePredictiveComplianceStore();
+  const { user, isOwnerOperator, isFleetCompany } = useUserStore();
+  const { settings } = useBrandingStore();
   
   useEffect(() => {
     // Check if inspection is required when component mounts
@@ -116,13 +120,19 @@ export default function DashboardScreen() {
     setInspectionModalVisible(true);
   };
   
+  // Use custom branding if available
+  const welcomeMessage = settings.welcomeMessage || 'Welcome back';
+  const appName = settings.appName || 'TruckLogPro';
+  const companyName = settings.companyName || user?.companyName;
+  
   return (
     <View style={styles.container}>
       <Stack.Screen 
         options={{ 
-          title: 'TruckMate',
+          title: !settings.hideDefaultBranding ? appName : (companyName || appName),
           headerTitleStyle: {
             fontWeight: 'bold',
+            color: settings.primaryColor || colors.text,
           },
         }} 
       />
@@ -130,8 +140,18 @@ export default function DashboardScreen() {
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <View>
-            <Text style={styles.greeting}>Hello, {driverInfo.name}</Text>
-            <Text style={styles.subGreeting}>{driverInfo.company}</Text>
+            {settings.logoUrl && settings.showCompanyLogo && (
+              <Image source={{ uri: settings.logoUrl }} style={styles.logo} />
+            )}
+            <Text style={[styles.greeting, { color: settings.primaryColor || colors.text }]}>
+              Hello, {user?.name || driverInfo.name}
+            </Text>
+            <Text style={styles.subGreeting}>
+              {companyName || driverInfo.company}
+            </Text>
+            {!settings.hideDefaultBranding && (
+              <Text style={styles.welcomeMessage}>{welcomeMessage}</Text>
+            )}
           </View>
         </View>
         
@@ -384,6 +404,18 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.textSecondary,
     marginTop: 4,
+  },
+  welcomeMessage: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    marginTop: 2,
+    fontStyle: 'italic',
+  },
+  logo: {
+    width: 40,
+    height: 40,
+    borderRadius: 8,
+    marginBottom: 8,
   },
   sectionHeader: {
     flexDirection: 'row',

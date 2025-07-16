@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Switch, Alert, Modal, TextInput } from 'react-native';
 import { Stack } from 'expo-router';
-import { User, Truck, Bell, Shield, HelpCircle, LogOut, ChevronRight, AlertTriangle, X, Save, Cloud } from 'lucide-react-native';
+import { User, Truck, Bell, Shield, HelpCircle, LogOut, ChevronRight, AlertTriangle, X, Save, Cloud, Palette, Building2 } from 'lucide-react-native';
 
 import { colors } from '@/constants/colors';
 import { driverInfo } from '@/constants/mockData';
 import VoiceCommandButton from '@/components/VoiceCommandButton';
 import CommandResponseModal from '@/components/CommandResponseModal';
+import BrandingCustomizer from '@/components/BrandingCustomizer';
 import { useVoiceCommandStore } from '@/store/voiceCommandStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useLogbookStore } from '@/store/logbookStore';
+import { useUserStore } from '@/store/userStore';
+import { router } from 'expo-router';
 
 export default function SettingsScreen() {
   const [commandModalVisible, setCommandModalVisible] = useState(false);
@@ -18,9 +21,11 @@ export default function SettingsScreen() {
   const [notificationModalVisible, setNotificationModalVisible] = useState(false);
   const [privacyModalVisible, setPrivacyModalVisible] = useState(false);
   const [helpModalVisible, setHelpModalVisible] = useState(false);
+  const [showBrandingModal, setShowBrandingModal] = useState(false);
   
   const { lastCommand, lastResponse } = useVoiceCommandStore();
   const { currentStatus, changeStatus } = useLogbookStore();
+  const { user, isFleetCompany, logout } = useUserStore();
   const { 
     autoTrackDriving,
     voiceCommands,
@@ -70,7 +75,8 @@ export default function SettingsScreen() {
           onPress: () => {
             // Reset driver status and navigate to login
             changeStatus('Off Duty');
-            Alert.alert('Logged Out', 'You have been successfully logged out.');
+            logout();
+            router.replace('/onboarding');
           }
         }
       ]
@@ -125,15 +131,21 @@ export default function SettingsScreen() {
       />
       
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        {/* User Profile Section */}
         <View style={styles.profileSection}>
           <View style={styles.profileInfo}>
             <View style={styles.profileAvatar}>
               <User size={32} color={colors.text} />
             </View>
             <View>
-              <Text style={styles.profileName}>{driverInfo.name}</Text>
-              <Text style={styles.profileDetails}>{driverInfo.company}</Text>
-              <Text style={styles.profileDetails}>CDL: {driverInfo.licenseNumber}</Text>
+              <Text style={styles.profileName}>{user?.name || driverInfo.name}</Text>
+              <Text style={styles.profileDetails}>{user?.companyName || driverInfo.company}</Text>
+              <Text style={styles.profileDetails}>
+                {user?.role === 'owner-operator' ? 'Owner/Operator' : 'Fleet Company'}
+              </Text>
+              {user?.cdlNumber && (
+                <Text style={styles.profileDetails}>CDL: {user.cdlNumber}</Text>
+              )}
             </View>
           </View>
           
@@ -141,6 +153,23 @@ export default function SettingsScreen() {
             <Text style={styles.editProfileText}>Edit Profile</Text>
           </TouchableOpacity>
         </View>
+        
+        {/* Fleet Branding Section - Only for Fleet Companies */}
+        {isFleetCompany() && (
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>White-Label Branding</Text>
+          </View>
+        )}
+        
+        {isFleetCompany() && (
+          <View style={styles.settingsCard}>
+            {renderSettingLink(
+              <Palette size={20} color={colors.primaryLight} />,
+              'Customize Branding',
+              () => setShowBrandingModal(true)
+            )}
+          </View>
+        )}
         
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>App Settings</Text>
@@ -263,10 +292,10 @@ export default function SettingsScreen() {
         
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <LogOut size={20} color={colors.danger} />
-          <Text style={styles.logoutText}>Log Out</Text>
+          <Text style={styles.logoutText}>Sign Out</Text>
         </TouchableOpacity>
         
-        <Text style={styles.versionText}>TruckMate v1.0.0</Text>
+        <Text style={styles.versionText}>TruckLogPro v1.0.0</Text>
         
         <View style={styles.footer} />
       </ScrollView>
@@ -626,6 +655,26 @@ export default function SettingsScreen() {
           </ScrollView>
         </View>
       </Modal>
+      
+      {/* Branding Customizer Modal */}
+      <Modal
+        visible={showBrandingModal}
+        animationType="slide"
+        presentationStyle="pageSheet"
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Customize Branding</Text>
+            <TouchableOpacity
+              style={styles.modalCloseButton}
+              onPress={() => setShowBrandingModal(false)}
+            >
+              <X size={24} color={colors.text} />
+            </TouchableOpacity>
+          </View>
+          <BrandingCustomizer onClose={() => setShowBrandingModal(false)} />
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -930,5 +979,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: colors.primaryLight,
+  },
+  modalCloseButton: {
+    padding: 4,
   },
 });

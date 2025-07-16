@@ -1,23 +1,43 @@
-import { Tabs } from "expo-router";
+import { Tabs, Redirect } from "expo-router";
 import { BarChart, Clipboard, Home, Receipt, Settings, Users, Shield, Cloud, Zap } from "lucide-react-native";
 import React from "react";
 
 import { colors } from "@/constants/colors";
+import { useUserStore } from "@/store/userStore";
+import { useBrandingStore } from "@/store/brandingStore";
 
 export default function TabLayout() {
+  const { isOnboarded, isOwnerOperator, isFleetCompany } = useUserStore();
+  const { settings } = useBrandingStore();
+  
+  // Redirect to onboarding if not completed
+  if (!isOnboarded) {
+    return <Redirect href="/onboarding" />;
+  }
+  
+  // Use custom colors if branding is customized
+  const activeColors = {
+    primary: settings.primaryColor || colors.primaryLight,
+    secondary: settings.secondaryColor || colors.secondary,
+    background: colors.background,
+    textSecondary: colors.textSecondary,
+    border: colors.border,
+    text: colors.text,
+  };
+
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: colors.primaryLight,
-        tabBarInactiveTintColor: colors.textSecondary,
+        tabBarActiveTintColor: activeColors.primary,
+        tabBarInactiveTintColor: activeColors.textSecondary,
         tabBarStyle: {
-          backgroundColor: colors.background,
-          borderTopColor: colors.border,
+          backgroundColor: activeColors.background,
+          borderTopColor: activeColors.border,
         },
         headerStyle: {
-          backgroundColor: colors.background,
+          backgroundColor: activeColors.background,
         },
-        headerTintColor: colors.text,
+        headerTintColor: activeColors.text,
         headerTitleStyle: {
           fontWeight: '600',
         },
@@ -65,13 +85,25 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <Cloud color={color} size={22} />,
         }}
       />
-      <Tabs.Screen
-        name="fleet"
-        options={{
-          title: "Fleet Admin",
-          tabBarIcon: ({ color }) => <Users color={color} size={22} />,
-        }}
-      />
+      {/* Fleet tab only visible for fleet companies */}
+      {isFleetCompany() && (
+        <Tabs.Screen
+          name="fleet"
+          options={{
+            title: "Fleet Admin",
+            tabBarIcon: ({ color }) => <Users color={color} size={22} />,
+          }}
+        />
+      )}
+      {/* Hide fleet tab for owner-operators */}
+      {isOwnerOperator() && (
+        <Tabs.Screen
+          name="fleet"
+          options={{
+            href: null, // This hides the tab
+          }}
+        />
+      )}
       <Tabs.Screen
         name="integrations"
         options={{

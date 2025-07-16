@@ -1,32 +1,56 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView } from 'react-native';
-import { Palette, Type, Image, Save } from 'lucide-react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Switch, Alert } from 'react-native';
+import { Palette, Type, Image, Save, Upload, Eye, EyeOff } from 'lucide-react-native';
 import { colors } from '@/constants/colors';
-import { BrandingSettings } from '@/store/fleetStore';
+import { BrandingSettings, brandingPresets, useBrandingStore } from '@/store/brandingStore';
 
 interface BrandingCustomizerProps {
-  settings: BrandingSettings;
-  onUpdate: (updates: Partial<BrandingSettings>) => void;
+  onClose?: () => void;
 }
 
-export default function BrandingCustomizer({ settings, onUpdate }: BrandingCustomizerProps) {
+export default function BrandingCustomizer({ onClose }: BrandingCustomizerProps) {
+  const { settings, updateBranding, resetToDefaults, applyPreset } = useBrandingStore();
   const [localSettings, setLocalSettings] = useState(settings);
   
   const handleSave = () => {
-    onUpdate(localSettings);
+    updateBranding(localSettings);
+    Alert.alert('Success', 'Branding settings saved successfully!');
+    onClose?.();
   };
   
-  const updateSetting = (key: keyof BrandingSettings, value: string) => {
+  const handleReset = () => {
+    Alert.alert(
+      'Reset Branding',
+      'Are you sure you want to reset all branding settings to defaults?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Reset',
+          style: 'destructive',
+          onPress: () => {
+            resetToDefaults();
+            setLocalSettings(settings);
+          },
+        },
+      ]
+    );
+  };
+  
+  const handlePresetApply = (preset: any) => {
+    const updatedSettings = {
+      ...localSettings,
+      primaryColor: preset.primaryColor,
+      secondaryColor: preset.secondaryColor,
+      accentColor: preset.accentColor,
+    };
+    setLocalSettings(updatedSettings);
+  };
+  
+  const updateSetting = (key: keyof BrandingSettings, value: string | boolean) => {
     setLocalSettings(prev => ({ ...prev, [key]: value }));
   };
   
-  const colorPresets = [
-    { name: 'Ocean Blue', primary: '#1E3A8A', secondary: '#10B981', accent: '#F59E0B' },
-    { name: 'Forest Green', primary: '#065F46', secondary: '#059669', accent: '#D97706' },
-    { name: 'Sunset Orange', primary: '#EA580C', secondary: '#DC2626', accent: '#7C3AED' },
-    { name: 'Royal Purple', primary: '#7C3AED', secondary: '#EC4899', accent: '#F59E0B' },
-    { name: 'Steel Gray', primary: '#374151', secondary: '#6B7280', accent: '#3B82F6' },
-  ];
+
   
   return (
     <ScrollView style={styles.container}>
@@ -89,7 +113,7 @@ export default function BrandingCustomizer({ settings, onUpdate }: BrandingCusto
         </View>
         
         <TouchableOpacity style={styles.uploadButton}>
-          <Image size={20} color={colors.text} />
+          <Upload size={20} color={colors.text} />
           <Text style={styles.uploadButtonText}>Upload Logo</Text>
         </TouchableOpacity>
       </View>
@@ -102,20 +126,16 @@ export default function BrandingCustomizer({ settings, onUpdate }: BrandingCusto
         
         <Text style={styles.subsectionTitle}>Quick Presets</Text>
         <View style={styles.colorPresets}>
-          {colorPresets.map((preset, index) => (
+          {brandingPresets.map((preset, index) => (
             <TouchableOpacity
               key={index}
               style={styles.colorPreset}
-              onPress={() => {
-                updateSetting('primaryColor', preset.primary);
-                updateSetting('secondaryColor', preset.secondary);
-                updateSetting('accentColor', preset.accent);
-              }}
+              onPress={() => handlePresetApply(preset)}
             >
               <View style={styles.colorPresetColors}>
-                <View style={[styles.colorSwatch, { backgroundColor: preset.primary }]} />
-                <View style={[styles.colorSwatch, { backgroundColor: preset.secondary }]} />
-                <View style={[styles.colorSwatch, { backgroundColor: preset.accent }]} />
+                <View style={[styles.colorSwatch, { backgroundColor: preset.primaryColor }]} />
+                <View style={[styles.colorSwatch, { backgroundColor: preset.secondaryColor }]} />
+                <View style={[styles.colorSwatch, { backgroundColor: preset.accentColor }]} />
               </View>
               <Text style={styles.colorPresetName}>{preset.name}</Text>
             </TouchableOpacity>
@@ -171,6 +191,41 @@ export default function BrandingCustomizer({ settings, onUpdate }: BrandingCusto
       
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Advanced Settings</Text>
+        </View>
+        
+        <View style={styles.switchGroup}>
+          <View style={styles.switchItem}>
+            <Text style={styles.switchLabel}>Show Company Logo</Text>
+            <Switch
+              value={localSettings.showCompanyLogo}
+              onValueChange={(value) => updateSetting('showCompanyLogo', value)}
+              trackColor={{ false: colors.textSecondary, true: colors.primary }}
+            />
+          </View>
+          
+          <View style={styles.switchItem}>
+            <Text style={styles.switchLabel}>Custom Splash Screen</Text>
+            <Switch
+              value={localSettings.customSplashScreen}
+              onValueChange={(value) => updateSetting('customSplashScreen', value)}
+              trackColor={{ false: colors.textSecondary, true: colors.primary }}
+            />
+          </View>
+          
+          <View style={styles.switchItem}>
+            <Text style={styles.switchLabel}>Hide Default Branding</Text>
+            <Switch
+              value={localSettings.hideDefaultBranding}
+              onValueChange={(value) => updateSetting('hideDefaultBranding', value)}
+              trackColor={{ false: colors.textSecondary, true: colors.primary }}
+            />
+          </View>
+        </View>
+      </View>
+      
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Support Information</Text>
         </View>
         
@@ -199,10 +254,16 @@ export default function BrandingCustomizer({ settings, onUpdate }: BrandingCusto
         </View>
       </View>
       
-      <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-        <Save size={20} color={colors.text} />
-        <Text style={styles.saveButtonText}>Save Branding Settings</Text>
-      </TouchableOpacity>
+      <View style={styles.actionButtons}>
+        <TouchableOpacity style={styles.resetButton} onPress={handleReset}>
+          <Text style={styles.resetButtonText}>Reset to Defaults</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+          <Save size={20} color={colors.text} />
+          <Text style={styles.saveButtonText}>Save Settings</Text>
+        </TouchableOpacity>
+      </View>
       
       <View style={styles.preview}>
         <Text style={styles.previewTitle}>Preview</Text>
@@ -360,6 +421,50 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: colors.text,
+  },
+  switchGroup: {
+    gap: 16,
+  },
+  switchItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 4,
+  },
+  switchLabel: {
+    fontSize: 16,
+    color: colors.text,
+    flex: 1,
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 16,
+    marginBottom: 24,
+  },
+  resetButton: {
+    flex: 1,
+    backgroundColor: colors.backgroundLight,
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  resetButtonText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: colors.textSecondary,
+  },
+  saveButton: {
+    flex: 2,
+    flexDirection: 'row',
+    backgroundColor: colors.secondary,
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
   },
   preview: {
     marginBottom: 24,

@@ -5,6 +5,8 @@ import React, { useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { colors } from "@/constants/colors";
+import { useUserStore } from "@/store/userStore";
+import { useBrandingStore } from "@/store/brandingStore";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -12,19 +14,30 @@ SplashScreen.preventAutoHideAsync();
 const queryClient = new QueryClient();
 
 function RootLayoutNav() {
+  const { isOnboarded } = useUserStore();
+  const { settings } = useBrandingStore();
+  
+  // Use custom colors if branding is customized
+  const activeColors = {
+    background: colors.background,
+    text: colors.text,
+    primary: settings.primaryColor || colors.primary,
+  };
+  
   return (
     <Stack 
       screenOptions={{ 
         headerBackTitle: "Back",
         headerStyle: {
-          backgroundColor: colors.background,
+          backgroundColor: activeColors.background,
         },
-        headerTintColor: colors.text,
+        headerTintColor: activeColors.text,
         contentStyle: {
-          backgroundColor: colors.background,
+          backgroundColor: activeColors.background,
         },
       }}
     >
+      <Stack.Screen name="onboarding" options={{ headerShown: false }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
     </Stack>
   );
