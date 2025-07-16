@@ -1,1 +1,661 @@
-import React, { useState } from 'react';\nimport {\n  View,\n  Text,\n  StyleSheet,\n  TouchableOpacity,\n  TextInput,\n  Modal,\n  ScrollView,\n  Alert\n} from 'react-native';\nimport {\n  Shield,\n  Database,\n  TrendingUp,\n  CheckCircle,\n  AlertTriangle,\n  X,\n  Zap,\n  Clock,\n  DollarSign,\n  Star,\n  Wrench\n} from 'lucide-react-native';\n\nimport { colors } from '@/constants/colors';\nimport { usePredictiveMaintenanceStore } from '@/store/predictiveMaintenanceStore';\nimport { TruckFaxVehicleInfo, TruckFaxPredictiveInsights } from '@/types';\n\ninterface TruckFaxIntegrationProps {\n  visible: boolean;\n  onClose: () => void;\n}\n\nconst TruckFaxIntegration: React.FC<TruckFaxIntegrationProps> = ({\n  visible,\n  onClose\n}) => {\n  const {\n    truckFaxEnabled,\n    truckFaxData,\n    truckFaxInsights,\n    vehicleVin,\n    isLoadingTruckFax,\n    lastTruckFaxSync,\n    setVehicleVin,\n    enableTruckFax,\n    disableTruckFax,\n    syncTruckFaxData\n  } = usePredictiveMaintenanceStore();\n\n  const [vinInput, setVinInput] = useState(vehicleVin || '');\n  const [showVehicleInfo, setShowVehicleInfo] = useState(false);\n  const [showInsights, setShowInsights] = useState(false);\n\n  const handleConnect = async () => {\n    if (!vinInput.trim()) {\n      Alert.alert('Error', 'Please enter a valid VIN number');\n      return;\n    }\n\n    if (vinInput.length !== 17) {\n      Alert.alert('Error', 'VIN must be exactly 17 characters');\n      return;\n    }\n\n    setVehicleVin(vinInput.trim().toUpperCase());\n    await enableTruckFax();\n  };\n\n  const handleDisconnect = () => {\n    Alert.alert(\n      'Disconnect TruckFax',\n      'Are you sure you want to disconnect TruckFax integration? This will remove enhanced predictions and historical data.',\n      [\n        { text: 'Cancel', style: 'cancel' },\n        {\n          text: 'Disconnect',\n          style: 'destructive',\n          onPress: () => {\n            disableTruckFax();\n            setVinInput('');\n          }\n        }\n      ]\n    );\n  };\n\n  const formatDate = (dateString: string) => {\n    return new Date(dateString).toLocaleDateString('en-US', {\n      year: 'numeric',\n      month: 'short',\n      day: 'numeric'\n    });\n  };\n\n  const formatCurrency = (amount: number) => {\n    return new Intl.NumberFormat('en-US', {\n      style: 'currency',\n      currency: 'USD'\n    }).format(amount);\n  };\n\n  const getStatusColor = (status: string) => {\n    switch (status.toLowerCase()) {\n      case 'completed':\n      case 'pass':\n      case 'clean':\n        return colors.secondary;\n      case 'open':\n      case 'warning':\n        return colors.warning;\n      case 'fail':\n      case 'violation':\n        return colors.danger;\n      default:\n        return colors.textSecondary;\n    }\n  };\n\n  const renderConnectionStatus = () => {\n    if (!truckFaxEnabled) {\n      return (\n        <View style={styles.connectionSection}>\n          <View style={styles.connectionHeader}>\n            <Shield size={24} color={colors.textSecondary} />\n            <Text style={styles.connectionTitle}>Connect TruckFax</Text>\n          </View>\n          <Text style={styles.connectionDescription}>\n            Enhance your predictive maintenance with comprehensive vehicle history,\n            advanced AI predictions, and certified repair shop network.\n          </Text>\n          \n          <View style={styles.benefits}>\n            <View style={styles.benefit}>\n              <Database size={16} color={colors.primary} />\n              <Text style={styles.benefitText}>Complete vehicle history</Text>\n            </View>\n            <View style={styles.benefit}>\n              <TrendingUp size={16} color={colors.primary} />\n              <Text style={styles.benefitText}>Enhanced AI predictions</Text>\n            </View>\n            <View style={styles.benefit}>\n              <Star size={16} color={colors.primary} />\n              <Text style={styles.benefitText}>Certified repair network</Text>\n            </View>\n          </View>\n\n          <View style={styles.vinInput}>\n            <Text style={styles.inputLabel}>Vehicle VIN</Text>\n            <TextInput\n              style={styles.textInput}\n              value={vinInput}\n              onChangeText={setVinInput}\n              placeholder=\"Enter 17-character VIN\"\n              placeholderTextColor={colors.textSecondary}\n              maxLength={17}\n              autoCapitalize=\"characters\"\n            />\n          </View>\n\n          <TouchableOpacity\n            style={[styles.connectButton, !vinInput.trim() && styles.disabledButton]}\n            onPress={handleConnect}\n            disabled={!vinInput.trim() || isLoadingTruckFax}\n          >\n            <Text style={styles.connectButtonText}>\n              {isLoadingTruckFax ? 'Connecting...' : 'Connect TruckFax'}\n            </Text>\n          </TouchableOpacity>\n        </View>\n      );\n    }\n\n    return (\n      <View style={styles.connectedSection}>\n        <View style={styles.connectedHeader}>\n          <CheckCircle size={24} color={colors.secondary} />\n          <Text style={styles.connectedTitle}>TruckFax Connected</Text>\n        </View>\n        \n        {truckFaxData && (\n          <View style={styles.vehicleInfo}>\n            <Text style={styles.vehicleTitle}>\n              {truckFaxData.year} {truckFaxData.make} {truckFaxData.model}\n            </Text>\n            <Text style={styles.vehicleVin}>VIN: {truckFaxData.vin}</Text>\n            <Text style={styles.vehicleMileage}>\n              {truckFaxData.mileage.toLocaleString()} miles\n            </Text>\n          </View>\n        )}\n\n        <View style={styles.connectedActions}>\n          <TouchableOpacity\n            style={styles.actionButton}\n            onPress={() => setShowVehicleInfo(true)}\n          >\n            <Database size={16} color={colors.primary} />\n            <Text style={styles.actionButtonText}>Vehicle History</Text>\n          </TouchableOpacity>\n          \n          <TouchableOpacity\n            style={styles.actionButton}\n            onPress={() => setShowInsights(true)}\n          >\n            <TrendingUp size={16} color={colors.primary} />\n            <Text style={styles.actionButtonText}>AI Insights</Text>\n          </TouchableOpacity>\n        </View>\n\n        <View style={styles.syncInfo}>\n          <Text style={styles.syncText}>\n            Last sync: {lastTruckFaxSync ? formatDate(lastTruckFaxSync) : 'Never'}\n          </Text>\n          <TouchableOpacity\n            style={styles.syncButton}\n            onPress={syncTruckFaxData}\n            disabled={isLoadingTruckFax}\n          >\n            <Text style={styles.syncButtonText}>\n              {isLoadingTruckFax ? 'Syncing...' : 'Sync Now'}\n            </Text>\n          </TouchableOpacity>\n        </View>\n\n        <TouchableOpacity\n          style={styles.disconnectButton}\n          onPress={handleDisconnect}\n        >\n          <Text style={styles.disconnectButtonText}>Disconnect</Text>\n        </TouchableOpacity>\n      </View>\n    );\n  };\n\n  const renderVehicleInfoModal = () => {\n    if (!truckFaxData) return null;\n\n    return (\n      <Modal\n        visible={showVehicleInfo}\n        animationType=\"slide\"\n        presentationStyle=\"pageSheet\"\n      >\n        <View style={styles.modalContainer}>\n          <View style={styles.modalHeader}>\n            <Text style={styles.modalTitle}>Vehicle History</Text>\n            <TouchableOpacity onPress={() => setShowVehicleInfo(false)}>\n              <X size={24} color={colors.textPrimary} />\n            </TouchableOpacity>\n          </View>\n\n          <ScrollView style={styles.modalContent}>\n            {/* Maintenance Records */}\n            <View style={styles.historySection}>\n              <Text style={styles.historySectionTitle}>Maintenance Records</Text>\n              {truckFaxData.maintenanceRecords.map((record, index) => (\n                <View key={index} style={styles.historyItem}>\n                  <View style={styles.historyItemHeader}>\n                    <Text style={styles.historyItemTitle}>{record.serviceType}</Text>\n                    <Text style={styles.historyItemDate}>{formatDate(record.date)}</Text>\n                  </View>\n                  <Text style={styles.historyItemDescription}>{record.description}</Text>\n                  <View style={styles.historyItemDetails}>\n                    <Text style={styles.historyItemMileage}>{record.mileage.toLocaleString()} miles</Text>\n                    {record.cost && (\n                      <Text style={styles.historyItemCost}>{formatCurrency(record.cost)}</Text>\n                    )}\n                  </View>\n                </View>\n              ))}\n            </View>\n\n            {/* Inspection History */}\n            <View style={styles.historySection}>\n              <Text style={styles.historySectionTitle}>Inspection History</Text>\n              {truckFaxData.inspectionHistory.map((inspection, index) => (\n                <View key={index} style={styles.historyItem}>\n                  <View style={styles.historyItemHeader}>\n                    <Text style={styles.historyItemTitle}>{inspection.type} Inspection</Text>\n                    <View style={[styles.statusBadge, { backgroundColor: getStatusColor(inspection.result) }]}>\n                      <Text style={styles.statusBadgeText}>{inspection.result}</Text>\n                    </View>\n                  </View>\n                  <Text style={styles.historyItemDescription}>\n                    Inspector: {inspection.inspector} • {inspection.location}\n                  </Text>\n                  <Text style={styles.historyItemDate}>{formatDate(inspection.date)}</Text>\n                </View>\n              ))}\n            </View>\n\n            {/* Recall Information */}\n            {truckFaxData.recallInformation.length > 0 && (\n              <View style={styles.historySection}>\n                <Text style={styles.historySectionTitle}>Recall Information</Text>\n                {truckFaxData.recallInformation.map((recall, index) => (\n                  <View key={index} style={styles.historyItem}>\n                    <View style={styles.historyItemHeader}>\n                      <Text style={styles.historyItemTitle}>{recall.component}</Text>\n                      <View style={[styles.statusBadge, { backgroundColor: getStatusColor(recall.status) }]}>\n                        <Text style={styles.statusBadgeText}>{recall.status}</Text>\n                      </View>\n                    </View>\n                    <Text style={styles.historyItemDescription}>{recall.description}</Text>\n                    <Text style={styles.historyItemDate}>\n                      Recall #{recall.recallNumber} • {formatDate(recall.date)}\n                    </Text>\n                  </View>\n                ))}\n              </View>\n            )}\n          </ScrollView>\n        </View>\n      </Modal>\n    );\n  };\n\n  const renderInsightsModal = () => {\n    if (!truckFaxInsights) return null;\n\n    return (\n      <Modal\n        visible={showInsights}\n        animationType=\"slide\"\n        presentationStyle=\"pageSheet\"\n      >\n        <View style={styles.modalContainer}>\n          <View style={styles.modalHeader}>\n            <Text style={styles.modalTitle}>AI Insights</Text>\n            <TouchableOpacity onPress={() => setShowInsights(false)}>\n              <X size={24} color={colors.textPrimary} />\n            </TouchableOpacity>\n          </View>\n\n          <ScrollView style={styles.modalContent}>\n            {/* Risk & Reliability Scores */}\n            <View style={styles.scoresSection}>\n              <View style={styles.scoreCard}>\n                <AlertTriangle size={20} color={colors.warning} />\n                <Text style={styles.scoreLabel}>Risk Score</Text>\n                <Text style={styles.scoreValue}>{truckFaxInsights.riskScore}/100</Text>\n              </View>\n              <View style={styles.scoreCard}>\n                <Shield size={20} color={colors.secondary} />\n                <Text style={styles.scoreLabel}>Reliability</Text>\n                <Text style={styles.scoreValue}>{truckFaxInsights.reliabilityScore}/100</Text>\n              </View>\n            </View>\n\n            {/* Cost Predictions */}\n            <View style={styles.insightSection}>\n              <Text style={styles.insightSectionTitle}>Cost Predictions</Text>\n              <View style={styles.costPredictions}>\n                <View style={styles.costPrediction}>\n                  <Text style={styles.costPeriod}>Next Year</Text>\n                  <Text style={styles.costAmount}>\n                    {formatCurrency(truckFaxInsights.costPredictions.nextYear.total)}\n                  </Text>\n                </View>\n                <View style={styles.costPrediction}>\n                  <Text style={styles.costPeriod}>Next 5 Years</Text>\n                  <Text style={styles.costAmount}>\n                    {formatCurrency(truckFaxInsights.costPredictions.next5Years.total)}\n                  </Text>\n                </View>\n              </View>\n            </View>\n\n            {/* Recommendations */}\n            <View style={styles.insightSection}>\n              <Text style={styles.insightSectionTitle}>Recommendations</Text>\n              {truckFaxInsights.recommendedActions.map((recommendation, index) => (\n                <View key={index} style={styles.recommendationCard}>\n                  <View style={styles.recommendationHeader}>\n                    <Wrench size={16} color={colors.primary} />\n                    <Text style={styles.recommendationTitle}>{recommendation.title}</Text>\n                    <View style={[styles.priorityBadge, { backgroundColor: getStatusColor(recommendation.priority) }]}>\n                      <Text style={styles.priorityBadgeText}>{recommendation.priority}</Text>\n                    </View>\n                  </View>\n                  <Text style={styles.recommendationDescription}>{recommendation.description}</Text>\n                  <View style={styles.recommendationDetails}>\n                    <View style={styles.recommendationDetail}>\n                      <Clock size={12} color={colors.textSecondary} />\n                      <Text style={styles.recommendationDetailText}>{recommendation.timeframe}</Text>\n                    </View>\n                    <View style={styles.recommendationDetail}>\n                      <DollarSign size={12} color={colors.textSecondary} />\n                      <Text style={styles.recommendationDetailText}>\n                        {formatCurrency(recommendation.estimatedCost)}\n                      </Text>\n                    </View>\n                  </View>\n                </View>\n              ))}\n            </View>\n          </ScrollView>\n        </View>\n      </Modal>\n    );\n  };\n\n  return (\n    <Modal\n      visible={visible}\n      animationType=\"slide\"\n      presentationStyle=\"pageSheet\"\n    >\n      <View style={styles.container}>\n        <View style={styles.header}>\n          <View style={styles.headerLeft}>\n            <Zap size={24} color={colors.primary} />\n            <Text style={styles.title}>TruckFax Integration</Text>\n          </View>\n          <TouchableOpacity onPress={onClose}>\n            <X size={24} color={colors.textPrimary} />\n          </TouchableOpacity>\n        </View>\n\n        <ScrollView style={styles.content}>\n          {renderConnectionStatus()}\n        </ScrollView>\n\n        {renderVehicleInfoModal()}\n        {renderInsightsModal()}\n      </View>\n    </Modal>\n  );\n};\n\nconst styles = StyleSheet.create({\n  container: {\n    flex: 1,\n    backgroundColor: colors.background\n  },\n  header: {\n    flexDirection: 'row',\n    justifyContent: 'space-between',\n    alignItems: 'center',\n    padding: 20,\n    borderBottomWidth: 1,\n    borderBottomColor: colors.border\n  },\n  headerLeft: {\n    flexDirection: 'row',\n    alignItems: 'center',\n    gap: 12\n  },\n  title: {\n    fontSize: 20,\n    fontWeight: '600',\n    color: colors.textPrimary\n  },\n  content: {\n    flex: 1,\n    padding: 20\n  },\n  connectionSection: {\n    backgroundColor: colors.cardBackground,\n    borderRadius: 12,\n    padding: 20\n  },\n  connectionHeader: {\n    flexDirection: 'row',\n    alignItems: 'center',\n    gap: 12,\n    marginBottom: 12\n  },\n  connectionTitle: {\n    fontSize: 18,\n    fontWeight: '600',\n    color: colors.textPrimary\n  },\n  connectionDescription: {\n    fontSize: 14,\n    color: colors.textSecondary,\n    lineHeight: 20,\n    marginBottom: 20\n  },\n  benefits: {\n    gap: 12,\n    marginBottom: 24\n  },\n  benefit: {\n    flexDirection: 'row',\n    alignItems: 'center',\n    gap: 8\n  },\n  benefitText: {\n    fontSize: 14,\n    color: colors.textPrimary\n  },\n  vinInput: {\n    marginBottom: 20\n  },\n  inputLabel: {\n    fontSize: 14,\n    fontWeight: '500',\n    color: colors.textPrimary,\n    marginBottom: 8\n  },\n  textInput: {\n    backgroundColor: colors.background,\n    borderWidth: 1,\n    borderColor: colors.border,\n    borderRadius: 8,\n    padding: 12,\n    fontSize: 16,\n    color: colors.textPrimary\n  },\n  connectButton: {\n    backgroundColor: colors.primary,\n    borderRadius: 8,\n    padding: 16,\n    alignItems: 'center'\n  },\n  disabledButton: {\n    backgroundColor: colors.textSecondary\n  },\n  connectButtonText: {\n    color: colors.white,\n    fontSize: 16,\n    fontWeight: '600'\n  },\n  connectedSection: {\n    backgroundColor: colors.cardBackground,\n    borderRadius: 12,\n    padding: 20\n  },\n  connectedHeader: {\n    flexDirection: 'row',\n    alignItems: 'center',\n    gap: 12,\n    marginBottom: 16\n  },\n  connectedTitle: {\n    fontSize: 18,\n    fontWeight: '600',\n    color: colors.textPrimary\n  },\n  vehicleInfo: {\n    backgroundColor: colors.background,\n    borderRadius: 8,\n    padding: 16,\n    marginBottom: 20\n  },\n  vehicleTitle: {\n    fontSize: 16,\n    fontWeight: '600',\n    color: colors.textPrimary,\n    marginBottom: 4\n  },\n  vehicleVin: {\n    fontSize: 12,\n    color: colors.textSecondary,\n    marginBottom: 4\n  },\n  vehicleMileage: {\n    fontSize: 14,\n    color: colors.textPrimary\n  },\n  connectedActions: {\n    flexDirection: 'row',\n    gap: 12,\n    marginBottom: 20\n  },\n  actionButton: {\n    flex: 1,\n    flexDirection: 'row',\n    alignItems: 'center',\n    justifyContent: 'center',\n    gap: 8,\n    backgroundColor: colors.background,\n    borderWidth: 1,\n    borderColor: colors.primary,\n    borderRadius: 8,\n    padding: 12\n  },\n  actionButtonText: {\n    color: colors.primary,\n    fontSize: 14,\n    fontWeight: '500'\n  },\n  syncInfo: {\n    flexDirection: 'row',\n    justifyContent: 'space-between',\n    alignItems: 'center',\n    marginBottom: 16\n  },\n  syncText: {\n    fontSize: 12,\n    color: colors.textSecondary\n  },\n  syncButton: {\n    backgroundColor: colors.primaryLight,\n    borderRadius: 6,\n    paddingHorizontal: 12,\n    paddingVertical: 6\n  },\n  syncButtonText: {\n    color: colors.primary,\n    fontSize: 12,\n    fontWeight: '500'\n  },\n  disconnectButton: {\n    backgroundColor: colors.danger,\n    borderRadius: 8,\n    padding: 12,\n    alignItems: 'center'\n  },\n  disconnectButtonText: {\n    color: colors.white,\n    fontSize: 14,\n    fontWeight: '500'\n  },\n  modalContainer: {\n    flex: 1,\n    backgroundColor: colors.background\n  },\n  modalHeader: {\n    flexDirection: 'row',\n    justifyContent: 'space-between',\n    alignItems: 'center',\n    padding: 20,\n    borderBottomWidth: 1,\n    borderBottomColor: colors.border\n  },\n  modalTitle: {\n    fontSize: 18,\n    fontWeight: '600',\n    color: colors.textPrimary\n  },\n  modalContent: {\n    flex: 1,\n    padding: 20\n  },\n  historySection: {\n    marginBottom: 24\n  },\n  historySectionTitle: {\n    fontSize: 16,\n    fontWeight: '600',\n    color: colors.textPrimary,\n    marginBottom: 12\n  },\n  historyItem: {\n    backgroundColor: colors.cardBackground,\n    borderRadius: 8,\n    padding: 16,\n    marginBottom: 12\n  },\n  historyItemHeader: {\n    flexDirection: 'row',\n    justifyContent: 'space-between',\n    alignItems: 'center',\n    marginBottom: 8\n  },\n  historyItemTitle: {\n    fontSize: 14,\n    fontWeight: '600',\n    color: colors.textPrimary\n  },\n  historyItemDate: {\n    fontSize: 12,\n    color: colors.textSecondary\n  },\n  historyItemDescription: {\n    fontSize: 13,\n    color: colors.textSecondary,\n    marginBottom: 8\n  },\n  historyItemDetails: {\n    flexDirection: 'row',\n    justifyContent: 'space-between'\n  },\n  historyItemMileage: {\n    fontSize: 12,\n    color: colors.textSecondary\n  },\n  historyItemCost: {\n    fontSize: 12,\n    fontWeight: '500',\n    color: colors.textPrimary\n  },\n  statusBadge: {\n    borderRadius: 12,\n    paddingHorizontal: 8,\n    paddingVertical: 4\n  },\n  statusBadgeText: {\n    color: colors.white,\n    fontSize: 10,\n    fontWeight: '500'\n  },\n  scoresSection: {\n    flexDirection: 'row',\n    gap: 12,\n    marginBottom: 24\n  },\n  scoreCard: {\n    flex: 1,\n    backgroundColor: colors.cardBackground,\n    borderRadius: 8,\n    padding: 16,\n    alignItems: 'center',\n    gap: 8\n  },\n  scoreLabel: {\n    fontSize: 12,\n    color: colors.textSecondary\n  },\n  scoreValue: {\n    fontSize: 20,\n    fontWeight: '700',\n    color: colors.textPrimary\n  },\n  insightSection: {\n    marginBottom: 24\n  },\n  insightSectionTitle: {\n    fontSize: 16,\n    fontWeight: '600',\n    color: colors.textPrimary,\n    marginBottom: 12\n  },\n  costPredictions: {\n    flexDirection: 'row',\n    gap: 12\n  },\n  costPrediction: {\n    flex: 1,\n    backgroundColor: colors.cardBackground,\n    borderRadius: 8,\n    padding: 16,\n    alignItems: 'center'\n  },\n  costPeriod: {\n    fontSize: 12,\n    color: colors.textSecondary,\n    marginBottom: 4\n  },\n  costAmount: {\n    fontSize: 16,\n    fontWeight: '600',\n    color: colors.textPrimary\n  },\n  recommendationCard: {\n    backgroundColor: colors.cardBackground,\n    borderRadius: 8,\n    padding: 16,\n    marginBottom: 12\n  },\n  recommendationHeader: {\n    flexDirection: 'row',\n    alignItems: 'center',\n    gap: 8,\n    marginBottom: 8\n  },\n  recommendationTitle: {\n    flex: 1,\n    fontSize: 14,\n    fontWeight: '600',\n    color: colors.textPrimary\n  },\n  priorityBadge: {\n    borderRadius: 10,\n    paddingHorizontal: 6,\n    paddingVertical: 2\n  },\n  priorityBadgeText: {\n    color: colors.white,\n    fontSize: 10,\n    fontWeight: '500'\n  },\n  recommendationDescription: {\n    fontSize: 13,\n    color: colors.textSecondary,\n    marginBottom: 12\n  },\n  recommendationDetails: {\n    flexDirection: 'row',\n    gap: 16\n  },\n  recommendationDetail: {\n    flexDirection: 'row',\n    alignItems: 'center',\n    gap: 4\n  },\n  recommendationDetailText: {\n    fontSize: 12,\n    color: colors.textSecondary\n  }\n});\n\nexport default TruckFaxIntegration;"
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  TextInput,
+  Modal,
+  ScrollView,
+  Alert
+} from 'react-native';
+import {
+  Shield,
+  Database,
+  TrendingUp,
+  CheckCircle,
+  AlertTriangle,
+  X,
+  Zap,
+  Clock,
+  DollarSign,
+  Star,
+  Wrench
+} from 'lucide-react-native';
+
+import { colors } from '@/constants/colors';
+import { usePredictiveMaintenanceStore } from '@/store/predictiveMaintenanceStore';
+import { TruckFaxVehicleInfo, TruckFaxPredictiveInsights } from '@/types';
+
+interface TruckFaxIntegrationProps {
+  visible: boolean;
+  onClose: () => void;
+}
+
+const TruckFaxIntegration: React.FC<TruckFaxIntegrationProps> = ({
+  visible,
+  onClose
+}) => {
+  const {
+    truckFaxEnabled,
+    truckFaxData,
+    truckFaxInsights,
+    vehicleVin,
+    isLoadingTruckFax,
+    lastTruckFaxSync,
+    setVehicleVin,
+    enableTruckFax,
+    disableTruckFax,
+    syncTruckFaxData
+  } = usePredictiveMaintenanceStore();
+
+  const [vinInput, setVinInput] = useState(vehicleVin || '');
+  const [showVehicleInfo, setShowVehicleInfo] = useState(false);
+  const [showInsights, setShowInsights] = useState(false);
+
+  const handleConnect = async () => {
+    if (!vinInput.trim()) {
+      Alert.alert('Error', 'Please enter a valid VIN number');
+      return;
+    }
+
+    if (vinInput.length !== 17) {
+      Alert.alert('Error', 'VIN must be exactly 17 characters');
+      return;
+    }
+
+    setVehicleVin(vinInput.trim().toUpperCase());
+    await enableTruckFax();
+  };
+
+  const handleDisconnect = () => {
+    Alert.alert(
+      'Disconnect TruckFax',
+      'Are you sure you want to disconnect TruckFax integration? This will remove enhanced predictions and historical data.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Disconnect',
+          style: 'destructive',
+          onPress: () => {
+            disableTruckFax();
+            setVinInput('');
+          }
+        }
+      ]
+    );
+  };
+
+  const handleSync = async () => {
+    if (!vehicleVin) {
+      Alert.alert('Error', 'No VIN configured');
+      return;
+    }
+    await syncTruckFaxData();
+  };
+
+  const renderConnectionStatus = () => (
+    <View style={styles.statusSection}>
+      <View style={styles.statusHeader}>
+        <Shield size={24} color={truckFaxEnabled ? colors.status.success : colors.text.secondary} />
+        <Text style={styles.statusTitle}>
+          TruckFax Integration
+        </Text>
+        <View style={[
+          styles.statusBadge,
+          { backgroundColor: truckFaxEnabled ? colors.status.success : colors.status.error }
+        ]}>
+          <Text style={styles.statusBadgeText}>
+            {truckFaxEnabled ? 'Connected' : 'Disconnected'}
+          </Text>
+        </View>
+      </View>
+
+      {truckFaxEnabled && vehicleVin && (
+        <View style={styles.vinContainer}>
+          <Text style={styles.vinLabel}>Vehicle VIN:</Text>
+          <Text style={styles.vinText}>{vehicleVin}</Text>
+        </View>
+      )}
+
+      {lastTruckFaxSync && (
+        <Text style={styles.lastSync}>
+          Last sync: {new Date(lastTruckFaxSync).toLocaleString()}
+        </Text>
+      )}
+    </View>
+  );
+
+  const renderConnectionForm = () => {
+    if (truckFaxEnabled) return null;
+
+    return (
+      <View style={styles.connectionForm}>
+        <Text style={styles.formTitle}>Connect Your Vehicle</Text>
+        <Text style={styles.formDescription}>
+          Enter your vehicle's VIN to enable enhanced predictive maintenance with TruckFax data
+        </Text>
+
+        <TextInput
+          style={styles.vinInput}
+          placeholder="Enter 17-digit VIN"
+          value={vinInput}
+          onChangeText={setVinInput}
+          maxLength={17}
+          autoCapitalize="characters"
+          autoCorrect={false}
+        />
+
+        <TouchableOpacity
+          style={[styles.connectButton, { opacity: vinInput.length === 17 ? 1 : 0.5 }]}
+          onPress={handleConnect}
+          disabled={vinInput.length !== 17 || isLoadingTruckFax}
+        >
+          <Database size={20} color={colors.white} />
+          <Text style={styles.connectButtonText}>
+            {isLoadingTruckFax ? 'Connecting...' : 'Connect TruckFax'}
+          </Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
+  const renderVehicleInfo = () => {
+    if (!truckFaxEnabled || !truckFaxData) return null;
+
+    return (
+      <View style={styles.infoSection}>
+        <TouchableOpacity
+          style={styles.sectionHeader}
+          onPress={() => setShowVehicleInfo(!showVehicleInfo)}
+        >
+          <Text style={styles.sectionTitle}>Vehicle Information</Text>
+          <Text style={styles.expandIcon}>{showVehicleInfo ? '−' : '+'}</Text>
+        </TouchableOpacity>
+
+        {showVehicleInfo && (
+          <View style={styles.sectionContent}>
+            <View style={styles.infoGrid}>
+              <View style={styles.infoItem}>
+                <Text style={styles.infoLabel}>Make & Model</Text>
+                <Text style={styles.infoValue}>
+                  {truckFaxData.make} {truckFaxData.model}
+                </Text>
+              </View>
+
+              <View style={styles.infoItem}>
+                <Text style={styles.infoLabel}>Year</Text>
+                <Text style={styles.infoValue}>{truckFaxData.year}</Text>
+              </View>
+
+              <View style={styles.infoItem}>
+                <Text style={styles.infoLabel}>Engine</Text>
+                <Text style={styles.infoValue}>{truckFaxData.engine}</Text>
+              </View>
+
+              <View style={styles.infoItem}>
+                <Text style={styles.infoLabel}>Mileage</Text>
+                <Text style={styles.infoValue}>
+                  {truckFaxData.mileage?.toLocaleString()} miles
+                </Text>
+              </View>
+            </View>
+
+            {truckFaxData.maintenanceHistory && truckFaxData.maintenanceHistory.length > 0 && (
+              <View style={styles.historySection}>
+                <Text style={styles.historyTitle}>Recent Maintenance</Text>
+                {truckFaxData.maintenanceHistory.slice(0, 3).map((record, index) => (
+                  <View key={index} style={styles.historyItem}>
+                    <View style={styles.historyHeader}>
+                      <Text style={styles.historyDate}>
+                        {new Date(record.date).toLocaleDateString()}
+                      </Text>
+                      <Text style={styles.historyMileage}>
+                        {record.mileage?.toLocaleString()} mi
+                      </Text>
+                    </View>
+                    <Text style={styles.historyDescription}>{record.description}</Text>
+                    <Text style={styles.historyCost}>${record.cost}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+          </View>
+        )}
+      </View>
+    );
+  };
+
+  const renderPredictiveInsights = () => {
+    if (!truckFaxEnabled || !truckFaxInsights) return null;
+
+    return (
+      <View style={styles.infoSection}>
+        <TouchableOpacity
+          style={styles.sectionHeader}
+          onPress={() => setShowInsights(!showInsights)}
+        >
+          <Text style={styles.sectionTitle}>Enhanced Predictions</Text>
+          <Text style={styles.expandIcon}>{showInsights ? '−' : '+'}</Text>
+        </TouchableOpacity>
+
+        {showInsights && (
+          <View style={styles.sectionContent}>
+            <View style={styles.insightsGrid}>
+              <View style={styles.insightCard}>
+                <TrendingUp size={20} color={colors.primary} />
+                <Text style={styles.insightLabel}>Accuracy Boost</Text>
+                <Text style={styles.insightValue}>
+                  +{truckFaxInsights.accuracyImprovement}%
+                </Text>
+              </View>
+
+              <View style={styles.insightCard}>
+                <Clock size={20} color={colors.status.warning} />
+                <Text style={styles.insightLabel}>Early Detection</Text>
+                <Text style={styles.insightValue}>
+                  {truckFaxInsights.earlyDetectionDays} days
+                </Text>
+              </View>
+
+              <View style={styles.insightCard}>
+                <DollarSign size={20} color={colors.status.success} />
+                <Text style={styles.insightLabel}>Cost Savings</Text>
+                <Text style={styles.insightValue}>
+                  ${truckFaxInsights.estimatedSavings}
+                </Text>
+              </View>
+            </View>
+
+            {truckFaxInsights.riskFactors && truckFaxInsights.riskFactors.length > 0 && (
+              <View style={styles.riskSection}>
+                <Text style={styles.riskTitle}>Risk Factors</Text>
+                {truckFaxInsights.riskFactors.map((risk, index) => (
+                  <View key={index} style={styles.riskItem}>
+                    <AlertTriangle 
+                      size={16} 
+                      color={risk.severity === 'high' ? colors.status.error : 
+                             risk.severity === 'medium' ? colors.status.warning : 
+                             colors.status.success} 
+                    />
+                    <View style={styles.riskContent}>
+                      <Text style={styles.riskComponent}>{risk.component}</Text>
+                      <Text style={styles.riskDescription}>{risk.description}</Text>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            )}
+          </View>
+        )}
+      </View>
+    );
+  };
+
+  const renderActions = () => (
+    <View style={styles.actionsSection}>
+      {truckFaxEnabled ? (
+        <>
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={handleSync}
+            disabled={isLoadingTruckFax}
+          >
+            <Zap size={20} color={colors.primary} />
+            <Text style={styles.actionButtonText}>
+              {isLoadingTruckFax ? 'Syncing...' : 'Sync Data'}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.actionButton, styles.disconnectButton]}
+            onPress={handleDisconnect}
+          >
+            <X size={20} color={colors.status.error} />
+            <Text style={[styles.actionButtonText, { color: colors.status.error }]}>
+              Disconnect
+            </Text>
+          </TouchableOpacity>
+        </>
+      ) : (
+        <View style={styles.benefitsSection}>
+          <Text style={styles.benefitsTitle}>TruckFax Benefits</Text>
+          <View style={styles.benefitsList}>
+            <View style={styles.benefitItem}>
+              <CheckCircle size={16} color={colors.status.success} />
+              <Text style={styles.benefitText}>Enhanced prediction accuracy</Text>
+            </View>
+            <View style={styles.benefitItem}>
+              <CheckCircle size={16} color={colors.status.success} />
+              <Text style={styles.benefitText}>Historical maintenance data</Text>
+            </View>
+            <View style={styles.benefitItem}>
+              <CheckCircle size={16} color={colors.status.success} />
+              <Text style={styles.benefitText}>Certified repair shop network</Text>
+            </View>
+            <View style={styles.benefitItem}>
+              <CheckCircle size={16} color={colors.status.success} />
+              <Text style={styles.benefitText}>Cost optimization insights</Text>
+            </View>
+          </View>
+        </View>
+      )}
+    </View>
+  );
+
+  return (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={onClose}
+    >
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.title}>TruckFax Integration</Text>
+          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <X size={24} color={colors.text.secondary} />
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView style={styles.content}>
+          {renderConnectionStatus()}
+          {renderConnectionForm()}
+          {renderVehicleInfo()}
+          {renderPredictiveInsights()}
+          {renderActions()}
+        </ScrollView>
+      </View>
+    </Modal>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background.primary,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.text.primary,
+  },
+  closeButton: {
+    padding: 8,
+  },
+  content: {
+    flex: 1,
+  },
+  statusSection: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  statusHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 12,
+  },
+  statusTitle: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text.primary,
+  },
+  statusBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  statusBadgeText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: colors.white,
+  },
+  vinContainer: {
+    backgroundColor: colors.background.secondary,
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  vinLabel: {
+    fontSize: 12,
+    color: colors.text.secondary,
+    marginBottom: 4,
+  },
+  vinText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.text.primary,
+    fontFamily: 'monospace',
+  },
+  lastSync: {
+    fontSize: 12,
+    color: colors.text.secondary,
+  },
+  connectionForm: {
+    padding: 16,
+  },
+  formTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text.primary,
+    marginBottom: 8,
+  },
+  formDescription: {
+    fontSize: 14,
+    color: colors.text.secondary,
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  vinInput: {
+    backgroundColor: colors.background.secondary,
+    padding: 12,
+    borderRadius: 8,
+    fontSize: 16,
+    color: colors.text.primary,
+    fontFamily: 'monospace',
+    marginBottom: 16,
+  },
+  connectButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primary,
+    padding: 16,
+    borderRadius: 12,
+    gap: 8,
+  },
+  connectButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.white,
+  },
+  infoSection: {
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text.primary,
+  },
+  expandIcon: {
+    fontSize: 20,
+    fontWeight: '300',
+    color: colors.text.secondary,
+  },
+  sectionContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+  },
+  infoGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 16,
+    marginBottom: 16,
+  },
+  infoItem: {
+    flex: 1,
+    minWidth: '45%',
+  },
+  infoLabel: {
+    fontSize: 12,
+    color: colors.text.secondary,
+    marginBottom: 4,
+  },
+  infoValue: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.text.primary,
+  },
+  historySection: {
+    marginTop: 16,
+  },
+  historyTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.text.primary,
+    marginBottom: 12,
+  },
+  historyItem: {
+    backgroundColor: colors.background.secondary,
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  historyHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  historyDate: {
+    fontSize: 12,
+    color: colors.text.secondary,
+  },
+  historyMileage: {
+    fontSize: 12,
+    color: colors.text.secondary,
+  },
+  historyDescription: {
+    fontSize: 14,
+    color: colors.text.primary,
+    marginBottom: 4,
+  },
+  historyCost: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.primary,
+  },
+  insightsGrid: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 16,
+  },
+  insightCard: {
+    flex: 1,
+    backgroundColor: colors.background.secondary,
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    gap: 8,
+  },
+  insightLabel: {
+    fontSize: 12,
+    color: colors.text.secondary,
+    textAlign: 'center',
+  },
+  insightValue: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text.primary,
+  },
+  riskSection: {
+    marginTop: 16,
+  },
+  riskTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.text.primary,
+    marginBottom: 12,
+  },
+  riskItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+    marginBottom: 12,
+  },
+  riskContent: {
+    flex: 1,
+  },
+  riskComponent: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.text.primary,
+    marginBottom: 2,
+  },
+  riskDescription: {
+    fontSize: 12,
+    color: colors.text.secondary,
+    lineHeight: 16,
+  },
+  actionsSection: {
+    padding: 16,
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.background.secondary,
+    padding: 16,
+    borderRadius: 12,
+    gap: 8,
+    marginBottom: 12,
+  },
+  actionButtonText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: colors.text.primary,
+  },
+  disconnectButton: {
+    backgroundColor: colors.background.secondary,
+  },
+  benefitsSection: {
+    marginTop: 16,
+  },
+  benefitsTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text.primary,
+    marginBottom: 16,
+  },
+  benefitsList: {
+    gap: 12,
+  },
+  benefitItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  benefitText: {
+    fontSize: 14,
+    color: colors.text.primary,
+  },
+});
+
+export default TruckFaxIntegration;

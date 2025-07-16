@@ -329,16 +329,20 @@ export interface VehicleDiagnostics {
 export interface MaintenancePrediction {
   id: string;
   vehicleId: string;
+  component: string;
   componentType: 'Engine' | 'Transmission' | 'Brakes' | 'Tires' | 'Battery' | 'Cooling System' | 'Fuel System' | 'Electrical';
   componentName: string;
   currentCondition: number; // 0-100 (100 = perfect condition)
   predictedFailureDate: string;
   milesUntilFailure: number;
+  estimatedMiles: number;
+  confidence: number; // 0-100
   confidenceLevel: number; // 0-100
-  severity: 'Critical' | 'High' | 'Medium' | 'Low';
+  severity: 'high' | 'medium' | 'low';
   estimatedCost: number;
   symptoms: string[];
   recommendations: string[];
+  description: string;
   preventiveMaintenance: PreventiveAction[];
   basedOnData: {
     diagnosticReadings: number;
@@ -388,6 +392,7 @@ export interface RepairShop {
   estimatedCost: number;
   availability: 'Same Day' | 'Next Day' | '2-3 Days' | '1 Week+';
   certifications: string[];
+  truckFaxCertified?: boolean;
   workingHours: {
     monday: string;
     tuesday: string;

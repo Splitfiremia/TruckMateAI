@@ -1,1 +1,645 @@
-import React, { useEffect, useState } from 'react';\nimport {\n  View,\n  Text,\n  ScrollView,\n  StyleSheet,\n  TouchableOpacity,\n  RefreshControl,\n  Alert,\n  Modal\n} from 'react-native';\nimport {\n  Activity,\n  AlertTriangle,\n  CheckCircle,\n  Clock,\n  MapPin,\n  Phone,\n  Settings,\n  Star,\n  Wrench,\n  Zap,\n  TrendingUp,\n  Shield,\n  Calendar,\n  Database\n} from 'lucide-react-native';\nimport { Stack } from 'expo-router';\n\nimport { colors } from '@/constants/colors';\nimport { usePredictiveMaintenanceStore } from '@/store/predictiveMaintenanceStore';\nimport { MaintenancePrediction, MaintenanceAlert, RepairShop } from '@/types';\nimport VehicleHealthDashboard from '@/components/VehicleHealthDashboard';\nimport MaintenanceAlertCard from '@/components/MaintenanceAlertCard';\nimport PredictiveMaintenanceCard from '@/components/PredictiveMaintenanceCard';\nimport TruckFaxIntegration from '@/components/TruckFaxIntegration';\n\nconst MaintenancePage = () => {\n  const {\n    currentDiagnostics,\n    predictions,\n    alerts,\n    vehicleHealth,\n    nearbyShops,\n    isAnalyzing,\n    isLoadingShops,\n    lastAnalysis,\n    isSimulating,\n    truckFaxEnabled,\n    truckFaxData,\n    isLoadingTruckFax,\n    runPredictiveAnalysis,\n    dismissAlert,\n    findNearbyShops,\n    findTruckFaxCertifiedShops,\n    startSimulation,\n    stopSimulation\n  } = usePredictiveMaintenanceStore();\n\n  const [refreshing, setRefreshing] = useState(false);\n  const [selectedPrediction, setSelectedPrediction] = useState<MaintenancePrediction | null>(null);\n  const [showShopsModal, setShowShopsModal] = useState(false);\n  const [showTruckFaxModal, setShowTruckFaxModal] = useState(false);\n\n  useEffect(() => {\n    // Start simulation on component mount\n    if (!isSimulating) {\n      startSimulation();\n    }\n    \n    // Cleanup on unmount\n    return () => {\n      stopSimulation();\n    };\n  }, []);\n\n  const toggleSimulation = () => {\n    if (isSimulating) {\n      stopSimulation();\n    } else {\n      startSimulation();\n    }\n  };\n\n  const onRefresh = async () => {\n    setRefreshing(true);\n    await runPredictiveAnalysis();\n    setRefreshing(false);\n  };\n\n  const handlePredictionPress = (prediction: MaintenancePrediction) => {\n    setSelectedPrediction(prediction);\n    const location = { lat: 33.4484, lng: -112.0740 };\n    \n    if (truckFaxEnabled) {\n      findTruckFaxCertifiedShops(prediction.componentName, location);\n    } else {\n      findNearbyShops(prediction.componentName, location);\n    }\n    setShowShopsModal(true);\n  };\n\n  const handleAlertViewShops = (alert: MaintenanceAlert) => {\n    const location = { lat: 33.4484, lng: -112.0740 };\n    \n    if (truckFaxEnabled) {\n      findTruckFaxCertifiedShops(alert.component, location);\n    } else {\n      findNearbyShops(alert.component, location);\n    }\n    setShowShopsModal(true);\n  };\n\n  const handleScheduleMaintenance = (shop: RepairShop, prediction: MaintenancePrediction) => {\n    Alert.alert(\n      'Schedule Maintenance',\n      `Schedule ${prediction.componentName} service at ${shop.name}?`,\n      [\n        { text: 'Cancel', style: 'cancel' },\n        {\n          text: 'Schedule',\n          onPress: () => {\n            // In a real app, this would integrate with the shop's booking system\n            Alert.alert('Success', 'Maintenance scheduled successfully!');\n            setShowShopsModal(false);\n          }\n        }\n      ]\n    );\n  };\n\n  const activeAlerts = alerts.filter(alert => !alert.dismissed && !alert.resolvedAt);\n\n  return (\n    <>\n      <Stack.Screen\n        options={{\n          title: 'AI Maintenance',\n          headerRight: () => (\n            <View style={styles.headerButtons}>\n              <TouchableOpacity onPress={() => setShowTruckFaxModal(true)} style={styles.headerButton}>\n                <Database \n                  color={truckFaxEnabled ? colors.secondary : colors.textSecondary} \n                  size={20} \n                />\n              </TouchableOpacity>\n              <TouchableOpacity onPress={toggleSimulation} style={styles.headerButton}>\n                <Activity \n                  color={isSimulating ? colors.secondary : colors.textSecondary} \n                  size={20} \n                />\n              </TouchableOpacity>\n              <TouchableOpacity onPress={() => {}} style={styles.headerButton}>\n                <Settings color={colors.text} size={22} />\n              </TouchableOpacity>\n            </View>\n          )\n        }}\n      />\n      \n      <ScrollView\n        style={styles.container}\n        refreshControl={\n          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />\n        }\n      >\n        {/* TruckFax Status Banner */}\n        {truckFaxEnabled && truckFaxData && (\n          <View style={styles.truckFaxBanner}>\n            <View style={styles.truckFaxInfo}>\n              <Database size={16} color={colors.primary} />\n              <Text style={styles.truckFaxText}>\n                Enhanced with TruckFax: {truckFaxData.year} {truckFaxData.make} {truckFaxData.model}\n              </Text>\n            </View>\n            {isLoadingTruckFax && (\n              <Text style={styles.truckFaxLoading}>Syncing...</Text>\n            )}\n          </View>\n        )}\n\n        {/* Vehicle Health Overview */}\n        {vehicleHealth && (\n          <View style={styles.section}>\n            <VehicleHealthDashboard \n              vehicleHealth={vehicleHealth}\n              onSystemPress={(system) => {\n                console.log('System pressed:', system);\n              }}\n            />\n          </View>\n        )}\n\n        {/* AI Analysis Status */}\n        <View style={styles.analysisCard}>\n          <View style={styles.analysisHeader}>\n            <Zap color={colors.primaryLight} size={20} />\n            <Text style={styles.analysisTitle}>AI Predictive Analysis</Text>\n            {isAnalyzing && <Activity color={colors.primaryLight} size={16} />}\n          </View>\n          <Text style={styles.analysisStatus}>\n            {isAnalyzing ? 'Analyzing vehicle data...' : \n             lastAnalysis ? `Last analysis: ${new Date(lastAnalysis).toLocaleTimeString()}` :\n             'No analysis performed yet'}\n          </Text>\n          {isSimulating && (\n            <Text style={styles.simulationStatus}>\n              🔄 Live simulation active - receiving diagnostic data\n            </Text>\n          )}\n          {truckFaxEnabled && (\n            <Text style={styles.truckFaxStatus}>\n              ⚡ Enhanced with TruckFax predictive insights\n            </Text>\n          )}\n          <TouchableOpacity\n            style={[styles.analyzeButton, isAnalyzing && styles.analyzeButtonDisabled]}\n            onPress={runPredictiveAnalysis}\n            disabled={isAnalyzing}\n          >\n            <Text style={styles.analyzeButtonText}>\n              {isAnalyzing ? 'Analyzing...' : 'Run Analysis'}\n            </Text>\n          </TouchableOpacity>\n        </View>\n\n        {/* Active Alerts */}\n        {activeAlerts.length > 0 && (\n          <View style={styles.section}>\n            <Text style={styles.sectionTitle}>Active Alerts ({activeAlerts.length})</Text>\n            {activeAlerts.map(alert => (\n              <MaintenanceAlertCard\n                key={alert.id}\n                alert={alert}\n                onDismiss={dismissAlert}\n                onViewShops={handleAlertViewShops}\n              />\n            ))}\n          </View>\n        )}\n\n        {/* Maintenance Predictions */}\n        {predictions.length > 0 && (\n          <View style={styles.section}>\n            <Text style={styles.sectionTitle}>AI Predictions ({predictions.length})</Text>\n            {predictions.map(prediction => (\n              <PredictiveMaintenanceCard\n                key={prediction.id}\n                prediction={prediction}\n                onPress={handlePredictionPress}\n              />\n            ))}\n          </View>\n        )}\n\n        {/* Current Diagnostics */}\n        {currentDiagnostics && (\n          <View style={styles.section}>\n            <Text style={styles.sectionTitle}>Live Diagnostics</Text>\n            <View style={styles.diagnosticsCard}>\n              <View style={styles.diagnosticsGrid}>\n                <View style={styles.diagnosticItem}>\n                  <Text style={styles.diagnosticLabel}>Engine Temp</Text>\n                  <Text style={[\n                    styles.diagnosticValue,\n                    { color: currentDiagnostics.engineTemp > 210 ? colors.danger : colors.text }\n                  ]}>\n                    {Math.round(currentDiagnostics.engineTemp)}°F\n                  </Text>\n                </View>\n                <View style={styles.diagnosticItem}>\n                  <Text style={styles.diagnosticLabel}>Oil Pressure</Text>\n                  <Text style={[\n                    styles.diagnosticValue,\n                    { color: currentDiagnostics.oilPressure < 30 ? colors.danger : colors.text }\n                  ]}>\n                    {Math.round(currentDiagnostics.oilPressure)} PSI\n                  </Text>\n                </View>\n                <View style={styles.diagnosticItem}>\n                  <Text style={styles.diagnosticLabel}>Brake Pressure</Text>\n                  <Text style={[\n                    styles.diagnosticValue,\n                    { color: currentDiagnostics.brakeSystemPressure < 80 ? colors.danger : colors.text }\n                  ]}>\n                    {Math.round(currentDiagnostics.brakeSystemPressure)} PSI\n                  </Text>\n                </View>\n                <View style={styles.diagnosticItem}>\n                  <Text style={styles.diagnosticLabel}>Battery</Text>\n                  <Text style={[\n                    styles.diagnosticValue,\n                    { color: currentDiagnostics.batteryVoltage < 12.4 ? colors.danger : colors.text }\n                  ]}>\n                    {currentDiagnostics.batteryVoltage.toFixed(1)}V\n                  </Text>\n                </View>\n              </View>\n              \n              <View style={styles.tirePressureSection}>\n                <Text style={styles.tirePressureTitle}>Tire Pressure</Text>\n                <View style={styles.tirePressureGrid}>\n                  <View style={styles.tireItem}>\n                    <Text style={styles.tireLabel}>FL</Text>\n                    <Text style={[\n                      styles.tireValue,\n                      { color: currentDiagnostics.tirePressure.frontLeft < 32 ? colors.danger : colors.text }\n                    ]}>\n                      {Math.round(currentDiagnostics.tirePressure.frontLeft)}\n                    </Text>\n                  </View>\n                  <View style={styles.tireItem}>\n                    <Text style={styles.tireLabel}>FR</Text>\n                    <Text style={[\n                      styles.tireValue,\n                      { color: currentDiagnostics.tirePressure.frontRight < 32 ? colors.danger : colors.text }\n                    ]}>\n                      {Math.round(currentDiagnostics.tirePressure.frontRight)}\n                    </Text>\n                  </View>\n                  <View style={styles.tireItem}>\n                    <Text style={styles.tireLabel}>RL</Text>\n                    <Text style={[\n                      styles.tireValue,\n                      { color: currentDiagnostics.tirePressure.rearLeft < 32 ? colors.danger : colors.text }\n                    ]}>\n                      {Math.round(currentDiagnostics.tirePressure.rearLeft)}\n                    </Text>\n                  </View>\n                  <View style={styles.tireItem}>\n                    <Text style={styles.tireLabel}>RR</Text>\n                    <Text style={[\n                      styles.tireValue,\n                      { color: currentDiagnostics.tirePressure.rearRight < 32 ? colors.danger : colors.text }\n                    ]}>\n                      {Math.round(currentDiagnostics.tirePressure.rearRight)}\n                    </Text>\n                  </View>\n                </View>\n              </View>\n              \n              {currentDiagnostics.faultCodes.length > 0 && (\n                <View style={styles.faultCodesSection}>\n                  <Text style={styles.faultCodesTitle}>Active Fault Codes</Text>\n                  <View style={styles.faultCodesList}>\n                    {currentDiagnostics.faultCodes.map(code => (\n                      <View key={code} style={styles.faultCodeBadge}>\n                        <Text style={styles.faultCodeText}>{code}</Text>\n                      </View>\n                    ))}\n                  </View>\n                </View>\n              )}\n            </View>\n          </View>\n        )}\n        \n        <View style={styles.footer} />\n      </ScrollView>\n\n      {/* Repair Shops Modal */}\n      <Modal\n        visible={showShopsModal}\n        animationType=\"slide\"\n        presentationStyle=\"pageSheet\"\n      >\n        <View style={styles.modalContainer}>\n          <View style={styles.modalHeader}>\n            <Text style={styles.modalTitle}>\n              {truckFaxEnabled ? 'TruckFax Certified Shops' : 'Nearby Repair Shops'}\n            </Text>\n            <TouchableOpacity\n              onPress={() => setShowShopsModal(false)}\n              style={styles.modalCloseButton}\n            >\n              <Text style={styles.modalCloseText}>Close</Text>\n            </TouchableOpacity>\n          </View>\n          \n          {selectedPrediction && (\n            <View style={styles.modalPredictionInfo}>\n              <Text style={styles.modalPredictionTitle}>\n                {selectedPrediction.componentName} Service\n              </Text>\n              <Text style={styles.modalPredictionCost}>\n                Estimated: ${selectedPrediction.estimatedCost}\n              </Text>\n            </View>\n          )}\n          \n          <ScrollView style={styles.modalContent}>\n            {isLoadingShops ? (\n              <View style={styles.loadingContainer}>\n                <Activity color={colors.primaryLight} size={24} />\n                <Text style={styles.loadingText}>\n                  {truckFaxEnabled ? 'Finding TruckFax certified shops...' : 'Finding nearby shops...'}\n                </Text>\n              </View>\n            ) : (\n              nearbyShops.map(shop => (\n                <View key={shop.id} style={styles.shopCard}>\n                  <View style={styles.shopHeader}>\n                    <Text style={styles.shopName}>{shop.name}</Text>\n                    <View style={styles.shopRating}>\n                      <Star color={colors.warning} size={14} fill={colors.warning} />\n                      <Text style={styles.shopRatingText}>\n                        {shop.rating} ({shop.reviewCount})\n                      </Text>\n                    </View>\n                  </View>\n                  \n                  <Text style={styles.shopAddress}>{shop.address}</Text>\n                  \n                  <View style={styles.shopDetails}>\n                    <View style={styles.shopDetailItem}>\n                      <MapPin color={colors.textSecondary} size={14} />\n                      <Text style={styles.shopDetailText}>{shop.distance} miles</Text>\n                    </View>\n                    <View style={styles.shopDetailItem}>\n                      <Clock color={colors.textSecondary} size={14} />\n                      <Text style={styles.shopDetailText}>{shop.availability}</Text>\n                    </View>\n                    <View style={styles.shopDetailItem}>\n                      <Text style={styles.shopCost}>${shop.estimatedCost}</Text>\n                    </View>\n                  </View>\n                  \n                  <View style={styles.shopSpecialties}>\n                    {shop.specialties.slice(0, 3).map(specialty => (\n                      <View key={specialty} style={styles.specialtyBadge}>\n                        <Text style={styles.specialtyText}>{specialty}</Text>\n                      </View>\n                    ))}\n                  </View>\n                  \n                  <View style={styles.shopCertifications}>\n                    {shop.certifications.slice(0, 2).map(cert => (\n                      <View key={cert} style={styles.certificationBadge}>\n                        <Text style={styles.certificationText}>{cert}</Text>\n                      </View>\n                    ))}\n                  </View>\n                  \n                  <View style={styles.shopActions}>\n                    <TouchableOpacity\n                      style={styles.shopCallButton}\n                      onPress={() => {}}\n                    >\n                      <Phone color={colors.primaryLight} size={16} />\n                      <Text style={styles.shopCallText}>Call</Text>\n                    </TouchableOpacity>\n                    <TouchableOpacity\n                      style={styles.shopScheduleButton}\n                      onPress={() => selectedPrediction && handleScheduleMaintenance(shop, selectedPrediction)}\n                    >\n                      <Text style={styles.shopScheduleText}>Schedule</Text>\n                    </TouchableOpacity>\n                  </View>\n                </View>\n              ))\n            )}\n          </ScrollView>\n        </View>\n      </Modal>\n\n      {/* TruckFax Integration Modal */}\n      <TruckFaxIntegration\n        visible={showTruckFaxModal}\n        onClose={() => setShowTruckFaxModal(false)}\n      />\n    </>\n  );\n};\n\nconst styles = StyleSheet.create({\n  container: {\n    flex: 1,\n    backgroundColor: colors.background,\n  },\n  headerButtons: {\n    flexDirection: 'row',\n    gap: 8,\n  },\n  headerButton: {\n    padding: 8,\n  },\n  truckFaxBanner: {\n    backgroundColor: colors.primaryLight,\n    borderRadius: 8,\n    padding: 12,\n    margin: 16,\n    marginBottom: 0,\n    flexDirection: 'row',\n    justifyContent: 'space-between',\n    alignItems: 'center'\n  },\n  truckFaxInfo: {\n    flexDirection: 'row',\n    alignItems: 'center',\n    gap: 8,\n    flex: 1\n  },\n  truckFaxText: {\n    fontSize: 13,\n    color: colors.primary,\n    fontWeight: '500',\n    flex: 1\n  },\n  truckFaxLoading: {\n    fontSize: 12,\n    color: colors.primary,\n    fontStyle: 'italic'\n  },\n  section: {\n    margin: 16,\n    marginTop: 0,\n  },\n  sectionTitle: {\n    color: colors.text,\n    fontSize: 16,\n    fontWeight: '600',\n    marginBottom: 12,\n  },\n  analysisCard: {\n    backgroundColor: colors.card,\n    margin: 16,\n    marginTop: 0,\n    borderRadius: 12,\n    padding: 16,\n  },\n  analysisHeader: {\n    flexDirection: 'row',\n    alignItems: 'center',\n    gap: 8,\n    marginBottom: 8,\n  },\n  analysisTitle: {\n    color: colors.text,\n    fontSize: 16,\n    fontWeight: '600',\n    flex: 1,\n  },\n  analysisStatus: {\n    color: colors.textSecondary,\n    fontSize: 14,\n    marginBottom: 8,\n  },\n  simulationStatus: {\n    color: colors.secondary,\n    fontSize: 12,\n    marginBottom: 8,\n    fontStyle: 'italic',\n  },\n  truckFaxStatus: {\n    color: colors.primary,\n    fontSize: 12,\n    marginBottom: 16,\n    fontStyle: 'italic',\n  },\n  analyzeButton: {\n    backgroundColor: colors.primaryLight,\n    paddingVertical: 12,\n    paddingHorizontal: 24,\n    borderRadius: 8,\n    alignItems: 'center',\n  },\n  analyzeButtonDisabled: {\n    opacity: 0.6,\n  },\n  analyzeButtonText: {\n    color: colors.text,\n    fontSize: 14,\n    fontWeight: '600',\n  },\n  diagnosticsCard: {\n    backgroundColor: colors.card,\n    borderRadius: 12,\n    padding: 16,\n  },\n  diagnosticsGrid: {\n    flexDirection: 'row',\n    flexWrap: 'wrap',\n    gap: 16,\n    marginBottom: 20,\n  },\n  diagnosticItem: {\n    width: '45%',\n    alignItems: 'center',\n  },\n  diagnosticLabel: {\n    color: colors.textSecondary,\n    fontSize: 12,\n    marginBottom: 4,\n  },\n  diagnosticValue: {\n    color: colors.text,\n    fontSize: 18,\n    fontWeight: '600',\n  },\n  tirePressureSection: {\n    borderTopWidth: 1,\n    borderTopColor: colors.border,\n    paddingTop: 16,\n    marginBottom: 16,\n  },\n  tirePressureTitle: {\n    color: colors.text,\n    fontSize: 14,\n    fontWeight: '600',\n    marginBottom: 12,\n    textAlign: 'center',\n  },\n  tirePressureGrid: {\n    flexDirection: 'row',\n    justifyContent: 'space-around',\n  },\n  tireItem: {\n    alignItems: 'center',\n  },\n  tireLabel: {\n    color: colors.textSecondary,\n    fontSize: 10,\n    marginBottom: 4,\n  },\n  tireValue: {\n    color: colors.text,\n    fontSize: 16,\n    fontWeight: '600',\n  },\n  faultCodesSection: {\n    borderTopWidth: 1,\n    borderTopColor: colors.border,\n    paddingTop: 16,\n  },\n  faultCodesTitle: {\n    color: colors.text,\n    fontSize: 14,\n    fontWeight: '600',\n    marginBottom: 12,\n  },\n  faultCodesList: {\n    flexDirection: 'row',\n    flexWrap: 'wrap',\n    gap: 8,\n  },\n  faultCodeBadge: {\n    backgroundColor: colors.danger,\n    paddingHorizontal: 8,\n    paddingVertical: 4,\n    borderRadius: 12,\n  },\n  faultCodeText: {\n    color: colors.text,\n    fontSize: 10,\n    fontWeight: '600',\n  },\n  footer: {\n    height: 20,\n  },\n  modalContainer: {\n    flex: 1,\n    backgroundColor: colors.background,\n  },\n  modalHeader: {\n    flexDirection: 'row',\n    justifyContent: 'space-between',\n    alignItems: 'center',\n    padding: 16,\n    borderBottomWidth: 1,\n    borderBottomColor: colors.border,\n  },\n  modalTitle: {\n    color: colors.text,\n    fontSize: 18,\n    fontWeight: '600',\n  },\n  modalCloseButton: {\n    padding: 8,\n  },\n  modalCloseText: {\n    color: colors.primaryLight,\n    fontSize: 16,\n  },\n  modalPredictionInfo: {\n    padding: 16,\n    backgroundColor: colors.card,\n    borderBottomWidth: 1,\n    borderBottomColor: colors.border,\n  },\n  modalPredictionTitle: {\n    color: colors.text,\n    fontSize: 16,\n    fontWeight: '600',\n  },\n  modalPredictionCost: {\n    color: colors.warning,\n    fontSize: 14,\n    marginTop: 4,\n  },\n  modalContent: {\n    flex: 1,\n  },\n  loadingContainer: {\n    alignItems: 'center',\n    padding: 32,\n  },\n  loadingText: {\n    color: colors.textSecondary,\n    fontSize: 14,\n    marginTop: 12,\n  },\n  shopCard: {\n    backgroundColor: colors.card,\n    margin: 16,\n    borderRadius: 12,\n    padding: 16,\n  },\n  shopHeader: {\n    flexDirection: 'row',\n    justifyContent: 'space-between',\n    alignItems: 'flex-start',\n    marginBottom: 8,\n  },\n  shopName: {\n    color: colors.text,\n    fontSize: 16,\n    fontWeight: '600',\n    flex: 1,\n  },\n  shopRating: {\n    flexDirection: 'row',\n    alignItems: 'center',\n    gap: 4,\n  },\n  shopRatingText: {\n    color: colors.textSecondary,\n    fontSize: 12,\n  },\n  shopAddress: {\n    color: colors.textSecondary,\n    fontSize: 14,\n    marginBottom: 12,\n  },\n  shopDetails: {\n    flexDirection: 'row',\n    justifyContent: 'space-between',\n    alignItems: 'center',\n    marginBottom: 12,\n  },\n  shopDetailItem: {\n    flexDirection: 'row',\n    alignItems: 'center',\n    gap: 4,\n  },\n  shopDetailText: {\n    color: colors.textSecondary,\n    fontSize: 12,\n  },\n  shopCost: {\n    color: colors.warning,\n    fontSize: 14,\n    fontWeight: '600',\n  },\n  shopSpecialties: {\n    flexDirection: 'row',\n    flexWrap: 'wrap',\n    gap: 8,\n    marginBottom: 12,\n  },\n  specialtyBadge: {\n    backgroundColor: colors.border,\n    paddingHorizontal: 8,\n    paddingVertical: 4,\n    borderRadius: 12,\n  },\n  specialtyText: {\n    color: colors.textSecondary,\n    fontSize: 10,\n  },\n  shopCertifications: {\n    flexDirection: 'row',\n    flexWrap: 'wrap',\n    gap: 8,\n    marginBottom: 16,\n  },\n  certificationBadge: {\n    backgroundColor: colors.secondary,\n    paddingHorizontal: 8,\n    paddingVertical: 4,\n    borderRadius: 12,\n  },\n  certificationText: {\n    color: colors.white,\n    fontSize: 10,\n    fontWeight: '500',\n  },\n  shopActions: {\n    flexDirection: 'row',\n    gap: 12,\n  },\n  shopCallButton: {\n    flexDirection: 'row',\n    alignItems: 'center',\n    gap: 8,\n    paddingVertical: 8,\n    paddingHorizontal: 16,\n    borderRadius: 8,\n    borderWidth: 1,\n    borderColor: colors.primaryLight,\n    flex: 1,\n    justifyContent: 'center',\n  },\n  shopCallText: {\n    color: colors.primaryLight,\n    fontSize: 14,\n    fontWeight: '600',\n  },\n  shopScheduleButton: {\n    backgroundColor: colors.primaryLight,\n    paddingVertical: 8,\n    paddingHorizontal: 16,\n    borderRadius: 8,\n    flex: 1,\n    alignItems: 'center',\n  },\n  shopScheduleText: {\n    color: colors.text,\n    fontSize: 14,\n    fontWeight: '600',\n  },\n});\n\nexport default MaintenancePage;"
+import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  RefreshControl,
+  Alert,
+  Modal
+} from 'react-native';
+import {
+  Activity,
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  MapPin,
+  Phone,
+  Settings,
+  Star,
+  Wrench,
+  Zap,
+  TrendingUp,
+  Shield,
+  Calendar,
+  Database,
+  X
+} from 'lucide-react-native';
+import { Stack } from 'expo-router';
+
+import { colors } from '@/constants/colors';
+import { usePredictiveMaintenanceStore } from '@/store/predictiveMaintenanceStore';
+import { MaintenancePrediction, MaintenanceAlert, RepairShop } from '@/types';
+import VehicleHealthDashboard from '@/components/VehicleHealthDashboard';
+import MaintenanceAlertCard from '@/components/MaintenanceAlertCard';
+import PredictiveMaintenanceCard from '@/components/PredictiveMaintenanceCard';
+import TruckFaxIntegration from '@/components/TruckFaxIntegration';
+
+const MaintenancePage = () => {
+  const {
+    currentDiagnostics,
+    predictions,
+    alerts,
+    vehicleHealth,
+    nearbyShops,
+    isAnalyzing,
+    isLoadingShops,
+    lastAnalysis,
+    isSimulating,
+    truckFaxEnabled,
+    truckFaxData,
+    isLoadingTruckFax,
+    runPredictiveAnalysis,
+    dismissAlert,
+    findNearbyShops,
+    findTruckFaxCertifiedShops,
+    startSimulation,
+    stopSimulation
+  } = usePredictiveMaintenanceStore();
+
+  const [refreshing, setRefreshing] = useState(false);
+  const [selectedPrediction, setSelectedPrediction] = useState<MaintenancePrediction | null>(null);
+  const [showShopsModal, setShowShopsModal] = useState(false);
+  const [showTruckFaxModal, setShowTruckFaxModal] = useState(false);
+
+  useEffect(() => {
+    // Start simulation on component mount
+    if (!isSimulating) {
+      startSimulation();
+    }
+    
+    // Cleanup on unmount
+    return () => {
+      stopSimulation();
+    };
+  }, []);
+
+  const toggleSimulation = () => {
+    if (isSimulating) {
+      stopSimulation();
+    } else {
+      startSimulation();
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await runPredictiveAnalysis();
+    setRefreshing(false);
+  };
+
+  const handlePredictionPress = (prediction: MaintenancePrediction) => {
+    setSelectedPrediction(prediction);
+  };
+
+  const handleFindShops = async () => {
+    setShowShopsModal(true);
+    if (nearbyShops.length === 0) {
+      await findNearbyShops();
+    }
+  };
+
+  const handleCallShop = (phone: string) => {
+    Alert.alert(
+      'Call Shop',
+      `Would you like to call ${phone}?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Call', onPress: () => console.log('Calling:', phone) }
+      ]
+    );
+  };
+
+  const renderPredictionModal = () => {
+    if (!selectedPrediction) return null;
+
+    return (
+      <Modal
+        visible={!!selectedPrediction}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setSelectedPrediction(null)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>{selectedPrediction.component}</Text>
+            <TouchableOpacity
+              onPress={() => setSelectedPrediction(null)}
+              style={styles.closeButton}
+            >
+              <X size={24} color={colors.text.secondary} />
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView style={styles.modalContent}>
+            <View style={styles.predictionDetails}>
+              <View style={styles.severityBadge}>
+                <AlertTriangle 
+                  size={16} 
+                  color={selectedPrediction.severity === 'high' ? colors.status.error : 
+                         selectedPrediction.severity === 'medium' ? colors.status.warning : 
+                         colors.status.success} 
+                />
+                <Text style={[styles.severityText, {
+                  color: selectedPrediction.severity === 'high' ? colors.status.error : 
+                         selectedPrediction.severity === 'medium' ? colors.status.warning : 
+                         colors.status.success
+                }]}>
+                  {selectedPrediction.severity.toUpperCase()} PRIORITY
+                </Text>
+              </View>
+
+              <Text style={styles.predictionDescription}>
+                {selectedPrediction.description}
+              </Text>
+
+              <View style={styles.predictionStats}>
+                <View style={styles.statItem}>
+                  <Clock size={16} color={colors.text.secondary} />
+                  <Text style={styles.statLabel}>Estimated Time</Text>
+                  <Text style={styles.statValue}>{selectedPrediction.estimatedMiles} miles</Text>
+                </View>
+
+                <View style={styles.statItem}>
+                  <TrendingUp size={16} color={colors.text.secondary} />
+                  <Text style={styles.statLabel}>Confidence</Text>
+                  <Text style={styles.statValue}>{Math.round(selectedPrediction.confidence * 100)}%</Text>
+                </View>
+              </View>
+
+              <View style={styles.recommendationsSection}>
+                <Text style={styles.sectionTitle}>Recommendations</Text>
+                {selectedPrediction.recommendations.map((rec, index) => (
+                  <View key={index} style={styles.recommendationItem}>
+                    <CheckCircle size={16} color={colors.primary} />
+                    <Text style={styles.recommendationText}>{rec}</Text>
+                  </View>
+                ))}
+              </View>
+
+              <TouchableOpacity
+                style={styles.findShopsButton}
+                onPress={() => {
+                  setSelectedPrediction(null);
+                  handleFindShops();
+                }}
+              >
+                <MapPin size={20} color={colors.white} />
+                <Text style={styles.findShopsButtonText}>Find Certified Shops</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </View>
+      </Modal>
+    );
+  };
+
+  const renderShopsModal = () => (
+    <Modal
+      visible={showShopsModal}
+      animationType="slide"
+      presentationStyle="pageSheet"
+      onRequestClose={() => setShowShopsModal(false)}
+    >
+      <View style={styles.modalContainer}>
+        <View style={styles.modalHeader}>
+          <Text style={styles.modalTitle}>Nearby Repair Shops</Text>
+          <TouchableOpacity
+            onPress={() => setShowShopsModal(false)}
+            style={styles.closeButton}
+          >
+            <X size={24} color={colors.text.secondary} />
+          </TouchableOpacity>
+        </View>
+
+        <ScrollView style={styles.modalContent}>
+          {isLoadingShops ? (
+            <View style={styles.loadingContainer}>
+              <Activity size={24} color={colors.primary} />
+              <Text style={styles.loadingText}>Finding nearby shops...</Text>
+            </View>
+          ) : (
+            nearbyShops.map((shop) => (
+              <View key={shop.id} style={styles.shopCard}>
+                <View style={styles.shopHeader}>
+                  <Text style={styles.shopName}>{shop.name}</Text>
+                  <View style={styles.ratingContainer}>
+                    <Star size={16} color={colors.status.warning} />
+                    <Text style={styles.rating}>{shop.rating}</Text>
+                  </View>
+                </View>
+
+                <Text style={styles.shopAddress}>{shop.address}</Text>
+                <Text style={styles.shopDistance}>{shop.distance} miles away</Text>
+
+                <View style={styles.shopSpecialties}>
+                  {shop.specialties.map((specialty, index) => (
+                    <View key={index} style={styles.specialtyTag}>
+                      <Text style={styles.specialtyText}>{specialty}</Text>
+                    </View>
+                  ))}
+                </View>
+
+                <View style={styles.shopActions}>
+                  <TouchableOpacity
+                    style={styles.callButton}
+                    onPress={() => handleCallShop(shop.phone)}
+                  >
+                    <Phone size={16} color={colors.white} />
+                    <Text style={styles.callButtonText}>Call</Text>
+                  </TouchableOpacity>
+
+                  {shop.truckFaxCertified && (
+                    <View style={styles.certifiedBadge}>
+                      <Shield size={16} color={colors.primary} />
+                      <Text style={styles.certifiedText}>TruckFax Certified</Text>
+                    </View>
+                  )}
+                </View>
+              </View>
+            ))
+          )}
+        </ScrollView>
+      </View>
+    </Modal>
+  );
+
+  return (
+    <>
+      <Stack.Screen 
+        options={{ 
+          title: 'Predictive Maintenance',
+          headerRight: () => (
+            <View style={styles.headerActions}>
+              <TouchableOpacity
+                onPress={() => setShowTruckFaxModal(true)}
+                style={styles.headerButton}
+              >
+                <Database size={20} color={truckFaxEnabled ? colors.primary : colors.text.secondary} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={toggleSimulation}
+                style={styles.headerButton}
+              >
+                <Zap size={20} color={isSimulating ? colors.status.success : colors.text.secondary} />
+              </TouchableOpacity>
+            </View>
+          )
+        }} 
+      />
+
+      <ScrollView
+        style={styles.container}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        {/* Vehicle Health Dashboard */}
+        <VehicleHealthDashboard />
+
+        {/* Active Alerts */}
+        {alerts.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Active Alerts</Text>
+            {alerts.map((alert) => (
+              <MaintenanceAlertCard
+                key={alert.id}
+                alert={alert}
+                onDismiss={() => dismissAlert(alert.id)}
+              />
+            ))}
+          </View>
+        )}
+
+        {/* Predictive Analysis */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Predictive Analysis</Text>
+            {lastAnalysis && (
+              <Text style={styles.lastAnalysis}>
+                Last updated: {new Date(lastAnalysis).toLocaleTimeString()}
+              </Text>
+            )}
+          </View>
+
+          {isAnalyzing ? (
+            <View style={styles.loadingContainer}>
+              <Activity size={24} color={colors.primary} />
+              <Text style={styles.loadingText}>Analyzing vehicle data...</Text>
+            </View>
+          ) : predictions.length > 0 ? (
+            predictions.map((prediction) => (
+              <PredictiveMaintenanceCard
+                key={prediction.id}
+                prediction={prediction}
+                onPress={() => handlePredictionPress(prediction)}
+              />
+            ))
+          ) : (
+            <View style={styles.noPredictionsContainer}>
+              <CheckCircle size={48} color={colors.status.success} />
+              <Text style={styles.noPredictionsTitle}>All Systems Healthy</Text>
+              <Text style={styles.noPredictionsText}>
+                No maintenance issues predicted in the near future
+              </Text>
+            </View>
+          )}
+        </View>
+
+        {/* Quick Actions */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Quick Actions</Text>
+          
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={handleFindShops}
+          >
+            <MapPin size={20} color={colors.primary} />
+            <Text style={styles.actionButtonText}>Find Nearby Shops</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() => runPredictiveAnalysis()}
+            disabled={isAnalyzing}
+          >
+            <TrendingUp size={20} color={colors.primary} />
+            <Text style={styles.actionButtonText}>Run Analysis</Text>
+          </TouchableOpacity>
+
+          {truckFaxEnabled && (
+            <TouchableOpacity
+              style={styles.actionButton}
+              onPress={() => findTruckFaxCertifiedShops()}
+            >
+              <Shield size={20} color={colors.primary} />
+              <Text style={styles.actionButtonText}>Find TruckFax Certified Shops</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </ScrollView>
+
+      {renderPredictionModal()}
+      {renderShopsModal()}
+      
+      <TruckFaxIntegration
+        visible={showTruckFaxModal}
+        onClose={() => setShowTruckFaxModal(false)}
+      />
+    </>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background.primary,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  headerButton: {
+    padding: 8,
+  },
+  section: {
+    padding: 16,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.text.primary,
+  },
+  lastAnalysis: {
+    fontSize: 12,
+    color: colors.text.secondary,
+  },
+  loadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+    gap: 12,
+  },
+  loadingText: {
+    fontSize: 16,
+    color: colors.text.secondary,
+  },
+  noPredictionsContainer: {
+    alignItems: 'center',
+    padding: 32,
+  },
+  noPredictionsTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.text.primary,
+    marginTop: 16,
+  },
+  noPredictionsText: {
+    fontSize: 14,
+    color: colors.text.secondary,
+    textAlign: 'center',
+    marginTop: 8,
+  },
+  actionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.background.secondary,
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+    gap: 12,
+  },
+  actionButtonText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: colors.text.primary,
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: colors.background.primary,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.text.primary,
+  },
+  closeButton: {
+    padding: 8,
+  },
+  modalContent: {
+    flex: 1,
+  },
+  predictionDetails: {
+    padding: 16,
+  },
+  severityBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    backgroundColor: colors.background.secondary,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    gap: 6,
+    marginBottom: 16,
+  },
+  severityText: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  predictionDescription: {
+    fontSize: 16,
+    color: colors.text.primary,
+    lineHeight: 24,
+    marginBottom: 24,
+  },
+  predictionStats: {
+    flexDirection: 'row',
+    gap: 24,
+    marginBottom: 24,
+  },
+  statItem: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 8,
+  },
+  statLabel: {
+    fontSize: 12,
+    color: colors.text.secondary,
+  },
+  statValue: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text.primary,
+  },
+  recommendationsSection: {
+    marginBottom: 24,
+  },
+  recommendationItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: 12,
+    marginBottom: 12,
+  },
+  recommendationText: {
+    flex: 1,
+    fontSize: 14,
+    color: colors.text.primary,
+    lineHeight: 20,
+  },
+  findShopsButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primary,
+    padding: 16,
+    borderRadius: 12,
+    gap: 8,
+  },
+  findShopsButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.white,
+  },
+  shopCard: {
+    backgroundColor: colors.background.secondary,
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 16,
+  },
+  shopHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  shopName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text.primary,
+    flex: 1,
+  },
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  rating: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.text.primary,
+  },
+  shopAddress: {
+    fontSize: 14,
+    color: colors.text.secondary,
+    marginBottom: 4,
+  },
+  shopDistance: {
+    fontSize: 12,
+    color: colors.text.secondary,
+    marginBottom: 12,
+  },
+  shopSpecialties: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 16,
+  },
+  specialtyTag: {
+    backgroundColor: colors.background.primary,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  specialtyText: {
+    fontSize: 12,
+    color: colors.text.secondary,
+  },
+  shopActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  callButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.primary,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+    gap: 6,
+  },
+  callButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.white,
+  },
+  certifiedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  certifiedText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: colors.primary,
+  },
+});
+
+export default MaintenancePage;
