@@ -687,3 +687,142 @@ export interface TruckFaxInsights {
     severity: 'high' | 'medium' | 'low';
   }[];
 }
+
+// Google Maps Route Optimization Types
+export interface RouteWaypoint {
+  id: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  type: 'pickup' | 'delivery' | 'fuel' | 'rest' | 'weigh_station';
+  timeWindow?: {
+    start: string;
+    end: string;
+  };
+  serviceTime?: number; // minutes
+  priority?: 'high' | 'medium' | 'low';
+  notes?: string;
+}
+
+export interface OptimizedRoute {
+  id: string;
+  waypoints: RouteWaypoint[];
+  totalDistance: number; // miles
+  totalDuration: number; // minutes
+  estimatedFuelCost: number;
+  tollCosts: number;
+  routePolyline: string;
+  alternativeRoutes?: OptimizedRoute[];
+  trafficConditions: 'light' | 'moderate' | 'heavy';
+  weatherAlerts: WeatherAlert[];
+  truckRestrictions: TruckRestriction[];
+  optimizationScore: number; // 0-100
+  createdAt: string;
+  lastUpdated: string;
+}
+
+export interface TruckRestriction {
+  type: 'height' | 'weight' | 'length' | 'hazmat' | 'no_trucks';
+  value?: number;
+  description: string;
+  location: {
+    latitude: number;
+    longitude: number;
+    address: string;
+  };
+  severity: 'warning' | 'restriction' | 'prohibited';
+}
+
+export interface WeatherAlert {
+  id: string;
+  type: 'snow' | 'ice' | 'rain' | 'wind' | 'fog' | 'extreme_temp';
+  severity: 'minor' | 'moderate' | 'severe' | 'extreme';
+  description: string;
+  location: {
+    latitude: number;
+    longitude: number;
+    address: string;
+  };
+  startTime: string;
+  endTime: string;
+  impact: 'low' | 'medium' | 'high';
+}
+
+export interface RouteOptimizationPreferences {
+  prioritizeTime: boolean;
+  prioritizeFuel: boolean;
+  avoidTolls: boolean;
+  avoidHighways: boolean;
+  preferTruckRoutes: boolean;
+  maxDrivingHours: number;
+  requiredBreakDuration: number; // minutes
+  fuelTankCapacity: number; // gallons
+  mpg: number;
+  truckDimensions: {
+    height: number; // feet
+    width: number; // feet
+    length: number; // feet
+    weight: number; // pounds
+  };
+  hazmatEndorsement: boolean;
+}
+
+export interface TrafficIncident {
+  id: string;
+  type: 'accident' | 'construction' | 'road_closure' | 'weather' | 'event';
+  severity: 'minor' | 'moderate' | 'major';
+  description: string;
+  location: {
+    latitude: number;
+    longitude: number;
+    address: string;
+  };
+  estimatedDelay: number; // minutes
+  startTime: string;
+  estimatedEndTime?: string;
+  alternativeRoute?: string;
+}
+
+export interface FuelStop {
+  id: string;
+  name: string;
+  brand: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  currentPrice: number;
+  amenities: string[];
+  truckParking: boolean;
+  showers: boolean;
+  restaurant: boolean;
+  distance: number; // miles from current location
+  detourTime: number; // additional minutes
+  rating: number;
+  reviewCount: number;
+}
+
+export interface RouteAnalytics {
+  routeId: string;
+  actualDistance: number;
+  actualDuration: number;
+  fuelConsumed: number;
+  tollsPaid: number;
+  delaysEncountered: TrafficIncident[];
+  fuelStopsUsed: FuelStop[];
+  complianceIssues: string[];
+  driverFeedback: {
+    rating: number;
+    comments: string;
+  };
+  accuracyScore: number; // how accurate the prediction was
+  completedAt: string;
+}
+
+export interface GoogleMapsConfig {
+  apiKey: string;
+  enableTraffic: boolean;
+  enableWeather: boolean;
+  enableTruckRestrictions: boolean;
+  updateInterval: number; // minutes
+  maxAlternativeRoutes: number;
+}
