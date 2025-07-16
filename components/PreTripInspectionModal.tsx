@@ -83,23 +83,27 @@ export default function PreTripInspectionModal({
   const handleNotesChange = (itemId: string, text: string) => {
     setNotes(prev => ({ ...prev, [itemId]: text }));
     const currentStatus = getItemStatus(itemId);
-    updateInspectionItem(
-      itemId, 
-      currentStatus, 
-      text, 
-      defectDescriptions[itemId] || ''
-    );
+    if (currentStatus) {
+      updateInspectionItem(
+        itemId, 
+        currentStatus, 
+        text, 
+        defectDescriptions[itemId] || ''
+      );
+    }
   };
   
   const handleDefectDescriptionChange = (itemId: string, text: string) => {
     setDefectDescriptions(prev => ({ ...prev, [itemId]: text }));
     const currentStatus = getItemStatus(itemId);
-    updateInspectionItem(
-      itemId, 
-      currentStatus, 
-      notes[itemId] || '', 
-      text
-    );
+    if (currentStatus) {
+      updateInspectionItem(
+        itemId, 
+        currentStatus, 
+        notes[itemId] || '', 
+        text
+      );
+    }
   };
   
   // Check if current category is complete
@@ -316,7 +320,7 @@ export default function PreTripInspectionModal({
         {icon}
         <Text style={[
           styles.statusButtonText,
-          isSelected && { color: colors.text }
+          isSelected && { color: colors.text.primary }
         ]}>
           {label}
         </Text>
@@ -349,19 +353,19 @@ export default function PreTripInspectionModal({
           {renderStatusButton(
             item.id, 
             'Pass', 
-            <CheckCircle size={16} color={getItemStatus(item.id) === 'Pass' ? colors.text : colors.secondary} />, 
+            <CheckCircle size={16} color={getItemStatus(item.id) === 'Pass' ? colors.text.primary : colors.secondary} />, 
             'Pass'
           )}
           {renderStatusButton(
             item.id, 
             'Defect', 
-            <AlertTriangle size={16} color={getItemStatus(item.id) === 'Defect' ? colors.text : colors.warning} />, 
+            <AlertTriangle size={16} color={getItemStatus(item.id) === 'Defect' ? colors.text.primary : colors.warning} />, 
             'Defect'
           )}
           {renderStatusButton(
             item.id, 
             'Fail', 
-            <XCircle size={16} color={getItemStatus(item.id) === 'Fail' ? colors.text : colors.danger} />, 
+            <XCircle size={16} color={getItemStatus(item.id) === 'Fail' ? colors.text.primary : colors.danger} />, 
             'Fail'
           )}
         </View>
@@ -407,7 +411,7 @@ export default function PreTripInspectionModal({
             </View>
           </View>
           <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
-            <X size={24} color={colors.text} />
+            <X size={24} color={colors.text.primary} />
           </TouchableOpacity>
         </View>
         
@@ -473,7 +477,7 @@ export default function PreTripInspectionModal({
                 ]}
               >
                 {isCategoryComplete(index) ? (
-                  <CheckCircle size={12} color={colors.text} />
+                  <CheckCircle size={12} color={colors.text.primary} />
                 ) : index > activeCategory && !isCategoryComplete(index - 1) ? (
                   <Lock size={10} color={colors.textSecondary} />
                 ) : (
@@ -515,7 +519,7 @@ export default function PreTripInspectionModal({
                 onPress={handlePreviousCategory}
                 disabled={!canGoBack()}
               >
-                <ChevronLeft size={20} color={canGoBack() ? colors.text : colors.textSecondary} />
+                <ChevronLeft size={20} color={canGoBack() ? colors.text.primary : colors.text.secondary} />
                 <Text style={[
                   styles.navButtonText,
                   !canGoBack() && styles.disabledNavButtonText
@@ -535,7 +539,7 @@ export default function PreTripInspectionModal({
                   <Text style={styles.navButtonText}>
                     Next Category
                   </Text>
-                  <ChevronRight size={20} color={colors.text} />
+                  <ChevronRight size={20} color={colors.text.primary} />
                 </TouchableOpacity>
               ) : (
                 <TouchableOpacity
@@ -548,7 +552,7 @@ export default function PreTripInspectionModal({
                   onPress={handleComplete}
                   disabled={!canCompleteInspection()}
                 >
-                  <User size={20} color={colors.text} />
+                  <User size={20} color={colors.text.primary} />
                   <Text style={[
                     styles.navButtonText,
                     !canCompleteInspection() && styles.disabledNavButtonText
@@ -595,7 +599,7 @@ export default function PreTripInspectionModal({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: colors.background.primary,
   },
   header: {
     flexDirection: 'row',
@@ -614,12 +618,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
     marginLeft: 8,
   },
   subtitle: {
     fontSize: 12,
-    color: colors.textSecondary,
+    color: colors.text.secondary,
     marginLeft: 8,
     marginTop: 2,
   },
@@ -629,7 +633,7 @@ const styles = StyleSheet.create({
   progressContainer: {
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: colors.background.secondary,
   },
   progressInfo: {
     flexDirection: 'row',
@@ -638,7 +642,7 @@ const styles = StyleSheet.create({
   },
   progressText: {
     fontSize: 14,
-    color: colors.textSecondary,
+    color: colors.text.secondary,
   },
   progressPercentage: {
     fontSize: 14,
@@ -664,7 +668,7 @@ const styles = StyleSheet.create({
   },
   progressHint: {
     fontSize: 12,
-    color: colors.textSecondary,
+    color: colors.text.secondary,
     textAlign: 'center',
     marginTop: 4,
     fontStyle: 'italic',
@@ -674,7 +678,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: colors.background.secondary,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
@@ -682,10 +686,10 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 8,
     fontSize: 16,
-    color: colors.text,
+    color: colors.text.primary,
   },
   categoryTabs: {
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: colors.background.secondary,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
@@ -700,7 +704,7 @@ const styles = StyleSheet.create({
   },
   categoryTabText: {
     fontSize: 14,
-    color: colors.textSecondary,
+    color: colors.text.secondary,
   },
   activeCategoryTabText: {
     color: colors.primaryLight,
@@ -715,11 +719,11 @@ const styles = StyleSheet.create({
   categoryTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
     marginBottom: 16,
   },
   inspectionItem: {
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: colors.background.secondary,
     borderRadius: 12,
     padding: 16,
     marginBottom: 16,
@@ -747,7 +751,7 @@ const styles = StyleSheet.create({
   itemLabel: {
     fontSize: 16,
     fontWeight: '500',
-    color: colors.text,
+    color: colors.text.primary,
     marginBottom: 4,
   },
   requiredText: {
@@ -776,22 +780,22 @@ const styles = StyleSheet.create({
   },
   statusButtonText: {
     fontSize: 14,
-    color: colors.textSecondary,
+    color: colors.text.secondary,
   },
   defectInput: {
-    backgroundColor: colors.background,
+    backgroundColor: colors.background.primary,
     borderRadius: 8,
     padding: 12,
     marginBottom: 8,
-    color: colors.text,
+    color: colors.text.primary,
     minHeight: 60,
     textAlignVertical: 'top',
   },
   notesInput: {
-    backgroundColor: colors.background,
+    backgroundColor: colors.background.primary,
     borderRadius: 8,
     padding: 12,
-    color: colors.text,
+    color: colors.text.primary,
     minHeight: 40,
     textAlignVertical: 'top',
   },
@@ -831,10 +835,10 @@ const styles = StyleSheet.create({
   completeButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
   },
   stepNavigation: {
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: colors.background.secondary,
     padding: 16,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
@@ -851,7 +855,7 @@ const styles = StyleSheet.create({
   stepSubtitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: colors.text,
+    color: colors.text.primary,
     marginTop: 4,
   },
   stepProgress: {
@@ -880,7 +884,7 @@ const styles = StyleSheet.create({
   stepNumber: {
     fontSize: 12,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
   },
   bypassWarning: {
     flexDirection: 'row',
@@ -903,7 +907,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   categoryProgress: {
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: colors.background.secondary,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
@@ -930,7 +934,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   backButton: {
-    backgroundColor: colors.backgroundLight,
+    backgroundColor: colors.background.secondary,
     borderWidth: 1,
     borderColor: colors.border,
   },
@@ -947,10 +951,10 @@ const styles = StyleSheet.create({
   navButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
   },
   disabledNavButtonText: {
-    color: colors.textSecondary,
+    color: colors.text.secondary,
   },
   hardStopNotice: {
     flexDirection: 'row',
