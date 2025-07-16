@@ -54,9 +54,6 @@ export const DrivewyzeAnalyticsCard: React.FC<DrivewyzeAnalyticsCardProps> = ({ 
             <Text style={styles.statValue}>{analytics.deniedBypasses}</Text>
           </View>
           <Text style={styles.statLabel}>Denied Bypasses</Text>
-          <Text style={styles.statSubtext}>
-            {analytics.totalBypassRequests} total requests
-          </Text>
         </View>
 
         <View style={styles.statCard}>
@@ -65,20 +62,14 @@ export const DrivewyzeAnalyticsCard: React.FC<DrivewyzeAnalyticsCardProps> = ({ 
             <Text style={styles.statValue}>{formatTime(analytics.timeSaved)}</Text>
           </View>
           <Text style={styles.statLabel}>Time Saved</Text>
-          <Text style={styles.statSubtext}>
-            Avg {formatTime(Math.floor(analytics.timeSaved / analytics.approvedBypasses))} per bypass
-          </Text>
         </View>
 
         <View style={styles.statCard}>
           <View style={styles.statHeader}>
-            <Fuel size={20} color={colors.warning} />
-            <Text style={styles.statValue}>{analytics.fuelSaved.toFixed(1)}</Text>
+            <Fuel size={20} color={colors.success} />
+            <Text style={styles.statValue}>{analytics.fuelSaved.toFixed(1)} gal</Text>
           </View>
-          <Text style={styles.statLabel}>Gallons Saved</Text>
-          <Text style={styles.statSubtext}>
-            Fuel efficiency improved
-          </Text>
+          <Text style={styles.statLabel}>Fuel Saved</Text>
         </View>
 
         <View style={styles.statCard}>
@@ -86,45 +77,21 @@ export const DrivewyzeAnalyticsCard: React.FC<DrivewyzeAnalyticsCardProps> = ({ 
             <DollarSign size={20} color={colors.success} />
             <Text style={styles.statValue}>{formatCurrency(analytics.costSaved)}</Text>
           </View>
-          <Text style={styles.statLabel}>Cost Savings</Text>
-          <Text style={styles.statSubtext}>
-            Fuel + time savings
-          </Text>
-        </View>
-
-        <View style={styles.statCard}>
-          <View style={styles.statHeader}>
-            <TrendingUp size={20} color={colors.primary} />
-            <Text style={styles.statValue}>{analytics.complianceScore}%</Text>
-          </View>
-          <Text style={styles.statLabel}>Compliance Score</Text>
-          <Text style={styles.statSubtext}>
-            DOT compliance rating
-          </Text>
+          <Text style={styles.statLabel}>Cost Saved</Text>
         </View>
       </View>
 
-      {analytics.monthlyStats && analytics.monthlyStats.length > 0 && (
-        <View style={styles.monthlySection}>
-          <Text style={styles.sectionTitle}>Monthly Breakdown</Text>
-          {analytics.monthlyStats.map((month, index) => (
-            <View key={index} style={styles.monthlyRow}>
-              <Text style={styles.monthLabel}>{month.month}</Text>
-              <View style={styles.monthlyStats}>
-                <Text style={styles.monthStat}>{month.bypasses} bypasses</Text>
-                <Text style={styles.monthStat}>{formatTime(month.timeSaved)}</Text>
-                <Text style={styles.monthStat}>{formatCurrency(month.costSaved)}</Text>
-              </View>
-            </View>
-          ))}
-        </View>
-      )}
-
-      <View style={styles.footer}>
-        <Text style={styles.lastUpdated}>
-          Last updated: {new Date(analytics.lastUpdated).toLocaleDateString()}
+      <View style={styles.complianceCard}>
+        <Text style={styles.complianceScore}>{analytics.complianceScore}%</Text>
+        <Text style={styles.complianceLabel}>Compliance Score</Text>
+        <Text style={styles.complianceText}>
+          Higher scores improve bypass approval rates
         </Text>
       </View>
+
+      <Text style={styles.lastUpdated}>
+        Last updated: {new Date(analytics.lastUpdated).toLocaleDateString()}
+      </Text>
     </View>
   );
 };
@@ -135,100 +102,91 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     marginHorizontal: 16,
-    marginBottom: 12,
-    shadowColor: colors.text.primary,
+    marginBottom: 20,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3,
+    elevation: 2,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 16,
+    gap: 8,
   },
   title: {
     fontSize: 18,
     fontWeight: '600',
     color: colors.text.primary,
-    marginLeft: 12,
   },
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    justifyContent: 'space-between',
     marginBottom: 20,
+    gap: 12,
   },
   statCard: {
-    backgroundColor: colors.background.secondary,
+    backgroundColor: colors.background.primary,
     borderRadius: 8,
     padding: 12,
-    flex: 1,
-    minWidth: '45%',
+    width: '48%', // Adjust based on spacing and number of items per row
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   statHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: 8,
+    gap: 6,
+    marginBottom: 4,
   },
   statValue: {
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 16,
+    fontWeight: '600',
     color: colors.text.primary,
   },
   statLabel: {
-    fontSize: 13,
+    fontSize: 12,
+    color: colors.text.secondary,
+    marginTop: 4,
+  },
+  statSubtext: {
+    fontSize: 11,
+    color: colors.text.tertiary,
+    marginTop: 2,
+  },
+  complianceCard: {
+    backgroundColor: colors.primary + '10', // Adding transparency to primary color
+    borderRadius: 8,
+    padding: 16,
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  complianceScore: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: colors.primary,
+    marginBottom: 4,
+  },
+  complianceLabel: {
+    fontSize: 14,
     fontWeight: '500',
     color: colors.text.primary,
     marginBottom: 4,
   },
-  statSubtext: {
-    fontSize: 11,
-    color: colors.text.secondary,
-  },
-  monthlySection: {
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    paddingTop: 16,
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: colors.text.primary,
-    marginBottom: 12,
-  },
-  monthlyRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  monthLabel: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: colors.text.primary,
-    flex: 1,
-  },
-  monthlyStats: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  monthStat: {
+  complianceText: {
     fontSize: 12,
     color: colors.text.secondary,
-    minWidth: 60,
-    textAlign: 'right',
-  },
-  footer: {
-    alignItems: 'center',
+    textAlign: 'center',
   },
   lastUpdated: {
     fontSize: 12,
-    color: colors.text.secondary,
-    fontStyle: 'italic',
+    color: colors.text.tertiary,
+    textAlign: 'center',
+    marginTop: 8,
   },
 });
