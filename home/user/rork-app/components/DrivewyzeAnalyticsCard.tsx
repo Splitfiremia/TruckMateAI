@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { TrendingUp, Clock, Fuel, DollarSign, CheckCircle, XCircle } from 'lucide-react-native';
-import { DrivewyzeAnalytics } from '@/types';
+import type { DrivewyzeAnalytics } from '@/types';
 import { colors } from '@/constants/colors';
 
 interface DrivewyzeAnalyticsCardProps {
@@ -55,47 +55,30 @@ export const DrivewyzeAnalyticsCard: React.FC<DrivewyzeAnalyticsCardProps> = ({ 
           </View>
           <Text style={styles.statLabel}>Denied Bypasses</Text>
         </View>
-      </View>
 
-      <View style={styles.divider} />
-
-      <View style={styles.savingsSection}>
-        <Text style={styles.sectionTitle}>Estimated Savings</Text>
-        
-        <View style={styles.savingsGrid}>
-          <View style={styles.savingsItem}>
-            <Clock size={18} color={colors.primary} />
-            <View>
-              <Text style={styles.savingsValue}>{formatTime(analytics.timeSaved)}</Text>
-              <Text style={styles.savingsLabel}>Time Saved</Text>
-            </View>
+        <View style={styles.statCard}>
+          <View style={styles.statHeader}>
+            <Clock size={20} color={colors.info} />
+            <Text style={styles.statValue}>{formatTime(analytics.timeSaved)}</Text>
           </View>
-          
-          <View style={styles.savingsItem}>
-            <Fuel size={18} color={colors.primary} />
-            <View>
-              <Text style={styles.savingsValue}>{analytics.fuelSaved.toFixed(1)} gal</Text>
-              <Text style={styles.savingsLabel}>Fuel Saved</Text>
-            </View>
-          </View>
-          
-          <View style={styles.savingsItem}>
-            <DollarSign size={18} color={colors.primary} />
-            <View>
-              <Text style={styles.savingsValue}>{formatCurrency(analytics.costSaved)}</Text>
-              <Text style={styles.savingsLabel}>Cost Saved</Text>
-            </View>
-          </View>
+          <Text style={styles.statLabel}>Time Saved</Text>
         </View>
-      </View>
 
-      <View style={styles.footer}>
-        <Text style={styles.complianceScore}>
-          Compliance Score: <Text style={{ color: colors.success }}>{analytics.complianceScore}%</Text>
-        </Text>
-        <Text style={styles.lastUpdated}>
-          Last updated: {new Date(analytics.lastUpdated).toLocaleString()}
-        </Text>
+        <View style={styles.statCard}>
+          <View style={styles.statHeader}>
+            <Fuel size={20} color={colors.warning} />
+            <Text style={styles.statValue}>{analytics.fuelSaved.toFixed(1)} gal</Text>
+          </View>
+          <Text style={styles.statLabel}>Fuel Saved</Text>
+        </View>
+
+        <View style={styles.statCard}>
+          <View style={styles.statHeader}>
+            <DollarSign size={20} color={colors.success} />
+            <Text style={styles.statValue}>{formatCurrency(analytics.costSaved)}</Text>
+          </View>
+          <Text style={styles.statLabel}>Cost Saved</Text>
+        </View>
       </View>
     </View>
   );
@@ -103,14 +86,10 @@ export const DrivewyzeAnalyticsCard: React.FC<DrivewyzeAnalyticsCardProps> = ({ 
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
+    backgroundColor: '#fff',
     borderRadius: 8,
-    backgroundColor: '#ffffff',
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    padding: 16,
+    marginBottom: 16,
     elevation: 2,
   },
   header: {
@@ -122,82 +101,40 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#333333',
+    color: '#333',
   },
   statsGrid: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
     gap: 12,
-    marginBottom: 16,
   },
   statCard: {
-    flex: 1,
-    padding: 12,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: '#f9f9f9',
     borderRadius: 6,
+    padding: 12,
+    flex: 1,
+    minWidth: 140,
+    marginBottom: 8,
   },
   statHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
     marginBottom: 4,
   },
   statValue: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: '#333333',
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#222',
   },
   statLabel: {
     fontSize: 14,
-    color: '#666666',
+    color: '#666',
+    marginBottom: 2,
   },
   statSubtext: {
     fontSize: 12,
-    color: '#888888',
-    marginTop: 4,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: '#eeeeee',
-    marginVertical: 16,
-  },
-  savingsSection: {
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333333',
-    marginBottom: 12,
-  },
-  savingsGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  savingsItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  savingsValue: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333333',
-  },
-  savingsLabel: {
-    fontSize: 12,
-    color: '#666666',
-  },
-  footer: {
-    marginTop: 8,
-  },
-  complianceScore: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#333333',
-    marginBottom: 4,
-  },
-  lastUpdated: {
-    fontSize: 12,
-    color: '#888888',
+    color: '#888',
   },
 });

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { MapPin, Clock, CheckCircle, XCircle, AlertTriangle, Wrench } from 'lucide-react-native';
-import { DrivewyzeWeighStation } from '@/types';
+import type { DrivewyzeWeighStation } from '@/types';
 import { colors } from '@/constants/colors';
 
 interface DrivewyzeWeighStationCardProps {
@@ -19,31 +19,21 @@ export const DrivewyzeWeighStationCard: React.FC<DrivewyzeWeighStationCardProps>
 }) => {
   const getStatusIcon = () => {
     switch (station.status) {
-      case 'open':
-        return <CheckCircle size={20} color={colors.success} />;
-      case 'closed':
-        return <XCircle size={20} color={colors.danger} />;
-      case 'bypass_available':
-        return <CheckCircle size={20} color={colors.primary} />;
-      case 'maintenance':
-        return <Wrench size={20} color={colors.warning} />;
-      default:
-        return <AlertTriangle size={20} color={colors.warning} />;
+      case 'open': return <CheckCircle size={20} color={colors.success} />;
+      case 'closed': return <XCircle size={20} color={colors.danger} />;
+      case 'bypass_available': return <CheckCircle size={20} color={colors.primary} />;
+      case 'maintenance': return <Wrench size={20} color={colors.warning} />;
+      default: return <AlertTriangle size={20} color={colors.warning} />;
     }
   };
 
   const getStatusColor = () => {
     switch (station.status) {
-      case 'open':
-        return colors.success;
-      case 'closed':
-        return colors.danger;
-      case 'bypass_available':
-        return colors.primary;
-      case 'maintenance':
-        return colors.warning;
-      default:
-        return colors.warning;
+      case 'open': return colors.success;
+      case 'closed': return colors.danger;
+      case 'bypass_available': return colors.primary;
+      case 'maintenance': return colors.warning;
+      default: return colors.warning;
     }
   };
 
@@ -72,40 +62,33 @@ const styles = StyleSheet.create({
   container: {
     padding: 16,
     borderRadius: 8,
-    backgroundColor: '#ffffff',
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    backgroundColor: '#fff',
+    marginBottom: 8,
     elevation: 2,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginBottom: 8,
   },
   title: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '500',
     flex: 1,
-    color: '#333333',
   },
   distance: {
-    fontSize: 14,
-    color: '#666666',
     marginTop: 4,
+    color: '#666',
   },
   bypassButton: {
-    marginTop: 12,
+    marginTop: 8,
     padding: 8,
     backgroundColor: colors.primary,
     borderRadius: 4,
     alignItems: 'center',
   },
   bypassText: {
-    color: '#ffffff',
+    color: '#fff',
     fontWeight: '500',
   },
 });
