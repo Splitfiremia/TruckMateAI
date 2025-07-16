@@ -55,7 +55,7 @@ const MaintenanceSummaryCard: React.FC = () => {
             <Wrench color={colors.primary} size={20} />
             <Text style={styles.title}>AI Maintenance</Text>
           </View>
-          <ChevronRight color={colors.text.secondary} size={16} />
+          <ChevronRight color={colors.textSecondary} size={16} />
         </View>
         <Text style={styles.noDataText}>
           Tap to start AI-powered predictive maintenance analysis
@@ -71,7 +71,7 @@ const MaintenanceSummaryCard: React.FC = () => {
           <Wrench color={colors.primary} size={20} />
           <Text style={styles.title}>AI Maintenance</Text>
         </View>
-        <ChevronRight color={colors.text.secondary} size={16} />
+        <ChevronRight color={colors.textSecondary} size={16} />
       </View>
 
       {isAnalyzing && (
@@ -98,7 +98,7 @@ const MaintenanceSummaryCard: React.FC = () => {
       {criticalAlerts.length > 0 && (
         <View style={styles.alertsSection}>
           <View style={styles.alertHeader}>
-            <AlertTriangle size={16} color={colors.status.error} />
+            <AlertTriangle size={16} color={colors.danger} />
             <Text style={styles.alertText}>
               {criticalAlerts.length} Critical Alert{criticalAlerts.length > 1 ? 's' : ''}
             </Text>
@@ -109,7 +109,7 @@ const MaintenanceSummaryCard: React.FC = () => {
       {upcomingMaintenance.length > 0 && (
         <View style={styles.maintenanceSection}>
           <View style={styles.maintenanceHeader}>
-            <Clock size={16} color={colors.status.warning} />
+            <Clock size={16} color={colors.warning} />
             <Text style={styles.maintenanceText}>
               {upcomingMaintenance.length} Upcoming Maintenance
             </Text>
@@ -128,7 +128,7 @@ const MaintenanceSummaryCard: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.background.secondary,
+    backgroundColor: colors.backgroundSecondary,
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
@@ -147,11 +147,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text.primary,
+    color: colors.text,
   },
   noDataText: {
     fontSize: 14,
-    color: colors.text.secondary,
+    color: colors.textSecondary,
     lineHeight: 20,
   },
   analyzingContainer: {
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
   },
   analyzingText: {
     fontSize: 14,
-    color: colors.text.secondary,
+    color: colors.textSecondary,
   },
   healthSection: {
     marginBottom: 12,
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
   },
   healthLabel: {
     fontSize: 14,
-    color: colors.text.secondary,
+    color: colors.textSecondary,
   },
   healthScore: {
     fontSize: 18,
@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
   alertText: {
     fontSize: 14,
     fontWeight: '500',
-    color: colors.status.error,
+    color: colors.danger,
   },
   maintenanceSection: {
     marginBottom: 12,
@@ -210,11 +210,11 @@ const styles = StyleSheet.create({
   maintenanceText: {
     fontSize: 14,
     fontWeight: '500',
-    color: colors.status.warning,
+    color: colors.warning,
   },
   lastUpdate: {
     fontSize: 12,
-    color: colors.text.secondary,
+    color: colors.textSecondary,
     textAlign: 'right',
   },
 });

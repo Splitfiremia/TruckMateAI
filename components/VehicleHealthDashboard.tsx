@@ -1,1 +1,271 @@
-import React from 'react';\nimport {\n  View,\n  Text,\n  StyleSheet,\n  TouchableOpacity\n} from 'react-native';\nimport {\n  Activity,\n  AlertTriangle,\n  CheckCircle,\n  Clock,\n  TrendingUp,\n  TrendingDown,\n  Minus\n} from 'lucide-react-native';\n\nimport { colors } from '@/constants/colors';\nimport { VehicleHealth } from '@/types';\n\ninterface VehicleHealthDashboardProps {\n  vehicleHealth: VehicleHealth;\n  onSystemPress?: (system: string) => void;\n}\n\nconst VehicleHealthDashboard: React.FC<VehicleHealthDashboardProps> = ({\n  vehicleHealth,\n  onSystemPress\n}) => {\n  const getHealthColor = (score: number) => {\n    if (score >= 85) return colors.secondary;\n    if (score >= 70) return colors.warning;\n    return colors.danger;\n  };\n\n  const getHealthIcon = (score: number) => {\n    if (score >= 85) return CheckCircle;\n    if (score >= 70) return AlertTriangle;\n    return AlertTriangle;\n  };\n\n  const getTrendIcon = (score: number) => {\n    if (score >= 85) return TrendingUp;\n    if (score >= 70) return Minus;\n    return TrendingDown;\n  };\n\n  const getSystemDisplayName = (system: string) => {\n    const names: { [key: string]: string } = {\n      engine: 'Engine',\n      transmission: 'Transmission',\n      brakes: 'Brakes',\n      tires: 'Tires',\n      electrical: 'Electrical',\n      cooling: 'Cooling',\n      fuel: 'Fuel System'\n    };\n    return names[system] || system;\n  };\n\n  const HealthIcon = getHealthIcon(vehicleHealth.overallScore);\n  const TrendIcon = getTrendIcon(vehicleHealth.overallScore);\n  const healthColor = getHealthColor(vehicleHealth.overallScore);\n\n  return (\n    <View style={styles.container}>\n      {/* Overall Health Score */}\n      <View style={styles.overallHealth}>\n        <View style={styles.scoreSection}>\n          <View style={[styles.scoreCircle, { borderColor: healthColor }]}>\n            <Text style={[styles.scoreText, { color: healthColor }]}>\n              {vehicleHealth.overallScore}\n            </Text>\n            <Text style={styles.scoreLabel}>Health</Text>\n          </View>\n          <View style={styles.scoreDetails}>\n            <View style={styles.scoreDetailItem}>\n              <HealthIcon color={healthColor} size={16} />\n              <Text style={styles.scoreDetailText}>\n                {vehicleHealth.overallScore >= 85 ? 'Excellent' :\n                 vehicleHealth.overallScore >= 70 ? 'Good' : 'Needs Attention'}\n              </Text>\n            </View>\n            <View style={styles.scoreDetailItem}>\n              <TrendIcon color={healthColor} size={16} />\n              <Text style={styles.scoreDetailText}>\n                {vehicleHealth.predictedReliability}% Reliability\n              </Text>\n            </View>\n          </View>\n        </View>\n\n        {/* Quick Stats */}\n        <View style={styles.quickStats}>\n          <View style={styles.statItem}>\n            <AlertTriangle color={colors.danger} size={16} />\n            <Text style={styles.statNumber}>{vehicleHealth.criticalIssues}</Text>\n            <Text style={styles.statLabel}>Critical</Text>\n          </View>\n          <View style={styles.statItem}>\n            <Clock color={colors.warning} size={16} />\n            <Text style={styles.statNumber}>{vehicleHealth.upcomingMaintenance}</Text>\n            <Text style={styles.statLabel}>Upcoming</Text>\n          </View>\n          <View style={styles.statItem}>\n            <Activity color={colors.primaryLight} size={16} />\n            <Text style={styles.statNumber}>\n              {Object.values(vehicleHealth.systemHealth).filter(score => score < 70).length}\n            </Text>\n            <Text style={styles.statLabel}>At Risk</Text>\n          </View>\n        </View>\n      </View>\n\n      {/* System Health Grid */}\n      <View style={styles.systemsSection}>\n        <Text style={styles.sectionTitle}>System Health</Text>\n        <View style={styles.systemsGrid}>\n          {Object.entries(vehicleHealth.systemHealth).map(([system, score]) => {\n            const SystemIcon = getHealthIcon(score);\n            const systemColor = getHealthColor(score);\n            \n            return (\n              <TouchableOpacity\n                key={system}\n                style={[styles.systemCard, { borderColor: systemColor }]}\n                onPress={() => onSystemPress?.(system)}\n                activeOpacity={0.7}\n              >\n                <View style={styles.systemHeader}>\n                  <SystemIcon color={systemColor} size={16} />\n                  <Text style={[styles.systemScore, { color: systemColor }]}>\n                    {score}%\n                  </Text>\n                </View>\n                <Text style={styles.systemName}>\n                  {getSystemDisplayName(system)}\n                </Text>\n                <View style={styles.systemBar}>\n                  <View\n                    style={[\n                      styles.systemBarFill,\n                      {\n                        width: `${score}%`,\n                        backgroundColor: systemColor\n                      }\n                    ]}\n                  />\n                </View>\n              </TouchableOpacity>\n            );\n          })}\n        </View>\n      </View>\n\n      {/* Recommended Actions */}\n      {vehicleHealth.recommendedActions.length > 0 && (\n        <View style={styles.actionsSection}>\n          <Text style={styles.sectionTitle}>Recommended Actions</Text>\n          <View style={styles.actionsList}>\n            {vehicleHealth.recommendedActions.slice(0, 3).map((action, index) => (\n              <View key={index} style={styles.actionItem}>\n                <View style={styles.actionBullet} />\n                <Text style={styles.actionText}>{action}</Text>\n              </View>\n            ))}\n          </View>\n        </View>\n      )}\n\n      {/* Last Updated */}\n      <View style={styles.footer}>\n        <Text style={styles.lastUpdated}>\n          Last updated: {new Date(vehicleHealth.lastUpdated).toLocaleString()}\n        </Text>\n      </View>\n    </View>\n  );\n};\n\nconst styles = StyleSheet.create({\n  container: {\n    backgroundColor: colors.card,\n    borderRadius: 12,\n    padding: 16,\n  },\n  overallHealth: {\n    marginBottom: 24,\n  },\n  scoreSection: {\n    flexDirection: 'row',\n    alignItems: 'center',\n    marginBottom: 16,\n  },\n  scoreCircle: {\n    width: 80,\n    height: 80,\n    borderRadius: 40,\n    borderWidth: 3,\n    alignItems: 'center',\n    justifyContent: 'center',\n    marginRight: 20,\n  },\n  scoreText: {\n    fontSize: 24,\n    fontWeight: 'bold',\n  },\n  scoreLabel: {\n    color: colors.textSecondary,\n    fontSize: 10,\n    marginTop: 2,\n  },\n  scoreDetails: {\n    flex: 1,\n  },\n  scoreDetailItem: {\n    flexDirection: 'row',\n    alignItems: 'center',\n    gap: 8,\n    marginBottom: 8,\n  },\n  scoreDetailText: {\n    color: colors.text,\n    fontSize: 14,\n  },\n  quickStats: {\n    flexDirection: 'row',\n    justifyContent: 'space-around',\n    paddingVertical: 16,\n    backgroundColor: colors.backgroundLight,\n    borderRadius: 8,\n  },\n  statItem: {\n    alignItems: 'center',\n    gap: 4,\n  },\n  statNumber: {\n    color: colors.text,\n    fontSize: 18,\n    fontWeight: 'bold',\n  },\n  statLabel: {\n    color: colors.textSecondary,\n    fontSize: 10,\n  },\n  systemsSection: {\n    marginBottom: 24,\n  },\n  sectionTitle: {\n    color: colors.text,\n    fontSize: 16,\n    fontWeight: '600',\n    marginBottom: 12,\n  },\n  systemsGrid: {\n    flexDirection: 'row',\n    flexWrap: 'wrap',\n    gap: 12,\n  },\n  systemCard: {\n    backgroundColor: colors.backgroundLight,\n    borderRadius: 8,\n    padding: 12,\n    width: '47%',\n    borderWidth: 1,\n  },\n  systemHeader: {\n    flexDirection: 'row',\n    justifyContent: 'space-between',\n    alignItems: 'center',\n    marginBottom: 8,\n  },\n  systemScore: {\n    fontSize: 16,\n    fontWeight: 'bold',\n  },\n  systemName: {\n    color: colors.text,\n    fontSize: 12,\n    marginBottom: 8,\n  },\n  systemBar: {\n    height: 4,\n    backgroundColor: colors.border,\n    borderRadius: 2,\n  },\n  systemBarFill: {\n    height: '100%',\n    borderRadius: 2,\n  },\n  actionsSection: {\n    marginBottom: 16,\n  },\n  actionsList: {\n    gap: 8,\n  },\n  actionItem: {\n    flexDirection: 'row',\n    alignItems: 'flex-start',\n    gap: 12,\n  },\n  actionBullet: {\n    width: 6,\n    height: 6,\n    borderRadius: 3,\n    backgroundColor: colors.primaryLight,\n    marginTop: 6,\n  },\n  actionText: {\n    color: colors.text,\n    fontSize: 14,\n    flex: 1,\n    lineHeight: 18,\n  },\n  footer: {\n    borderTopWidth: 1,\n    borderTopColor: colors.border,\n    paddingTop: 12,\n  },\n  lastUpdated: {\n    color: colors.textSecondary,\n    fontSize: 12,\n    textAlign: 'center',\n  },\n});\n\nexport default VehicleHealthDashboard;
+import React from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity
+} from 'react-native';
+import {
+  Activity,
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  TrendingUp,
+  TrendingDown,
+  Minus
+} from 'lucide-react-native';
+
+import { colors } from '@/constants/colors';
+import { VehicleHealth } from '@/types';
+
+interface VehicleHealthDashboardProps {
+  vehicleHealth: VehicleHealth;
+  onSystemPress?: (system: string) => void;
+}
+
+const VehicleHealthDashboard: React.FC<VehicleHealthDashboardProps> = ({
+  vehicleHealth,
+  onSystemPress
+}) => {
+  const getHealthColor = (score: number) => {
+    if (score >= 85) return colors.secondary;
+    if (score >= 70) return colors.warning;
+    return colors.danger;
+  };
+
+  const getHealthIcon = (score: number) => {
+    if (score >= 85) return CheckCircle;
+    if (score >= 70) return AlertTriangle;
+    return AlertTriangle;
+  };
+
+  const getTrendIcon = (score: number) => {
+    if (score >= 85) return TrendingUp;
+    if (score >= 70) return Minus;
+    return TrendingDown;
+  };
+
+  const getSystemDisplayName = (system: string) => {
+    const names: { [key: string]: string } = {
+      engine: 'Engine',
+      transmission: 'Transmission',
+      brakes: 'Brakes',
+      tires: 'Tires',
+      electrical: 'Electrical',
+      cooling: 'Cooling',
+      fuel: 'Fuel System'
+    };
+    return names[system] || system;
+  };
+
+  const HealthIcon = getHealthIcon(vehicleHealth.overallScore);
+  const TrendIcon = getTrendIcon(vehicleHealth.overallScore);
+  const healthColor = getHealthColor(vehicleHealth.overallScore);
+
+  return (
+    <View style={styles.container}>
+      {/* Overall Health Score */}
+      <View style={styles.overallHealth}>
+        <View style={styles.scoreSection}>
+          <View style={[styles.scoreCircle, { borderColor: healthColor }]}>
+            <Text style={[styles.scoreText, { color: healthColor }]}>
+              {vehicleHealth.overallScore}
+            </Text>
+            <Text style={styles.scoreLabel}>Health</Text>
+          </View>
+          <View style={styles.scoreDetails}>
+            <View style={styles.scoreDetailItem}>
+              <HealthIcon color={healthColor} size={16} />
+              <Text style={styles.scoreDetailText}>
+                {vehicleHealth.overallScore >= 85 ? 'Excellent' :
+                 vehicleHealth.overallScore >= 70 ? 'Good' : 'Needs Attention'}
+              </Text>
+            </View>
+            <View style={styles.scoreDetailItem}>
+              <TrendIcon color={healthColor} size={16} />
+              <Text style={styles.scoreDetailText}>
+                {vehicleHealth.predictedReliability}% Reliability
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Quick Stats */}
+        <View style={styles.quickStats}>
+          <View style={styles.statItem}>
+            <AlertTriangle color={colors.danger} size={16} />
+            <Text style={styles.statNumber}>{vehicleHealth.criticalIssues}</Text>
+            <Text style={styles.statLabel}>Critical</Text>
+          </View>
+          <View style={styles.statItem}>
+            <Clock color={colors.warning} size={16} />
+            <Text style={styles.statNumber}>{vehicleHealth.upcomingMaintenance}</Text>
+            <Text style={styles.statLabel}>Upcoming</Text>
+          </View>
+          <View style={styles.statItem}>
+            <Activity color={colors.primaryLight} size={16} />
+            <Text style={styles.statNumber}>
+              {Object.values(vehicleHealth.systemHealth).filter(score => score < 70).length}
+            </Text>
+            <Text style={styles.statLabel}>At Risk</Text>
+          </View>
+        </View>
+      </View>
+
+      {/* System Health Breakdown */}
+      <View style={styles.systemsSection}>
+        <Text style={styles.sectionTitle}>System Health</Text>
+        <View style={styles.systemsList}>
+          {Object.entries(vehicleHealth.systemHealth).map(([system, score]) => {
+            const SystemHealthIcon = getHealthIcon(score);
+            const systemColor = getHealthColor(score);
+            
+            return (
+              <TouchableOpacity
+                key={system}
+                style={styles.systemItem}
+                onPress={() => onSystemPress?.(system)}
+              >
+                <View style={styles.systemInfo}>
+                  <SystemHealthIcon color={systemColor} size={16} />
+                  <Text style={styles.systemName}>
+                    {getSystemDisplayName(system)}
+                  </Text>
+                </View>
+                <View style={styles.systemScore}>
+                  <Text style={[styles.systemScoreText, { color: systemColor }]}>
+                    {score}%
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </View>
+
+      {/* Last Updated */}
+      <Text style={styles.lastUpdated}>
+        Last updated: {new Date(vehicleHealth.lastUpdated).toLocaleString()}
+      </Text>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: colors.white,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: colors.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  overallHealth: {
+    marginBottom: 20,
+  },
+  scoreSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  scoreCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    borderWidth: 3,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  scoreText: {
+    fontSize: 24,
+    fontWeight: '700',
+  },
+  scoreLabel: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    marginTop: 2,
+  },
+  scoreDetails: {
+    flex: 1,
+    gap: 8,
+  },
+  scoreDetailItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  scoreDetailText: {
+    fontSize: 14,
+    color: colors.text,
+    fontWeight: '500',
+  },
+  quickStats: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingVertical: 16,
+    backgroundColor: colors.backgroundSecondary,
+    borderRadius: 12,
+  },
+  statItem: {
+    alignItems: 'center',
+    gap: 4,
+  },
+  statNumber: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.text,
+  },
+  statLabel: {
+    fontSize: 12,
+    color: colors.textSecondary,
+  },
+  systemsSection: {
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text,
+    marginBottom: 12,
+  },
+  systemsList: {
+    gap: 8,
+  },
+  systemItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: colors.backgroundSecondary,
+    borderRadius: 8,
+  },
+  systemInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  systemName: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.text,
+  },
+  systemScore: {
+    alignItems: 'flex-end',
+  },
+  systemScoreText: {
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  lastUpdated: {
+    fontSize: 12,
+    color: colors.textSecondary,
+    textAlign: 'center',
+  },
+});
+
+export default VehicleHealthDashboard;
