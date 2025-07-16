@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,28 +7,8 @@ import {
   Alert,
   Platform,
   Dimensions,
+  ScrollView,
 } from 'react-native';
-
-// Conditionally import react-native-maps only on native platforms
-let MapView: any = null;
-let Marker: any = null;
-let Polyline: any = null;
-let PROVIDER_GOOGLE: any = null;
-let MapViewDirections: any = null;
-
-if (Platform.OS !== 'web') {
-  const maps = require('react-native-maps');
-  MapView = maps.default;
-  Marker = maps.Marker;
-  Polyline = maps.Polyline;
-  PROVIDER_GOOGLE = maps.PROVIDER_GOOGLE;
-  
-  try {
-    MapViewDirections = require('react-native-maps-directions').default;
-  } catch (e) {
-    console.warn('react-native-maps-directions not available');
-  }
-}
 import {
   Navigation,
   MapPin,
@@ -46,9 +26,6 @@ import { RouteWaypoint, OptimizedRoute } from '@/types';
 
 const { width, height } = Dimensions.get('window');
 
-// Mock Google Maps API key - in production, this should be from environment variables
-const GOOGLE_MAPS_API_KEY = 'YOUR_GOOGLE_MAPS_API_KEY';
-
 interface RouteOptimizationMapProps {
   onWaypointPress?: (waypoint: RouteWaypoint) => void;
   onMapPress?: (coordinate: { latitude: number; longitude: number }) => void;
@@ -58,9 +35,6 @@ const RouteOptimizationMap: React.FC<RouteOptimizationMapProps> = ({
   onWaypointPress,
   onMapPress,
 }) => {
-  const mapRef = useRef<any>(null);
-  const [mapReady, setMapReady] = useState(false);
-  
   const {
     currentRoute,
     waypoints,
@@ -79,34 +53,6 @@ const RouteOptimizationMap: React.FC<RouteOptimizationMapProps> = ({
     toggleFuelStopsView,
     toggleWeatherView,
   } = useRouteOptimizationStore();
-
-  // Default region (centered on US)
-  const [region, setRegion] = useState({
-    latitude: 39.8283,
-    longitude: -98.5795,
-    latitudeDelta: 10,
-    longitudeDelta: 10,
-  });
-
-  useEffect(() => {
-    if (waypoints.length > 0 && mapReady) {
-      fitToWaypoints();
-    }
-  }, [waypoints, mapReady]);
-
-  const fitToWaypoints = () => {
-    if (waypoints.length === 0 || !mapRef.current) return;
-
-    const coordinates = waypoints.map(wp => ({
-      latitude: wp.latitude,
-      longitude: wp.longitude,
-    }));
-
-    mapRef.current.fitToCoordinates(coordinates, {
-      edgePadding: { top: 50, right: 50, bottom: 50, left: 50 },
-      animated: true,
-    });
-  };
 
   const handleOptimizeRoute = async () => {
     if (waypoints.length < 2) {
@@ -152,148 +98,137 @@ const RouteOptimizationMap: React.FC<RouteOptimizationMapProps> = ({
     }
   };
 
-  const renderWaypoints = () => {
-    return waypoints.map((waypoint, index) => (
-      <Marker
-        key={waypoint.id}
-        coordinate={{
-          latitude: waypoint.latitude,
-          longitude: waypoint.longitude,
-        }}
-        title={waypoint.address}
-        description={`${waypoint.type} - ${waypoint.notes || ''}`}
-        pinColor={getWaypointColor(waypoint.type)}
-        onPress={() => onWaypointPress?.(waypoint)}
-      >
-        <View style={[
-          styles.customMarker,
-          { backgroundColor: getWaypointColor(waypoint.type) }
-        ]}>
-          <Text style={styles.markerText}>{index + 1}</Text>
-        </View>
-      </Marker>
-    ));
-  };
-
-  const renderFuelStops = () => {
-    if (!showFuelStops) return null;
-
-    return nearbyFuelStops.map((stop) => (
-      <Marker
-        key={stop.id}
-        coordinate={{
-          latitude: stop.latitude,
-          longitude: stop.longitude,
-        }}
-        title={stop.name}
-        description={`$${stop.currentPrice}/gal - ${stop.distance.toFixed(1)} mi`}
-      >
-        <View style={[styles.fuelMarker]}>
-          <Fuel size={16} color={colors.white} />
-        </View>
-      </Marker>
-    ));
-  };
-
-  const renderWeatherAlerts = () => {
-    if (!showWeatherAlerts) return null;
-
-    return weatherAlerts.map((alert) => (
-      <Marker
-        key={alert.id}
-        coordinate={{
-          latitude: alert.location.latitude,
-          longitude: alert.location.longitude,
-        }}
-        title={`Weather Alert: ${alert.type}`}
-        description={alert.description}
-      >
-        <View style={[styles.weatherMarker]}>
-          <Cloud size={16} color={colors.white} />
-        </View>
-      </Marker>
-    ));
-  };
-
-  const renderRoute = () => {
-    if (!currentRoute || waypoints.length < 2 || Platform.OS === 'web') return null;
-
-    const coordinates = waypoints.map(wp => ({
-      latitude: wp.latitude,
-      longitude: wp.longitude,
-    }));
-
-    // Simple polyline for basic route display
-    if (!MapViewDirections) {
-      return (
-        <Polyline
-          coordinates={coordinates}
-          strokeColor={colors.primary}
-          strokeWidth={4}
-        />
-      );
-    }
-
-    // Use MapViewDirections for native platforms when available
-    return (
-      <MapViewDirections
-        origin={coordinates[0]}
-        destination={coordinates[coordinates.length - 1]}
-        waypoints={coordinates.slice(1, -1)}
-        apikey={GOOGLE_MAPS_API_KEY}
-        strokeWidth={4}
-        strokeColor={colors.primary}
-        optimizeWaypoints={true}
-        onStart={(params: any) => {
-          console.log('Route calculation started');
-        }}
-        onReady={(result: any) => {
-          console.log('Route ready:', result);
-        }}
-        onError={(errorMessage: any) => {
-          console.error('Route error:', errorMessage);
-        }}
-      />
-    );
-  };
-
-  // Web fallback component
-  const WebMapFallback = () => (
-    <View style={[styles.map, styles.webFallback]}>
-      <View style={styles.webFallbackContent}>
+  // Web-compatible map fallback component
+  const MapFallback = () => (
+    <View style={[styles.map, styles.mapFallback]}>
+      <View style={styles.mapFallbackContent}>
         <MapPin size={48} color={colors.primary} />
-        <Text style={styles.webFallbackTitle}>Map View</Text>
-        <Text style={styles.webFallbackText}>
-          Interactive maps are not available on web.
+        <Text style={styles.mapFallbackTitle}>Route Optimization</Text>
+        <Text style={styles.mapFallbackText}>
+          Interactive maps are available on mobile devices.
           {waypoints.length > 0 && (
             `\n\nWaypoints (${waypoints.length}):`
           )}
         </Text>
+        <Text style={styles.mapFallbackSubtext}>
+          Use the mobile app for full map functionality.
+        </Text>
+        
         {waypoints.length > 0 && (
-          <View style={styles.waypointsList}>
+          <ScrollView style={styles.waypointsList} showsVerticalScrollIndicator={false}>
             {waypoints.map((waypoint, index) => (
-              <View key={waypoint.id} style={styles.waypointItem}>
-                <Text style={styles.waypointNumber}>{index + 1}</Text>
+              <TouchableOpacity
+                key={waypoint.id}
+                style={styles.waypointItem}
+                onPress={() => onWaypointPress?.(waypoint)}
+              >
+                <View style={[
+                  styles.waypointNumber,
+                  { backgroundColor: getWaypointColor(waypoint.type) }
+                ]}>
+                  <Text style={styles.waypointNumberText}>{index + 1}</Text>
+                </View>
                 <View style={styles.waypointInfo}>
-                  <Text style={styles.waypointAddress}>{waypoint.address}</Text>
-                  <Text style={styles.waypointType}>{waypoint.type}</Text>
+                  <Text style={styles.waypointAddress} numberOfLines={1}>
+                    {waypoint.address}
+                  </Text>
+                  <Text style={styles.waypointType}>
+                    {getWaypointIcon(waypoint.type)} {waypoint.type}
+                  </Text>
+                  {waypoint.notes && (
+                    <Text style={styles.waypointNotes} numberOfLines={1}>
+                      {waypoint.notes}
+                    </Text>
+                  )}
+                </View>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        )}
+        
+        {currentRoute && (
+          <View style={styles.routeInfo}>
+            <Text style={styles.routeTitle}>Route Summary</Text>
+            <View style={styles.routeStats}>
+              <View style={styles.routeStat}>
+                <Navigation size={16} color={colors.primary} />
+                <Text style={styles.routeStatValue}>
+                  {currentRoute.totalDistance.toFixed(1)} mi
+                </Text>
+                <Text style={styles.routeStatLabel}>Distance</Text>
+              </View>
+              <View style={styles.routeStat}>
+                <Text style={styles.routeStatValue}>
+                  {Math.floor(currentRoute.totalDuration / 60)}h {Math.floor(currentRoute.totalDuration % 60)}m
+                </Text>
+                <Text style={styles.routeStatLabel}>Duration</Text>
+              </View>
+              <View style={styles.routeStat}>
+                <Fuel size={16} color={colors.warning} />
+                <Text style={styles.routeStatValue}>
+                  ${currentRoute.estimatedFuelCost.toFixed(2)}
+                </Text>
+                <Text style={styles.routeStatLabel}>Fuel Cost</Text>
+              </View>
+              <View style={styles.routeStat}>
+                <Text style={styles.routeStatValue}>
+                  {currentRoute.optimizationScore.toFixed(0)}/100
+                </Text>
+                <Text style={styles.routeStatLabel}>Score</Text>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {/* Alerts Section */}
+        {(trafficIncidents.length > 0 || weatherAlerts.length > 0) && (
+          <View style={styles.alertsSection}>
+            <Text style={styles.alertsTitle}>Route Alerts</Text>
+            {trafficIncidents.slice(0, 2).map((incident) => (
+              <View key={incident.id} style={styles.alertItem}>
+                <AlertTriangle size={16} color={colors.warning} />
+                <View style={styles.alertContent}>
+                  <Text style={styles.alertType}>Traffic</Text>
+                  <Text style={styles.alertDescription} numberOfLines={2}>
+                    {incident.description}
+                  </Text>
+                  <Text style={styles.alertDelay}>+{incident.estimatedDelay}min delay</Text>
+                </View>
+              </View>
+            ))}
+            {weatherAlerts.slice(0, 2).map((alert) => (
+              <View key={alert.id} style={styles.alertItem}>
+                <Cloud size={16} color={colors.secondary} />
+                <View style={styles.alertContent}>
+                  <Text style={styles.alertType}>Weather</Text>
+                  <Text style={styles.alertDescription} numberOfLines={2}>
+                    {alert.description}
+                  </Text>
+                  <Text style={styles.alertImpact}>{alert.impact} impact</Text>
                 </View>
               </View>
             ))}
           </View>
         )}
-        {currentRoute && (
-          <View style={styles.webRouteInfo}>
-            <Text style={styles.webRouteTitle}>Route Summary</Text>
-            <Text style={styles.webRouteDetail}>
-              Distance: {currentRoute.totalDistance.toFixed(1)} mi
-            </Text>
-            <Text style={styles.webRouteDetail}>
-              Duration: {Math.floor(currentRoute.totalDuration / 60)}h {Math.floor(currentRoute.totalDuration % 60)}m
-            </Text>
-            <Text style={styles.webRouteDetail}>
-              Fuel Cost: ${currentRoute.estimatedFuelCost.toFixed(2)}
-            </Text>
+
+        {/* Fuel Stops Section */}
+        {showFuelStops && nearbyFuelStops.length > 0 && (
+          <View style={styles.fuelStopsSection}>
+            <Text style={styles.fuelStopsTitle}>Nearby Fuel Stops</Text>
+            {nearbyFuelStops.slice(0, 3).map((stop) => (
+              <View key={stop.id} style={styles.fuelStopItem}>
+                <Fuel size={16} color={colors.warning} />
+                <View style={styles.fuelStopContent}>
+                  <Text style={styles.fuelStopName}>{stop.name}</Text>
+                  <Text style={styles.fuelStopPrice}>
+                    ${stop.currentPrice.toFixed(2)}/gal • {stop.distance.toFixed(1)} mi
+                  </Text>
+                  <Text style={styles.fuelStopRating}>
+                    ⭐ {stop.rating}/5 ({stop.reviewCount} reviews)
+                  </Text>
+                </View>
+              </View>
+            ))}
           </View>
         )}
       </View>
@@ -302,30 +237,7 @@ const RouteOptimizationMap: React.FC<RouteOptimizationMapProps> = ({
 
   return (
     <View style={styles.container}>
-      {Platform.OS === 'web' ? (
-        <WebMapFallback />
-      ) : (
-        MapView && (
-          <MapView
-            ref={mapRef}
-            style={styles.map}
-            provider={Platform.OS === 'android' ? PROVIDER_GOOGLE : undefined}
-            initialRegion={region}
-            showsTraffic={showTraffic}
-            showsBuildings={false}
-            showsIndoors={false}
-            onMapReady={() => setMapReady(true)}
-            onPress={(event: any) => {
-              onMapPress?.(event.nativeEvent.coordinate);
-            }}
-          >
-            {renderWaypoints()}
-            {renderFuelStops()}
-            {renderWeatherAlerts()}
-            {renderRoute()}
-          </MapView>
-        )
-      )}
+      <MapFallback />
 
       {/* Control Panel */}
       <View style={styles.controlPanel}>
@@ -394,36 +306,6 @@ const RouteOptimizationMap: React.FC<RouteOptimizationMapProps> = ({
           </TouchableOpacity>
         </View>
       </View>
-
-      {/* Route Info - Only show on native platforms */}
-      {Platform.OS !== 'web' && currentRoute && (
-        <View style={styles.routeInfo}>
-          <View style={styles.routeInfoRow}>
-            <Text style={styles.routeInfoLabel}>Distance:</Text>
-            <Text style={styles.routeInfoValue}>
-              {currentRoute.totalDistance.toFixed(1)} mi
-            </Text>
-          </View>
-          <View style={styles.routeInfoRow}>
-            <Text style={styles.routeInfoLabel}>Duration:</Text>
-            <Text style={styles.routeInfoValue}>
-              {Math.floor(currentRoute.totalDuration / 60)}h {Math.floor(currentRoute.totalDuration % 60)}m
-            </Text>
-          </View>
-          <View style={styles.routeInfoRow}>
-            <Text style={styles.routeInfoLabel}>Fuel Cost:</Text>
-            <Text style={styles.routeInfoValue}>
-              ${currentRoute.estimatedFuelCost.toFixed(2)}
-            </Text>
-          </View>
-          <View style={styles.routeInfoRow}>
-            <Text style={styles.routeInfoLabel}>Score:</Text>
-            <Text style={styles.routeInfoValue}>
-              {currentRoute.optimizationScore.toFixed(0)}/100
-            </Text>
-          </View>
-        </View>
-      )}
     </View>
   );
 };
@@ -435,35 +317,220 @@ const styles = StyleSheet.create({
   map: {
     flex: 1,
   },
-  customMarker: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
+  mapFallback: {
+    backgroundColor: colors.background.primary,
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+  },
+  mapFallbackContent: {
+    alignItems: 'center',
+    padding: 20,
+    width: '100%',
+    maxWidth: 500,
+  },
+  mapFallbackTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: colors.text.primary,
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  mapFallbackText: {
+    fontSize: 16,
+    color: colors.text.secondary,
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: 8,
+  },
+  mapFallbackSubtext: {
+    fontSize: 14,
+    color: colors.text.secondary,
+    textAlign: 'center',
+    fontStyle: 'italic',
+    marginBottom: 20,
+  },
+  waypointsList: {
+    width: '100%',
+    maxHeight: 200,
+    marginBottom: 20,
+  },
+  waypointItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.card,
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 8,
+    gap: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  waypointNumber: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: colors.white,
   },
-  markerText: {
+  waypointNumberText: {
     color: colors.white,
     fontSize: 12,
     fontWeight: 'bold',
   },
-  fuelMarker: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: colors.warning,
-    alignItems: 'center',
-    justifyContent: 'center',
+  waypointInfo: {
+    flex: 1,
   },
-  weatherMarker: {
-    width: 24,
-    height: 24,
+  waypointAddress: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.text.primary,
+    marginBottom: 2,
+  },
+  waypointType: {
+    fontSize: 12,
+    color: colors.text.secondary,
+    textTransform: 'capitalize',
+    marginBottom: 2,
+  },
+  waypointNotes: {
+    fontSize: 11,
+    color: colors.text.secondary,
+    fontStyle: 'italic',
+  },
+  routeInfo: {
+    width: '100%',
+    backgroundColor: colors.card,
     borderRadius: 12,
-    backgroundColor: colors.secondary,
+    padding: 16,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  routeTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: colors.text.primary,
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  routeStats: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+  },
+  routeStat: {
     alignItems: 'center',
-    justifyContent: 'center',
+    flex: 1,
+  },
+  routeStatValue: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.text.primary,
+    marginTop: 4,
+  },
+  routeStatLabel: {
+    fontSize: 11,
+    color: colors.text.secondary,
+    marginTop: 2,
+  },
+  alertsSection: {
+    width: '100%',
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  alertsTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: colors.text.primary,
+    marginBottom: 12,
+  },
+  alertItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+    gap: 8,
+  },
+  alertContent: {
+    flex: 1,
+  },
+  alertType: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: colors.primary,
+    backgroundColor: colors.background.secondary,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    alignSelf: 'flex-start',
+    marginBottom: 4,
+  },
+  alertDescription: {
+    fontSize: 13,
+    color: colors.text.primary,
+    marginBottom: 2,
+  },
+  alertDelay: {
+    fontSize: 11,
+    fontWeight: '500',
+    color: colors.warning,
+  },
+  alertImpact: {
+    fontSize: 11,
+    fontWeight: '500',
+    color: colors.text.secondary,
+  },
+  fuelStopsSection: {
+    width: '100%',
+    backgroundColor: colors.card,
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  fuelStopsTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: colors.text.primary,
+    marginBottom: 12,
+  },
+  fuelStopItem: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+    gap: 8,
+  },
+  fuelStopContent: {
+    flex: 1,
+  },
+  fuelStopName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.text.primary,
+    marginBottom: 2,
+  },
+  fuelStopPrice: {
+    fontSize: 12,
+    color: colors.text.secondary,
+    marginBottom: 2,
+  },
+  fuelStopRating: {
+    fontSize: 11,
+    color: colors.text.secondary,
   },
   controlPanel: {
     position: 'absolute',
@@ -523,112 +590,6 @@ const styles = StyleSheet.create({
     color: colors.white,
     fontSize: 14,
     fontWeight: '600',
-  },
-  routeInfo: {
-    position: 'absolute',
-    bottom: 16,
-    left: 16,
-    right: 16,
-    backgroundColor: colors.card,
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  routeInfoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 4,
-  },
-  routeInfoLabel: {
-    fontSize: 14,
-    color: colors.text.secondary,
-  },
-  routeInfoValue: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.text.primary,
-  },
-  webFallback: {
-    backgroundColor: colors.background.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  webFallbackContent: {
-    alignItems: 'center',
-    padding: 32,
-    maxWidth: 400,
-  },
-  webFallbackTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: colors.text.primary,
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  webFallbackText: {
-    fontSize: 16,
-    color: colors.text.secondary,
-    textAlign: 'center',
-    lineHeight: 24,
-  },
-  waypointsList: {
-    width: '100%',
-    marginTop: 24,
-    gap: 12,
-  },
-  waypointItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.card,
-    padding: 12,
-    borderRadius: 8,
-    gap: 12,
-  },
-  waypointNumber: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: colors.primary,
-    color: colors.white,
-    textAlign: 'center',
-    lineHeight: 24,
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  waypointInfo: {
-    flex: 1,
-  },
-  waypointAddress: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.text.primary,
-  },
-  waypointType: {
-    fontSize: 12,
-    color: colors.text.secondary,
-    textTransform: 'capitalize',
-  },
-  webRouteInfo: {
-    width: '100%',
-    marginTop: 24,
-    padding: 16,
-    backgroundColor: colors.card,
-    borderRadius: 12,
-  },
-  webRouteTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: colors.text.primary,
-    marginBottom: 8,
-  },
-  webRouteDetail: {
-    fontSize: 14,
-    color: colors.text.secondary,
-    marginBottom: 4,
   },
 });
 
