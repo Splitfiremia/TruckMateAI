@@ -60,7 +60,7 @@ export default function AIAssistant({ onClose, showHeader = true }: AIAssistantP
   } = useAIAssistantStore();
 
   const [inputText, setInputText] = useState('');
-  const [recording, setRecording] = useState<Audio.Recording | null>(null);
+  const [audioRecording, setAudioRecording] = useState<Audio.Recording | null>(null);
   const [settingsVisible, setSettingsVisible] = useState(false);
   const scrollViewRef = useRef<ScrollView>(null);
   const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -185,7 +185,7 @@ export default function AIAssistant({ onClose, showHeader = true }: AIAssistantP
       const { recording } = await Audio.Recording.createAsync(
         Audio.RecordingOptionsPresets.HIGH_QUALITY
       );
-      setRecording(recording);
+      setAudioRecording(recording);
       setRecording(true);
     } catch (error) {
       Alert.alert('Error', 'Failed to start recording');
@@ -193,12 +193,12 @@ export default function AIAssistant({ onClose, showHeader = true }: AIAssistantP
   };
 
   const stopRecording = async () => {
-    if (!recording) return;
+    if (!audioRecording) return;
 
     try {
       setRecording(false);
-      await recording.stopAndUnloadAsync();
-      const uri = recording.getURI();
+      await audioRecording.stopAndUnloadAsync();
+      const uri = audioRecording.getURI();
       
       if (uri) {
         // In a real app, you would transcribe the audio here
@@ -206,7 +206,7 @@ export default function AIAssistant({ onClose, showHeader = true }: AIAssistantP
         Alert.alert('Voice Input', 'Voice transcription would happen here');
       }
       
-      setRecording(null);
+      setAudioRecording(null);
     } catch (error) {
       Alert.alert('Error', 'Failed to stop recording');
     }
