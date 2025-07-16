@@ -1,1 +1,244 @@
-import React from 'react';\nimport {\n  View,\n  Text,\n  StyleSheet,\n  TouchableOpacity,\n  Alert\n} from 'react-native';\nimport {\n  AlertTriangle,\n  Clock,\n  MapPin,\n  Wrench,\n  X\n} from 'lucide-react-native';\n\nimport { colors } from '@/constants/colors';\nimport { MaintenanceAlert } from '@/types';\n\ninterface MaintenanceAlertCardProps {\n  alert: MaintenanceAlert;\n  onDismiss: (alertId: string) => void;\n  onViewShops: (alert: MaintenanceAlert) => void;\n}\n\nconst MaintenanceAlertCard: React.FC<MaintenanceAlertCardProps> = ({\n  alert,\n  onDismiss,\n  onViewShops\n}) => {\n  const getPriorityColor = (priority: string) => {\n    switch (priority) {\n      case 'Critical': return colors.danger;\n      case 'High': return colors.warning;\n      case 'Medium': return colors.primaryLight;\n      case 'Low': return colors.secondary;\n      default: return colors.textSecondary;\n    }\n  };\n\n  const getTypeIcon = (type: string) => {\n    switch (type) {\n      case 'Prediction': return AlertTriangle;\n      case 'Immediate': return AlertTriangle;\n      case 'Scheduled': return Clock;\n      case 'Overdue': return AlertTriangle;\n      default: return AlertTriangle;\n    }\n  };\n\n  const TypeIcon = getTypeIcon(alert.type);\n  const priorityColor = getPriorityColor(alert.priority);\n\n  const handleViewShops = () => {\n    if (alert.nearbyShops.length > 0 || alert.estimatedCost > 0) {\n      onViewShops(alert);\n    } else {\n      Alert.alert(\n        'No Shops Available',\n        'No nearby repair shops found for this service. Please try again later.',\n        [{ text: 'OK' }]\n      );\n    }\n  };\n\n  return (\n    <View style={[styles.container, { borderLeftColor: priorityColor }]}>\n      <View style={styles.header}>\n        <View style={styles.titleRow}>\n          <TypeIcon color={priorityColor} size={18} />\n          <Text style={styles.title}>{alert.title}</Text>\n          <View style={[styles.priorityBadge, { backgroundColor: priorityColor }]}>\n            <Text style={styles.priorityText}>{alert.priority}</Text>\n          </View>\n        </View>\n        <TouchableOpacity\n          onPress={() => onDismiss(alert.id)}\n          style={styles.dismissButton}\n        >\n          <X color={colors.textSecondary} size={16} />\n        </TouchableOpacity>\n      </View>\n\n      <Text style={styles.message}>{alert.message}</Text>\n\n      <View style={styles.details}>\n        <View style={styles.detailItem}>\n          <Wrench color={colors.textSecondary} size={14} />\n          <Text style={styles.detailText}>{alert.component}</Text>\n        </View>\n        \n        {alert.dueDate && (\n          <View style={styles.detailItem}>\n            <Clock color={colors.textSecondary} size={14} />\n            <Text style={styles.detailText}>\n              Due: {new Date(alert.dueDate).toLocaleDateString()}\n            </Text>\n          </View>\n        )}\n        \n        {alert.estimatedCost > 0 && (\n          <View style={styles.detailItem}>\n            <Text style={styles.costText}>${alert.estimatedCost}</Text>\n          </View>\n        )}\n      </View>\n\n      {alert.actionRequired && (\n        <View style={styles.actions}>\n          <TouchableOpacity\n            style={styles.actionButton}\n            onPress={handleViewShops}\n          >\n            <MapPin color={colors.primaryLight} size={16} />\n            <Text style={styles.actionButtonText}>Find Shops</Text>\n          </TouchableOpacity>\n        </View>\n      )}\n    </View>\n  );\n};\n\nconst styles = StyleSheet.create({\n  container: {\n    backgroundColor: colors.card,\n    borderRadius: 12,\n    padding: 16,\n    marginBottom: 12,\n    borderLeftWidth: 4,\n  },\n  header: {\n    flexDirection: 'row',\n    justifyContent: 'space-between',\n    alignItems: 'flex-start',\n    marginBottom: 8,\n  },\n  titleRow: {\n    flexDirection: 'row',\n    alignItems: 'center',\n    gap: 8,\n    flex: 1,\n  },\n  title: {\n    color: colors.text,\n    fontSize: 16,\n    fontWeight: '600',\n    flex: 1,\n  },\n  priorityBadge: {\n    paddingHorizontal: 8,\n    paddingVertical: 4,\n    borderRadius: 12,\n  },\n  priorityText: {\n    color: colors.text,\n    fontSize: 10,\n    fontWeight: '600',\n  },\n  dismissButton: {\n    padding: 4,\n  },\n  message: {\n    color: colors.textSecondary,\n    fontSize: 14,\n    marginBottom: 12,\n    lineHeight: 20,\n  },\n  details: {\n    flexDirection: 'row',\n    flexWrap: 'wrap',\n    gap: 16,\n    marginBottom: 12,\n  },\n  detailItem: {\n    flexDirection: 'row',\n    alignItems: 'center',\n    gap: 4,\n  },\n  detailText: {\n    color: colors.textSecondary,\n    fontSize: 12,\n  },\n  costText: {\n    color: colors.warning,\n    fontSize: 14,\n    fontWeight: '600',\n  },\n  actions: {\n    flexDirection: 'row',\n    gap: 12,\n  },\n  actionButton: {\n    flexDirection: 'row',\n    alignItems: 'center',\n    gap: 8,\n    backgroundColor: colors.backgroundLight,\n    paddingVertical: 8,\n    paddingHorizontal: 12,\n    borderRadius: 8,\n    borderWidth: 1,\n    borderColor: colors.primaryLight,\n  },\n  actionButtonText: {\n    color: colors.primaryLight,\n    fontSize: 12,\n    fontWeight: '600',\n  },\n});\n\nexport default MaintenanceAlertCard;
+import React from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Alert
+} from 'react-native';
+import {
+  AlertTriangle,
+  Clock,
+  MapPin,
+  Wrench,
+  X
+} from 'lucide-react-native';
+
+import { colors } from '@/constants/colors';
+import { MaintenanceAlert } from '@/types';
+
+interface MaintenanceAlertCardProps {
+  alert: MaintenanceAlert;
+  onDismiss: (alertId: string) => void;
+  onViewShops: (alert: MaintenanceAlert) => void;
+}
+
+const MaintenanceAlertCard: React.FC<MaintenanceAlertCardProps> = ({
+  alert,
+  onDismiss,
+  onViewShops
+}) => {
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'Critical': return colors.danger;
+      case 'High': return colors.warning;
+      case 'Medium': return colors.primaryLight;
+      case 'Low': return colors.secondary;
+      default: return colors.textSecondary;
+    }
+  };
+
+  const getTypeIcon = (type: string) => {
+    switch (type) {
+      case 'Prediction': return AlertTriangle;
+      case 'Immediate': return AlertTriangle;
+      case 'Scheduled': return Clock;
+      case 'Overdue': return AlertTriangle;
+      default: return AlertTriangle;
+    }
+  };
+
+  const TypeIcon = getTypeIcon(alert.type);
+  const priorityColor = getPriorityColor(alert.priority);
+
+  const handleViewShops = () => {
+    if (alert.nearbyShops.length > 0 || alert.estimatedCost > 0) {
+      onViewShops(alert);
+    } else {
+      Alert.alert(
+        'No Shops Available',
+        'No nearby repair shops found for this service. Please try again later.',
+        [{ text: 'OK' }]
+      );
+    }
+  };
+
+  return (
+    <View style={[styles.container, { borderLeftColor: priorityColor }]}>
+      <View style={styles.header}>
+        <View style={styles.titleRow}>
+          <TypeIcon color={priorityColor} size={18} />
+          <Text style={styles.title}>{alert.title}</Text>
+          <View style={[styles.priorityBadge, { backgroundColor: priorityColor + '20' }]}>
+            <Text style={[styles.priorityText, { color: priorityColor }]}>
+              {alert.priority}
+            </Text>
+          </View>
+        </View>
+        <TouchableOpacity
+          style={styles.dismissButton}
+          onPress={() => onDismiss(alert.id)}
+        >
+          <X color={colors.textSecondary} size={16} />
+        </TouchableOpacity>
+      </View>
+
+      <Text style={styles.description}>{alert.description}</Text>
+
+      <View style={styles.details}>
+        <View style={styles.detailItem}>
+          <Clock color={colors.textSecondary} size={14} />
+          <Text style={styles.detailText}>
+            {alert.type === 'Prediction' 
+              ? `In ${alert.milesUntilFailure?.toLocaleString()} miles`
+              : alert.dueDate
+            }
+          </Text>
+        </View>
+        
+        {alert.estimatedCost > 0 && (
+          <View style={styles.detailItem}>
+            <Wrench color={colors.textSecondary} size={14} />
+            <Text style={styles.detailText}>
+              Est. ${alert.estimatedCost.toLocaleString()}
+            </Text>
+          </View>
+        )}
+
+        {alert.nearbyShops.length > 0 && (
+          <View style={styles.detailItem}>
+            <MapPin color={colors.textSecondary} size={14} />
+            <Text style={styles.detailText}>
+              {alert.nearbyShops.length} shops nearby
+            </Text>
+          </View>
+        )}
+      </View>
+
+      <View style={styles.actions}>
+        <TouchableOpacity
+          style={[styles.actionButton, styles.secondaryButton]}
+          onPress={handleViewShops}
+        >
+          <MapPin color={colors.primary} size={16} />
+          <Text style={styles.secondaryButtonText}>View Shops</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity
+          style={[styles.actionButton, styles.primaryButton]}
+          onPress={() => {
+            // Handle schedule maintenance
+            Alert.alert(
+              'Schedule Maintenance',
+              'This feature will be available soon.',
+              [{ text: 'OK' }]
+            );
+          }}
+        >
+          <Clock color={colors.white} size={16} />
+          <Text style={styles.primaryButtonText}>Schedule</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: colors.white,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    borderLeftWidth: 4,
+    shadowColor: colors.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 8,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    gap: 8,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text,
+    flex: 1,
+  },
+  priorityBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  priorityText: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  dismissButton: {
+    padding: 4,
+  },
+  description: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    marginBottom: 12,
+    lineHeight: 20,
+  },
+  details: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 16,
+    marginBottom: 16,
+  },
+  detailItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  detailText: {
+    fontSize: 12,
+    color: colors.textSecondary,
+  },
+  actions: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  actionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    gap: 6,
+  },
+  primaryButton: {
+    backgroundColor: colors.primary,
+  },
+  secondaryButton: {
+    backgroundColor: colors.primaryLight + '20',
+    borderWidth: 1,
+    borderColor: colors.primary,
+  },
+  primaryButtonText: {
+    color: colors.white,
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  secondaryButtonText: {
+    color: colors.primary,
+    fontSize: 14,
+    fontWeight: '500',
+  },
+});
+
+export default MaintenanceAlertCard;
