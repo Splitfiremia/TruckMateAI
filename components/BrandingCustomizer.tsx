@@ -60,7 +60,18 @@ export default function BrandingCustomizer({ onClose }: BrandingCustomizerProps)
     
     const brandingSettings: BrandingSettings = {
       ...settings,
-      ...localSettings,
+      companyName: localSettings.companyName,
+      appName: localSettings.appName,
+      welcomeMessage: localSettings.welcomeMessage,
+      logoUrl: localSettings.logoUrl,
+      primaryColor: localSettings.primaryColor,
+      secondaryColor: localSettings.secondaryColor,
+      accentColor: localSettings.accentColor,
+      supportEmail: localSettings.supportEmail,
+      supportPhone: localSettings.supportPhone,
+      showCompanyLogo: localSettings.showCompanyLogo === 'true',
+      customSplashScreen: localSettings.customSplashScreen === 'true',
+      hideDefaultBranding: localSettings.hideDefaultBranding === 'true',
     };
     
     updateBranding(brandingSettings);
@@ -79,20 +90,21 @@ export default function BrandingCustomizer({ onClose }: BrandingCustomizerProps)
           style: 'destructive',
           onPress: () => {
             resetToDefaults();
-            setLocalSettings({
-              companyName: settings.companyName,
-              appName: settings.appName,
-              welcomeMessage: settings.welcomeMessage,
-              logoUrl: settings.logoUrl || '',
-              primaryColor: settings.primaryColor,
-              secondaryColor: settings.secondaryColor,
-              accentColor: settings.accentColor,
-              supportEmail: settings.supportEmail,
-              supportPhone: settings.supportPhone,
-              showCompanyLogo: settings.showCompanyLogo.toString(),
-              customSplashScreen: settings.customSplashScreen.toString(),
-              hideDefaultBranding: settings.hideDefaultBranding.toString(),
-            });
+            const defaultSettings = {
+              companyName: 'Your Company',
+              appName: 'TruckMate AI',
+              welcomeMessage: 'Welcome to TruckMate AI',
+              logoUrl: '',
+              primaryColor: '#3B82F6',
+              secondaryColor: '#10B981',
+              accentColor: '#F59E0B',
+              supportEmail: 'support@truckmateai.com',
+              supportPhone: '(555) 123-4567',
+              showCompanyLogo: 'false',
+              customSplashScreen: 'false',
+              hideDefaultBranding: 'false',
+            };
+            setLocalSettings(defaultSettings);
           },
         },
       ]
@@ -100,20 +112,19 @@ export default function BrandingCustomizer({ onClose }: BrandingCustomizerProps)
   };
   
   const handlePresetApply = (preset: any) => {
-    const updatedSettings = {
-      ...localSettings,
+    setLocalSettings(prev => ({
+      ...prev,
       primaryColor: preset.primaryColor,
       secondaryColor: preset.secondaryColor,
       accentColor: preset.accentColor,
-    };
-    setLocalSettings(updatedSettings);
+    }));
   };
   
   const updateSetting = (key: string, value: string | boolean) => {
     if (key === 'showCompanyLogo' || key === 'customSplashScreen' || key === 'hideDefaultBranding') {
       setLocalSettings(prev => ({ ...prev, [key]: value.toString() }));
     } else {
-      setLocalSettings(prev => ({ ...prev, [key]: value }));
+      setLocalSettings(prev => ({ ...prev, [key]: value as string }));
     }
   };
   
