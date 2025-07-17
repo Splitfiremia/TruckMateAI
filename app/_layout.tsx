@@ -19,15 +19,6 @@ function RootLayoutNav() {
   const { settings } = useBrandingStore();
   const { theme, isDark } = useTheme();
   
-  // Handle navigation based on user state
-  useEffect(() => {
-    if (!user || !isOnboarded) {
-      router.replace('/onboarding');
-    } else {
-      router.replace('/(tabs)');
-    }
-  }, [user, isOnboarded]);
-  
   // Use custom colors if branding is customized, otherwise use theme colors
   const activeColors = {
     background: theme.background.primary,
@@ -48,6 +39,7 @@ function RootLayoutNav() {
         },
       }}
     >
+      <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="onboarding" options={{ headerShown: false }} />
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
     </Stack>
