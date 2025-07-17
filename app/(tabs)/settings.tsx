@@ -103,7 +103,7 @@ export default function SettingsScreen() {
           value={currentValue}
           onValueChange={() => toggleSetting(setting)}
           trackColor={{ false: colors.border, true: colors.primaryLight }}
-          thumbColor={currentValue ? colors.white : colors.text.primary}
+          thumbColor={currentValue ? colors.white : colors.text.primary as string}
           ios_backgroundColor={colors.border}
         />
       </View>
@@ -139,7 +139,7 @@ export default function SettingsScreen() {
         <View style={styles.profileSection}>
           <View style={styles.profileInfo}>
             <View style={styles.profileAvatar}>
-              <User size={32} color={colors.text.primary} />
+              <User size={32} color={colors.text.primary as string} />
             </View>
             <View>
               <Text style={styles.profileName}>{user?.name || driverInfo.name}</Text>
@@ -343,7 +343,7 @@ export default function SettingsScreen() {
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Personal Information</Text>
             <TouchableOpacity onPress={() => setPersonalInfoModalVisible(false)}>
-              <X size={24} color={colors.text.primary} />
+              <X size={24} color={colors.text.primary as string} />
             </TouchableOpacity>
           </View>
           
@@ -417,7 +417,7 @@ export default function SettingsScreen() {
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Vehicle Settings</Text>
             <TouchableOpacity onPress={() => setVehicleSettingsModalVisible(false)}>
-              <X size={24} color={colors.text.primary} />
+              <X size={24} color={colors.text.primary as string} />
             </TouchableOpacity>
           </View>
           
@@ -488,7 +488,7 @@ export default function SettingsScreen() {
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Notification Preferences</Text>
             <TouchableOpacity onPress={() => setNotificationModalVisible(false)}>
-              <X size={24} color={colors.text.primary} />
+              <X size={24} color={colors.text.primary as string} />
             </TouchableOpacity>
           </View>
           
@@ -557,7 +557,7 @@ export default function SettingsScreen() {
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Privacy & Security</Text>
             <TouchableOpacity onPress={() => setPrivacyModalVisible(false)}>
-              <X size={24} color={colors.text.primary} />
+              <X size={24} color={colors.text.primary as string} />
             </TouchableOpacity>
           </View>
           
@@ -629,7 +629,7 @@ export default function SettingsScreen() {
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Help & Support</Text>
             <TouchableOpacity onPress={() => setHelpModalVisible(false)}>
-              <X size={24} color={colors.text.primary} />
+              <X size={24} color={colors.text.primary as string} />
             </TouchableOpacity>
           </View>
           
@@ -691,7 +691,7 @@ export default function SettingsScreen() {
               style={styles.modalCloseButton}
               onPress={() => setShowBrandingModal(false)}
             >
-              <X size={24} color={colors.text.primary} />
+              <X size={24} color={colors.text.primary as string} />
             </TouchableOpacity>
           </View>
           <BrandingCustomizer onClose={() => setShowBrandingModal(false)} />
@@ -711,7 +711,7 @@ export default function SettingsScreen() {
               style={styles.modalCloseButton}
               onPress={() => setShowLogoGeneratorModal(false)}
             >
-              <X size={24} color={colors.text.primary} />
+              <X size={24} color={colors.text.primary as string} />
             </TouchableOpacity>
           </View>
           <LogoGenerator />
@@ -754,7 +754,7 @@ const styles = StyleSheet.create({
   profileName: {
     fontSize: 18,
     fontWeight: '600',
-    color: colors.text.primary,
+    color: colors.text.primary as string,
     marginBottom: 4,
   },
   profileDetails: {
@@ -781,7 +781,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: colors.text.primary,
+    color: colors.text.primary as string,
   },
   settingsCard: {
     backgroundColor: colors.background.secondary,
@@ -805,7 +805,7 @@ const styles = StyleSheet.create({
   settingLabel: {
     fontSize: 16,
     fontWeight: '500',
-    color: colors.text.primary,
+    color: colors.text.primary as string,
     marginBottom: 2,
   },
   settingDescription: {
@@ -855,7 +855,7 @@ const styles = StyleSheet.create({
   },
   settingLinkLabel: {
     fontSize: 16,
-    color: colors.text.primary,
+    color: colors.text.primary as string,
   },
   logoutButton: {
     flexDirection: 'row',
@@ -903,7 +903,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: colors.text.primary,
+    color: colors.text.primary as string,
   },
   modalContent: {
     flex: 1,
@@ -916,7 +916,7 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 16,
     fontWeight: '500',
-    color: colors.text.primary,
+    color: colors.text.primary as string,
     marginBottom: 8,
   },
   textInput: {
@@ -925,7 +925,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 16,
-    color: colors.text.primary,
+    color: colors.text.primary as string,
     borderWidth: 1,
     borderColor: colors.border,
   },
@@ -948,7 +948,7 @@ const styles = StyleSheet.create({
   sectionSubtitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: colors.text.primary,
+    color: colors.text.primary as string,
     marginBottom: 12,
     marginTop: 8,
   },
@@ -1003,7 +1003,7 @@ const styles = StyleSheet.create({
   supportTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text.primary,
+    color: colors.text.primary as string,
     marginBottom: 8,
   },
   supportText: {
