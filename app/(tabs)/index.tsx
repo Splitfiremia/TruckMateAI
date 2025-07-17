@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
-import { Stack } from 'expo-router';
-import { Mic, Camera, Clock, AlertTriangle, Truck, DollarSign, Clipboard, Upload, Shield, Cloud, Coffee, Bed } from 'lucide-react-native';
+import { Stack, router } from 'expo-router';
+import { Mic, Camera, Clock, AlertTriangle, Truck, DollarSign, Clipboard, Upload, Shield, Cloud, Coffee, Bed, LogOut } from 'lucide-react-native';
 
 import { colors } from '@/constants/colors';
 import { ComplianceViolationPrediction, DutyStatus } from '@/types';
@@ -65,7 +65,7 @@ export default function DashboardScreen() {
     dismissInspectionPrompt 
   } = useInspectionStore();
   const { violationPredictions, activeAlerts, metrics } = usePredictiveComplianceStore();
-  const { user, isOwnerOperator, isFleetCompany } = useUserStore();
+  const { user, isOwnerOperator, isFleetCompany, logout } = useUserStore();
   const { settings } = useBrandingStore();
   const { currentStatus, changeStatus, startBreak, endBreak, isOnBreak, startTrip } = useLogbookStore();
   const { showDiscoveryPrompt, detectedDevice, dismissPrompt } = useDeviceDiscovery();
@@ -221,6 +221,24 @@ export default function DashboardScreen() {
   const appName = settings.appName || 'TruckMate AI';
   const companyName = settings.companyName || user?.companyName;
   
+  const handleLogOut = () => {
+    Alert.alert(
+      'Log Out',
+      'Are you sure you want to log out?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Log Out', 
+          style: 'destructive',
+          onPress: () => {
+            logout();
+            router.replace('/onboarding');
+          }
+        }
+      ]
+    );
+  };
+  
   return (
     <View style={styles.container}>
       <Stack.Screen 
@@ -235,7 +253,7 @@ export default function DashboardScreen() {
       
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <View>
+          <View style={styles.headerLeft}>
             {settings.logoUrl && settings.showCompanyLogo && (
               <Image source={{ uri: settings.logoUrl }} style={styles.logo} />
             )}
@@ -247,6 +265,14 @@ export default function DashboardScreen() {
             </Text>
             <Text style={styles.welcomeMessage}>{welcomeMessage}</Text>
           </View>
+          
+          <TouchableOpacity 
+            style={styles.logOutButton}
+            onPress={handleLogOut}
+          >
+            <LogOut size={20} color={colors.text.secondary} />
+            <Text style={styles.logOutText}>Log Out</Text>
+          </TouchableOpacity>
         </View>
         
         <StatusCard onStatusChange={handleStatusCardPress} />
@@ -599,9 +625,12 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginTop: 16,
     marginBottom: 16,
+  },
+  headerLeft: {
+    flex: 1,
   },
   greeting: {
     fontSize: 24,
@@ -838,5 +867,21 @@ const styles = StyleSheet.create({
   },
   breakToggleTextActive: {
     color: colors.white,
+  },
+  logOutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: colors.background.secondary,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
+    gap: 6,
+  },
+  logOutText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.text.secondary,
   },
 });
