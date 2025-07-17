@@ -4,6 +4,7 @@ import { Stack } from 'expo-router';
 import { User, Truck, Bell, Shield, HelpCircle, LogOut, ChevronRight, AlertTriangle, X, Save, Cloud, Palette, Building2, Sparkles, Smartphone } from 'lucide-react-native';
 
 import { colors } from '@/constants/colors';
+import { useTheme } from '@/store/themeStore';
 import { driverInfo } from '@/constants/mockData';
 import VoiceCommandButton from '@/components/VoiceCommandButton';
 import CommandResponseModal from '@/components/CommandResponseModal';
@@ -27,6 +28,7 @@ export default function SettingsScreen() {
   const [showLogoGeneratorModal, setShowLogoGeneratorModal] = useState(false);
   const [showTelematicsModal, setShowTelematicsModal] = useState(false);
   
+  const { theme } = useTheme();
   const { lastCommand, lastResponse } = useVoiceCommandStore();
   const { currentStatus, changeStatus } = useLogbookStore();
   const { user, isFleetCompany, logout } = useUserStore();
@@ -102,9 +104,9 @@ export default function SettingsScreen() {
         <Switch
           value={currentValue}
           onValueChange={() => toggleSetting(setting)}
-          trackColor={{ false: colors.border, true: colors.primaryLight }}
-          thumbColor={currentValue ? colors.white : colors.text.primary as string}
-          ios_backgroundColor={colors.border}
+          trackColor={{ false: theme.border, true: theme.primaryLight }}
+          thumbColor={currentValue ? theme.white : theme.text.primary}
+          ios_backgroundColor={theme.border}
         />
       </View>
     );
@@ -122,7 +124,7 @@ export default function SettingsScreen() {
         </View>
         <Text style={styles.settingLinkLabel}>{label}</Text>
       </View>
-      <ChevronRight size={20} color={colors.textSecondary} />
+      <ChevronRight size={20} color={theme.text.secondary} />
     </TouchableOpacity>
   );
   
@@ -597,17 +599,17 @@ export default function SettingsScreen() {
             <View style={styles.privacyCard}>
               <TouchableOpacity style={styles.securityOption}>
                 <Text style={styles.settingLabel}>Change Password</Text>
-                <ChevronRight size={20} color={colors.textSecondary} />
+                <ChevronRight size={20} color={theme.text.secondary} />
               </TouchableOpacity>
               
               <TouchableOpacity style={styles.securityOption}>
                 <Text style={styles.settingLabel}>Two-Factor Authentication</Text>
-                <ChevronRight size={20} color={colors.textSecondary} />
+                <ChevronRight size={20} color={theme.text.secondary} />
               </TouchableOpacity>
               
               <TouchableOpacity style={styles.securityOption}>
                 <Text style={styles.settingLabel}>Download My Data</Text>
-                <ChevronRight size={20} color={colors.textSecondary} />
+                <ChevronRight size={20} color={theme.text.secondary} />
               </TouchableOpacity>
               
               <TouchableOpacity style={[styles.securityOption, styles.dangerOption]}>
@@ -637,32 +639,32 @@ export default function SettingsScreen() {
             <View style={styles.helpCard}>
               <TouchableOpacity style={styles.helpOption}>
                 <Text style={styles.settingLabel}>Frequently Asked Questions</Text>
-                <ChevronRight size={20} color={colors.textSecondary} />
+                <ChevronRight size={20} color={theme.text.secondary} />
               </TouchableOpacity>
               
               <TouchableOpacity style={styles.helpOption}>
                 <Text style={styles.settingLabel}>Contact Support</Text>
-                <ChevronRight size={20} color={colors.textSecondary} />
+                <ChevronRight size={20} color={theme.text.secondary} />
               </TouchableOpacity>
               
               <TouchableOpacity style={styles.helpOption}>
                 <Text style={styles.settingLabel}>Report a Bug</Text>
-                <ChevronRight size={20} color={colors.textSecondary} />
+                <ChevronRight size={20} color={theme.text.secondary} />
               </TouchableOpacity>
               
               <TouchableOpacity style={styles.helpOption}>
                 <Text style={styles.settingLabel}>Feature Request</Text>
-                <ChevronRight size={20} color={colors.textSecondary} />
+                <ChevronRight size={20} color={theme.text.secondary} />
               </TouchableOpacity>
               
               <TouchableOpacity style={styles.helpOption}>
                 <Text style={styles.settingLabel}>Terms of Service</Text>
-                <ChevronRight size={20} color={colors.textSecondary} />
+                <ChevronRight size={20} color={theme.text.secondary} />
               </TouchableOpacity>
               
               <TouchableOpacity style={styles.helpOption}>
                 <Text style={styles.settingLabel}>Privacy Policy</Text>
-                <ChevronRight size={20} color={colors.textSecondary} />
+                <ChevronRight size={20} color={theme.text.secondary} />
               </TouchableOpacity>
             </View>
             
@@ -721,17 +723,17 @@ export default function SettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background.primary,
+    backgroundColor: theme.background.primary,
   },
   scrollView: {
     flex: 1,
     paddingHorizontal: 16,
   },
   profileSection: {
-    backgroundColor: colors.background.secondary,
+    backgroundColor: theme.background.secondary,
     borderRadius: 12,
     padding: 16,
     marginTop: 16,
@@ -746,7 +748,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: colors.primaryLight,
+    backgroundColor: theme.primaryLight,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 16,
@@ -754,16 +756,16 @@ const styles = StyleSheet.create({
   profileName: {
     fontSize: 18,
     fontWeight: '600',
-    color: colors.text.primary as string,
+    color: theme.text.primary,
     marginBottom: 4,
   },
   profileDetails: {
     fontSize: 14,
-    color: colors.textSecondary,
+    color: theme.text.secondary,
     marginBottom: 2,
   },
   editProfileButton: {
-    backgroundColor: colors.background.secondary,
+    backgroundColor: theme.background.secondary,
     borderWidth: 1,
     borderColor: colors.primaryLight,
     borderRadius: 8,
@@ -781,10 +783,10 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: colors.text.primary as string,
+    color: theme.text.primary,
   },
   settingsCard: {
-    backgroundColor: colors.background.secondary,
+    backgroundColor: theme.background.secondary,
     borderRadius: 12,
     marginBottom: 24,
     overflow: 'hidden',
@@ -805,12 +807,12 @@ const styles = StyleSheet.create({
   settingLabel: {
     fontSize: 16,
     fontWeight: '500',
-    color: colors.text.primary as string,
+    color: theme.text.primary,
     marginBottom: 2,
   },
   settingDescription: {
     fontSize: 14,
-    color: colors.textSecondary,
+    color: theme.text.secondary,
   },
   settingLabelContainer: {
     flexDirection: 'row',
@@ -855,7 +857,7 @@ const styles = StyleSheet.create({
   },
   settingLinkLabel: {
     fontSize: 16,
-    color: colors.text.primary as string,
+    color: theme.text.primary,
   },
   logoutButton: {
     flexDirection: 'row',
@@ -874,7 +876,7 @@ const styles = StyleSheet.create({
   },
   versionText: {
     fontSize: 14,
-    color: colors.textSecondary,
+    color: theme.text.secondary,
     textAlign: 'center',
     marginBottom: 24,
   },
@@ -903,7 +905,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: colors.text.primary as string,
+    color: theme.text.primary,
   },
   modalContent: {
     flex: 1,
@@ -916,16 +918,16 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 16,
     fontWeight: '500',
-    color: colors.text.primary as string,
+    color: theme.text.primary,
     marginBottom: 8,
   },
   textInput: {
-    backgroundColor: colors.background.secondary,
+    backgroundColor: theme.background.secondary,
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 16,
-    color: colors.text.primary as string,
+    color: theme.text.primary,
     borderWidth: 1,
     borderColor: colors.border,
   },
@@ -933,7 +935,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.primaryLight,
+    backgroundColor: theme.primaryLight,
     borderRadius: 12,
     paddingVertical: 16,
     marginHorizontal: 16,
@@ -948,18 +950,18 @@ const styles = StyleSheet.create({
   sectionSubtitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: colors.text.primary as string,
+    color: theme.text.primary,
     marginBottom: 12,
     marginTop: 8,
   },
   notificationCard: {
-    backgroundColor: colors.background.secondary,
+    backgroundColor: theme.background.secondary,
     borderRadius: 12,
     marginBottom: 24,
     overflow: 'hidden',
   },
   privacyCard: {
-    backgroundColor: colors.background.secondary,
+    backgroundColor: theme.background.secondary,
     borderRadius: 12,
     marginBottom: 24,
     overflow: 'hidden',
@@ -980,7 +982,7 @@ const styles = StyleSheet.create({
     color: colors.danger,
   },
   helpCard: {
-    backgroundColor: colors.background.secondary,
+    backgroundColor: theme.background.secondary,
     borderRadius: 12,
     marginBottom: 24,
     overflow: 'hidden',
@@ -995,7 +997,7 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.border,
   },
   supportInfo: {
-    backgroundColor: colors.background.secondary,
+    backgroundColor: theme.background.secondary,
     borderRadius: 12,
     padding: 16,
     marginBottom: 24,
@@ -1003,12 +1005,12 @@ const styles = StyleSheet.create({
   supportTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text.primary as string,
+    color: theme.text.primary,
     marginBottom: 8,
   },
   supportText: {
     fontSize: 14,
-    color: colors.textSecondary,
+    color: theme.text.secondary,
     marginBottom: 4,
   },
   supportPhone: {
