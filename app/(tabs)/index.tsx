@@ -571,7 +571,7 @@ export default function DashboardScreen() {
       <DeviceDiscoveryPrompt
         visible={showDiscoveryPrompt}
         onClose={dismissPrompt}
-        detectedDevice={detectedDevice}
+        detectedDevice={detectedDevice || undefined}
       />
     </View>
   );

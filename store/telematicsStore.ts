@@ -102,6 +102,18 @@ const devicePatterns = {
     macPrefix: ['B8:27:EB', 'DC:A6:32'],
     ports: [5001, 5002],
     capabilities: ['gps', 'eld', 'maintenance', 'fuel']
+  },
+  other: {
+    userAgent: /UNKNOWN/i,
+    macPrefix: ['00:00:00'],
+    ports: [8000],
+    capabilities: ['gps']
+  },
+  unknown: {
+    userAgent: /UNKNOWN/i,
+    macPrefix: ['00:00:00'],
+    ports: [8000],
+    capabilities: ['gps']
   }
 };
 

@@ -23,6 +23,20 @@ import {
 import { colors } from '@/constants/colors';
 import { useTelematicsStore, DeviceType, TelematicsDevice } from '@/store/telematicsStore';
 
+const getStatusStyle = (status: string) => {
+  switch (status) {
+    case 'detected':
+      return styles.statusDetected;
+    case 'connected':
+      return styles.statusConnected;
+    case 'error':
+    case 'disconnected':
+      return styles.statusError;
+    default:
+      return styles.statusDetected;
+  }
+};
+
 interface DeviceDetectionStepProps {
   onComplete: () => void;
   onSkip: () => void;
@@ -267,7 +281,7 @@ export default function DeviceDetectionStep({ onComplete, onSkip }: DeviceDetect
               <View style={styles.deviceInfo}>
                 <View style={styles.deviceHeader}>
                   <Text style={styles.deviceName}>{device.name}</Text>
-                  <View style={[styles.deviceStatus, styles[`status${device.status.charAt(0).toUpperCase() + device.status.slice(1)}`]]}>
+                  <View style={[styles.deviceStatus, getStatusStyle(device.status)]}>
                     <Text style={styles.deviceStatusText}>{device.status}</Text>
                   </View>
                 </View>
@@ -560,6 +574,12 @@ const styles = StyleSheet.create({
   },
   statusError: {
     backgroundColor: colors.error + '20',
+  },
+  statusDisconnected: {
+    backgroundColor: colors.error + '20',
+  },
+  statusPending: {
+    backgroundColor: colors.warning + '20',
   },
   deviceStatusText: {
     fontSize: 12,

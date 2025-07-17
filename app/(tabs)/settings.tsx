@@ -139,7 +139,7 @@ export default function SettingsScreen() {
         <View style={styles.profileSection}>
           <View style={styles.profileInfo}>
             <View style={styles.profileAvatar}>
-              <User size={32} color={colors.text} />
+              <User size={32} color={colors.text.primary} />
             </View>
             <View>
               <Text style={styles.profileName}>{user?.name || driverInfo.name}</Text>
@@ -343,7 +343,7 @@ export default function SettingsScreen() {
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Personal Information</Text>
             <TouchableOpacity onPress={() => setPersonalInfoModalVisible(false)}>
-              <X size={24} color={colors.text} />
+              <X size={24} color={colors.text.primary} />
             </TouchableOpacity>
           </View>
           
@@ -417,7 +417,7 @@ export default function SettingsScreen() {
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Vehicle Settings</Text>
             <TouchableOpacity onPress={() => setVehicleSettingsModalVisible(false)}>
-              <X size={24} color={colors.text} />
+              <X size={24} color={colors.text.primary} />
             </TouchableOpacity>
           </View>
           
@@ -488,7 +488,7 @@ export default function SettingsScreen() {
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Notification Preferences</Text>
             <TouchableOpacity onPress={() => setNotificationModalVisible(false)}>
-              <X size={24} color={colors.text} />
+              <X size={24} color={colors.text.primary} />
             </TouchableOpacity>
           </View>
           
@@ -557,7 +557,7 @@ export default function SettingsScreen() {
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Privacy & Security</Text>
             <TouchableOpacity onPress={() => setPrivacyModalVisible(false)}>
-              <X size={24} color={colors.text} />
+              <X size={24} color={colors.text.primary} />
             </TouchableOpacity>
           </View>
           
@@ -629,7 +629,7 @@ export default function SettingsScreen() {
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Help & Support</Text>
             <TouchableOpacity onPress={() => setHelpModalVisible(false)}>
-              <X size={24} color={colors.text} />
+              <X size={24} color={colors.text.primary} />
             </TouchableOpacity>
           </View>
           
@@ -691,7 +691,7 @@ export default function SettingsScreen() {
               style={styles.modalCloseButton}
               onPress={() => setShowBrandingModal(false)}
             >
-              <X size={24} color={colors.text} />
+              <X size={24} color={colors.text.primary} />
             </TouchableOpacity>
           </View>
           <BrandingCustomizer onClose={() => setShowBrandingModal(false)} />
@@ -711,7 +711,7 @@ export default function SettingsScreen() {
               style={styles.modalCloseButton}
               onPress={() => setShowLogoGeneratorModal(false)}
             >
-              <X size={24} color={colors.text} />
+              <X size={24} color={colors.text.primary} />
             </TouchableOpacity>
           </View>
           <LogoGenerator />
