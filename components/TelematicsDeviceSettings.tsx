@@ -143,7 +143,7 @@ export default function TelematicsDeviceSettings({ onBack }: TelematicsDeviceSet
             </View>
           </View>
         </View>
-        <View style={[styles.statusBadge, { backgroundColor: getStatusColor(device.status) + '20' }]}>
+        <View style={[styles.statusBadge, { backgroundColor: `${getStatusColor(device.status)}20` }]}>
           <Text style={[styles.statusText, { color: getStatusColor(device.status) }]}>
             {device.status}
           </Text>
@@ -251,7 +251,7 @@ export default function TelematicsDeviceSettings({ onBack }: TelematicsDeviceSet
           <Switch
             value={autoDetectionEnabled}
             onValueChange={setAutoDetection}
-            trackColor={{ false: colors.background.secondary, true: colors.primary + '40' }}
+            trackColor={{ false: colors.background.secondary, true: `${colors.primary}40` }}
             thumbColor={autoDetectionEnabled ? colors.primary : colors.text.secondary}
           />
         </View>
@@ -422,7 +422,7 @@ const styles = StyleSheet.create({
   errorContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.error + '10',
+    backgroundColor: `${colors.error}10`,
     marginHorizontal: 20,
     marginBottom: 16,
     borderRadius: 8,
@@ -640,7 +640,7 @@ const styles = StyleSheet.create({
   learnMoreButton: {
     paddingHorizontal: 12,
     paddingVertical: 6,
-    backgroundColor: colors.primary + '10',
+    backgroundColor: `${colors.primary}10`,
     borderRadius: 6,
   },
   learnMoreText: {

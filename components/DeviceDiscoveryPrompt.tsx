@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
   },
   deviceBadge: {
-    backgroundColor: colors.primary + '20',
+    backgroundColor: `${colors.primary}20`,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,

@@ -660,19 +660,19 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   statusDetected: {
-    backgroundColor: colors.warning + '20',
+    backgroundColor: `${colors.warning}20`,
   },
   statusConnected: {
-    backgroundColor: colors.success + '20',
+    backgroundColor: `${colors.success}20`,
   },
   statusError: {
-    backgroundColor: colors.error + '20',
+    backgroundColor: `${colors.error}20`,
   },
   statusDisconnected: {
-    backgroundColor: colors.error + '20',
+    backgroundColor: `${colors.error}20`,
   },
   statusPending: {
-    backgroundColor: colors.warning + '20',
+    backgroundColor: `${colors.warning}20`,
   },
   deviceStatusText: {
     fontSize: 12,
@@ -711,7 +711,7 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
   },
   disconnectButton: {
-    backgroundColor: colors.error + '10',
+    backgroundColor: `${colors.error}10`,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 6,
@@ -751,7 +751,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: colors.primary + '10',
+    backgroundColor: `${colors.primary}10`,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 8,
@@ -785,7 +785,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: colors.primary + '10',
+    backgroundColor: `${colors.primary}10`,
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 8,
@@ -882,7 +882,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    backgroundColor: colors.error + '10',
+    backgroundColor: `${colors.error}10`,
     padding: 12,
     borderRadius: 8,
     marginBottom: 16,
