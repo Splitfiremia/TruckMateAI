@@ -282,7 +282,7 @@ const RouteOptimizationMap: React.FC<RouteOptimizationMapProps> = ({
             onPress={handleOptimizeRoute}
             disabled={isOptimizing}
           >
-            <Zap size={20} color={colors.white} />
+            <Zap size={16} color={colors.white} />
             <Text style={styles.optimizeButtonText}>
               {isOptimizing ? 'Optimizing...' : 'Optimize Route'}
             </Text>
@@ -299,7 +299,7 @@ const RouteOptimizationMap: React.FC<RouteOptimizationMapProps> = ({
             onPress={isNavigating ? stopNavigation : handleStartNavigation}
             disabled={!currentRoute}
           >
-            <Navigation size={20} color={colors.white} />
+            <Navigation size={16} color={colors.white} />
             <Text style={styles.navigationButtonText}>
               {isNavigating ? 'Stop' : 'Navigate'}
             </Text>
@@ -325,6 +325,7 @@ const styles = StyleSheet.create({
   mapFallbackContent: {
     alignItems: 'center',
     padding: 20,
+    paddingTop: 80,
     width: '100%',
     maxWidth: 500,
   },
@@ -534,9 +535,10 @@ const styles = StyleSheet.create({
   },
   controlPanel: {
     position: 'absolute',
-    top: 50,
+    top: 16,
     right: 16,
     gap: 8,
+    zIndex: 10,
   },
   controlRow: {
     flexDirection: 'row',
@@ -558,10 +560,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.primary,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 22,
-    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    gap: 6,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
@@ -570,16 +572,16 @@ const styles = StyleSheet.create({
   },
   optimizeButtonText: {
     color: colors.white,
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '600',
   },
   navigationButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: 22,
-    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    gap: 6,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
@@ -588,7 +590,7 @@ const styles = StyleSheet.create({
   },
   navigationButtonText: {
     color: colors.white,
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '600',
   },
 });
