@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Stack } from "expo-router";
+import { Stack, router } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
@@ -15,9 +15,18 @@ SplashScreen.preventAutoHideAsync();
 const queryClient = new QueryClient();
 
 function RootLayoutNav() {
-  const { isOnboarded } = useUserStore();
+  const { isOnboarded, user } = useUserStore();
   const { settings } = useBrandingStore();
   const { theme, isDark } = useTheme();
+  
+  // Handle navigation based on user state
+  useEffect(() => {
+    if (!user || !isOnboarded) {
+      router.replace('/onboarding');
+    } else {
+      router.replace('/(tabs)');
+    }
+  }, [user, isOnboarded]);
   
   // Use custom colors if branding is customized, otherwise use theme colors
   const activeColors = {

@@ -80,10 +80,9 @@ export default function SettingsScreen() {
           text: 'Log Out', 
           style: 'destructive',
           onPress: () => {
-            // Reset driver status and navigate to login
+            // Reset driver status and logout
             changeStatus('Off Duty');
             logout();
-            router.replace('/onboarding');
           }
         }
       ]

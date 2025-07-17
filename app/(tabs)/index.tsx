@@ -232,7 +232,6 @@ export default function DashboardScreen() {
           style: 'destructive',
           onPress: () => {
             logout();
-            router.replace('/onboarding');
           }
         }
       ]
