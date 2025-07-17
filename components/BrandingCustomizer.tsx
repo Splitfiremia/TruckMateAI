@@ -128,8 +128,6 @@ export default function BrandingCustomizer({ onClose }: BrandingCustomizerProps)
     }
   };
   
-
-  
   return (
     <ScrollView style={styles.container}>
       <View style={styles.section}>
