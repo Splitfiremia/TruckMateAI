@@ -381,6 +381,60 @@ export const useTelematicsStore = create<TelematicsState>()(persist(
       return detectedDevices;
     },
     
+    detectFromIncomingData: async () => {
+      // Simulate detection from incoming data patterns
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Mock analysis of incoming data to detect device type
+      // In real implementation, this would analyze data patterns, headers, or protocols
+      const dataPatterns = [
+        { type: 'geotab', probability: 0.3, signature: 'GO_DEVICE_DATA' },
+        { type: 'samsara', probability: 0.25, signature: 'SAMSARA_TELEMETRY' },
+        { type: 'motive', probability: 0.2, signature: 'MOTIVE_ELD_DATA' },
+        { type: 'omnitracs', probability: 0.15, signature: 'OMNI_FLEET_MSG' },
+        { type: 'keeptruckin', probability: 0.1, signature: 'KT_DEVICE_INFO' }
+      ];
+      
+      // Simulate random detection based on probability
+      const random = Math.random();
+      let cumulativeProbability = 0;
+      
+      for (const pattern of dataPatterns) {
+        cumulativeProbability += pattern.probability;
+        if (random < cumulativeProbability) {
+          const mockDevice = mockDevices.find(d => d.type === pattern.type);
+          if (mockDevice) {
+            const detectedDevice: TelematicsDevice = {
+              ...mockDevice,
+              id: `incoming-${Date.now()}`,
+              status: 'detected',
+              connectionMethod: 'cellular',
+              lastSeen: new Date(),
+              metadata: {
+                ...mockDevice.metadata,
+                detectionSource: 'incoming-data',
+                dataSignature: pattern.signature,
+                confidence: 0.8
+              }
+            };
+            
+            // Add to devices if not already present
+            const existingDevice = get().devices.find(d => 
+              d.type === detectedDevice.type && d.serialNumber === detectedDevice.serialNumber
+            );
+            
+            if (!existingDevice) {
+              get().addDevice(detectedDevice);
+            }
+            
+            return detectedDevice;
+          }
+        }
+      }
+      
+      return null;
+    },
+    
     setOnboardingPreference: (preference) => {
       set((state) => ({
         onboardingPreference: { ...state.onboardingPreference, ...preference }
