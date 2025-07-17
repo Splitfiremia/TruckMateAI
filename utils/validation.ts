@@ -240,7 +240,7 @@ export const useFormValidation = (
     const result = validateField(value, rules);
     setErrors(prev => ({
       ...prev,
-      [fieldName]: result.error && result.error.trim() ? result.error : ''
+      [fieldName]: result.error && result.error.trim && result.error.trim() ? result.error : ''
     }));
   };
 

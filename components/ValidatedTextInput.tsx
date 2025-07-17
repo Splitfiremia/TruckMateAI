@@ -37,7 +37,7 @@ export default function ValidatedTextInput({
   helpText,
   ...textInputProps
 }: ValidatedTextInputProps) {
-  const hasError = touched && error && error.trim().length > 0;
+  const hasError = touched && error && error.trim && error.trim().length > 0;
   const isValid = touched && !hasError && textInputProps.value && textInputProps.value.length > 0;
 
   return (
@@ -48,7 +48,7 @@ export default function ValidatedTextInput({
             {label}
             {required && <Text style={styles.required}> *</Text>}
           </Text>
-          {helpText && <Text style={styles.helpText}>{helpText}</Text>}
+          {helpText && helpText.trim() && <Text style={styles.helpText}>{helpText}</Text>}
         </View>
       )}
       
@@ -78,7 +78,7 @@ export default function ValidatedTextInput({
         )}
       </View>
       
-      {hasError && error && (
+      {hasError && error && error.trim() && (
         <View style={styles.errorContainer}>
           <AlertCircle size={14} color={colors.error} />
           <Text style={styles.errorText}>{error}</Text>
