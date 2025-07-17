@@ -1,83 +1,83 @@
 // Light Theme Colors
 const lightTheme = {
-  primary: "#1E40AF", // Deep blue
-  primaryLight: "#3B82F6", // Medium blue
-  secondary: "#2563EB", // Vibrant blue
-  accent: "#60A5FA", // Light blue accent
-  success: "#059669", // Professional green
-  warning: "#D97706", // Professional amber
-  danger: "#DC2626", // Professional red
-  error: "#DC2626", // Professional red (alias for danger)
+  primary: "#0F4C75", // Deep navy blue
+  primaryLight: "#3282B8", // Ocean blue
+  secondary: "#1B6EC2", // Royal blue
+  accent: "#4A90E2", // Sky blue accent
+  success: "#28A745", // Professional green
+  warning: "#FFC107", // Professional amber
+  danger: "#DC3545", // Professional red
+  error: "#DC3545", // Professional red (alias for danger)
   white: "#FFFFFF",
-  black: "#0F172A", // Deep slate
+  black: "#1A1A1A", // Deep charcoal
   
-  // Background colors - Blue tones
+  // Background colors - Sophisticated blue tones
   background: {
-    primary: "#1E40AF", // Deep blue background
-    secondary: "#2563EB", // Vibrant blue background
-    tertiary: "#3B82F6", // Medium blue background
+    primary: "#0A2540", // Deep midnight blue
+    secondary: "#0F4C75", // Navy blue
+    tertiary: "#1B6EC2", // Royal blue
   },
   
-  // Text colors - White tones
+  // Text colors - High contrast whites
   text: {
     primary: "#FFFFFF", // Pure white text
-    secondary: "#F8FAFC", // Very light text
-    tertiary: "#E2E8F0", // Light gray text
+    secondary: "#F5F7FA", // Off-white text
+    tertiary: "#E8EDF5", // Light blue-gray text
   },
   
-  // Status colors
+  // Status colors - High visibility for safety
   status: {
-    success: "#10B981", // Brighter green for blue background
-    warning: "#F59E0B", // Brighter amber for blue background
-    error: "#EF4444", // Brighter red for blue background
+    success: "#00C851", // Bright green for visibility
+    warning: "#FFB300", // Bright amber for alerts
+    error: "#FF4444", // Bright red for warnings
   },
   
   // Border and surface
-  border: "#60A5FA", // Light blue border
-  surface: "#2563EB", // Blue surface
-  card: "#1E40AF", // Blue card background
-  shadow: "rgba(30, 64, 175, 0.2)", // Blue shadow
+  border: "#3282B8", // Ocean blue border
+  surface: "#0F4C75", // Navy surface
+  card: "#0A2540", // Midnight blue card background
+  shadow: "rgba(10, 37, 64, 0.3)", // Deep blue shadow
 };
 
 // Dark Theme Colors
 const darkTheme = {
-  primary: "#93C5FD", // Light blue for dark mode
-  primaryLight: "#60A5FA", // Medium blue
-  secondary: "#3B82F6", // Vibrant blue
-  accent: "#DBEAFE", // Very light blue accent
-  success: "#10B981", // Brighter green for dark mode
-  warning: "#F59E0B", // Brighter amber for dark mode
-  danger: "#EF4444", // Brighter red for dark mode
-  error: "#EF4444", // Brighter red (alias for danger)
+  primary: "#4A90E2", // Sky blue for dark mode
+  primaryLight: "#6BB6FF", // Light sky blue
+  secondary: "#3282B8", // Ocean blue
+  accent: "#87CEEB", // Light blue accent
+  success: "#28A745", // Professional green
+  warning: "#FFC107", // Professional amber
+  danger: "#DC3545", // Professional red
+  error: "#DC3545", // Professional red (alias for danger)
   white: "#FFFFFF",
   black: "#000000",
   
-  // Background colors - Darker blue tones
+  // Background colors - Professional dark blue tones
   background: {
-    primary: "#0F1629", // Very dark blue background
-    secondary: "#1E2A47", // Dark blue background
-    tertiary: "#2D3E63", // Medium dark blue background
+    primary: "#0D1B2A", // Very dark navy
+    secondary: "#1B263B", // Dark slate blue
+    tertiary: "#2C3E50", // Dark blue-gray
   },
   
-  // Text colors - White tones
+  // Text colors - High contrast whites
   text: {
     primary: "#FFFFFF", // Pure white text
-    secondary: "#F8FAFC", // Very light text
-    tertiary: "#E2E8F0", // Light gray text
+    secondary: "#F8F9FA", // Very light text
+    tertiary: "#E9ECEF", // Light gray text
   },
   
-  // Status colors
+  // Status colors - High visibility for night driving
   status: {
-    success: "#10B981",
-    warning: "#F59E0B",
-    error: "#EF4444",
+    success: "#00C851", // Bright green
+    warning: "#FFB300", // Bright amber
+    error: "#FF4444", // Bright red
   },
   
   // Border and surface
-  border: "#3B82F6", // Blue border
-  surface: "#1E2A47", // Dark blue surface
-  card: "#2D3E63", // Dark blue card background
-  shadow: "rgba(15, 22, 41, 0.4)", // Dark blue shadow
+  border: "#3282B8", // Ocean blue border
+  surface: "#1B263B", // Dark slate surface
+  card: "#2C3E50", // Dark blue-gray card background
+  shadow: "rgba(13, 27, 42, 0.5)", // Deep navy shadow
 };
 
 // Export themes
