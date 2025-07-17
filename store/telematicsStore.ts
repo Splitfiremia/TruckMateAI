@@ -342,7 +342,13 @@ export const useTelematicsStore = create<TelematicsState>()(persist(
           ...randomDevice,
           id: `bluetooth-${Date.now()}`,
           connectionMethod: 'bluetooth',
-          macAddress: `${devicePatterns[randomDevice.type]?.macPrefix[0] || '00:00:00'}:${Math.floor(Math.random() * 256).toString(16).padStart(2, '0')}:${Math.floor(Math.random() * 256).toString(16).padStart(2, '0')}:${Math.floor(Math.random() * 256).toString(16).padStart(2, '0')}`,
+          macAddress: (() => {
+            const prefix = devicePatterns[randomDevice.type]?.macPrefix[0] || '00:00:00';
+            const suffix1 = Math.floor(Math.random() * 256).toString(16).padStart(2, '0');
+            const suffix2 = Math.floor(Math.random() * 256).toString(16).padStart(2, '0');
+            const suffix3 = Math.floor(Math.random() * 256).toString(16).padStart(2, '0');
+            return `${prefix}:${suffix1}:${suffix2}:${suffix3}`;
+          })(),
           status: 'detected'
         });
       }
