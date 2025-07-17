@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch, Alert, TextInput } from 'react-native';
 import { Palette, Type, Image, Save, Upload, Eye, EyeOff } from 'lucide-react-native';
 import { colors } from '@/constants/colors';
 import { BrandingSettings, brandingPresets, useBrandingStore } from '@/store/brandingStore';
@@ -45,6 +45,9 @@ export default function BrandingCustomizer({ onClose }: BrandingCustomizerProps)
       accentColor: settings.accentColor,
       supportEmail: settings.supportEmail,
       supportPhone: settings.supportPhone,
+      showCompanyLogo: settings.showCompanyLogo.toString(),
+      customSplashScreen: settings.customSplashScreen.toString(),
+      hideDefaultBranding: settings.hideDefaultBranding.toString(),
     },
     validationRules
   );
@@ -76,7 +79,20 @@ export default function BrandingCustomizer({ onClose }: BrandingCustomizerProps)
           style: 'destructive',
           onPress: () => {
             resetToDefaults();
-            setLocalSettings(settings);
+            setLocalSettings({
+              companyName: settings.companyName,
+              appName: settings.appName,
+              welcomeMessage: settings.welcomeMessage,
+              logoUrl: settings.logoUrl || '',
+              primaryColor: settings.primaryColor,
+              secondaryColor: settings.secondaryColor,
+              accentColor: settings.accentColor,
+              supportEmail: settings.supportEmail,
+              supportPhone: settings.supportPhone,
+              showCompanyLogo: settings.showCompanyLogo.toString(),
+              customSplashScreen: settings.customSplashScreen.toString(),
+              hideDefaultBranding: settings.hideDefaultBranding.toString(),
+            });
           },
         },
       ]
@@ -93,8 +109,12 @@ export default function BrandingCustomizer({ onClose }: BrandingCustomizerProps)
     setLocalSettings(updatedSettings);
   };
   
-  const updateSetting = (key: keyof BrandingSettings, value: string | boolean) => {
-    setLocalSettings(prev => ({ ...prev, [key]: value }));
+  const updateSetting = (key: string, value: string | boolean) => {
+    if (key === 'showCompanyLogo' || key === 'customSplashScreen' || key === 'hideDefaultBranding') {
+      setLocalSettings(prev => ({ ...prev, [key]: value.toString() }));
+    } else {
+      setLocalSettings(prev => ({ ...prev, [key]: value }));
+    }
   };
   
 
@@ -112,9 +132,9 @@ export default function BrandingCustomizer({ onClose }: BrandingCustomizerProps)
           <TextInput
             style={styles.textInput}
             value={localSettings.companyName}
-            onChangeText={(text) => updateSetting('companyName', text)}
+            onChangeText={(text: string) => updateSetting('companyName', text)}
             placeholder="Enter company name"
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={colors.text.secondary}
           />
         </View>
         
@@ -123,9 +143,9 @@ export default function BrandingCustomizer({ onClose }: BrandingCustomizerProps)
           <TextInput
             style={styles.textInput}
             value={localSettings.appName}
-            onChangeText={(text) => updateSetting('appName', text)}
+            onChangeText={(text: string) => updateSetting('appName', text)}
             placeholder="Enter custom app name"
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={colors.text.secondary}
           />
         </View>
         
@@ -134,9 +154,9 @@ export default function BrandingCustomizer({ onClose }: BrandingCustomizerProps)
           <TextInput
             style={[styles.textInput, styles.multilineInput]}
             value={localSettings.welcomeMessage}
-            onChangeText={(text) => updateSetting('welcomeMessage', text)}
+            onChangeText={(text: string) => updateSetting('welcomeMessage', text)}
             placeholder="Enter welcome message for drivers"
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={colors.text.secondary}
             multiline
           />
         </View>
@@ -153,14 +173,14 @@ export default function BrandingCustomizer({ onClose }: BrandingCustomizerProps)
           <TextInput
             style={styles.textInput}
             value={localSettings.logoUrl || ''}
-            onChangeText={(text) => updateSetting('logoUrl', text)}
+            onChangeText={(text: string) => updateSetting('logoUrl', text)}
             placeholder="Enter logo image URL"
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={colors.text.secondary}
           />
         </View>
         
         <TouchableOpacity style={styles.uploadButton}>
-          <Upload size={20} color={colors.text} />
+          <Upload size={20} color={colors.text.primary} />
           <Text style={styles.uploadButtonText}>Upload Logo</Text>
         </TouchableOpacity>
       </View>
@@ -199,9 +219,9 @@ export default function BrandingCustomizer({ onClose }: BrandingCustomizerProps)
               <TextInput
                 style={styles.colorInput}
                 value={localSettings.primaryColor}
-                onChangeText={(text) => updateSetting('primaryColor', text)}
+                onChangeText={(text: string) => updateSetting('primaryColor', text)}
                 placeholder="#1E3A8A"
-                placeholderTextColor={colors.textSecondary}
+                placeholderTextColor={colors.text.secondary}
               />
             </View>
           </View>
@@ -213,9 +233,9 @@ export default function BrandingCustomizer({ onClose }: BrandingCustomizerProps)
               <TextInput
                 style={styles.colorInput}
                 value={localSettings.secondaryColor}
-                onChangeText={(text) => updateSetting('secondaryColor', text)}
+                onChangeText={(text: string) => updateSetting('secondaryColor', text)}
                 placeholder="#10B981"
-                placeholderTextColor={colors.textSecondary}
+                placeholderTextColor={colors.text.secondary}
               />
             </View>
           </View>
@@ -227,9 +247,9 @@ export default function BrandingCustomizer({ onClose }: BrandingCustomizerProps)
               <TextInput
                 style={styles.colorInput}
                 value={localSettings.accentColor}
-                onChangeText={(text) => updateSetting('accentColor', text)}
+                onChangeText={(text: string) => updateSetting('accentColor', text)}
                 placeholder="#F59E0B"
-                placeholderTextColor={colors.textSecondary}
+                placeholderTextColor={colors.text.secondary}
               />
             </View>
           </View>
@@ -245,27 +265,27 @@ export default function BrandingCustomizer({ onClose }: BrandingCustomizerProps)
           <View style={styles.switchItem}>
             <Text style={styles.switchLabel}>Show Company Logo</Text>
             <Switch
-              value={localSettings.showCompanyLogo}
+              value={localSettings.showCompanyLogo === 'true'}
               onValueChange={(value) => updateSetting('showCompanyLogo', value)}
-              trackColor={{ false: colors.textSecondary, true: colors.primary }}
+              trackColor={{ false: colors.text.secondary, true: colors.primary }}
             />
           </View>
           
           <View style={styles.switchItem}>
             <Text style={styles.switchLabel}>Custom Splash Screen</Text>
             <Switch
-              value={localSettings.customSplashScreen}
+              value={localSettings.customSplashScreen === 'true'}
               onValueChange={(value) => updateSetting('customSplashScreen', value)}
-              trackColor={{ false: colors.textSecondary, true: colors.primary }}
+              trackColor={{ false: colors.text.secondary, true: colors.primary }}
             />
           </View>
           
           <View style={styles.switchItem}>
             <Text style={styles.switchLabel}>Hide Default Branding</Text>
             <Switch
-              value={localSettings.hideDefaultBranding}
+              value={localSettings.hideDefaultBranding === 'true'}
               onValueChange={(value) => updateSetting('hideDefaultBranding', value)}
-              trackColor={{ false: colors.textSecondary, true: colors.primary }}
+              trackColor={{ false: colors.text.secondary, true: colors.primary }}
             />
           </View>
         </View>
@@ -281,9 +301,9 @@ export default function BrandingCustomizer({ onClose }: BrandingCustomizerProps)
           <TextInput
             style={styles.textInput}
             value={localSettings.supportEmail}
-            onChangeText={(text) => updateSetting('supportEmail', text)}
+            onChangeText={(text: string) => updateSetting('supportEmail', text)}
             placeholder="support@company.com"
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={colors.text.secondary}
             keyboardType="email-address"
           />
         </View>
@@ -293,9 +313,9 @@ export default function BrandingCustomizer({ onClose }: BrandingCustomizerProps)
           <TextInput
             style={styles.textInput}
             value={localSettings.supportPhone}
-            onChangeText={(text) => updateSetting('supportPhone', text)}
+            onChangeText={(text: string) => updateSetting('supportPhone', text)}
             placeholder="(555) 123-4567"
-            placeholderTextColor={colors.textSecondary}
+            placeholderTextColor={colors.text.secondary}
             keyboardType="phone-pad"
           />
         </View>
@@ -307,7 +327,7 @@ export default function BrandingCustomizer({ onClose }: BrandingCustomizerProps)
         </TouchableOpacity>
         
         <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <Save size={20} color={colors.text} />
+          <Save size={20} color={colors.text.primary} />
           <Text style={styles.primarySaveButtonText}>Save Settings</Text>
         </TouchableOpacity>
       </View>
@@ -357,13 +377,13 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
     marginLeft: 8,
   },
   subsectionTitle: {
     fontSize: 16,
     fontWeight: '500',
-    color: colors.text,
+    color: colors.text.primary,
     marginBottom: 12,
     marginTop: 8,
   },
@@ -373,14 +393,14 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 14,
     fontWeight: '500',
-    color: colors.text,
+    color: colors.text.primary,
     marginBottom: 6,
   },
   textInput: {
-    backgroundColor: colors.background,
+    backgroundColor: colors.background.primary,
     borderRadius: 8,
     padding: 12,
-    color: colors.text,
+    color: colors.text.primary,
     fontSize: 16,
   },
   multilineInput: {
@@ -400,7 +420,7 @@ const styles = StyleSheet.create({
   uploadButtonText: {
     fontSize: 16,
     fontWeight: '500',
-    color: colors.text,
+    color: colors.text.primary,
   },
   colorPresets: {
     flexDirection: 'row',
@@ -424,7 +444,7 @@ const styles = StyleSheet.create({
   },
   colorPresetName: {
     fontSize: 12,
-    color: colors.textSecondary,
+    color: colors.text.secondary,
     textAlign: 'center',
   },
   colorInputs: {
@@ -436,7 +456,7 @@ const styles = StyleSheet.create({
   colorInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.background,
+    backgroundColor: colors.background.primary,
     borderRadius: 8,
     padding: 4,
   },
@@ -448,7 +468,7 @@ const styles = StyleSheet.create({
   },
   colorInput: {
     flex: 1,
-    color: colors.text,
+    color: colors.text.primary,
     fontSize: 16,
     padding: 8,
   },
@@ -467,7 +487,7 @@ const styles = StyleSheet.create({
   primarySaveButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
   },
   switchGroup: {
     gap: 16,
@@ -480,7 +500,7 @@ const styles = StyleSheet.create({
   },
   switchLabel: {
     fontSize: 16,
-    color: colors.text,
+    color: colors.text.primary,
     flex: 1,
   },
   actionButtons: {
@@ -500,7 +520,7 @@ const styles = StyleSheet.create({
   resetButtonText: {
     fontSize: 16,
     fontWeight: '500',
-    color: colors.textSecondary,
+    color: colors.text.secondary,
   },
   saveButton: {
     flex: 2,
@@ -519,7 +539,7 @@ const styles = StyleSheet.create({
   previewTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
     marginBottom: 12,
   },
   previewCard: {
@@ -535,12 +555,12 @@ const styles = StyleSheet.create({
   },
   previewCompanyName: {
     fontSize: 16,
-    color: colors.textSecondary,
+    color: colors.text.secondary,
     marginBottom: 8,
   },
   previewMessage: {
     fontSize: 14,
-    color: colors.text,
+    color: colors.text.primary,
     marginBottom: 16,
   },
   previewButtons: {
@@ -555,6 +575,6 @@ const styles = StyleSheet.create({
   previewButtonText: {
     fontSize: 12,
     fontWeight: '500',
-    color: colors.text,
+    color: colors.text.primary,
   },
 });
