@@ -754,7 +754,7 @@ const styles = StyleSheet.create({
   profileName: {
     fontSize: 18,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
     marginBottom: 4,
   },
   profileDetails: {
@@ -781,7 +781,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
   },
   settingsCard: {
     backgroundColor: colors.background.secondary,
@@ -805,7 +805,7 @@ const styles = StyleSheet.create({
   settingLabel: {
     fontSize: 16,
     fontWeight: '500',
-    color: colors.text,
+    color: colors.text.primary,
     marginBottom: 2,
   },
   settingDescription: {
@@ -855,7 +855,7 @@ const styles = StyleSheet.create({
   },
   settingLinkLabel: {
     fontSize: 16,
-    color: colors.text,
+    color: colors.text.primary,
   },
   logoutButton: {
     flexDirection: 'row',
@@ -903,7 +903,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
   },
   modalContent: {
     flex: 1,
@@ -916,7 +916,7 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 16,
     fontWeight: '500',
-    color: colors.text,
+    color: colors.text.primary,
     marginBottom: 8,
   },
   textInput: {
@@ -925,7 +925,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 16,
-    color: colors.text,
+    color: colors.text.primary,
     borderWidth: 1,
     borderColor: colors.border,
   },
@@ -948,7 +948,7 @@ const styles = StyleSheet.create({
   sectionSubtitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
     marginBottom: 12,
     marginTop: 8,
   },
@@ -1003,7 +1003,7 @@ const styles = StyleSheet.create({
   supportTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
     marginBottom: 8,
   },
   supportText: {
