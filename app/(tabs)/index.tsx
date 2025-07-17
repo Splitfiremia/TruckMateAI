@@ -458,8 +458,6 @@ export default function DashboardScreen() {
         <View style={styles.footer} />
       </ScrollView>
       
-
-      
       <View style={styles.voiceButtonContainer}>
         <VoiceCommandButton onCommandProcessed={handleCommandProcessed} />
       </View>
@@ -570,7 +568,7 @@ export default function DashboardScreen() {
       <DeviceDiscoveryPrompt
         visible={showDiscoveryPrompt}
         onClose={dismissPrompt}
-        detectedDevice={detectedDevice || undefined}
+        detectedDevice={detectedDevice ?? undefined}
       />
     </View>
   );
