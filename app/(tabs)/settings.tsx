@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Switch, Alert, Mo
 import { Stack } from 'expo-router';
 import { User, Truck, Bell, Shield, HelpCircle, LogOut, ChevronRight, AlertTriangle, X, Save, Cloud, Palette, Building2, Sparkles, Smartphone } from 'lucide-react-native';
 
-import { colors } from '@/constants/colors';
+import { colors, deprecatedColors } from '@/constants/colors';
 import { useTheme } from '@/store/themeStore';
 import { driverInfo } from '@/constants/mockData';
 import VoiceCommandButton from '@/components/VoiceCommandButton';
@@ -142,7 +142,7 @@ export default function SettingsScreen() {
         <View style={styles.profileSection}>
           <View style={styles.profileInfo}>
             <View style={styles.profileAvatar}>
-              <User size={32} color={colors.text.primary as string} />
+              <User size={32} color={theme.text.primary} />
             </View>
             <View>
               <Text style={styles.profileName}>{user?.name || driverInfo.name}</Text>
@@ -190,7 +190,7 @@ export default function SettingsScreen() {
         
         <View style={styles.settingsCard}>
           {renderSettingLink(
-            <Sparkles size={20} color={colors.primaryLight} />,
+            <Sparkles size={20} color={theme.primaryLight} />,
             'AI Logo Generator',
             () => setShowLogoGeneratorModal(true)
           )}
@@ -316,7 +316,7 @@ export default function SettingsScreen() {
         </View>
         
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <LogOut size={20} color={colors.danger} />
+          <LogOut size={20} color={theme.danger} />
           <Text style={styles.logoutText}>Sign Out</Text>
         </TouchableOpacity>
         
@@ -346,7 +346,7 @@ export default function SettingsScreen() {
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Personal Information</Text>
             <TouchableOpacity onPress={() => setPersonalInfoModalVisible(false)}>
-              <X size={24} color={colors.text.primary as string} />
+              <X size={24} color={theme.text.primary} />
             </TouchableOpacity>
           </View>
           
@@ -404,7 +404,7 @@ export default function SettingsScreen() {
           </ScrollView>
           
           <TouchableOpacity style={styles.saveButton}>
-            <Save size={20} color={colors.white} />
+            <Save size={20} color={theme.white} />
             <Text style={styles.saveButtonText}>Save Changes</Text>
           </TouchableOpacity>
         </View>
@@ -420,7 +420,7 @@ export default function SettingsScreen() {
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Vehicle Settings</Text>
             <TouchableOpacity onPress={() => setVehicleSettingsModalVisible(false)}>
-              <X size={24} color={colors.text.primary as string} />
+              <X size={24} color={theme.text.primary} />
             </TouchableOpacity>
           </View>
           
@@ -475,7 +475,7 @@ export default function SettingsScreen() {
           </ScrollView>
           
           <TouchableOpacity style={styles.saveButton}>
-            <Save size={20} color={colors.white} />
+            <Save size={20} color={theme.white} />
             <Text style={styles.saveButtonText}>Save Changes</Text>
           </TouchableOpacity>
         </View>
@@ -491,7 +491,7 @@ export default function SettingsScreen() {
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Notification Preferences</Text>
             <TouchableOpacity onPress={() => setNotificationModalVisible(false)}>
-              <X size={24} color={colors.text.primary as string} />
+              <X size={24} color={theme.text.primary} />
             </TouchableOpacity>
           </View>
           
@@ -544,7 +544,7 @@ export default function SettingsScreen() {
           </ScrollView>
           
           <TouchableOpacity style={styles.saveButton}>
-            <Save size={20} color={colors.white} />
+            <Save size={20} color={theme.white} />
             <Text style={styles.saveButtonText}>Save Preferences</Text>
           </TouchableOpacity>
         </View>
@@ -560,7 +560,7 @@ export default function SettingsScreen() {
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Privacy & Security</Text>
             <TouchableOpacity onPress={() => setPrivacyModalVisible(false)}>
-              <X size={24} color={colors.text.primary as string} />
+              <X size={24} color={theme.text.primary} />
             </TouchableOpacity>
           </View>
           
@@ -615,7 +615,7 @@ export default function SettingsScreen() {
               
               <TouchableOpacity style={[styles.securityOption, styles.dangerOption]}>
                 <Text style={[styles.settingLabel, styles.dangerText]}>Delete Account</Text>
-                <ChevronRight size={20} color={colors.danger} />
+                <ChevronRight size={20} color={theme.danger} />
               </TouchableOpacity>
             </View>
           </ScrollView>
@@ -632,7 +632,7 @@ export default function SettingsScreen() {
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Help & Support</Text>
             <TouchableOpacity onPress={() => setHelpModalVisible(false)}>
-              <X size={24} color={colors.text.primary as string} />
+              <X size={24} color={theme.text.primary} />
             </TouchableOpacity>
           </View>
           
@@ -694,7 +694,7 @@ export default function SettingsScreen() {
               style={styles.modalCloseButton}
               onPress={() => setShowBrandingModal(false)}
             >
-              <X size={24} color={colors.text.primary as string} />
+              <X size={24} color={theme.text.primary} />
             </TouchableOpacity>
           </View>
           <BrandingCustomizer onClose={() => setShowBrandingModal(false)} />
@@ -714,7 +714,7 @@ export default function SettingsScreen() {
               style={styles.modalCloseButton}
               onPress={() => setShowLogoGeneratorModal(false)}
             >
-              <X size={24} color={colors.text.primary as string} />
+              <X size={24} color={theme.text.primary} />
             </TouchableOpacity>
           </View>
           <LogoGenerator />

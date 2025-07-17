@@ -433,7 +433,6 @@ export const useTelematicsStore = create<TelematicsState>()(persist(
       
       return detectedDevices;
     },
-
     
     setOnboardingPreference: (preference) => {
       set((state) => ({
