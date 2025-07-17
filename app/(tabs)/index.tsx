@@ -367,54 +367,60 @@ export default function DashboardScreen() {
         </View>
         
         <View style={styles.quickActions}>
-          <QuickActionButton 
-            icon={<Clock size={20} color={colors.text.primary} />}
-            label="Change Status"
-            onPress={() => handleActionWithInspectionCheck(() => setStatusModalVisible(true))}
-            color={colors.primaryLight}
-          />
+          <View style={styles.quickActionRow}>
+            <QuickActionButton 
+              icon={<Clock size={20} color={colors.text.primary} />}
+              label="Change Status"
+              onPress={() => handleActionWithInspectionCheck(() => setStatusModalVisible(true))}
+              color={colors.primaryLight}
+            />
+            
+            <QuickActionButton 
+              icon={<Clipboard size={20} color={colors.text.primary} />}
+              label="Pre-Trip"
+              onPress={() => setInspectionModalVisible(true)}
+              color={colors.secondary}
+            />
+            
+            <QuickActionButton 
+              icon={<Camera size={20} color={colors.text.primary} />}
+              label="Scan Receipt"
+              onPress={() => handleActionWithInspectionCheck(() => setScannerVisible(true))}
+              color={colors.secondary}
+            />
+            
+            <QuickActionButton 
+              icon={<Upload size={20} color={colors.text.primary} />}
+              label="Bulk Upload"
+              onPress={() => handleActionWithInspectionCheck(() => setBulkUploadVisible(true))}
+              color={colors.primaryLight}
+            />
+          </View>
           
-          <QuickActionButton 
-            icon={<Clipboard size={20} color={colors.text.primary} />}
-            label="Pre-Trip"
-            onPress={() => setInspectionModalVisible(true)}
-            color={colors.secondary}
-          />
-          
-          <QuickActionButton 
-            icon={<Camera size={20} color={colors.text.primary} />}
-            label="Scan Receipt"
-            onPress={() => handleActionWithInspectionCheck(() => setScannerVisible(true))}
-            color={colors.secondary}
-          />
-          
-          <QuickActionButton 
-            icon={<Upload size={20} color={colors.text.primary} />}
-            label="Bulk Upload"
-            onPress={() => handleActionWithInspectionCheck(() => setBulkUploadVisible(true))}
-            color={colors.primaryLight}
-          />
-          
-          <QuickActionButton 
-            icon={<Shield size={20} color={colors.text.primary} />}
-            label="DOT Assistant"
-            onPress={() => handleActionWithInspectionCheck(() => setDotAssistantVisible(true))}
-            color={colors.secondary}
-          />
-          
-          <QuickActionButton 
-            icon={<AlertTriangle size={20} color={colors.text.primary} />}
-            label="AI Compliance"
-            onPress={() => handleActionWithInspectionCheck(() => setPredictiveComplianceVisible(true))}
-            color={violationPredictions.length > 0 ? colors.warning : colors.primaryLight}
-          />
-          
-          <QuickActionButton 
-            icon={<Cloud size={20} color={colors.text.primary} />}
-            label="Weather"
-            onPress={() => setWeatherForecastVisible(true)}
-            color={colors.primaryLight}
-          />
+          <View style={styles.quickActionRow}>
+            <QuickActionButton 
+              icon={<Shield size={20} color={colors.text.primary} />}
+              label="DOT Assistant"
+              onPress={() => handleActionWithInspectionCheck(() => setDotAssistantVisible(true))}
+              color={colors.secondary}
+            />
+            
+            <QuickActionButton 
+              icon={<AlertTriangle size={20} color={colors.text.primary} />}
+              label="AI Compliance"
+              onPress={() => handleActionWithInspectionCheck(() => setPredictiveComplianceVisible(true))}
+              color={violationPredictions.length > 0 ? colors.warning : colors.primaryLight}
+            />
+            
+            <QuickActionButton 
+              icon={<Cloud size={20} color={colors.text.primary} />}
+              label="Weather"
+              onPress={() => setWeatherForecastVisible(true)}
+              color={colors.primaryLight}
+            />
+            
+            <View style={styles.quickActionPlaceholder} />
+          </View>
         </View>
         
         <View style={styles.sectionHeader}>
@@ -633,10 +639,17 @@ const styles = StyleSheet.create({
     color: colors.primaryLight,
   },
   quickActions: {
+    marginBottom: 8,
+  },
+  quickActionRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    flexWrap: 'wrap',
-    gap: 12,
+    marginBottom: 12,
+    gap: 8,
+  },
+  quickActionPlaceholder: {
+    flex: 1,
+    minWidth: 80,
   },
   statsContainer: {
     flexDirection: 'row',

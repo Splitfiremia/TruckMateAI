@@ -1,5 +1,5 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet, ViewStyle } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, ViewStyle, View } from 'react-native';
 import { colors } from '@/constants/colors';
 import { LucideIcon } from 'lucide-react-native';
 
@@ -49,16 +49,18 @@ export default function QuickActionButton({
   );
 }
 
-const View = require('react-native').View;
+
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 12,
     borderWidth: 1,
     padding: 12,
     minWidth: 80,
+    minHeight: 90,
     backgroundColor: colors.backgroundLight,
   },
   iconContainer: {
@@ -72,8 +74,11 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 12,
     fontWeight: '500',
-    color: colors.text,
+    color: colors.text.primary,
     textAlign: 'center',
+    lineHeight: 16,
+    numberOfLines: 2,
+    flexShrink: 1,
   },
   disabledContainer: {
     opacity: 0.5,
@@ -83,6 +88,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.border,
   },
   disabledLabel: {
-    color: colors.textSecondary,
+    color: colors.text.secondary,
   },
 });
