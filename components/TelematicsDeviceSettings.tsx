@@ -21,11 +21,18 @@ import {
   RefreshCw,
   Search,
   Info,
+  Unlink,
+  ArrowLeft,
+  X,
 } from 'lucide-react-native';
 import { colors } from '@/constants/colors';
 import { useTelematicsStore, TelematicsDevice, DeviceType } from '@/store/telematicsStore';
 
-export default function TelematicsDeviceSettings() {
+interface TelematicsDeviceSettingsProps {
+  onBack?: () => void;
+}
+
+export default function TelematicsDeviceSettings({ onBack }: TelematicsDeviceSettingsProps = {}) {
   const {
     devices,
     isScanning,
@@ -178,6 +185,7 @@ export default function TelematicsDeviceSettings() {
             style={styles.disconnectButton}
             onPress={() => handleDisconnectDevice(device.id)}
           >
+            <Unlink size={16} color={colors.text.primary} />
             <Text style={styles.disconnectButtonText}>Disconnect</Text>
           </TouchableOpacity>
         )}
@@ -216,10 +224,19 @@ export default function TelematicsDeviceSettings() {
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
       <View style={styles.header}>
-        <Text style={styles.title}>Telematics Devices</Text>
-        <Text style={styles.subtitle}>
-          Manage your ELD and fleet hardware connections
-        </Text>
+        <View style={styles.navigationBar}>
+          {onBack && (
+            <TouchableOpacity style={styles.backButton} onPress={onBack}>
+              <ArrowLeft size={24} color={colors.text.primary} />
+            </TouchableOpacity>
+          )}
+          <View style={styles.titleContainer}>
+            <Text style={styles.title}>Telematics Devices</Text>
+            <Text style={styles.subtitle}>
+              Manage your ELD and fleet hardware connections
+            </Text>
+          </View>
+        </View>
       </View>
 
       {/* Auto-Detection Setting */}

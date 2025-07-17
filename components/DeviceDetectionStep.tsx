@@ -18,7 +18,11 @@ import {
   Truck,
   Settings,
   ArrowRight,
-  SkipForward
+  SkipForward,
+  ArrowLeft,
+  X,
+  RefreshCw,
+  Unlink
 } from 'lucide-react-native';
 import { colors } from '@/constants/colors';
 import { useTelematicsStore, DeviceType, TelematicsDevice } from '@/store/telematicsStore';
@@ -40,9 +44,10 @@ const getStatusStyle = (status: string) => {
 interface DeviceDetectionStepProps {
   onComplete: () => void;
   onSkip: () => void;
+  onBack?: () => void;
 }
 
-export default function DeviceDetectionStep({ onComplete, onSkip }: DeviceDetectionStepProps) {
+export default function DeviceDetectionStep({ onComplete, onSkip, onBack }: DeviceDetectionStepProps) {
   const {
     devices,
     onboardingPreference,
@@ -51,6 +56,7 @@ export default function DeviceDetectionStep({ onComplete, onSkip }: DeviceDetect
     startDeviceDetection,
     setOnboardingPreference,
     connectDevice,
+    disconnectDevice,
     getDeviceRecommendations,
     setError
   } = useTelematicsStore();
@@ -131,6 +137,35 @@ export default function DeviceDetectionStep({ onComplete, onSkip }: DeviceDetect
       ]);
     } else {
       Alert.alert('Connection Failed', error || 'Unable to connect to device');
+    }
+  };
+
+  const handleDisconnectDevice = (deviceId: string) => {
+    Alert.alert(
+      'Disconnect Device',
+      'Are you sure you want to disconnect this device?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Disconnect',
+          style: 'destructive',
+          onPress: () => disconnectDevice(deviceId),
+        },
+      ]
+    );
+  };
+
+  const handleGoBack = () => {
+    if (showDetectedDevices || showRecommendations) {
+      setShowDetectedDevices(false);
+      setShowRecommendations(false);
+      setSelectedOption(null);
+    } else if (selectedOption === 'existing' && selectedDeviceType) {
+      setSelectedDeviceType(null);
+    } else if (selectedOption) {
+      setSelectedOption(null);
+    } else if (onBack) {
+      onBack();
     }
   };
 
@@ -275,40 +310,64 @@ export default function DeviceDetectionStep({ onComplete, onSkip }: DeviceDetect
       )}
 
       {devices.length > 0 && (
-        <ScrollView style={styles.devicesList}>
-          {devices.map((device) => (
-            <View key={device.id} style={styles.deviceCard}>
-              <View style={styles.deviceInfo}>
-                <View style={styles.deviceHeader}>
-                  <Text style={styles.deviceName}>{device.name}</Text>
-                  <View style={[styles.deviceStatus, getStatusStyle(device.status)]}>
-                    <Text style={styles.deviceStatusText}>{device.status}</Text>
+        <>
+          <ScrollView style={styles.devicesList}>
+            {devices.map((device) => (
+              <View key={device.id} style={styles.deviceCard}>
+                <View style={styles.deviceInfo}>
+                  <View style={styles.deviceHeader}>
+                    <Text style={styles.deviceName}>{device.name}</Text>
+                    <View style={[styles.deviceStatus, getStatusStyle(device.status)]}>
+                      <Text style={styles.deviceStatusText}>{device.status}</Text>
+                    </View>
+                  </View>
+                  <Text style={styles.deviceType}>{device.type.toUpperCase()}</Text>
+                  <View style={styles.deviceDetails}>
+                    <Text style={styles.deviceDetail}>
+                      Connection: {device.connectionMethod}
+                    </Text>
+                    {device.signalStrength && (
+                      <Text style={styles.deviceDetail}>
+                        Signal: {device.signalStrength}%
+                      </Text>
+                    )}
                   </View>
                 </View>
-                <Text style={styles.deviceType}>{device.type.toUpperCase()}</Text>
-                <View style={styles.deviceDetails}>
-                  <Text style={styles.deviceDetail}>
-                    Connection: {device.connectionMethod}
-                  </Text>
-                  {device.signalStrength && (
-                    <Text style={styles.deviceDetail}>
-                      Signal: {device.signalStrength}%
-                    </Text>
+                <View style={styles.deviceActions}>
+                  {device.status === 'detected' && (
+                    <TouchableOpacity
+                      style={styles.connectButton}
+                      onPress={() => handleConnectDevice(device.id)}
+                    >
+                      <Text style={styles.connectButtonText}>Connect</Text>
+                    </TouchableOpacity>
+                  )}
+                  
+                  {device.status === 'connected' && (
+                    <TouchableOpacity
+                      style={styles.disconnectButton}
+                      onPress={() => handleDisconnectDevice(device.id)}
+                    >
+                      <Unlink size={16} color={colors.error} />
+                      <Text style={styles.disconnectButtonText}>Disconnect</Text>
+                    </TouchableOpacity>
                   )}
                 </View>
               </View>
-              <TouchableOpacity
-                style={styles.connectButton}
-                onPress={() => handleConnectDevice(device.id)}
-                disabled={device.status === 'connected'}
-              >
-                <Text style={styles.connectButtonText}>
-                  {device.status === 'connected' ? 'Connected' : 'Connect'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          ))}
-        </ScrollView>
+            ))}
+          </ScrollView>
+          
+          <View style={styles.additionalActions}>
+            <TouchableOpacity style={styles.scanMoreButton} onPress={handleManualDetection}>
+              <Search size={16} color={colors.primary} />
+              <Text style={styles.scanMoreButtonText}>Scan for Other Devices</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.changeDeviceTypeButton} onPress={() => setSelectedDeviceType(null)}>
+              <Settings size={16} color={colors.text.secondary} />
+              <Text style={styles.changeDeviceTypeButtonText}>Change Device Type</Text>
+            </TouchableOpacity>
+          </View>
+        </>
       )}
 
       {!isScanning && devices.length === 0 && (
@@ -318,10 +377,16 @@ export default function DeviceDetectionStep({ onComplete, onSkip }: DeviceDetect
           <Text style={styles.noDevicesText}>
             Make sure your device is powered on and nearby
           </Text>
-          <TouchableOpacity style={styles.retryButton} onPress={handleManualDetection}>
-            <Search size={16} color={colors.primary} />
-            <Text style={styles.retryButtonText}>Scan Again</Text>
-          </TouchableOpacity>
+          <View style={styles.noDevicesActions}>
+            <TouchableOpacity style={styles.retryButton} onPress={handleManualDetection}>
+              <RefreshCw size={16} color={colors.primary} />
+              <Text style={styles.retryButtonText}>Scan Again</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.scanOtherButton} onPress={() => setSelectedDeviceType(null)}>
+              <Search size={16} color={colors.text.secondary} />
+              <Text style={styles.scanOtherButtonText}>Try Different Device</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       )}
     </View>
@@ -364,7 +429,19 @@ export default function DeviceDetectionStep({ onComplete, onSkip }: DeviceDetect
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Device Setup</Text>
+      <View style={styles.header}>
+        <View style={styles.navigationBar}>
+          {(selectedOption || onBack) && (
+            <TouchableOpacity style={styles.backButton} onPress={handleGoBack}>
+              <ArrowLeft size={24} color={colors.text.primary} />
+            </TouchableOpacity>
+          )}
+          <Text style={styles.title}>Device Setup</Text>
+          <TouchableOpacity style={styles.closeButton} onPress={onSkip}>
+            <X size={24} color={colors.text.secondary} />
+          </TouchableOpacity>
+        </View>
+      </View>
       
       {!selectedOption && renderInitialOptions()}
       
@@ -398,11 +475,30 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  header: {
+    marginBottom: 16,
+  },
+  navigationBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 4,
+    marginBottom: 8,
+  },
+  backButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: colors.background.secondary,
+  },
+  closeButton: {
+    padding: 8,
+    borderRadius: 8,
+  },
   title: {
     fontSize: 24,
     fontWeight: '600',
     color: colors.text.primary,
-    marginBottom: 8,
+    flex: 1,
     textAlign: 'center',
   },
   optionsContainer: {
@@ -543,12 +639,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
   },
   deviceInfo: {
-    flex: 1,
+    marginBottom: 12,
   },
   deviceHeader: {
     flexDirection: 'row',
@@ -599,16 +692,39 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.text.secondary,
   },
+  deviceActions: {
+    flexDirection: 'row',
+    gap: 12,
+    alignItems: 'center',
+  },
   connectButton: {
     backgroundColor: colors.primary,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 6,
+    flex: 1,
+    alignItems: 'center',
   },
   connectButtonText: {
     fontSize: 14,
     fontWeight: '500',
     color: colors.text.primary,
+  },
+  disconnectButton: {
+    backgroundColor: colors.error + '10',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    flex: 1,
+    justifyContent: 'center',
+  },
+  disconnectButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.error,
   },
   noDevicesContainer: {
     alignItems: 'center',
@@ -625,15 +741,76 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
     textAlign: 'center',
   },
+  noDevicesActions: {
+    flexDirection: 'row',
+    gap: 16,
+    marginTop: 16,
+    justifyContent: 'center',
+  },
   retryButton: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginTop: 8,
+    backgroundColor: colors.primary + '10',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
   },
   retryButtonText: {
     fontSize: 14,
     color: colors.primary,
+    fontWeight: '500',
+  },
+  scanOtherButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: colors.background.secondary,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  scanOtherButtonText: {
+    fontSize: 14,
+    color: colors.text.secondary,
+    fontWeight: '500',
+  },
+  additionalActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 16,
+    paddingHorizontal: 16,
+  },
+  scanMoreButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: colors.primary + '10',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    flex: 1,
+    justifyContent: 'center',
+  },
+  scanMoreButtonText: {
+    fontSize: 14,
+    color: colors.primary,
+    fontWeight: '500',
+  },
+  changeDeviceTypeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: colors.background.secondary,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    flex: 1,
+    justifyContent: 'center',
+  },
+  changeDeviceTypeButtonText: {
+    fontSize: 14,
+    color: colors.text.secondary,
     fontWeight: '500',
   },
   recommendationsContainer: {
