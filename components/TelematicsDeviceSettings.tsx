@@ -356,6 +356,18 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: 16,
   },
+  navigationBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  backButton: {
+    padding: 8,
+    marginLeft: -8,
+  },
+  titleContainer: {
+    flex: 1,
+  },
   title: {
     fontSize: 24,
     fontWeight: '700',
