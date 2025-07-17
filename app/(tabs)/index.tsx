@@ -377,7 +377,7 @@ export default function DashboardScreen() {
             
             <QuickActionButton 
               icon={<Clipboard size={20} color={colors.text.primary} />}
-              label="Pre-Trip"
+              label="Pre-Trip Inspection"
               onPress={() => setInspectionModalVisible(true)}
               color={colors.secondary}
             />
@@ -388,16 +388,16 @@ export default function DashboardScreen() {
               onPress={() => handleActionWithInspectionCheck(() => setScannerVisible(true))}
               color={colors.secondary}
             />
-            
+          </View>
+          
+          <View style={styles.quickActionRow}>
             <QuickActionButton 
               icon={<Upload size={20} color={colors.text.primary} />}
               label="Bulk Upload"
               onPress={() => handleActionWithInspectionCheck(() => setBulkUploadVisible(true))}
               color={colors.primaryLight}
             />
-          </View>
-          
-          <View style={styles.quickActionRow}>
+            
             <QuickActionButton 
               icon={<Shield size={20} color={colors.text.primary} />}
               label="DOT Assistant"
@@ -411,14 +411,17 @@ export default function DashboardScreen() {
               onPress={() => handleActionWithInspectionCheck(() => setPredictiveComplianceVisible(true))}
               color={violationPredictions.length > 0 ? colors.warning : colors.primaryLight}
             />
-            
+          </View>
+          
+          <View style={styles.quickActionRow}>
             <QuickActionButton 
               icon={<Cloud size={20} color={colors.text.primary} />}
-              label="Weather"
+              label="Weather Forecast"
               onPress={() => setWeatherForecastVisible(true)}
               color={colors.primaryLight}
             />
             
+            <View style={styles.quickActionPlaceholder} />
             <View style={styles.quickActionPlaceholder} />
           </View>
         </View>
@@ -645,7 +648,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 12,
-    gap: 8,
+    gap: 10,
   },
   quickActionPlaceholder: {
     flex: 1,

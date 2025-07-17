@@ -39,10 +39,14 @@ export default function QuickActionButton({
       ]}>
         {icon}
       </View>
-      <Text style={[
-        styles.label,
-        disabled && styles.disabledLabel
-      ]}>
+      <Text 
+        style={[
+          styles.label,
+          disabled && styles.disabledLabel
+        ]}
+        numberOfLines={2}
+        ellipsizeMode="tail"
+      >
         {label}
       </Text>
     </TouchableOpacity>
@@ -60,7 +64,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 12,
     minWidth: 80,
-    minHeight: 90,
+    minHeight: 100,
     backgroundColor: colors.backgroundLight,
   },
   iconContainer: {
@@ -76,9 +80,9 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: colors.text.primary,
     textAlign: 'center',
-    lineHeight: 16,
-    numberOfLines: 2,
+    lineHeight: 14,
     flexShrink: 1,
+    flexWrap: 'wrap',
   },
   disabledContainer: {
     opacity: 0.5,
