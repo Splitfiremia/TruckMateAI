@@ -198,9 +198,9 @@ export default function DashboardScreen() {
       case 'Off Duty':
         return colors.secondary;
       case 'Sleeper Berth':
-        return colors.textSecondary;
+        return colors.text.secondary;
       default:
-        return colors.textSecondary;
+        return colors.text.secondary;
     }
   };
   
