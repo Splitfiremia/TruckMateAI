@@ -34,6 +34,7 @@ import { WeatherForecastModal } from '@/components/WeatherForecastModal';
 import { WeatherNotificationSystem } from '@/components/WeatherNotificationSystem';
 import MaintenanceSummaryCard from '@/components/MaintenanceSummaryCard';
 import AIAssistantFAB from '@/components/AIAssistantFAB';
+import ELDIntegrationCard from '@/components/ELDIntegrationCard';
 import { useUserStore } from '@/store/userStore';
 import { useBrandingStore } from '@/store/brandingStore';
 import { useLogbookStore } from '@/store/logbookStore';

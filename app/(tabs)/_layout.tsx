@@ -1,5 +1,5 @@
 import { Tabs, Redirect } from "expo-router";
-import { BarChart, Clipboard, Home, Receipt, Settings, Users, Shield, Cloud, Zap, Wrench, Navigation, Bot } from "lucide-react-native";
+import { BarChart, Clipboard, Home, Receipt, Settings, Users, Shield, Cloud, Zap, Wrench, Navigation, Bot, Truck } from "lucide-react-native";
 import React from "react";
 
 import { colors } from "@/constants/colors";
@@ -94,6 +94,13 @@ export default function TabLayout() {
         options={{
           title: "Compliance",
           tabBarIcon: ({ color }) => <Shield color={color} size={20} />,
+        }}
+      />
+      <Tabs.Screen
+        name="eld-integration"
+        options={{
+          title: "ELD",
+          tabBarIcon: ({ color }) => <Truck color={color} size={20} />,
         }}
       />
       <Tabs.Screen

@@ -826,3 +826,254 @@ export interface GoogleMapsConfig {
   updateInterval: number; // minutes
   maxAlternativeRoutes: number;
 }
+
+// ELD Integration Types
+export type ELDProvider = 'geotab' | 'samsara' | 'motive' | 'verizon' | 'omnitracs';
+
+export interface ELDProviderInfo {
+  id: ELDProvider;
+  name: string;
+  description: string;
+  logo: string;
+  features: string[];
+  apiVersion: string;
+  supportedFeatures: {
+    realTimeTracking: boolean;
+    hosCompliance: boolean;
+    faultCodes: boolean;
+    fuelData: boolean;
+    maintenanceAlerts: boolean;
+    driverBehavior: boolean;
+  };
+  pricingModel: 'free' | 'freemium' | 'paid';
+  trialAvailable: boolean;
+}
+
+export interface ELDConnection {
+  id: string;
+  provider: ELDProvider;
+  status: 'connected' | 'disconnected' | 'error' | 'pending';
+  connectedAt: string;
+  lastSync: string;
+  accessToken?: string;
+  refreshToken?: string;
+  expiresAt?: string;
+  vehicleCount: number;
+  driverCount: number;
+  syncFrequency: number; // minutes
+  enabledFeatures: string[];
+  errorMessage?: string;
+}
+
+export interface ELDVehicle {
+  id: string;
+  eldId: string;
+  vin: string;
+  make: string;
+  model: string;
+  year: number;
+  licensePlate: string;
+  unitNumber?: string;
+  status: 'active' | 'inactive' | 'maintenance';
+  location: {
+    latitude: number;
+    longitude: number;
+    address: string;
+    timestamp: string;
+  };
+  diagnostics: {
+    engineHours: number;
+    odometer: number;
+    fuelLevel: number;
+    engineRpm: number;
+    speed: number;
+    engineTemp: number;
+    oilPressure: number;
+    batteryVoltage: number;
+  };
+  faultCodes: ELDFaultCode[];
+  lastUpdated: string;
+}
+
+export interface ELDDriver {
+  id: string;
+  eldId: string;
+  name: string;
+  cdlNumber: string;
+  employeeId?: string;
+  status: 'on-duty' | 'off-duty' | 'driving' | 'sleeper-berth';
+  currentVehicleId?: string;
+  hosStatus: {
+    driveTime: number; // minutes remaining
+    onDutyTime: number;
+    cycleTime: number;
+    shiftTime: number;
+    lastBreak: string;
+    nextBreakRequired: string;
+    violationRisk: 'low' | 'medium' | 'high';
+  };
+  location: {
+    latitude: number;
+    longitude: number;
+    address: string;
+    timestamp: string;
+  };
+  lastActivity: string;
+}
+
+export interface ELDFaultCode {
+  id: string;
+  code: string;
+  description: string;
+  severity: 'critical' | 'warning' | 'info';
+  category: 'engine' | 'transmission' | 'brakes' | 'electrical' | 'emissions';
+  timestamp: string;
+  resolved: boolean;
+  resolvedAt?: string;
+  impact: string;
+  recommendedAction: string;
+}
+
+export interface HOSViolation {
+  id: string;
+  driverId: string;
+  type: 'drive_time' | 'on_duty_time' | 'cycle_time' | 'break_required';
+  severity: 'warning' | 'violation';
+  description: string;
+  timestamp: string;
+  timeToViolation: number; // minutes
+  currentValue: number;
+  limitValue: number;
+  location: string;
+  canOverride: boolean;
+  estimatedFine?: number;
+  preventionActions: string[];
+}
+
+export interface ELDAlert {
+  id: string;
+  type: 'hos_violation' | 'fault_code' | 'maintenance' | 'safety' | 'fuel';
+  priority: 'critical' | 'high' | 'medium' | 'low';
+  title: string;
+  message: string;
+  vehicleId?: string;
+  driverId?: string;
+  timestamp: string;
+  acknowledged: boolean;
+  acknowledgedAt?: string;
+  resolvedAt?: string;
+  actionRequired: boolean;
+  autoResolved: boolean;
+}
+
+export interface ELDComplianceDashboard {
+  overallScore: number; // 0-100
+  hosCompliance: {
+    activeViolations: number;
+    warningsCount: number;
+    driversAtRisk: number;
+    averageUtilization: number;
+  };
+  vehicleHealth: {
+    activeFaults: number;
+    maintenanceDue: number;
+    averageHealth: number;
+    criticalIssues: number;
+  };
+  safetyMetrics: {
+    harshBrakingEvents: number;
+    speedingEvents: number;
+    idlingTime: number;
+    fuelEfficiency: number;
+  };
+  inspectionReadiness: {
+    score: number;
+    lastInspection: string;
+    nextDue: string;
+    documentsReady: boolean;
+  };
+  lastUpdated: string;
+}
+
+export interface ELDMaintenanceAlert {
+  id: string;
+  vehicleId: string;
+  type: 'scheduled' | 'fault_based' | 'predictive';
+  component: string;
+  description: string;
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  dueDate: string;
+  dueMileage: number;
+  currentMileage: number;
+  estimatedCost: number;
+  nearbyShops: RepairShop[];
+  canDelay: boolean;
+  delayRisk: string;
+  basedOnFaultCodes: string[];
+  createdAt: string;
+}
+
+export interface ELDFuelData {
+  vehicleId: string;
+  timestamp: string;
+  fuelLevel: number; // percentage
+  fuelConsumed: number; // gallons
+  mpg: number;
+  idlingTime: number; // minutes
+  idlingFuelWaste: number; // gallons
+  estimatedRange: number; // miles
+  fuelCostSavings: {
+    potentialSavings: number;
+    idlingCost: number;
+    efficiencyTips: string[];
+  };
+}
+
+export interface ELDSafetyEvent {
+  id: string;
+  vehicleId: string;
+  driverId: string;
+  type: 'harsh_braking' | 'harsh_acceleration' | 'speeding' | 'sharp_turn' | 'collision';
+  severity: 'minor' | 'moderate' | 'severe';
+  timestamp: string;
+  location: {
+    latitude: number;
+    longitude: number;
+    address: string;
+  };
+  speed: number;
+  speedLimit: number;
+  gForce?: number;
+  duration?: number;
+  videoAvailable: boolean;
+  coachingRequired: boolean;
+  acknowledged: boolean;
+}
+
+export interface ELDIntegrationSettings {
+  provider: ELDProvider;
+  syncFrequency: number; // minutes
+  enabledFeatures: {
+    realTimeAlerts: boolean;
+    hosMonitoring: boolean;
+    maintenanceAlerts: boolean;
+    fuelTracking: boolean;
+    safetyEvents: boolean;
+    automaticReports: boolean;
+  };
+  alertPreferences: {
+    criticalAlerts: boolean;
+    hosWarnings: boolean;
+    maintenanceReminders: boolean;
+    fuelAlerts: boolean;
+    safetyAlerts: boolean;
+    emailNotifications: boolean;
+    pushNotifications: boolean;
+  };
+  dataRetention: number; // days
+  privacySettings: {
+    personalConveyance: boolean;
+    offDutyTracking: boolean;
+    locationSharing: boolean;
+  };
+}
