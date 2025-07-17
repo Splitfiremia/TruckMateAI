@@ -35,6 +35,7 @@ import { WeatherNotificationSystem } from '@/components/WeatherNotificationSyste
 import MaintenanceSummaryCard from '@/components/MaintenanceSummaryCard';
 import AIAssistantFAB from '@/components/AIAssistantFAB';
 import ELDIntegrationCard from '@/components/ELDIntegrationCard';
+import SmartDeviceOnboardingCard from '@/components/SmartDeviceOnboardingCard';
 import { useUserStore } from '@/store/userStore';
 import { useBrandingStore } from '@/store/brandingStore';
 import { useLogbookStore } from '@/store/logbookStore';
@@ -249,6 +250,8 @@ export default function DashboardScreen() {
         </View>
         
         <StatusCard onStatusChange={handleStatusCardPress} />
+        
+        <SmartDeviceOnboardingCard />
         
         {/* Quick Duty Status Change Section */}
         <View style={styles.quickStatusSection}>

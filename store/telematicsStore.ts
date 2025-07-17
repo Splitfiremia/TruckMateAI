@@ -61,6 +61,7 @@ interface TelematicsState {
   detectDeviceFromUserAgent: () => DeviceType;
   detectDeviceFromNetwork: () => Promise<TelematicsDevice[]>;
   detectBluetoothDevices: () => Promise<TelematicsDevice[]>;
+  detectFromIncomingData: () => Promise<TelematicsDevice | null>;
   
   // Onboarding
   setOnboardingPreference: (preference: Partial<OnboardingDevicePreference>) => void;
@@ -299,9 +300,33 @@ export const useTelematicsStore = create<TelematicsState>()(persist(
       if (Platform.OS === 'web' && typeof navigator !== 'undefined') {
         const userAgent = navigator.userAgent;
         
+        // Check for specific ELD device patterns in user agent
         for (const [deviceType, pattern] of Object.entries(devicePatterns)) {
           if (pattern.userAgent.test(userAgent)) {
             return deviceType as DeviceType;
+          }
+        }
+        
+        // Check for common ELD-related strings
+        const eldPatterns = [
+          /geotab/i,
+          /samsara/i,
+          /motive/i,
+          /keeptruckin/i,
+          /omnitracs/i,
+          /eld/i,
+          /electronic.logging/i,
+          /fleet.management/i
+        ];
+        
+        for (const pattern of eldPatterns) {
+          if (pattern.test(userAgent)) {
+            // Try to determine specific type
+            if (/geotab/i.test(userAgent)) return 'geotab';
+            if (/samsara/i.test(userAgent)) return 'samsara';
+            if (/motive|keeptruckin/i.test(userAgent)) return 'motive';
+            if (/omnitracs/i.test(userAgent)) return 'omnitracs';
+            return 'other'; // Generic ELD detected
           }
         }
       }

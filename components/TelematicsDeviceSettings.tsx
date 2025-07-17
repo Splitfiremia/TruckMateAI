@@ -236,6 +236,9 @@ export default function TelematicsDeviceSettings({ onBack }: TelematicsDeviceSet
               Manage your ELD and fleet hardware connections
             </Text>
           </View>
+          <TouchableOpacity style={styles.closeButton} onPress={onBack}>
+            <X size={24} color={colors.text.secondary} />
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -272,6 +275,47 @@ export default function TelematicsDeviceSettings({ onBack }: TelematicsDeviceSet
           {isScanning ? 'Scanning...' : 'Scan for Devices'}
         </Text>
       </TouchableOpacity>
+
+      {/* Quick Actions */}
+      {devices.length > 0 && (
+        <View style={styles.quickActions}>
+          <TouchableOpacity
+            style={styles.quickActionButton}
+            onPress={handleScanDevices}
+            disabled={isScanning}
+          >
+            <RefreshCw size={16} color={colors.primary} />
+            <Text style={styles.quickActionText}>Rescan</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={styles.quickActionButton}
+            onPress={() => {
+              Alert.alert(
+                'Disconnect All',
+                'Are you sure you want to disconnect all devices?',
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  {
+                    text: 'Disconnect All',
+                    style: 'destructive',
+                    onPress: () => {
+                      devices.forEach(device => {
+                        if (device.status === 'connected') {
+                          disconnectDevice(device.id);
+                        }
+                      });
+                    },
+                  },
+                ]
+              );
+            }}
+          >
+            <Unlink size={16} color={colors.warning} />
+            <Text style={[styles.quickActionText, { color: colors.warning }]}>Disconnect All</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       {/* Error Display */}
       {error && (
@@ -359,6 +403,7 @@ const styles = StyleSheet.create({
   navigationBar: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     gap: 16,
   },
   backButton: {
@@ -367,6 +412,10 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     flex: 1,
+  },
+  closeButton: {
+    padding: 8,
+    marginRight: -8,
   },
   title: {
     fontSize: 24,
@@ -418,6 +467,27 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: colors.text.primary,
+  },
+  quickActions: {
+    flexDirection: 'row',
+    marginHorizontal: 20,
+    marginBottom: 16,
+    gap: 12,
+  },
+  quickActionButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.background.secondary,
+    paddingVertical: 12,
+    borderRadius: 8,
+    gap: 8,
+  },
+  quickActionText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: colors.primary,
   },
   errorContainer: {
     flexDirection: 'row',

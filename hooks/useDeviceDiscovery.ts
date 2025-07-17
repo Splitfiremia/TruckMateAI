@@ -26,6 +26,97 @@ export function useDeviceDiscovery(): UseDeviceDiscoveryReturn {
   const [detectedDevice, setDetectedDevice] = useState<TelematicsDevice | null>(null);
   const [hasShownPrompt, setHasShownPrompt] = useState(false);
 
+  // Scan local network for connected devices (web only)
+  const scanLocalNetwork = useCallback(async (): Promise<TelematicsDevice[]> => {
+    if (Platform.OS !== 'web') return [];
+    
+    try {
+      // Simulate network scanning - in real implementation, this would:
+      // 1. Check for devices on common ELD ports (9001, 8080, 7001, etc.)
+      // 2. Look for specific MAC address patterns
+      // 3. Check for device-specific HTTP endpoints
+      
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      const devicePatterns = [
+        { type: 'geotab', name: 'Geotab GO9', ports: [9001, 9002] },
+        { type: 'samsara', name: 'Samsara VG34', ports: [8080, 8443] },
+        { type: 'motive', name: 'Motive ELD', ports: [7001, 7002] },
+      ];
+      
+      // 60% chance of finding a device on network
+      if (Math.random() > 0.4) {
+        const randomPattern = devicePatterns[Math.floor(Math.random() * devicePatterns.length)];
+        return [{
+          id: `network-${Date.now()}`,
+          name: randomPattern.name,
+          type: randomPattern.type as any,
+          status: 'detected',
+          connectionMethod: 'wifi',
+          isELDCertified: true,
+          capabilities: ['gps', 'eld', 'diagnostics'],
+          signalStrength: 88,
+          ipAddress: `192.168.1.${Math.floor(Math.random() * 254) + 1}`,
+          metadata: {
+            detectionMethod: 'network-scan',
+            confidence: 0.85,
+            port: randomPattern.ports[0]
+          }
+        }];
+      }
+      
+      return [];
+    } catch (error) {
+      console.log('Network scan failed:', error);
+      return [];
+    }
+  }, []);
+
+  // Scan for paired Bluetooth ELDs (mobile only)
+  const scanBluetoothDevices = useCallback(async (): Promise<TelematicsDevice[]> => {
+    if (Platform.OS === 'web') return [];
+    
+    try {
+      // Simulate Bluetooth scanning - in real implementation, this would:
+      // 1. Check for paired devices with ELD service UUIDs
+      // 2. Look for devices with known MAC address prefixes
+      // 3. Check device names for ELD patterns
+      
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      const bluetoothDevices = [
+        { type: 'geotab', name: 'Geotab GO9', macPrefix: '00:04:F2' },
+        { type: 'samsara', name: 'Samsara VG34', macPrefix: 'A4:CF:12' },
+        { type: 'motive', name: 'Motive ELD', macPrefix: '00:1B:21' },
+      ];
+      
+      // 50% chance of finding a paired device
+      if (Math.random() > 0.5) {
+        const randomDevice = bluetoothDevices[Math.floor(Math.random() * bluetoothDevices.length)];
+        return [{
+          id: `bluetooth-${Date.now()}`,
+          name: randomDevice.name,
+          type: randomDevice.type as any,
+          status: 'detected',
+          connectionMethod: 'bluetooth',
+          isELDCertified: true,
+          capabilities: ['gps', 'eld'],
+          signalStrength: 92,
+          macAddress: `${randomDevice.macPrefix}:${Math.floor(Math.random() * 256).toString(16).padStart(2, '0')}:${Math.floor(Math.random() * 256).toString(16).padStart(2, '0')}:${Math.floor(Math.random() * 256).toString(16).padStart(2, '0')}`,
+          metadata: {
+            detectionMethod: 'bluetooth-scan',
+            confidence: 0.9
+          }
+        }];
+      }
+      
+      return [];
+    } catch (error) {
+      console.log('Bluetooth scan failed:', error);
+      return [];
+    }
+  }, []);
+
   // Auto-detect devices when user completes onboarding
   const performAutoDetection = useCallback(async () => {
     if (!autoDetectionEnabled || !isOnboarded || hasShownPrompt) return;
@@ -44,6 +135,10 @@ export function useDeviceDiscovery(): UseDeviceDiscoveryReturn {
           isELDCertified: true,
           capabilities: ['gps', 'eld'],
           signalStrength: 85,
+          metadata: {
+            detectionMethod: 'user-agent',
+            confidence: 0.8
+          }
         };
         
         setDetectedDevice(mockDevice);
@@ -52,7 +147,29 @@ export function useDeviceDiscovery(): UseDeviceDiscoveryReturn {
         return;
       }
 
-      // If no user agent detection, perform network/bluetooth scan
+      // For web users: Scan local network for connected devices (with permission)
+      if (Platform.OS === 'web') {
+        const networkDevices = await scanLocalNetwork();
+        if (networkDevices.length > 0) {
+          setDetectedDevice(networkDevices[0]);
+          setShowDiscoveryPrompt(true);
+          setHasShownPrompt(true);
+          return;
+        }
+      }
+
+      // For mobile: Check for paired Bluetooth ELDs
+      if (Platform.OS !== 'web') {
+        const bluetoothDevices = await scanBluetoothDevices();
+        if (bluetoothDevices.length > 0) {
+          setDetectedDevice(bluetoothDevices[0]);
+          setShowDiscoveryPrompt(true);
+          setHasShownPrompt(true);
+          return;
+        }
+      }
+
+      // If no immediate detection, perform full scan
       const result = await startDeviceDetection();
       
       if (result.devices.length > 0 && result.confidence > 0.7) {
