@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Switch, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Switch, Alert } from 'react-native';
 import { Palette, Type, Image, Save, Upload, Eye, EyeOff } from 'lucide-react-native';
 import { colors } from '@/constants/colors';
 import { BrandingSettings, brandingPresets, useBrandingStore } from '@/store/brandingStore';
+import ValidatedTextInput from '@/components/ValidatedTextInput';
+import { useFormValidation, commonValidationRules } from '@/utils/validation';
 
 interface BrandingCustomizerProps {
   onClose?: () => void;
@@ -10,10 +12,55 @@ interface BrandingCustomizerProps {
 
 export default function BrandingCustomizer({ onClose }: BrandingCustomizerProps) {
   const { settings, updateBranding, resetToDefaults, applyPreset } = useBrandingStore();
-  const [localSettings, setLocalSettings] = useState(settings);
+  
+  const validationRules = {
+    companyName: commonValidationRules.companyName,
+    appName: { required: true, minLength: 2, maxLength: 30 },
+    welcomeMessage: { maxLength: 200 },
+    logoUrl: commonValidationRules.url,
+    primaryColor: commonValidationRules.colorHex,
+    secondaryColor: commonValidationRules.colorHex,
+    accentColor: commonValidationRules.colorHex,
+    supportEmail: commonValidationRules.email,
+    supportPhone: commonValidationRules.phone,
+  };
+
+  const {
+    formData: localSettings,
+    errors,
+    touched,
+    hasErrors,
+    handleFieldChange,
+    handleFieldBlur,
+    validateAllFields,
+    setFormData: setLocalSettings,
+  } = useFormValidation(
+    {
+      companyName: settings.companyName,
+      appName: settings.appName,
+      welcomeMessage: settings.welcomeMessage,
+      logoUrl: settings.logoUrl || '',
+      primaryColor: settings.primaryColor,
+      secondaryColor: settings.secondaryColor,
+      accentColor: settings.accentColor,
+      supportEmail: settings.supportEmail,
+      supportPhone: settings.supportPhone,
+    },
+    validationRules
+  );
   
   const handleSave = () => {
-    updateBranding(localSettings);
+    if (!validateAllFields()) {
+      Alert.alert('Validation Error', 'Please fix the errors below before saving.');
+      return;
+    }
+    
+    const brandingSettings: BrandingSettings = {
+      ...settings,
+      ...localSettings,
+    };
+    
+    updateBranding(brandingSettings);
     Alert.alert('Success', 'Branding settings saved successfully!');
     onClose?.();
   };

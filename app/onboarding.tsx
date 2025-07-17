@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  TextInput,
   ScrollView,
   Alert,
 } from 'react-native';
@@ -14,6 +13,8 @@ import { Truck, Building2, User, Mail, Hash, Phone } from 'lucide-react-native';
 import { colors } from '@/constants/colors';
 import { useUserStore, UserRole, UserProfile } from '@/store/userStore';
 import DeviceDetectionStep from '@/components/DeviceDetectionStep';
+import ValidatedTextInput from '@/components/ValidatedTextInput';
+import { useFormValidation, commonValidationRules } from '@/utils/validation';
 
 type OnboardingStep = 'role-selection' | 'profile-setup' | 'company-details' | 'device-setup';
 
@@ -21,16 +22,57 @@ export default function OnboardingScreen() {
   const { setUser, completeOnboarding: completeUserOnboarding } = useUserStore();
   const [currentStep, setCurrentStep] = useState<OnboardingStep>('role-selection');
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    companyName: '',
-    fleetSize: '',
-    cdlNumber: '',
-    dotNumber: '',
-    mcNumber: '',
-    phone: '',
-  });
+  
+  // Define validation rules based on selected role
+  const getValidationRules = () => {
+    const baseRules = {
+      name: commonValidationRules.name,
+      email: commonValidationRules.email,
+      phone: commonValidationRules.phone,
+      dotNumber: commonValidationRules.dotNumber,
+      mcNumber: commonValidationRules.mcNumber,
+    };
+
+    if (selectedRole === 'owner-operator') {
+      return {
+        ...baseRules,
+        cdlNumber: commonValidationRules.cdlNumber,
+      };
+    }
+
+    if (selectedRole === 'fleet-company') {
+      return {
+        ...baseRules,
+        companyName: commonValidationRules.companyName,
+        fleetSize: commonValidationRules.fleetSize,
+      };
+    }
+
+    return baseRules;
+  };
+
+  const {
+    formData,
+    errors,
+    touched,
+    hasErrors,
+    handleFieldChange,
+    handleFieldBlur,
+    validateAllFields,
+    resetForm,
+  } = useFormValidation(
+    {
+      name: '',
+      email: '',
+      companyName: '',
+      fleetSize: '',
+      cdlNumber: '',
+      dotNumber: '',
+      mcNumber: '',
+      phone: '',
+    },
+    getValidationRules()
+  );
 
   const handleRoleSelection = (role: UserRole) => {
     setSelectedRole(role);
@@ -38,8 +80,8 @@ export default function OnboardingScreen() {
   };
 
   const handleProfileSetup = () => {
-    if (!formData.name || !formData.email) {
-      Alert.alert('Error', 'Please fill in all required fields');
+    if (!validateAllFields()) {
+      Alert.alert('Validation Error', 'Please fix the errors below before continuing.');
       return;
     }
     
@@ -51,8 +93,8 @@ export default function OnboardingScreen() {
   };
 
   const handleCompanyDetails = () => {
-    if (!formData.companyName) {
-      Alert.alert('Error', 'Please enter your company name');
+    if (!validateAllFields()) {
+      Alert.alert('Validation Error', 'Please fix the errors below before continuing.');
       return;
     }
     
@@ -87,9 +129,7 @@ export default function OnboardingScreen() {
     router.replace('/(tabs)');
   };
 
-  const updateFormData = (key: string, value: string) => {
-    setFormData(prev => ({ ...prev, [key]: value }));
-  };
+
 
   const renderRoleSelection = () => (
     <View style={styles.stepContainer}>
@@ -148,98 +188,102 @@ export default function OnboardingScreen() {
       </Text>
       
       <View style={styles.form}>
-        <View style={styles.inputGroup}>
-          <Text style={styles.inputLabel}>Full Name *</Text>
-          <View style={styles.inputContainer}>
-            <User size={20} color={colors.text.secondary} />
-            <TextInput
-              style={styles.textInput}
-              value={formData.name}
-              onChangeText={(text) => updateFormData('name', text)}
-              placeholder="Enter your full name"
-              placeholderTextColor={colors.text.secondary}
-            />
-          </View>
-        </View>
+        <ValidatedTextInput
+          label="Full Name"
+          required
+          value={formData.name}
+          onChangeText={(text) => handleFieldChange('name', text)}
+          onBlur={() => handleFieldBlur('name')}
+          placeholder="Enter your full name"
+          icon={<User size={20} color={colors.text.secondary} />}
+          error={errors.name}
+          touched={touched.name}
+          autoCapitalize="words"
+        />
         
-        <View style={styles.inputGroup}>
-          <Text style={styles.inputLabel}>Email Address *</Text>
-          <View style={styles.inputContainer}>
-            <Mail size={20} color={colors.text.secondary} />
-            <TextInput
-              style={styles.textInput}
-              value={formData.email}
-              onChangeText={(text) => updateFormData('email', text)}
-              placeholder="Enter your email"
-              placeholderTextColor={colors.text.secondary}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-          </View>
-        </View>
+        <ValidatedTextInput
+          label="Email Address"
+          required
+          value={formData.email}
+          onChangeText={(text) => handleFieldChange('email', text)}
+          onBlur={() => handleFieldBlur('email')}
+          placeholder="Enter your email"
+          icon={<Mail size={20} color={colors.text.secondary} />}
+          error={errors.email}
+          touched={touched.email}
+          keyboardType="email-address"
+          autoCapitalize="none"
+        />
         
-        <View style={styles.inputGroup}>
-          <Text style={styles.inputLabel}>Phone Number</Text>
-          <View style={styles.inputContainer}>
-            <Phone size={20} color={colors.text.secondary} />
-            <TextInput
-              style={styles.textInput}
-              value={formData.phone}
-              onChangeText={(text) => updateFormData('phone', text)}
-              placeholder="(555) 123-4567"
-              placeholderTextColor={colors.text.secondary}
-              keyboardType="phone-pad"
-            />
-          </View>
-        </View>
+        <ValidatedTextInput
+          label="Phone Number"
+          value={formData.phone}
+          onChangeText={(text) => handleFieldChange('phone', text)}
+          onBlur={() => handleFieldBlur('phone')}
+          placeholder="(555) 123-4567"
+          icon={<Phone size={20} color={colors.text.secondary} />}
+          error={errors.phone}
+          touched={touched.phone}
+          keyboardType="phone-pad"
+          helpText="Optional - for account recovery and notifications"
+        />
         
         {selectedRole === 'owner-operator' && (
-          <View style={styles.inputGroup}>
-            <Text style={styles.inputLabel}>CDL Number</Text>
-            <View style={styles.inputContainer}>
-              <Hash size={20} color={colors.text.secondary} />
-              <TextInput
-                style={styles.textInput}
-                value={formData.cdlNumber}
-                onChangeText={(text) => updateFormData('cdlNumber', text)}
-                placeholder="Enter your CDL number"
-                placeholderTextColor={colors.text.secondary}
-              />
-            </View>
-          </View>
+          <ValidatedTextInput
+            label="CDL Number"
+            value={formData.cdlNumber}
+            onChangeText={(text) => handleFieldChange('cdlNumber', text)}
+            onBlur={() => handleFieldBlur('cdlNumber')}
+            placeholder="Enter your CDL number"
+            icon={<Hash size={20} color={colors.text.secondary} />}
+            error={errors.cdlNumber}
+            touched={touched.cdlNumber}
+            autoCapitalize="characters"
+            helpText="Optional - helps with compliance tracking"
+          />
         )}
         
-        <View style={styles.inputGroup}>
-          <Text style={styles.inputLabel}>DOT Number</Text>
-          <View style={styles.inputContainer}>
-            <Hash size={20} color={colors.textSecondary} />
-            <TextInput
-              style={styles.textInput}
-              value={formData.dotNumber}
-              onChangeText={(text) => updateFormData('dotNumber', text)}
-              placeholder="Enter your DOT number"
-              placeholderTextColor={colors.text.secondary}
-            />
-          </View>
-        </View>
+        <ValidatedTextInput
+          label="DOT Number"
+          value={formData.dotNumber}
+          onChangeText={(text) => handleFieldChange('dotNumber', text)}
+          onBlur={() => handleFieldBlur('dotNumber')}
+          placeholder="Enter your DOT number"
+          icon={<Hash size={20} color={colors.text.secondary} />}
+          error={errors.dotNumber}
+          touched={touched.dotNumber}
+          keyboardType="numeric"
+          helpText="Optional - for DOT compliance features"
+        />
         
-        <View style={styles.inputGroup}>
-          <Text style={styles.inputLabel}>MC Number</Text>
-          <View style={styles.inputContainer}>
-            <Hash size={20} color={colors.textSecondary} />
-            <TextInput
-              style={styles.textInput}
-              value={formData.mcNumber}
-              onChangeText={(text) => updateFormData('mcNumber', text)}
-              placeholder="Enter your MC number"
-              placeholderTextColor={colors.text.secondary}
-            />
-          </View>
-        </View>
+        <ValidatedTextInput
+          label="MC Number"
+          value={formData.mcNumber}
+          onChangeText={(text) => handleFieldChange('mcNumber', text)}
+          onBlur={() => handleFieldBlur('mcNumber')}
+          placeholder="Enter your MC number"
+          icon={<Hash size={20} color={colors.text.secondary} />}
+          error={errors.mcNumber}
+          touched={touched.mcNumber}
+          keyboardType="numeric"
+          helpText="Optional - for motor carrier authority tracking"
+        />
       </View>
       
-      <TouchableOpacity style={styles.continueButton} onPress={handleProfileSetup}>
-        <Text style={styles.continueButtonText}>Continue</Text>
+      <TouchableOpacity 
+        style={[
+          styles.continueButton,
+          hasErrors && styles.continueButtonDisabled
+        ]} 
+        onPress={handleProfileSetup}
+        disabled={hasErrors}
+      >
+        <Text style={[
+          styles.continueButtonText,
+          hasErrors && styles.continueButtonTextDisabled
+        ]}>
+          Continue
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -252,38 +296,47 @@ export default function OnboardingScreen() {
       </Text>
       
       <View style={styles.form}>
-        <View style={styles.inputGroup}>
-          <Text style={styles.inputLabel}>Company Name *</Text>
-          <View style={styles.inputContainer}>
-            <Building2 size={20} color={colors.text.secondary} />
-            <TextInput
-              style={styles.textInput}
-              value={formData.companyName}
-              onChangeText={(text) => updateFormData('companyName', text)}
-              placeholder="Enter your company name"
-              placeholderTextColor={colors.text.secondary}
-            />
-          </View>
-        </View>
+        <ValidatedTextInput
+          label="Company Name"
+          required
+          value={formData.companyName}
+          onChangeText={(text) => handleFieldChange('companyName', text)}
+          onBlur={() => handleFieldBlur('companyName')}
+          placeholder="Enter your company name"
+          icon={<Building2 size={20} color={colors.text.secondary} />}
+          error={errors.companyName}
+          touched={touched.companyName}
+          autoCapitalize="words"
+        />
         
-        <View style={styles.inputGroup}>
-          <Text style={styles.inputLabel}>Fleet Size</Text>
-          <View style={styles.inputContainer}>
-            <Truck size={20} color={colors.text.secondary} />
-            <TextInput
-              style={styles.textInput}
-              value={formData.fleetSize}
-              onChangeText={(text) => updateFormData('fleetSize', text)}
-              placeholder="Number of vehicles"
-              placeholderTextColor={colors.text.secondary}
-              keyboardType="numeric"
-            />
-          </View>
-        </View>
+        <ValidatedTextInput
+          label="Fleet Size"
+          value={formData.fleetSize}
+          onChangeText={(text) => handleFieldChange('fleetSize', text)}
+          onBlur={() => handleFieldBlur('fleetSize')}
+          placeholder="Number of vehicles"
+          icon={<Truck size={20} color={colors.text.secondary} />}
+          error={errors.fleetSize}
+          touched={touched.fleetSize}
+          keyboardType="numeric"
+          helpText="Optional - helps customize features for your fleet size"
+        />
       </View>
       
-      <TouchableOpacity style={styles.continueButton} onPress={handleCompanyDetails}>
-        <Text style={styles.continueButtonText}>Complete Setup</Text>
+      <TouchableOpacity 
+        style={[
+          styles.continueButton,
+          hasErrors && styles.continueButtonDisabled
+        ]} 
+        onPress={handleCompanyDetails}
+        disabled={hasErrors}
+      >
+        <Text style={[
+          styles.continueButtonText,
+          hasErrors && styles.continueButtonTextDisabled
+        ]}>
+          Complete Setup
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -442,5 +495,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: colors.text.primary,
+  },
+  continueButtonDisabled: {
+    backgroundColor: colors.border,
+    opacity: 0.6,
+  },
+  continueButtonTextDisabled: {
+    color: colors.text.secondary,
   },
 });
