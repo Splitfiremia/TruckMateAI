@@ -542,6 +542,9 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
   },
   disconnectButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
     backgroundColor: colors.background.secondary,
     paddingHorizontal: 16,
     paddingVertical: 8,
