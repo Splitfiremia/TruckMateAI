@@ -29,6 +29,7 @@ export default function SettingsScreen() {
   const [showTelematicsModal, setShowTelematicsModal] = useState(false);
   
   const { theme } = useTheme();
+  const styles = createStyles(theme);
   const { lastCommand, lastResponse } = useVoiceCommandStore();
   const { currentStatus, changeStatus } = useLogbookStore();
   const { user, isFleetCompany, logout } = useUserStore();
@@ -170,12 +171,12 @@ export default function SettingsScreen() {
         {isFleetCompany() && (
           <View style={styles.settingsCard}>
             {renderSettingLink(
-              <Palette size={20} color={colors.primaryLight} />,
+              <Palette size={20} color={theme.primaryLight} />,
               'Customize Branding',
               () => setShowBrandingModal(true)
             )}
             {renderSettingLink(
-              <Sparkles size={20} color={colors.primaryLight} />,
+              <Sparkles size={20} color={theme.primaryLight} />,
               'Generate Company Logo',
               () => setShowLogoGeneratorModal(true)
             )}
@@ -284,31 +285,31 @@ export default function SettingsScreen() {
         
         <View style={styles.settingsCard}>
           {renderSettingLink(
-            <User size={20} color={colors.primaryLight} />,
+            <User size={20} color={theme.primaryLight} />,
             'Personal Information',
             () => setPersonalInfoModalVisible(true)
           )}
           
           {renderSettingLink(
-            <Truck size={20} color={colors.primaryLight} />,
+            <Truck size={20} color={theme.primaryLight} />,
             'Vehicle Settings',
             () => setVehicleSettingsModalVisible(true)
           )}
           
           {renderSettingLink(
-            <Bell size={20} color={colors.primaryLight} />,
+            <Bell size={20} color={theme.primaryLight} />,
             'Notification Preferences',
             () => setNotificationModalVisible(true)
           )}
           
           {renderSettingLink(
-            <Shield size={20} color={colors.primaryLight} />,
+            <Shield size={20} color={theme.primaryLight} />,
             'Privacy & Security',
             () => setPrivacyModalVisible(true)
           )}
           
           {renderSettingLink(
-            <HelpCircle size={20} color={colors.primaryLight} />,
+            <HelpCircle size={20} color={theme.primaryLight} />,
             'Help & Support',
             () => setHelpModalVisible(true)
           )}
@@ -356,7 +357,7 @@ export default function SettingsScreen() {
                 style={styles.textInput}
                 value={driverInfo.name}
                 placeholder="Enter your full name"
-                placeholderTextColor={colors.textSecondary}
+                placeholderTextColor={theme.text.secondary}
               />
             </View>
             
@@ -366,7 +367,7 @@ export default function SettingsScreen() {
                 style={styles.textInput}
                 value={driverInfo.company}
                 placeholder="Enter company name"
-                placeholderTextColor={colors.textSecondary}
+                placeholderTextColor={theme.text.secondary}
               />
             </View>
             
@@ -376,7 +377,7 @@ export default function SettingsScreen() {
                 style={styles.textInput}
                 value={driverInfo.licenseNumber}
                 placeholder="Enter CDL number"
-                placeholderTextColor={colors.textSecondary}
+                placeholderTextColor={theme.text.secondary}
               />
             </View>
             
@@ -385,7 +386,7 @@ export default function SettingsScreen() {
               <TextInput
                 style={styles.textInput}
                 placeholder="Enter phone number"
-                placeholderTextColor={colors.textSecondary}
+                placeholderTextColor={theme.text.secondary}
                 keyboardType="phone-pad"
               />
             </View>
@@ -395,7 +396,7 @@ export default function SettingsScreen() {
               <TextInput
                 style={styles.textInput}
                 placeholder="Enter email address"
-                placeholderTextColor={colors.textSecondary}
+                placeholderTextColor={theme.text.secondary}
                 keyboardType="email-address"
                 autoCapitalize="none"
               />
@@ -429,7 +430,7 @@ export default function SettingsScreen() {
               <TextInput
                 style={styles.textInput}
                 placeholder="e.g., Freightliner"
-                placeholderTextColor={colors.textSecondary}
+                placeholderTextColor={theme.text.secondary}
               />
             </View>
             
@@ -438,7 +439,7 @@ export default function SettingsScreen() {
               <TextInput
                 style={styles.textInput}
                 placeholder="e.g., Cascadia"
-                placeholderTextColor={colors.textSecondary}
+                placeholderTextColor={theme.text.secondary}
               />
             </View>
             
@@ -447,7 +448,7 @@ export default function SettingsScreen() {
               <TextInput
                 style={styles.textInput}
                 placeholder="e.g., 2023"
-                placeholderTextColor={colors.textSecondary}
+                placeholderTextColor={theme.text.secondary}
                 keyboardType="numeric"
               />
             </View>
@@ -457,7 +458,7 @@ export default function SettingsScreen() {
               <TextInput
                 style={styles.textInput}
                 placeholder="Enter license plate"
-                placeholderTextColor={colors.textSecondary}
+                placeholderTextColor={theme.text.secondary}
                 autoCapitalize="characters"
               />
             </View>
@@ -467,7 +468,7 @@ export default function SettingsScreen() {
               <TextInput
                 style={styles.textInput}
                 placeholder="Enter VIN number"
-                placeholderTextColor={colors.textSecondary}
+                placeholderTextColor={theme.text.secondary}
                 autoCapitalize="characters"
               />
             </View>
@@ -520,9 +521,9 @@ export default function SettingsScreen() {
                 <Switch
                   value={true}
                   onValueChange={() => {}}
-                  trackColor={{ false: colors.border, true: colors.primaryLight }}
-                  thumbColor={colors.white}
-                  ios_backgroundColor={colors.border}
+                  trackColor={{ false: theme.border, true: theme.primaryLight }}
+                  thumbColor={theme.white}
+                  ios_backgroundColor={theme.border}
                 />
               </View>
               
@@ -534,9 +535,9 @@ export default function SettingsScreen() {
                 <Switch
                   value={true}
                   onValueChange={() => {}}
-                  trackColor={{ false: colors.border, true: colors.primaryLight }}
-                  thumbColor={colors.white}
-                  ios_backgroundColor={colors.border}
+                  trackColor={{ false: theme.border, true: theme.primaryLight }}
+                  thumbColor={theme.white}
+                  ios_backgroundColor={theme.border}
                 />
               </View>
             </View>
@@ -574,9 +575,9 @@ export default function SettingsScreen() {
                 <Switch
                   value={true}
                   onValueChange={() => {}}
-                  trackColor={{ false: colors.border, true: colors.primaryLight }}
-                  thumbColor={colors.white}
-                  ios_backgroundColor={colors.border}
+                  trackColor={{ false: theme.border, true: theme.primaryLight }}
+                  thumbColor={theme.white}
+                  ios_backgroundColor={theme.border}
                 />
               </View>
               
@@ -588,9 +589,9 @@ export default function SettingsScreen() {
                 <Switch
                   value={false}
                   onValueChange={() => {}}
-                  trackColor={{ false: colors.border, true: colors.primaryLight }}
-                  thumbColor={colors.white}
-                  ios_backgroundColor={colors.border}
+                  trackColor={{ false: theme.border, true: theme.primaryLight }}
+                  thumbColor={theme.white}
+                  ios_backgroundColor={theme.border}
                 />
               </View>
             </View>
@@ -767,7 +768,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   editProfileButton: {
     backgroundColor: theme.background.secondary,
     borderWidth: 1,
-    borderColor: colors.primaryLight,
+    borderColor: theme.primaryLight,
     borderRadius: 8,
     paddingVertical: 8,
     alignItems: 'center',
@@ -775,7 +776,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   editProfileText: {
     fontSize: 14,
     fontWeight: '500',
-    color: colors.primaryLight,
+    color: theme.primaryLight,
   },
   sectionHeader: {
     marginBottom: 12,
@@ -798,7 +799,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderBottomColor: theme.border,
   },
   settingContent: {
     flex: 1,
@@ -820,7 +821,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     marginBottom: 2,
   },
   warningText: {
-    color: colors.warning,
+    color: theme.warning,
     fontWeight: '500',
   },
   statusText: {
@@ -840,7 +841,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderBottomColor: theme.border,
   },
   settingLinkContent: {
     flexDirection: 'row',
@@ -871,7 +872,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   logoutText: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.danger,
+    color: theme.danger,
     marginLeft: 8,
   },
   versionText: {
@@ -891,7 +892,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   // Modal Styles
   modalContainer: {
     flex: 1,
-    backgroundColor: colors.background.primary,
+    backgroundColor: theme.background.primary,
   },
   modalHeader: {
     flexDirection: 'row',
@@ -900,7 +901,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderBottomColor: theme.border,
   },
   modalTitle: {
     fontSize: 20,
@@ -929,7 +930,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     fontSize: 16,
     color: theme.text.primary,
     borderWidth: 1,
-    borderColor: colors.border,
+    borderColor: theme.border,
   },
   saveButton: {
     flexDirection: 'row',
@@ -944,7 +945,7 @@ const createStyles = (theme: any) => StyleSheet.create({
   saveButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.white,
+    color: theme.white,
     marginLeft: 8,
   },
   sectionSubtitle: {
@@ -973,13 +974,13 @@ const createStyles = (theme: any) => StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderBottomColor: theme.border,
   },
   dangerOption: {
     borderBottomWidth: 0,
   },
   dangerText: {
-    color: colors.danger,
+    color: theme.danger,
   },
   helpCard: {
     backgroundColor: theme.background.secondary,
@@ -994,7 +995,7 @@ const createStyles = (theme: any) => StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderBottomColor: theme.border,
   },
   supportInfo: {
     backgroundColor: theme.background.secondary,
@@ -1016,13 +1017,13 @@ const createStyles = (theme: any) => StyleSheet.create({
   supportPhone: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.primaryLight,
+    color: theme.primaryLight,
     marginBottom: 12,
   },
   supportEmail: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.primaryLight,
+    color: theme.primaryLight,
   },
   modalCloseButton: {
     padding: 4,
