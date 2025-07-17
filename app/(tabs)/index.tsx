@@ -274,7 +274,6 @@ export default function DashboardScreen() {
                 styles.quickStatusText,
                 currentStatus === 'Driving' && styles.quickStatusTextActive
               ]}>Driving</Text>
-
             </TouchableOpacity>
             
             <TouchableOpacity 
