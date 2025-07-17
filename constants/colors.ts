@@ -1,9 +1,9 @@
 // Light Theme Colors
 const lightTheme = {
-  primary: "#2563EB", // Vibrant blue
-  primaryLight: "#DBEAFE", // Very light blue
-  secondary: "#1E40AF", // Deep blue
-  accent: "#3B82F6", // Medium blue
+  primary: "#1E40AF", // Deep blue
+  primaryLight: "#3B82F6", // Medium blue
+  secondary: "#2563EB", // Vibrant blue
+  accent: "#60A5FA", // Light blue accent
   success: "#059669", // Professional green
   warning: "#D97706", // Professional amber
   danger: "#DC2626", // Professional red
@@ -11,40 +11,40 @@ const lightTheme = {
   white: "#FFFFFF",
   black: "#0F172A", // Deep slate
   
-  // Background colors
+  // Background colors - Blue tones
   background: {
-    primary: "#FFFFFF", // Pure white background
-    secondary: "#F8FAFC", // Very light blue-gray background
-    tertiary: "#F1F5F9", // Light blue-gray background
+    primary: "#1E40AF", // Deep blue background
+    secondary: "#2563EB", // Vibrant blue background
+    tertiary: "#3B82F6", // Medium blue background
   },
   
-  // Text colors
+  // Text colors - White tones
   text: {
-    primary: "#0F172A", // Deep slate text
-    secondary: "#475569", // Slate gray text
-    tertiary: "#64748B", // Medium slate text
+    primary: "#FFFFFF", // Pure white text
+    secondary: "#F8FAFC", // Very light text
+    tertiary: "#E2E8F0", // Light gray text
   },
   
   // Status colors
   status: {
-    success: "#059669",
-    warning: "#D97706",
-    error: "#DC2626",
+    success: "#10B981", // Brighter green for blue background
+    warning: "#F59E0B", // Brighter amber for blue background
+    error: "#EF4444", // Brighter red for blue background
   },
   
   // Border and surface
-  border: "#E2E8F0", // Light slate border
-  surface: "#F8FAFC", // Light blue surface
-  card: "#FFFFFF", // White card background
-  shadow: "rgba(15, 23, 42, 0.1)", // Light shadow
+  border: "#60A5FA", // Light blue border
+  surface: "#2563EB", // Blue surface
+  card: "#1E40AF", // Blue card background
+  shadow: "rgba(30, 64, 175, 0.2)", // Blue shadow
 };
 
 // Dark Theme Colors
 const darkTheme = {
-  primary: "#60A5FA", // Lighter blue for dark mode
-  primaryLight: "#1E3A8A", // Dark blue background
-  secondary: "#3B82F6", // Medium blue
-  accent: "#93C5FD", // Light blue accent
+  primary: "#93C5FD", // Light blue for dark mode
+  primaryLight: "#60A5FA", // Medium blue
+  secondary: "#3B82F6", // Vibrant blue
+  accent: "#DBEAFE", // Very light blue accent
   success: "#10B981", // Brighter green for dark mode
   warning: "#F59E0B", // Brighter amber for dark mode
   danger: "#EF4444", // Brighter red for dark mode
@@ -52,18 +52,18 @@ const darkTheme = {
   white: "#FFFFFF",
   black: "#000000",
   
-  // Background colors
+  // Background colors - Darker blue tones
   background: {
-    primary: "#0F172A", // Deep slate background
-    secondary: "#1E293B", // Lighter slate background
-    tertiary: "#334155", // Medium slate background
+    primary: "#0F1629", // Very dark blue background
+    secondary: "#1E2A47", // Dark blue background
+    tertiary: "#2D3E63", // Medium dark blue background
   },
   
-  // Text colors
+  // Text colors - White tones
   text: {
-    primary: "#F8FAFC", // Very light text
-    secondary: "#CBD5E1", // Light slate text
-    tertiary: "#94A3B8", // Medium slate text
+    primary: "#FFFFFF", // Pure white text
+    secondary: "#F8FAFC", // Very light text
+    tertiary: "#E2E8F0", // Light gray text
   },
   
   // Status colors
@@ -74,10 +74,10 @@ const darkTheme = {
   },
   
   // Border and surface
-  border: "#475569", // Medium slate border
-  surface: "#1E293B", // Dark surface
-  card: "#1E293B", // Dark card background
-  shadow: "rgba(0, 0, 0, 0.3)", // Dark shadow
+  border: "#3B82F6", // Blue border
+  surface: "#1E2A47", // Dark blue surface
+  card: "#2D3E63", // Dark blue card background
+  shadow: "rgba(15, 22, 41, 0.4)", // Dark blue shadow
 };
 
 // Export themes
