@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Switch, Alert, Modal, TextInput } from 'react-native';
 import { Stack } from 'expo-router';
-import { User, Truck, Bell, Shield, HelpCircle, LogOut, ChevronRight, AlertTriangle, X, Save, Cloud, Palette, Building2, Sparkles } from 'lucide-react-native';
+import { User, Truck, Bell, Shield, HelpCircle, LogOut, ChevronRight, AlertTriangle, X, Save, Cloud, Palette, Building2, Sparkles, Smartphone } from 'lucide-react-native';
 
 import { colors } from '@/constants/colors';
 import { driverInfo } from '@/constants/mockData';
@@ -9,6 +9,7 @@ import VoiceCommandButton from '@/components/VoiceCommandButton';
 import CommandResponseModal from '@/components/CommandResponseModal';
 import BrandingCustomizer from '@/components/BrandingCustomizer';
 import LogoGenerator from '@/components/LogoGenerator';
+import TelematicsDeviceSettings from '@/components/TelematicsDeviceSettings';
 import { useVoiceCommandStore } from '@/store/voiceCommandStore';
 import { useSettingsStore } from '@/store/settingsStore';
 import { useLogbookStore } from '@/store/logbookStore';
@@ -24,6 +25,7 @@ export default function SettingsScreen() {
   const [helpModalVisible, setHelpModalVisible] = useState(false);
   const [showBrandingModal, setShowBrandingModal] = useState(false);
   const [showLogoGeneratorModal, setShowLogoGeneratorModal] = useState(false);
+  const [showTelematicsModal, setShowTelematicsModal] = useState(false);
   
   const { lastCommand, lastResponse } = useVoiceCommandStore();
   const { currentStatus, changeStatus } = useLogbookStore();

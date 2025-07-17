@@ -28,6 +28,8 @@ import { useInspectionStore } from '@/store/inspectionStore';
 import { usePredictiveComplianceStore } from '@/store/predictiveComplianceStore';
 import { WeatherCard } from '@/components/WeatherCard';
 import { WeatherAlertsModal } from '@/components/WeatherAlertsModal';
+import DeviceDiscoveryPrompt from '@/components/DeviceDiscoveryPrompt';
+import { useDeviceDiscovery } from '@/hooks/useDeviceDiscovery';
 import { WeatherForecastModal } from '@/components/WeatherForecastModal';
 import { WeatherNotificationSystem } from '@/components/WeatherNotificationSystem';
 import MaintenanceSummaryCard from '@/components/MaintenanceSummaryCard';
@@ -64,6 +66,7 @@ export default function DashboardScreen() {
   const { user, isOwnerOperator, isFleetCompany } = useUserStore();
   const { settings } = useBrandingStore();
   const { currentStatus, changeStatus, startBreak, endBreak, isOnBreak, startTrip } = useLogbookStore();
+  const { showDiscoveryPrompt, detectedDevice, dismissPrompt } = useDeviceDiscovery();
   
   useEffect(() => {
     // Check if inspection is required when component mounts (but don't show prompt)
@@ -562,6 +565,13 @@ export default function DashboardScreen() {
         onNotificationPress={(alert) => {
           setWeatherAlertsVisible(true);
         }}
+      />
+      
+      {/* Device Discovery Prompt */}
+      <DeviceDiscoveryPrompt
+        visible={showDiscoveryPrompt}
+        onClose={dismissPrompt}
+        detectedDevice={detectedDevice}
       />
     </View>
   );

@@ -13,8 +13,9 @@ import { router } from 'expo-router';
 import { Truck, Building2, User, Mail, Hash, Phone } from 'lucide-react-native';
 import { colors } from '@/constants/colors';
 import { useUserStore, UserRole, UserProfile } from '@/store/userStore';
+import DeviceDetectionStep from '@/components/DeviceDetectionStep';
 
-type OnboardingStep = 'role-selection' | 'profile-setup' | 'company-details';
+type OnboardingStep = 'role-selection' | 'profile-setup' | 'company-details' | 'device-setup';
 
 export default function OnboardingScreen() {
   const { setUser, completeOnboarding: completeUserOnboarding } = useUserStore();
@@ -45,7 +46,7 @@ export default function OnboardingScreen() {
     if (selectedRole === 'fleet-company') {
       setCurrentStep('company-details');
     } else {
-      handleCompleteOnboarding();
+      setCurrentStep('device-setup');
     }
   };
 
@@ -55,6 +56,14 @@ export default function OnboardingScreen() {
       return;
     }
     
+    setCurrentStep('device-setup');
+  };
+
+  const handleDeviceSetupComplete = () => {
+    handleCompleteOnboarding();
+  };
+
+  const handleDeviceSetupSkip = () => {
     handleCompleteOnboarding();
   };
 
@@ -290,12 +299,19 @@ export default function OnboardingScreen() {
             {selectedRole === 'fleet-company' && (
               <View style={[styles.progressDot, currentStep === 'company-details' && styles.progressDotActive]} />
             )}
+            <View style={[styles.progressDot, currentStep === 'device-setup' && styles.progressDotActive]} />
           </View>
         </View>
         
         {currentStep === 'role-selection' && renderRoleSelection()}
         {currentStep === 'profile-setup' && renderProfileSetup()}
         {currentStep === 'company-details' && renderCompanyDetails()}
+        {currentStep === 'device-setup' && (
+          <DeviceDetectionStep
+            onComplete={handleDeviceSetupComplete}
+            onSkip={handleDeviceSetupSkip}
+          />
+        )}
       </ScrollView>
     </SafeAreaView>
   );
