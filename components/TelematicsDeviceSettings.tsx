@@ -209,11 +209,11 @@ export default function TelematicsDeviceSettings({ onBack }: TelematicsDeviceSet
       <Text style={styles.recommendationType}>{device.type.toUpperCase()}</Text>
       <View style={styles.recommendationFeatures}>
         {device.metadata?.features?.slice(0, 2).map((feature: string, index: number) => (
-          <Text key={index} style={styles.recommendationFeature}>• {feature}</Text>
+          <Text key={index} style={styles.recommendationFeature}>- {feature}</Text>
         ))}
       </View>
       <View style={styles.recommendationFooter}>
-        <Text style={styles.ratingText}>★ {device.metadata?.rating}</Text>
+        <Text style={styles.ratingText}>⭐ {device.metadata?.rating}</Text>
         <TouchableOpacity style={styles.learnMoreButton}>
           <Text style={styles.learnMoreText}>Learn More</Text>
         </TouchableOpacity>
