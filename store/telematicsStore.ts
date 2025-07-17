@@ -382,7 +382,7 @@ export const useTelematicsStore = create<TelematicsState>()(persist(
     },
     
     detectFromIncomingData: async () => {
-      // Simulate detection from incoming data patterns
+      // Simulate detection from incoming data patterns  
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Mock analysis of incoming data to detect device type
