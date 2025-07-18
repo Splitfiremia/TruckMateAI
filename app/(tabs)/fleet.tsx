@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, TextInput, Switch } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, TextInput, Switch, Animated } from 'react-native';
 import { Stack } from 'expo-router';
 import { 
   Users, 
@@ -29,6 +29,8 @@ import ComplianceOverview from '@/components/ComplianceOverview';
 
 export default function FleetAdminScreen() {
   const [activeTab, setActiveTab] = useState<'overview' | 'drivers' | 'branding' | 'compliance' | 'settings'>('overview');
+  const [isTabBarExpanded, setIsTabBarExpanded] = useState(false);
+  const tabBarHeight = useState(new Animated.Value(100))[0];
   
   const { 
     fleetInfo, 
@@ -60,6 +62,17 @@ export default function FleetAdminScreen() {
     );
   }
 
+  const toggleTabBarExpansion = () => {
+    const toValue = isTabBarExpanded ? 100 : 140;
+    setIsTabBarExpanded(!isTabBarExpanded);
+    
+    Animated.timing(tabBarHeight, {
+      toValue,
+      duration: 300,
+      useNativeDriver: false,
+    }).start();
+  };
+
   const renderTabButton = (
     tab: typeof activeTab,
     icon: React.ReactNode,
@@ -68,16 +81,23 @@ export default function FleetAdminScreen() {
     <TouchableOpacity
       style={[
         styles.tabButton,
+        isTabBarExpanded && styles.tabButtonExpanded,
         activeTab === tab && { backgroundColor: colors.primaryLight }
       ]}
-      onPress={() => setActiveTab(tab)}
+      onPress={() => {
+        setActiveTab(tab);
+        if (isTabBarExpanded) {
+          toggleTabBarExpansion();
+        }
+      }}
     >
       <View style={styles.tabButtonIcon}>
         {icon}
       </View>
       <Text style={[
         styles.tabButtonText,
-        activeTab === tab && { color: colors.text }
+        isTabBarExpanded && styles.tabButtonTextExpanded,
+        activeTab === tab && { color: colors.text.primary }
       ]}>
         {label}
       </Text>
@@ -346,20 +366,26 @@ export default function FleetAdminScreen() {
         }} 
       />
       
-      <View style={styles.tabBar}>
-        <View style={styles.tabGrid}>
-          <View style={styles.tabRow}>
-            {renderTabButton('overview', <BarChart3 size={18} color={activeTab === 'overview' ? colors.text.primary : colors.textSecondary} />, 'Fleet Overview')}
-            {renderTabButton('drivers', <Users size={18} color={activeTab === 'drivers' ? colors.text.primary : colors.textSecondary} />, 'Driver Management')}
-            {renderTabButton('branding', <Palette size={18} color={activeTab === 'branding' ? (settings.primaryColor || colors.text.primary) : colors.textSecondary} />, 'White-Label Branding')}
+      <Animated.View style={[styles.tabBar, { height: tabBarHeight }]}>
+        <TouchableOpacity 
+          style={styles.tabBarTouchArea}
+          onPress={toggleTabBarExpansion}
+          activeOpacity={1}
+        >
+          <View style={styles.tabGrid}>
+            <View style={styles.tabRow}>
+              {renderTabButton('overview', <BarChart3 size={18} color={activeTab === 'overview' ? colors.text.primary : colors.textSecondary} />, 'Fleet Overview')}
+              {renderTabButton('drivers', <Users size={18} color={activeTab === 'drivers' ? colors.text.primary : colors.textSecondary} />, 'Driver Management')}
+              {renderTabButton('branding', <Palette size={18} color={activeTab === 'branding' ? (settings.primaryColor || colors.text.primary) : colors.textSecondary} />, 'White-Label Branding')}
+            </View>
+            <View style={styles.tabRow}>
+              {renderTabButton('compliance', <Shield size={18} color={activeTab === 'compliance' ? colors.text.primary : colors.textSecondary} />, 'Compliance Monitor')}
+              {renderTabButton('settings', <Settings size={18} color={activeTab === 'settings' ? colors.text.primary : colors.textSecondary} />, 'Fleet Settings')}
+              <View style={styles.tabPlaceholder} />
+            </View>
           </View>
-          <View style={styles.tabRow}>
-            {renderTabButton('compliance', <Shield size={18} color={activeTab === 'compliance' ? colors.text.primary : colors.textSecondary} />, 'Compliance Monitor')}
-            {renderTabButton('settings', <Settings size={18} color={activeTab === 'settings' ? colors.text.primary : colors.textSecondary} />, 'Fleet Settings')}
-            <View style={styles.tabPlaceholder} />
-          </View>
-        </View>
-      </View>
+        </TouchableOpacity>
+      </Animated.View>
 
       {activeTab === 'overview' && renderOverviewTab()}
       {activeTab === 'drivers' && renderDriversTab()}
@@ -380,6 +406,11 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
     paddingVertical: 12,
+    overflow: 'hidden',
+  },
+  tabBarTouchArea: {
+    flex: 1,
+    width: '100%',
   },
   tabGrid: {
     paddingHorizontal: 6,
@@ -400,6 +431,10 @@ const styles = StyleSheet.create({
     minHeight: 70,
     justifyContent: 'center',
   },
+  tabButtonExpanded: {
+    minHeight: 90,
+    paddingVertical: 12,
+  },
   tabButtonIcon: {
     marginBottom: 6,
   },
@@ -411,6 +446,12 @@ const styles = StyleSheet.create({
     lineHeight: 12,
     flexWrap: 'wrap',
     maxWidth: '100%',
+    numberOfLines: 2,
+  },
+  tabButtonTextExpanded: {
+    fontSize: 11,
+    lineHeight: 14,
+    numberOfLines: 3,
   },
   tabPlaceholder: {
     flex: 1,
