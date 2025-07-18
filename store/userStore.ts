@@ -80,7 +80,7 @@ export const useUserStore = create<UserState>()(persist(
     
     logout: () => {
       // Clear user state immediately
-      set({ user: null, isAuthenticated: false, isOnboarded: false });
+      set({ user: null, isAuthenticated: false, isOnboarded: false });\n      \n      // Clear AsyncStorage to ensure complete logout\n      AsyncStorage.removeItem('user-storage').catch(error => {\n        console.error('Error clearing user storage:', error);\n      });
       
       // Navigate to sign-in screen after logout with multiple fallbacks
       const navigateToSignIn = () => {

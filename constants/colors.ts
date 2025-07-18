@@ -92,6 +92,10 @@ export const colors = {
   textSecondary: lightTheme.text.secondary,
   backgroundLight: lightTheme.background.secondary,
   backgroundSecondary: lightTheme.background.secondary,
+  // Chase theme overrides for mobile
+  primary: "#117ACA", // Chase blue
+  secondary: "#2D2D2D", // Dark gray
+  accent: "#FFB81C", // Chase gold
 };
 
 // Deprecated properties for backward compatibility

@@ -33,12 +33,13 @@ export default function TabLayout() {
   
   // Use custom colors if branding is customized - Updated for Chase professional palette
   const activeColors = {
-    primary: settings.primaryColor || colors.primary, // Chase blue for active states
-    secondary: settings.secondaryColor || colors.secondary, // Dark gray for contrast
-    background: colors.secondary, // Dark gray background for professional look
-    textSecondary: colors.white, // White text for maximum contrast
-    border: colors.primary, // Chase blue for borders
-    text: colors.white, // White text for readability
+    primary: settings.primaryColor || "#117ACA", // Chase blue for active states
+    secondary: settings.secondaryColor || "#2D2D2D", // Dark gray for contrast
+    background: "#2D2D2D", // Dark gray background for professional look
+    textSecondary: "#FFFFFF", // White text for maximum contrast
+    border: "#117ACA", // Chase blue for borders
+    text: "#FFFFFF", // White text for readability
+    accent: "#FFB81C", // Chase gold accent
   };
 
   const expandTabBar = () => {
@@ -52,7 +53,7 @@ export default function TabLayout() {
       setExpanded(true);
       Animated.parallel([
         Animated.timing(heightAnim, {
-          toValue: 140, // Increased height to show full text for all labels
+          toValue: 120, // Optimized height to show full text for all labels
           duration: 300,
           useNativeDriver: false,
         }),
@@ -115,15 +116,15 @@ export default function TabLayout() {
     <View style={{ flex: 1 }}>
       <Tabs
         screenOptions={{
-          tabBarActiveTintColor: colors.primary, // Chase blue
+          tabBarActiveTintColor: "#117ACA", // Chase blue
           tabBarInactiveTintColor: '#888888', // Inactive gray
           tabBarStyle: {
             display: 'none', // Hide default tab bar
           },
           headerStyle: {
-            backgroundColor: colors.background.primary, // Light gray background
+            backgroundColor: "#F7F7F7", // Light gray background
           },
-          headerTintColor: colors.text.primary, // Primary text color
+          headerTintColor: "#333333", // Primary text color
           headerTitleStyle: {
             fontWeight: '600',
           },
@@ -254,8 +255,8 @@ export default function TabLayout() {
             left: 0,
             right: 0,
             height: heightAnim,
-            backgroundColor: colors.secondary, // Dark gray background
-            borderTopColor: colors.primary, // Chase blue border
+            backgroundColor: "#2D2D2D", // Dark gray background
+            borderTopColor: "#117ACA", // Chase blue border
             borderTopWidth: 1,
             paddingBottom: Platform.OS === 'ios' ? 25 : 15,
             paddingTop: expanded ? 16 : 12,
@@ -296,19 +297,19 @@ export default function TabLayout() {
                   }}
                 >
                   <IconComponent 
-                    color={isActive ? colors.primary : colors.white} 
+                    color={isActive ? "#117ACA" : "#FFFFFF"} 
                     size={expanded ? 20 : 16} 
                   />
                   <Animated.Text
                     style={{
-                      fontSize: expanded ? 14 : 9,
+                      fontSize: expanded ? 12 : 9,
                       fontWeight: '500',
-                      color: isActive ? colors.primary : colors.white,
+                      color: isActive ? "#117ACA" : "#FFFFFF",
                       marginTop: expanded ? 10 : 2,
                       textAlign: 'center',
                       opacity: expanded ? 1 : 0.8,
-                      lineHeight: expanded ? 16 : 12,
-                      width: expanded ? 90 : 'auto',
+                      lineHeight: expanded ? 14 : 12,
+                      width: expanded ? 80 : 'auto',
                     }}
                     numberOfLines={expanded ? 2 : 1}
                     ellipsizeMode="tail"
