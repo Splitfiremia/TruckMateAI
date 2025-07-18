@@ -1,7 +1,7 @@
 // Light Theme Colors - Chase Bank Professional Palette
 const lightTheme = {
   primary: "#117ACA", // Chase blue for main buttons and CTAs
-  primaryLight: "#117ACA", // Chase blue for navigation and headers
+  primaryLight: "#3B82F6", // Softer contrast blue for navigation and headers
   secondary: "#2D2D2D", // Dark gray for headers and subtitles
   accent: "#FFB81C", // Chase gold for notifications and badges
   success: "#28A745", // Professional green

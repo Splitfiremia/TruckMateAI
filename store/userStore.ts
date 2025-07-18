@@ -79,23 +79,36 @@ export const useUserStore = create<UserState>()(persist(
     },
     
     logout: () => {
+      // Clear user state immediately
       set({ user: null, isAuthenticated: false, isOnboarded: false });
-      // Navigate to sign-in screen after logout
-      setTimeout(() => {
+      
+      // Navigate to sign-in screen after logout with multiple fallbacks
+      const navigateToSignIn = () => {
         try {
           router.replace('/sign-in');
         } catch (error) {
           console.error('Navigation error after logout:', error);
-          // Fallback navigation
+          // Try push instead of replace
           setTimeout(() => {
             try {
               router.push('/sign-in');
-            } catch (fallbackError) {
-              console.error('Fallback navigation error after logout:', fallbackError);
+            } catch (pushError) {
+              console.error('Push navigation error after logout:', pushError);
+              // Final fallback - navigate to root
+              setTimeout(() => {
+                try {
+                  router.replace('/');
+                } catch (rootError) {
+                  console.error('Root navigation error after logout:', rootError);
+                }
+              }, 500);
             }
-          }, 500);
+          }, 300);
         }
-      }, 100);
+      };
+      
+      // Small delay to ensure state is updated
+      setTimeout(navigateToSignIn, 100);
     },
     
     isOwnerOperator: () => {

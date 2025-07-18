@@ -52,7 +52,7 @@ export default function TabLayout() {
       setExpanded(true);
       Animated.parallel([
         Animated.timing(heightAnim, {
-          toValue: 120, // Increased height to show full text
+          toValue: 140, // Increased height to show full text for all labels
           duration: 300,
           useNativeDriver: false,
         }),
@@ -83,7 +83,7 @@ export default function TabLayout() {
           })
         ]).start();
       }
-    }, 3000);
+    }, 3000); // Auto-collapse after 3 seconds
   };
 
   const navigateToTab = (route: string) => {
@@ -274,8 +274,8 @@ export default function TabLayout() {
               flexDirection: 'row',
               alignItems: expanded ? 'flex-start' : 'center',
               paddingHorizontal: 16,
-              gap: expanded ? 8 : 4,
-              minHeight: expanded ? 80 : 60,
+              gap: expanded ? 12 : 4,
+              minHeight: expanded ? 100 : 60,
             }}
             style={{ flex: 1 }}
           >
@@ -289,9 +289,9 @@ export default function TabLayout() {
                   onPress={() => navigateToTab(item.route)}
                   style={{
                     alignItems: 'center',
-                    minWidth: expanded ? 90 : 70,
-                    paddingHorizontal: expanded ? 12 : 6,
-                    paddingVertical: expanded ? 8 : 6,
+                    minWidth: expanded ? 100 : 70,
+                    paddingHorizontal: expanded ? 16 : 6,
+                    paddingVertical: expanded ? 12 : 6,
                     justifyContent: expanded ? 'flex-start' : 'center',
                   }}
                 >
@@ -301,14 +301,14 @@ export default function TabLayout() {
                   />
                   <Animated.Text
                     style={{
-                      fontSize: expanded ? 12 : 9,
+                      fontSize: expanded ? 14 : 9,
                       fontWeight: '500',
                       color: isActive ? colors.primary : colors.white,
-                      marginTop: expanded ? 8 : 2,
+                      marginTop: expanded ? 10 : 2,
                       textAlign: 'center',
                       opacity: expanded ? 1 : 0.8,
-                      lineHeight: expanded ? 14 : 12,
-                      width: expanded ? 80 : 'auto',
+                      lineHeight: expanded ? 16 : 12,
+                      width: expanded ? 90 : 'auto',
                     }}
                     numberOfLines={expanded ? 2 : 1}
                     ellipsizeMode="tail"
