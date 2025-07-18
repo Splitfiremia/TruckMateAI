@@ -290,7 +290,7 @@ export default function PricingTabScreen() {
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Usage Alerts */}
         {usageAlerts.map((alert, index) => (
-          <UsageAlertBanner key={alert.id || `alert-${index}`} alert={alert} />
+          <UsageAlertBanner key={alert.id || ('alert-' + index)} alert={alert} />
         ))}
 
         {/* Subscription Status */}
