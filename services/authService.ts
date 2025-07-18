@@ -123,6 +123,23 @@ class AuthService {
 
   async signInWithApple(): Promise<AuthResult> {
     try {
+      if (Platform.OS === 'web') {
+        // For web, provide a mock Apple Sign-In experience
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            resolve({
+              success: true,
+              user: {
+                id: 'apple_' + Date.now(),
+                email: 'user@privaterelay.appleid.com',
+                name: 'Apple User',
+                provider: 'apple',
+              },
+            });
+          }, 1000);
+        });
+      }
+
       if (Platform.OS !== 'ios') {
         return {
           success: false,
@@ -178,6 +195,7 @@ class AuthService {
   }
 
   async isAppleSignInAvailable(): Promise<boolean> {
+    if (Platform.OS === 'web') return true; // Show Apple Sign-In on web for demo
     if (Platform.OS !== 'ios') return false;
     
     try {

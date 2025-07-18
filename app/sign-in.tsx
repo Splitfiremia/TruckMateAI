@@ -107,15 +107,36 @@ export default function SignInScreen() {
             )}
           </TouchableOpacity>
 
-          {/* Apple Sign In - Only show on iOS */}
+          {/* Apple Sign In */}
           {isAppleAvailable && (
-            <AppleAuthentication.AppleAuthenticationButton
-              buttonType={AppleAuthentication.AppleAuthenticationButtonType.CONTINUE}
-              buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
-              cornerRadius={12}
-              style={styles.appleButton}
-              onPress={handleAppleSignIn}
-            />
+            Platform.OS === 'ios' ? (
+              <AppleAuthentication.AppleAuthenticationButton
+                buttonType={AppleAuthentication.AppleAuthenticationButtonType.CONTINUE}
+                buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+                cornerRadius={12}
+                style={styles.appleButton}
+                onPress={handleAppleSignIn}
+              />
+            ) : (
+              <TouchableOpacity
+                style={[styles.signInButton, styles.appleButtonCustom]}
+                onPress={handleAppleSignIn}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <ActivityIndicator color={colors.text.primary} />
+                ) : (
+                  <>
+                    <View style={styles.appleIcon}>
+                      <Text style={styles.appleIconText}>🍎</Text>
+                    </View>
+                    <Text style={[styles.signInButtonText, styles.appleButtonText]}>
+                      Continue with Apple
+                    </Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            )
           )}
 
           {/* Email Sign In (Demo) */}
@@ -202,6 +223,23 @@ const styles = StyleSheet.create({
   },
   appleButton: {
     height: 52,
+  },
+  appleButtonCustom: {
+    backgroundColor: '#000000',
+    borderWidth: 1,
+    borderColor: '#000000',
+  },
+  appleIcon: {
+    width: 20,
+    height: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  appleIconText: {
+    fontSize: 16,
+  },
+  appleButtonText: {
+    color: '#FFFFFF',
   },
   emailButton: {
     backgroundColor: 'rgba(59, 130, 246, 0.1)',
