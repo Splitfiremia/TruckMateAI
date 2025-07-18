@@ -32,7 +32,7 @@ export default function TabLayout() {
     const newState = !expanded;
     setExpanded(newState);
     Animated.timing(heightAnim, {
-      toValue: newState ? 110 : 85,
+      toValue: newState ? 120 : 85,
       duration: 300,
       useNativeDriver: false,
     }).start();
@@ -58,15 +58,15 @@ export default function TabLayout() {
               shadowRadius: 3,
             },
             tabBarLabelStyle: {
-              fontSize: expanded ? 12 : 11,
+              fontSize: expanded ? 14 : 11,
               fontWeight: '500',
-              marginTop: 2,
+              marginTop: 4,
               paddingHorizontal: 2,
               textAlign: 'center',
             },
             tabBarItemStyle: {
-              paddingVertical: 4,
-              minHeight: expanded ? 90 : 70,
+              paddingVertical: 6,
+              minHeight: expanded ? 100 : 70,
               justifyContent: 'center',
             },
             headerStyle: {
