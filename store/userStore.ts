@@ -25,6 +25,7 @@ interface UserState {
   // Actions
   setUser: (user: UserProfile) => void;
   updateUser: (updates: Partial<UserProfile>) => void;
+  setUserType: (role: UserRole) => void;
   completeOnboarding: () => void;
   logout: () => void;
   
@@ -46,6 +47,14 @@ export const useUserStore = create<UserState>()(persist(
       const currentUser = get().user;
       if (currentUser) {
         const updatedUser = { ...currentUser, ...updates };
+        set({ user: updatedUser });
+      }
+    },
+    
+    setUserType: (role) => {
+      const currentUser = get().user;
+      if (currentUser) {
+        const updatedUser = { ...currentUser, role };
         set({ user: updatedUser });
       }
     },

@@ -85,7 +85,7 @@ export default function PricingTabScreen() {
 
   const handleUpgrade = () => {
     if (!user) {
-      startOnboarding('guest');
+      startOnboarding(user?.id || 'guest');
       router.push('/onboarding-flow');
     } else {
       router.push('/pricing');

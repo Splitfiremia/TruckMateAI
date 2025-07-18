@@ -116,8 +116,7 @@ class FallbackLocationService {
           },
           {
             enableHighAccuracy: false,
-            timeout: 10000,
-            maximumAge: 300000
+            timeout: 10000
           }
         );
       }

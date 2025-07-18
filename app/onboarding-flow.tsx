@@ -14,7 +14,7 @@ import FeatureSelectionStep from '@/components/onboarding/FeatureSelectionStep';
 
 export default function OnboardingFlowScreen() {
   const { onboardingFlow, updateOnboardingStep, completeOnboarding, trackEvent } = usePricingStore();
-  const { updateUser } = useUserStore();
+  const { updateUser, setUserType } = useUserStore();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
   useEffect(() => {
@@ -35,7 +35,7 @@ export default function OnboardingFlowScreen() {
     
     // Update user store based on step data
     if (stepData.userType) {
-      updateUser({ role: stepData.userType });
+      setUserType(stepData.userType);
     }
 
     if (isLastStep) {
