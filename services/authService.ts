@@ -19,9 +19,9 @@ export interface AuthResult {
 
 class AuthService {
   private googleClientId = Platform.select({
-    ios: 'YOUR_IOS_CLIENT_ID',
-    android: 'YOUR_ANDROID_CLIENT_ID',
-    web: 'YOUR_WEB_CLIENT_ID',
+    ios: '1234567890-abcdefghijklmnopqrstuvwxyz123456.apps.googleusercontent.com',
+    android: '1234567890-abcdefghijklmnopqrstuvwxyz123456.apps.googleusercontent.com',
+    web: '1234567890-abcdefghijklmnopqrstuvwxyz123456.apps.googleusercontent.com',
   });
 
   async signInWithGoogle(): Promise<AuthResult> {
@@ -47,11 +47,17 @@ class AuthService {
     const codeVerifier = Crypto.randomUUID() + Crypto.randomUUID();
     
     // Create code challenge from verifier
-    const codeChallenge = await Crypto.digestStringAsync(
+    const codeChallengeBytes = await Crypto.digestStringAsync(
       Crypto.CryptoDigestAlgorithm.SHA256,
       codeVerifier,
       { encoding: Crypto.CryptoEncoding.BASE64 }
     );
+    
+    // Convert to BASE64URL format (replace + with -, / with _, remove padding =)
+    const codeChallenge = codeChallengeBytes
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=/g, '');
 
     const request = new AuthSession.AuthRequest({
       clientId: this.googleClientId!,
