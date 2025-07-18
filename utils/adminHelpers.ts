@@ -146,7 +146,7 @@ export const generateHighUsageAlert = (userEmail: string, usage: number) => ({
 
 // Data Validation Helpers
 export const validateApiKey = (key: string): boolean => {
-  return key && key.length > 10 && !key.includes('[YOUR_');
+  return Boolean(key && key.length > 10 && !key.includes('[YOUR_'));
 };
 
 export const validateWebhookUrl = (url: string): boolean => {

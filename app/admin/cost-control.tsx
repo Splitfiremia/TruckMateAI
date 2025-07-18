@@ -327,7 +327,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   chart: {
-    height: chartHeight,
+    height: 120,
     position: 'relative',
   },
   chartGrid: {
