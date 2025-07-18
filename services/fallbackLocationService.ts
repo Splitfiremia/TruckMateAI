@@ -24,7 +24,6 @@ class FallbackLocationService {
         if (status === 'granted') {
           const location = await Location.getCurrentPositionAsync({
             accuracy: Location.Accuracy.Balanced,
-            maximumAge: 300000, // 5 minutes
           });
 
           const locationData: LocationData = {
