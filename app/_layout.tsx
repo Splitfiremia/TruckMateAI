@@ -44,6 +44,11 @@ function RootLayoutNav() {
       >
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+        <Stack.Screen name="onboarding-flow" options={{ headerShown: false }} />
+        <Stack.Screen name="logo-generator" options={{ title: "Logo Generator" }} />
+        <Stack.Screen name="api-settings" options={{ title: "API Settings" }} />
+        <Stack.Screen name="api-testing" options={{ title: "API Testing" }} />
+        <Stack.Screen name="pricing" options={{ title: "Pricing" }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       </Stack>
     </>

@@ -86,8 +86,11 @@ export const themes = {
   dark: darkTheme,
 };
 
-// Default export for backward compatibility
-export const colors = lightTheme;
+// Default export for backward compatibility with deprecated properties
+export const colors = {
+  ...lightTheme,
+  textSecondary: lightTheme.text.secondary,
+};
 
 // Deprecated properties for backward compatibility
 export const deprecatedColors = {
