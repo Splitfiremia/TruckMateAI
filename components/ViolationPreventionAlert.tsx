@@ -593,12 +593,12 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 16,
     padding: 16,
-    backgroundColor: colors.background,
+    backgroundColor: colors.background.primary,
     borderRadius: 12,
   },
   countdownLabel: {
     fontSize: 14,
-    color: colors.text,
+    color: colors.text.primary,
     flex: 1,
   },
   countdownTime: {
@@ -607,7 +607,7 @@ const styles = StyleSheet.create({
   },
   message: {
     fontSize: 16,
-    color: colors.text,
+    color: colors.text.primary,
     marginBottom: 16,
     lineHeight: 22,
   },
@@ -622,7 +622,7 @@ const styles = StyleSheet.create({
   statusValue: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
     marginBottom: 8,
   },
   progressBar: {
@@ -640,7 +640,7 @@ const styles = StyleSheet.create({
   quickActionsTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
     marginBottom: 12,
   },
   quickActions: {
@@ -676,13 +676,13 @@ const styles = StyleSheet.create({
   preventionTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
     marginBottom: 12,
   },
   preventionAction: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.background,
+    backgroundColor: colors.background.primary,
     borderRadius: 8,
     padding: 12,
     marginBottom: 8,
@@ -699,7 +699,7 @@ const styles = StyleSheet.create({
   actionTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
   },
   actionDescription: {
     fontSize: 12,
@@ -743,7 +743,7 @@ const styles = StyleSheet.create({
   },
   fineLabel: {
     fontSize: 14,
-    color: colors.text,
+    color: colors.text.primary,
   },
   fineAmount: {
     fontSize: 16,
@@ -763,7 +763,7 @@ const styles = StyleSheet.create({
   overrideTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
     marginBottom: 4,
   },
   overrideDescription: {
@@ -817,7 +817,7 @@ const styles = StyleSheet.create({
   },
   overrideReason: {
     fontSize: 12,
-    color: colors.text,
+    color: colors.text.primary,
     fontStyle: 'italic',
   },
   
@@ -845,7 +845,7 @@ const styles = StyleSheet.create({
   overrideModalTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: colors.text,
+    color: colors.text.primary,
   },
   overrideModalClose: {
     width: 32,
@@ -870,7 +870,7 @@ const styles = StyleSheet.create({
   overrideFormLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
     marginBottom: 8,
   },
   overrideReasonInput: {
@@ -879,8 +879,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     fontSize: 14,
-    color: colors.text,
-    backgroundColor: colors.background,
+    color: colors.text.primary,
+    backgroundColor: colors.background.primary,
     textAlignVertical: 'top',
     minHeight: 80,
   },
@@ -909,7 +909,7 @@ const styles = StyleSheet.create({
   },
   checkboxText: {
     fontSize: 14,
-    color: colors.text,
+    color: colors.text.primary,
     flex: 1,
     lineHeight: 18,
   },
