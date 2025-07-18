@@ -568,14 +568,17 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    paddingTop: 60, // Add top padding to prevent cutoff
+    paddingTop: 60,
+    paddingBottom: 120, // Add bottom padding to prevent cutoff from nav bar
   },
   alertContainer: {
     width: '100%',
     maxWidth: 400,
-    maxHeight: '95%', // Allow more height for content
+    maxHeight: '85%', // Reduce max height to ensure it fits with padding
+    flex: 1,
   },
   alertCard: {
+    flex: 1,
     borderRadius: 20,
     borderWidth: 2,
     borderColor: colors.border,
@@ -589,6 +592,7 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   alertCardGradient: {
+    flex: 1,
     borderRadius: 18,
     padding: 24,
   },

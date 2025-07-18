@@ -1,6 +1,6 @@
 import { Tabs, Redirect, useRouter, usePathname } from "expo-router";
 import { BarChart, Clipboard, Home, Receipt, Settings, Users, Shield, Cloud, Zap, Wrench, Navigation, Bot, Truck, CreditCard } from "lucide-react-native";
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Animated, Platform, TouchableWithoutFeedback, View, Text, Pressable, ScrollView } from "react-native";
 
 import { colors } from "@/constants/colors";
@@ -15,7 +15,17 @@ export default function TabLayout() {
   const [expanded, setExpanded] = useState(false);
   const heightAnim = useRef(new Animated.Value(60)).current;
   const opacityAnim = useRef(new Animated.Value(0.8)).current;
+  const collapseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (collapseTimeoutRef.current) {
+        clearTimeout(collapseTimeoutRef.current);
+      }
+    };
+  }, []);
+
   // Redirect to onboarding if not completed
   if (!isOnboarded) {
     return <Redirect href="/onboarding" />;
@@ -32,11 +42,17 @@ export default function TabLayout() {
   };
 
   const expandTabBar = () => {
+    // Clear any existing collapse timeout
+    if (collapseTimeoutRef.current) {
+      clearTimeout(collapseTimeoutRef.current);
+      collapseTimeoutRef.current = null;
+    }
+    
     if (!expanded) {
       setExpanded(true);
       Animated.parallel([
         Animated.timing(heightAnim, {
-          toValue: 140,
+          toValue: 120, // Increased height to show full text
           duration: 300,
           useNativeDriver: false,
         }),
@@ -50,21 +66,24 @@ export default function TabLayout() {
   };
 
   const collapseTabBar = () => {
-    if (expanded) {
-      setExpanded(false);
-      Animated.parallel([
-        Animated.timing(heightAnim, {
-          toValue: 60,
-          duration: 300,
-          useNativeDriver: false,
-        }),
-        Animated.timing(opacityAnim, {
-          toValue: 0.8,
-          duration: 300,
-          useNativeDriver: false,
-        })
-      ]).start();
-    }
+    // Set a timeout to auto-collapse after 3 seconds
+    collapseTimeoutRef.current = setTimeout(() => {
+      if (expanded) {
+        setExpanded(false);
+        Animated.parallel([
+          Animated.timing(heightAnim, {
+            toValue: 60,
+            duration: 300,
+            useNativeDriver: false,
+          }),
+          Animated.timing(opacityAnim, {
+            toValue: 0.8,
+            duration: 300,
+            useNativeDriver: false,
+          })
+        ]).start();
+      }
+    }, 3000);
   };
 
   const navigateToTab = (route: string) => {
@@ -109,7 +128,7 @@ export default function TabLayout() {
             fontWeight: '600',
           },
           contentStyle: {
-            paddingBottom: Platform.OS === 'ios' ? 110 : 100, // Add padding for custom nav bar
+            paddingBottom: Platform.OS === 'ios' ? 140 : 130, // Increased padding for expanded nav bar
           },
         }}
       >
@@ -229,6 +248,7 @@ export default function TabLayout() {
       <TouchableWithoutFeedback
         onPressIn={expandTabBar}
         onPressOut={collapseTabBar}
+        onPress={expandTabBar}
       >
         <Animated.View
           style={{
@@ -241,7 +261,7 @@ export default function TabLayout() {
             borderTopColor: activeColors.border,
             borderTopWidth: 1,
             paddingBottom: Platform.OS === 'ios' ? 25 : 15,
-            paddingTop: 12,
+            paddingTop: expanded ? 16 : 12,
             elevation: 8,
             shadowColor: '#000',
             shadowOffset: { width: 0, height: -2 },
@@ -255,9 +275,10 @@ export default function TabLayout() {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{
               flexDirection: 'row',
-              alignItems: 'center',
+              alignItems: expanded ? 'flex-start' : 'center',
               paddingHorizontal: 16,
-              gap: 4,
+              gap: expanded ? 8 : 4,
+              minHeight: expanded ? 80 : 60,
             }}
             style={{ flex: 1 }}
           >
@@ -271,24 +292,26 @@ export default function TabLayout() {
                   onPress={() => navigateToTab(item.route)}
                   style={{
                     alignItems: 'center',
-                    minWidth: expanded ? 85 : 70,
-                    paddingHorizontal: expanded ? 10 : 6,
-                    paddingVertical: 6,
+                    minWidth: expanded ? 90 : 70,
+                    paddingHorizontal: expanded ? 12 : 6,
+                    paddingVertical: expanded ? 8 : 6,
+                    justifyContent: expanded ? 'flex-start' : 'center',
                   }}
                 >
                   <IconComponent 
                     color={isActive ? activeColors.primary : activeColors.textSecondary} 
-                    size={expanded ? 22 : 16} 
+                    size={expanded ? 20 : 16} 
                   />
                   <Animated.Text
                     style={{
-                      fontSize: expanded ? 11 : 9,
+                      fontSize: expanded ? 12 : 9,
                       fontWeight: '500',
                       color: isActive ? activeColors.primary : activeColors.textSecondary,
-                      marginTop: expanded ? 6 : 2,
+                      marginTop: expanded ? 8 : 2,
                       textAlign: 'center',
                       opacity: expanded ? 1 : 0.8,
-                      lineHeight: expanded ? 13 : 12,
+                      lineHeight: expanded ? 14 : 12,
+                      width: expanded ? 80 : 'auto',
                     }}
                     numberOfLines={expanded ? 2 : 1}
                     ellipsizeMode="tail"
