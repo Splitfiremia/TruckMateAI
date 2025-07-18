@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router } from 'expo-router';
 
 export type UserRole = 'owner-operator' | 'fleet-company';
 export type AuthProvider = 'google' | 'apple' | 'email';
@@ -79,6 +80,22 @@ export const useUserStore = create<UserState>()(persist(
     
     logout: () => {
       set({ user: null, isAuthenticated: false, isOnboarded: false });
+      // Navigate to sign-in screen after logout
+      setTimeout(() => {
+        try {
+          router.replace('/sign-in');
+        } catch (error) {
+          console.error('Navigation error after logout:', error);
+          // Fallback navigation
+          setTimeout(() => {
+            try {
+              router.push('/sign-in');
+            } catch (fallbackError) {
+              console.error('Fallback navigation error after logout:', fallbackError);
+            }
+          }, 500);
+        }
+      }, 100);
     },
     
     isOwnerOperator: () => {
