@@ -51,7 +51,7 @@ export const ViolationPreventionAlert: React.FC<ViolationPreventionAlertProps> =
   const [fineAccepted, setFineAccepted] = useState(false);
   
   const { executePreventionAction, overrideViolationPrediction, canOverrideViolation } = usePredictiveComplianceStore();
-  const { startBreak, changeStatus, currentTripId, getWeeklyOverrideCount } = useLogbookStore();
+  const { startBreak, changeStatus, currentTripId, getWeeklyOverrideCount, logViolationOverride } = useLogbookStore();
 
   useEffect(() => {
     if (visible && prediction.severity === 'Critical') {
@@ -203,7 +203,6 @@ export const ViolationPreventionAlert: React.FC<ViolationPreventionAlertProps> =
       
       if (success) {
         // Log the override in the logbook store for record keeping
-        const { logViolationOverride } = useLogbookStore.getState();
         logViolationOverride(
           override, 
           prediction.type, 
