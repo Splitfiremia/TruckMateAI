@@ -573,7 +573,7 @@ const styles = StyleSheet.create({
   alertContainer: {
     width: '100%',
     maxWidth: 400,
-    maxHeight: '90%', // Prevent modal from being too tall
+    maxHeight: '95%', // Allow more height for content
   },
   alertCard: {
     borderRadius: 20,
