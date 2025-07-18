@@ -80,34 +80,22 @@ export const useUserStore = create<UserState>()(persist(
     
     logout: () => {
       set({ user: null, isAuthenticated: false, isOnboarded: false });
-      
-      AsyncStorage.removeItem('user-storage').catch(error => {
-        console.error('Error clearing user storage:', error);
-      });
-      
-      const navigateToSignIn = () => {
+      // Navigate to sign-in screen after logout
+      setTimeout(() => {
         try {
           router.replace('/sign-in');
         } catch (error) {
           console.error('Navigation error after logout:', error);
+          // Fallback navigation
           setTimeout(() => {
             try {
               router.push('/sign-in');
-            } catch (pushError) {
-              console.error('Push navigation error after logout:', pushError);
-              setTimeout(() => {
-                try {
-                  router.replace('/');
-                } catch (rootError) {
-                  console.error('Root navigation error after logout:', rootError);
-                }
-              }, 500);
+            } catch (fallbackError) {
+              console.error('Fallback navigation error after logout:', fallbackError);
             }
-          }, 300);
+          }, 500);
         }
-      };
-      
-      setTimeout(navigateToSignIn, 100);
+      }, 100);
     },
     
     isOwnerOperator: () => {

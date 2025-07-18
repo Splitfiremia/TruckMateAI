@@ -39,6 +39,9 @@ function RootLayoutNav() {
             backgroundColor: activeColors.background,
           },
           headerTintColor: activeColors.text,
+          contentStyle: {
+            backgroundColor: activeColors.background,
+          },
         }}
       >
         <Stack.Screen name="index" options={{ headerShown: false }} />

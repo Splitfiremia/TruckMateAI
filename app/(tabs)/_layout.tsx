@@ -33,13 +33,12 @@ export default function TabLayout() {
   
   // Use custom colors if branding is customized - Updated for Chase professional palette
   const activeColors = {
-    primary: settings.primaryColor || "#117ACA", // Chase blue for active states
-    secondary: settings.secondaryColor || "#2D2D2D", // Dark gray for contrast
-    background: "#2D2D2D", // Dark gray background for professional look
-    textSecondary: "#FFFFFF", // White text for maximum contrast
-    border: "#117ACA", // Chase blue for borders
-    text: "#FFFFFF", // White text for readability
-    accent: "#FFB81C", // Chase gold accent
+    primary: settings.primaryColor || colors.primary, // Chase blue for active states
+    secondary: settings.secondaryColor || colors.secondary, // Dark gray for contrast
+    background: colors.secondary, // Dark gray background for professional look
+    textSecondary: colors.white, // White text for maximum contrast
+    border: colors.primary, // Chase blue for borders
+    text: colors.white, // White text for readability
   };
 
   const expandTabBar = () => {
@@ -53,7 +52,7 @@ export default function TabLayout() {
       setExpanded(true);
       Animated.parallel([
         Animated.timing(heightAnim, {
-          toValue: 120, // Optimized height to show full text for all labels
+          toValue: 120, // Increased height to show full text
           duration: 300,
           useNativeDriver: false,
         }),
@@ -84,7 +83,7 @@ export default function TabLayout() {
           })
         ]).start();
       }
-    }, 3000); // Auto-collapse after 3 seconds
+    }, 3000);
   };
 
   const navigateToTab = (route: string) => {
@@ -116,15 +115,15 @@ export default function TabLayout() {
     <View style={{ flex: 1 }}>
       <Tabs
         screenOptions={{
-          tabBarActiveTintColor: "#117ACA", // Chase blue
+          tabBarActiveTintColor: colors.primary, // Chase blue
           tabBarInactiveTintColor: '#888888', // Inactive gray
           tabBarStyle: {
             display: 'none', // Hide default tab bar
           },
           headerStyle: {
-            backgroundColor: "#F7F7F7", // Light gray background
+            backgroundColor: colors.background.primary, // Light gray background
           },
-          headerTintColor: "#333333", // Primary text color
+          headerTintColor: colors.text.primary, // Primary text color
           headerTitleStyle: {
             fontWeight: '600',
           },
@@ -255,8 +254,8 @@ export default function TabLayout() {
             left: 0,
             right: 0,
             height: heightAnim,
-            backgroundColor: "#2D2D2D", // Dark gray background
-            borderTopColor: "#117ACA", // Chase blue border
+            backgroundColor: colors.secondary, // Dark gray background
+            borderTopColor: colors.primary, // Chase blue border
             borderTopWidth: 1,
             paddingBottom: Platform.OS === 'ios' ? 25 : 15,
             paddingTop: expanded ? 16 : 12,
@@ -275,8 +274,8 @@ export default function TabLayout() {
               flexDirection: 'row',
               alignItems: expanded ? 'flex-start' : 'center',
               paddingHorizontal: 16,
-              gap: expanded ? 12 : 4,
-              minHeight: expanded ? 100 : 60,
+              gap: expanded ? 8 : 4,
+              minHeight: expanded ? 80 : 60,
             }}
             style={{ flex: 1 }}
           >
@@ -290,22 +289,22 @@ export default function TabLayout() {
                   onPress={() => navigateToTab(item.route)}
                   style={{
                     alignItems: 'center',
-                    minWidth: expanded ? 100 : 70,
-                    paddingHorizontal: expanded ? 16 : 6,
-                    paddingVertical: expanded ? 12 : 6,
+                    minWidth: expanded ? 90 : 70,
+                    paddingHorizontal: expanded ? 12 : 6,
+                    paddingVertical: expanded ? 8 : 6,
                     justifyContent: expanded ? 'flex-start' : 'center',
                   }}
                 >
                   <IconComponent 
-                    color={isActive ? "#117ACA" : "#FFFFFF"} 
+                    color={isActive ? colors.primary : colors.white} 
                     size={expanded ? 20 : 16} 
                   />
                   <Animated.Text
                     style={{
                       fontSize: expanded ? 12 : 9,
                       fontWeight: '500',
-                      color: isActive ? "#117ACA" : "#FFFFFF",
-                      marginTop: expanded ? 10 : 2,
+                      color: isActive ? colors.primary : colors.white,
+                      marginTop: expanded ? 8 : 2,
                       textAlign: 'center',
                       opacity: expanded ? 1 : 0.8,
                       lineHeight: expanded ? 14 : 12,
