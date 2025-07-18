@@ -173,10 +173,10 @@ export default function FeatureSelectionStep({ onNext }: FeatureSelectionStepPro
               <View style={styles.featureFooter}>
                 <View style={styles.pricingInfo}>
                   <Text style={styles.priceText}>
-                    {isIncluded ? 'Free' : `${feature.price}/mo`}
+                    {isIncluded ? 'Free' : `$${feature.price}/mo`}
                   </Text>
                   <Text style={styles.savingsText}>
-                    <Text>Saves ~$</Text><Text>{feature.savings}</Text><Text>/mo</Text>
+                    Saves ~${feature.savings}/mo
                   </Text>
                 </View>
                 
@@ -240,7 +240,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: '700',
+    fontWeight: '700' as const,
     color: colors.text.primary,
     textAlign: 'center',
     marginBottom: 8,
@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
   },
   featureName: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '600' as const,
     color: colors.text.primary,
     marginRight: 8,
   },
@@ -311,7 +311,7 @@ const styles = StyleSheet.create({
   },
   popularText: {
     fontSize: 10,
-    fontWeight: '600',
+    fontWeight: '600' as const,
     color: colors.white,
   },
   includedBadge: {
@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
   },
   includedText: {
     fontSize: 10,
-    fontWeight: '600',
+    fontWeight: '600' as const,
     color: colors.white,
   },
   featureDescription: {
@@ -334,7 +334,7 @@ const styles = StyleSheet.create({
   featureCategory: {
     fontSize: 12,
     color: colors.primary,
-    fontWeight: '500',
+    fontWeight: '500' as const,
   },
   checkmark: {
     width: 24,
@@ -354,13 +354,13 @@ const styles = StyleSheet.create({
   },
   priceText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600' as const,
     color: colors.text.primary,
   },
   savingsText: {
     fontSize: 12,
     color: colors.status.success,
-    fontWeight: '500',
+    fontWeight: '500' as const,
   },
   roiContainer: {
     backgroundColor: colors.status.success,
@@ -370,7 +370,7 @@ const styles = StyleSheet.create({
   },
   roiText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '600' as const,
     color: colors.white,
   },
   summaryContainer: {
@@ -390,11 +390,11 @@ const styles = StyleSheet.create({
   summaryLabel: {
     fontSize: 14,
     color: colors.text.secondary,
-    fontWeight: '500',
+    fontWeight: '500' as const,
   },
   summaryValue: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600' as const,
     color: colors.text.primary,
   },
   savingsValue: {
@@ -415,7 +415,7 @@ const styles = StyleSheet.create({
   },
   roiHighlightText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '600' as const,
     color: colors.white,
     marginLeft: 4,
   },
@@ -429,7 +429,7 @@ const styles = StyleSheet.create({
   },
   nextButtonText: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '600' as const,
     color: colors.white,
   },
 });
