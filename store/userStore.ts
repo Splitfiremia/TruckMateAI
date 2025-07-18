@@ -3,23 +3,28 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export type UserRole = 'owner-operator' | 'fleet-company';
+export type AuthProvider = 'google' | 'apple' | 'email';
 
 export interface UserProfile {
   id: string;
   name: string;
   email: string;
-  role: UserRole;
+  role?: UserRole;
   companyName?: string;
   fleetSize?: number;
   cdlNumber?: string;
   dotNumber?: string;
   mcNumber?: string;
+  phone?: string;
+  profilePicture?: string;
+  authProvider: AuthProvider;
   createdAt: string;
   onboardingCompleted: boolean;
 }
 
 export interface UserState {
   user: UserProfile | null;
+  isAuthenticated: boolean;
   isOnboarded: boolean;
   
   // Actions
@@ -37,10 +42,15 @@ export interface UserState {
 export const useUserStore = create<UserState>()(persist(
   (set, get) => ({
     user: null,
+    isAuthenticated: false,
     isOnboarded: false,
     
     setUser: (user) => {
-      set({ user, isOnboarded: user.onboardingCompleted });
+      set({ 
+        user, 
+        isAuthenticated: true,
+        isOnboarded: user.onboardingCompleted 
+      });
     },
     
     updateUser: (updates) => {
@@ -68,7 +78,7 @@ export const useUserStore = create<UserState>()(persist(
     },
     
     logout: () => {
-      set({ user: null, isOnboarded: false });
+      set({ user: null, isAuthenticated: false, isOnboarded: false });
     },
     
     isOwnerOperator: () => {

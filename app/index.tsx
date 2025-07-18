@@ -5,7 +5,7 @@ import { useUserStore } from '@/store/userStore';
 import { useTheme } from '@/store/themeStore';
 
 export default function Index() {
-  const { isOnboarded, user } = useUserStore();
+  const { isAuthenticated, isOnboarded, user } = useUserStore();
   const { theme } = useTheme();
   const [isMounted, setIsMounted] = useState(false);
 
@@ -20,9 +20,14 @@ export default function Index() {
     // Delay navigation to ensure everything is ready
     const timer = setTimeout(() => {
       try {
-        if (!user || !isOnboarded) {
+        if (!user) {
+          // No user signed in, go to sign-in screen
+          router.replace('/sign-in');
+        } else if (!isOnboarded) {
+          // User signed in but not onboarded
           router.replace('/onboarding');
         } else {
+          // User signed in and onboarded
           router.replace('/(tabs)');
         }
       } catch (error) {
@@ -30,7 +35,9 @@ export default function Index() {
         // Fallback navigation after a longer delay
         setTimeout(() => {
           try {
-            if (!user || !isOnboarded) {
+            if (!user) {
+              router.push('/sign-in');
+            } else if (!isOnboarded) {
               router.push('/onboarding');
             } else {
               router.push('/(tabs)');

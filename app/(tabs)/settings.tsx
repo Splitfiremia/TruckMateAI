@@ -285,7 +285,7 @@ export default function SettingsScreen() {
         <View style={styles.settingsCard}>
           {renderSettingLink(
             <User size={20} color={theme.primaryLight} />,
-            'Personal Information',
+            'Profile & Credentials',
             () => setPersonalInfoModalVisible(true)
           )}
           
@@ -343,50 +343,21 @@ export default function SettingsScreen() {
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Personal Information</Text>
+            <Text style={styles.modalTitle}>Profile & Credentials</Text>
             <TouchableOpacity onPress={() => setPersonalInfoModalVisible(false)}>
               <X size={24} color={theme.text.primary} />
             </TouchableOpacity>
           </View>
           
           <ScrollView style={styles.modalContent}>
+            <Text style={styles.sectionSubtitle}>Personal Information</Text>
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Full Name</Text>
               <TextInput
                 style={styles.textInput}
-                value={driverInfo.name}
+                value={user?.name || driverInfo.name}
                 placeholder="Enter your full name"
                 placeholderTextColor={theme.text.secondary}
-              />
-            </View>
-            
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Company</Text>
-              <TextInput
-                style={styles.textInput}
-                value={driverInfo.company}
-                placeholder="Enter company name"
-                placeholderTextColor={theme.text.secondary}
-              />
-            </View>
-            
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>CDL Number</Text>
-              <TextInput
-                style={styles.textInput}
-                value={driverInfo.licenseNumber}
-                placeholder="Enter CDL number"
-                placeholderTextColor={theme.text.secondary}
-              />
-            </View>
-            
-            <View style={styles.inputGroup}>
-              <Text style={styles.inputLabel}>Phone Number</Text>
-              <TextInput
-                style={styles.textInput}
-                placeholder="Enter phone number"
-                placeholderTextColor={theme.text.secondary}
-                keyboardType="phone-pad"
               />
             </View>
             
@@ -394,11 +365,73 @@ export default function SettingsScreen() {
               <Text style={styles.inputLabel}>Email Address</Text>
               <TextInput
                 style={styles.textInput}
+                value={user?.email}
                 placeholder="Enter email address"
                 placeholderTextColor={theme.text.secondary}
                 keyboardType="email-address"
                 autoCapitalize="none"
+                editable={false}
+                style={[styles.textInput, styles.disabledInput]}
               />
+              <Text style={styles.helpText}>Email cannot be changed after sign-in</Text>
+            </View>
+            
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Phone Number</Text>
+              <TextInput
+                style={styles.textInput}
+                value={user?.phone}
+                placeholder="Enter phone number"
+                placeholderTextColor={theme.text.secondary}
+                keyboardType="phone-pad"
+              />
+            </View>
+            
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>Company Name</Text>
+              <TextInput
+                style={styles.textInput}
+                value={user?.companyName || driverInfo.company}
+                placeholder="Enter company name"
+                placeholderTextColor={theme.text.secondary}
+              />
+            </View>
+
+            <Text style={styles.sectionSubtitle}>Professional Credentials</Text>
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>CDL Number</Text>
+              <TextInput
+                style={styles.textInput}
+                value={user?.cdlNumber || driverInfo.licenseNumber}
+                placeholder="Enter CDL number"
+                placeholderTextColor={theme.text.secondary}
+                autoCapitalize="characters"
+              />
+              <Text style={styles.helpText}>Commercial Driver's License number</Text>
+            </View>
+            
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>DOT Number</Text>
+              <TextInput
+                style={styles.textInput}
+                value={user?.dotNumber}
+                placeholder="Enter DOT number"
+                placeholderTextColor={theme.text.secondary}
+                keyboardType="numeric"
+              />
+              <Text style={styles.helpText}>Department of Transportation number</Text>
+            </View>
+            
+            <View style={styles.inputGroup}>
+              <Text style={styles.inputLabel}>MC Number</Text>
+              <TextInput
+                style={styles.textInput}
+                value={user?.mcNumber}
+                placeholder="Enter MC number"
+                placeholderTextColor={theme.text.secondary}
+                keyboardType="numeric"
+              />
+              <Text style={styles.helpText}>Motor Carrier authority number</Text>
             </View>
           </ScrollView>
           
@@ -1026,5 +1059,15 @@ const createStyles = (theme: any) => StyleSheet.create({
   },
   modalCloseButton: {
     padding: 4,
+  },
+  disabledInput: {
+    backgroundColor: theme.border,
+    opacity: 0.6,
+  },
+  helpText: {
+    fontSize: 12,
+    color: theme.text.secondary,
+    marginTop: 4,
+    fontStyle: 'italic',
   },
 });

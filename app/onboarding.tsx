@@ -19,7 +19,7 @@ import { useFormValidation, commonValidationRules } from '@/utils/validation';
 type OnboardingStep = 'role-selection' | 'profile-setup' | 'company-details' | 'device-setup';
 
 export default function OnboardingScreen() {
-  const { setUser, completeOnboarding: completeUserOnboarding } = useUserStore();
+  const { user, setUser, completeOnboarding: completeUserOnboarding } = useUserStore();
   const [currentStep, setCurrentStep] = useState<OnboardingStep>('role-selection');
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
   
@@ -29,16 +29,7 @@ export default function OnboardingScreen() {
       name: commonValidationRules.name,
       email: commonValidationRules.email,
       phone: commonValidationRules.phone,
-      dotNumber: commonValidationRules.dotNumber,
-      mcNumber: commonValidationRules.mcNumber,
     };
-
-    if (selectedRole === 'owner-operator') {
-      return {
-        ...baseRules,
-        cdlNumber: commonValidationRules.cdlNumber,
-      };
-    }
 
     if (selectedRole === 'fleet-company') {
       return {
@@ -62,14 +53,11 @@ export default function OnboardingScreen() {
     resetForm,
   } = useFormValidation(
     {
-      name: '',
-      email: '',
+      name: user?.name || '',
+      email: user?.email || '',
       companyName: '',
       fleetSize: '',
-      cdlNumber: '',
-      dotNumber: '',
-      mcNumber: '',
-      phone: '',
+      phone: user?.phone || '',
     },
     getValidationRules()
   );
@@ -110,21 +98,21 @@ export default function OnboardingScreen() {
   };
 
   const handleCompleteOnboarding = () => {
-    const userProfile: UserProfile = {
-      id: Date.now().toString(),
-      name: formData.name,
-      email: formData.email,
+    const { user } = useUserStore.getState();
+    if (!user) return;
+
+    const updatedProfile: UserProfile = {
+      ...user,
+      name: formData.name || user.name,
+      email: formData.email || user.email,
+      phone: formData.phone,
       role: selectedRole!,
       companyName: selectedRole === 'fleet-company' ? formData.companyName : undefined,
       fleetSize: selectedRole === 'fleet-company' && formData.fleetSize ? parseInt(formData.fleetSize) : undefined,
-      cdlNumber: selectedRole === 'owner-operator' ? formData.cdlNumber : undefined,
-      dotNumber: formData.dotNumber || undefined,
-      mcNumber: formData.mcNumber || undefined,
-      createdAt: new Date().toISOString(),
       onboardingCompleted: true,
     };
     
-    setUser(userProfile);
+    setUser(updatedProfile);
     completeUserOnboarding();
     router.replace('/(tabs)');
   };
@@ -226,47 +214,6 @@ export default function OnboardingScreen() {
           touched={touched.phone}
           keyboardType="phone-pad"
           helpText="Optional - for account recovery and notifications"
-        />
-        
-        {selectedRole === 'owner-operator' && (
-          <ValidatedTextInput
-            label="CDL Number"
-            value={formData.cdlNumber}
-            onChangeText={(text) => handleFieldChange('cdlNumber', text)}
-            onBlur={() => handleFieldBlur('cdlNumber')}
-            placeholder="Enter your CDL number"
-            icon={<Hash size={20} color={colors.text.secondary} />}
-            error={errors.cdlNumber}
-            touched={touched.cdlNumber}
-            autoCapitalize="characters"
-            helpText="Optional - helps with compliance tracking"
-          />
-        )}
-        
-        <ValidatedTextInput
-          label="DOT Number"
-          value={formData.dotNumber}
-          onChangeText={(text) => handleFieldChange('dotNumber', text)}
-          onBlur={() => handleFieldBlur('dotNumber')}
-          placeholder="Enter your DOT number"
-          icon={<Hash size={20} color={colors.text.secondary} />}
-          error={errors.dotNumber}
-          touched={touched.dotNumber}
-          keyboardType="numeric"
-          helpText="Optional - for DOT compliance features"
-        />
-        
-        <ValidatedTextInput
-          label="MC Number"
-          value={formData.mcNumber}
-          onChangeText={(text) => handleFieldChange('mcNumber', text)}
-          onBlur={() => handleFieldBlur('mcNumber')}
-          placeholder="Enter your MC number"
-          icon={<Hash size={20} color={colors.text.secondary} />}
-          error={errors.mcNumber}
-          touched={touched.mcNumber}
-          keyboardType="numeric"
-          helpText="Optional - for motor carrier authority tracking"
         />
       </View>
       
