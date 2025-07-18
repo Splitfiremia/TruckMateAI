@@ -9,6 +9,7 @@ import { useUserStore } from "@/store/userStore";
 import { useBrandingStore } from "@/store/brandingStore";
 import { ThemeProvider, useTheme } from "@/store/themeStore";
 import APIStatusBanner from "@/components/APIStatusBanner";
+import { DeviceTestingDashboard } from "@/components/DeviceTestingDashboard";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -30,6 +31,7 @@ function RootLayoutNav() {
   return (
     <>
       <APIStatusBanner />
+      <DeviceTestingDashboard />
       <Stack 
         screenOptions={{ 
           headerBackTitle: "Back",
