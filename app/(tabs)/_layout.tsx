@@ -36,7 +36,7 @@ export default function TabLayout() {
       setExpanded(true);
       Animated.parallel([
         Animated.timing(heightAnim, {
-          toValue: 100,
+          toValue: 120,
           duration: 300,
           useNativeDriver: false,
         }),
@@ -109,7 +109,7 @@ export default function TabLayout() {
             fontWeight: '600',
           },
           contentStyle: {
-            paddingBottom: Platform.OS === 'ios' ? 80 : 70, // Add padding for custom nav bar
+            paddingBottom: Platform.OS === 'ios' ? 90 : 80, // Add padding for custom nav bar
           },
         }}
       >
@@ -240,8 +240,8 @@ export default function TabLayout() {
             backgroundColor: activeColors.background,
             borderTopColor: activeColors.border,
             borderTopWidth: 1,
-            paddingBottom: Platform.OS === 'ios' ? 20 : 10,
-            paddingTop: 8,
+            paddingBottom: Platform.OS === 'ios' ? 25 : 15,
+            paddingTop: 12,
             elevation: 8,
             shadowColor: '#000',
             shadowOffset: { width: 0, height: -2 },
@@ -256,7 +256,7 @@ export default function TabLayout() {
             contentContainerStyle={{
               flexDirection: 'row',
               alignItems: 'center',
-              paddingHorizontal: 8,
+              paddingHorizontal: 16,
               minWidth: '100%',
               justifyContent: 'space-around',
             }}
@@ -273,24 +273,26 @@ export default function TabLayout() {
                   style={{
                     alignItems: 'center',
                     minWidth: 80,
-                    paddingHorizontal: 4,
-                    paddingVertical: 4,
+                    paddingHorizontal: 8,
+                    paddingVertical: 6,
                   }}
                 >
                   <IconComponent 
                     color={isActive ? activeColors.primary : activeColors.textSecondary} 
-                    size={expanded ? 20 : 18} 
+                    size={expanded ? 20 : 16} 
                   />
                   <Animated.Text
                     style={{
-                      fontSize: expanded ? 12 : 10,
+                      fontSize: expanded ? 12 : 9,
                       fontWeight: '500',
                       color: isActive ? activeColors.primary : activeColors.textSecondary,
-                      marginTop: expanded ? 4 : 2,
+                      marginTop: expanded ? 8 : 2,
                       textAlign: 'center',
                       opacity: expanded ? 1 : 0.8,
+                      lineHeight: expanded ? 14 : 12,
                     }}
                     numberOfLines={expanded ? 2 : 1}
+                    ellipsizeMode="tail"
                   >
                     {item.title}
                   </Animated.Text>
