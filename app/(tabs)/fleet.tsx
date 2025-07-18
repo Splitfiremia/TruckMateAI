@@ -72,7 +72,9 @@ export default function FleetAdminScreen() {
       ]}
       onPress={() => setActiveTab(tab)}
     >
-      {icon}
+      <View style={styles.tabButtonIcon}>
+        {icon}
+      </View>
       <Text style={[
         styles.tabButtonText,
         activeTab === tab && { color: colors.text }
@@ -345,13 +347,18 @@ export default function FleetAdminScreen() {
       />
       
       <View style={styles.tabBar}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {renderTabButton('overview', <BarChart3 size={18} color={activeTab === 'overview' ? colors.text : colors.textSecondary} />, 'Overview')}
-          {renderTabButton('drivers', <Users size={18} color={activeTab === 'drivers' ? colors.text : colors.textSecondary} />, 'Drivers')}
-          {renderTabButton('branding', <Palette size={18} color={activeTab === 'branding' ? (settings.primaryColor || colors.text) : colors.textSecondary} />, 'White-Label')}
-          {renderTabButton('compliance', <Shield size={18} color={activeTab === 'compliance' ? colors.text : colors.textSecondary} />, 'Compliance')}
-          {renderTabButton('settings', <Settings size={18} color={activeTab === 'settings' ? colors.text : colors.textSecondary} />, 'Settings')}
-        </ScrollView>
+        <View style={styles.tabGrid}>
+          <View style={styles.tabRow}>
+            {renderTabButton('overview', <BarChart3 size={18} color={activeTab === 'overview' ? colors.text : colors.textSecondary} />, 'Fleet Overview')}
+            {renderTabButton('drivers', <Users size={18} color={activeTab === 'drivers' ? colors.text : colors.textSecondary} />, 'Driver Management')}
+            {renderTabButton('branding', <Palette size={18} color={activeTab === 'branding' ? (settings.primaryColor || colors.text) : colors.textSecondary} />, 'White-Label Branding')}
+          </View>
+          <View style={styles.tabRow}>
+            {renderTabButton('compliance', <Shield size={18} color={activeTab === 'compliance' ? colors.text : colors.textSecondary} />, 'Compliance Monitor')}
+            {renderTabButton('settings', <Settings size={18} color={activeTab === 'settings' ? colors.text : colors.textSecondary} />, 'Fleet Settings')}
+            <View style={styles.tabPlaceholder} />
+          </View>
+        </View>
       </View>
 
       {activeTab === 'overview' && renderOverviewTab()}
@@ -372,20 +379,39 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background.secondary,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
+    paddingVertical: 8,
+  },
+  tabGrid: {
+    paddingHorizontal: 8,
+  },
+  tabRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+    gap: 8,
   },
   tabButton: {
-    flexDirection: 'row',
+    flex: 1,
+    flexDirection: 'column',
     alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    marginRight: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 10,
     borderRadius: 8,
-    gap: 6,
+    minHeight: 60,
+    justifyContent: 'center',
+  },
+  tabButtonIcon: {
+    marginBottom: 4,
   },
   tabButtonText: {
-    fontSize: 14,
+    fontSize: 11,
     color: colors.textSecondary,
     fontWeight: '500',
+    textAlign: 'center',
+    lineHeight: 14,
+  },
+  tabPlaceholder: {
+    flex: 1,
   },
   tabContent: {
     flex: 1,
