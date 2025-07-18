@@ -3,7 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 
-export type UserRole = 'owner-operator' | 'fleet-company' | 'admin';
+export type UserRole = 'owner-operator' | 'fleet-company';
 export type AuthProvider = 'google' | 'apple' | 'email';
 
 export interface UserProfile {

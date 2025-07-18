@@ -29,23 +29,30 @@ interface CacheEntry {
   ttl: number; // Time to live in milliseconds
 }
 
-// API Configurations - Updated for FleetPilot Hybrid Config
+// API Configurations
 const API_CONFIGS: APIConfig[] = [
-  // Trial APIs (Free Tier)
+  // Primary APIs
   {
-    name: 'ipapi',
-    baseUrl: 'https://api.ipapi.com',
-    apiKey: process.env.EXPO_PUBLIC_IPAPI_KEY || 'demo_key',
-    priority: 'fallback',
-    usedFor: ['geolocation'],
-    rateLimit: { daily: 1000, monthly: 30000 }
+    name: 'Geotab',
+    baseUrl: 'https://api.geotab.com',
+    priority: 'primary',
+    usedFor: ['eld', 'engine_faults', 'compliance'],
+    rateLimit: { daily: 10000, monthly: 300000 }
   },
   {
-    name: 'OpenWeatherMap',
-    baseUrl: 'https://api.openweathermap.org',
-    apiKey: process.env.EXPO_PUBLIC_OPENWEATHER_KEY || 'demo_key',
+    name: 'Samsara',
+    baseUrl: 'https://api.samsara.com',
+    priority: 'primary',
+    usedFor: ['eld', 'engine_faults', 'telematics'],
+    rateLimit: { daily: 5000, monthly: 150000 }
+  },
+  
+  // Fallback APIs
+  {
+    name: 'ipapi',
+    baseUrl: 'https://ipapi.co',
     priority: 'fallback',
-    usedFor: ['weather'],
+    usedFor: ['location'],
     rateLimit: { daily: 1000, monthly: 30000 }
   },
   {
@@ -53,33 +60,15 @@ const API_CONFIGS: APIConfig[] = [
     baseUrl: 'https://generativelanguage.googleapis.com',
     apiKey: process.env.EXPO_PUBLIC_GOOGLE_AI_KEY || 'demo_key',
     priority: 'fallback',
-    usedFor: ['diagnostics'],
-    rateLimit: { daily: 100, monthly: 1500 }
-  },
-  
-  // Paid APIs (Premium Tier)
-  {
-    name: 'Geotab',
-    baseUrl: 'https://my.geotab.com/apiv1',
-    apiKey: process.env.EXPO_PUBLIC_GEOTAB_KEY || 'demo_key',
-    priority: 'primary',
-    usedFor: ['geolocation'],
-    rateLimit: { daily: 10000, monthly: 300000 }
+    usedFor: ['nlp_diagnostics'],
+    rateLimit: { daily: 100, monthly: 1500 } // Based on 1.5M tokens/month
   },
   {
-    name: 'WeatherStack',
-    baseUrl: 'https://api.weatherstack.com',
-    apiKey: process.env.EXPO_PUBLIC_WEATHERSTACK_KEY || 'demo_key',
-    priority: 'primary',
+    name: 'OpenWeatherMap',
+    baseUrl: 'https://api.openweathermap.org',
+    apiKey: process.env.EXPO_PUBLIC_OPENWEATHER_KEY || 'demo_key',
+    priority: 'fallback',
     usedFor: ['weather'],
-    rateLimit: { daily: 5000, monthly: 150000 }
-  },
-  {
-    name: 'HuggingFace',
-    baseUrl: 'https://api-inference.huggingface.co',
-    apiKey: process.env.EXPO_PUBLIC_HUGGINGFACE_KEY || 'demo_key',
-    priority: 'primary',
-    usedFor: ['diagnostics'],
     rateLimit: { daily: 1000, monthly: 30000 }
   }
 ];
