@@ -1,7 +1,7 @@
-import { Tabs, Redirect } from "expo-router";
+import { Tabs, Redirect, useRouter, usePathname } from "expo-router";
 import { BarChart, Clipboard, Home, Receipt, Settings, Users, Shield, Cloud, Zap, Wrench, Navigation, Bot, Truck, CreditCard } from "lucide-react-native";
-import React, { useState } from "react";
-import { Animated, Platform } from "react-native";
+import React, { useState, useRef } from "react";
+import { Animated, Platform, TouchableWithoutFeedback, View, Text, Pressable, ScrollView } from "react-native";
 
 import { colors } from "@/constants/colors";
 import { useUserStore } from "@/store/userStore";
@@ -10,8 +10,11 @@ import { useBrandingStore } from "@/store/brandingStore";
 export default function TabLayout() {
   const { isOnboarded, isOwnerOperator, isFleetCompany } = useUserStore();
   const { settings } = useBrandingStore();
+  const router = useRouter();
+  const pathname = usePathname();
   const [expanded, setExpanded] = useState(false);
-  const [heightAnim] = useState(new Animated.Value(80));
+  const heightAnim = useRef(new Animated.Value(60)).current;
+  const opacityAnim = useRef(new Animated.Value(0.8)).current;
   
   // Redirect to onboarding if not completed
   if (!isOnboarded) {
@@ -28,80 +31,88 @@ export default function TabLayout() {
     text: colors.text.primary,
   };
 
-  const handleTabBarPress = () => {
-    const newState = !expanded;
-    setExpanded(newState);
-    Animated.timing(heightAnim, {
-      toValue: newState ? 100 : 80,
-      duration: 300,
-      useNativeDriver: false,
-    }).start();
+  const expandTabBar = () => {
+    if (!expanded) {
+      setExpanded(true);
+      Animated.parallel([
+        Animated.timing(heightAnim, {
+          toValue: 100,
+          duration: 300,
+          useNativeDriver: false,
+        }),
+        Animated.timing(opacityAnim, {
+          toValue: 1,
+          duration: 300,
+          useNativeDriver: false,
+        })
+      ]).start();
+    }
   };
 
+  const collapseTabBar = () => {
+    if (expanded) {
+      setExpanded(false);
+      Animated.parallel([
+        Animated.timing(heightAnim, {
+          toValue: 60,
+          duration: 300,
+          useNativeDriver: false,
+        }),
+        Animated.timing(opacityAnim, {
+          toValue: 0.8,
+          duration: 300,
+          useNativeDriver: false,
+        })
+      ]).start();
+    }
+  };
+
+  const navigateToTab = (route: string) => {
+    router.push(route as any);
+  };
+
+  const isActiveTab = (route: string) => {
+    return pathname === route || pathname.startsWith(route);
+  };
+
+  const tabItems = [
+    { route: '/', icon: Home, title: 'Dashboard' },
+    { route: '/logbook', icon: Clipboard, title: 'Logbook' },
+    { route: '/loads', icon: BarChart, title: 'Loads' },
+    { route: '/route-optimization', icon: Navigation, title: 'Routes' },
+    { route: '/receipts', icon: Receipt, title: 'Receipts' },
+    { route: '/compliance', icon: Shield, title: 'Compliance' },
+    { route: '/eld-integration', icon: Truck, title: 'ELD' },
+    { route: '/weather', icon: Cloud, title: 'Weather' },
+    ...(isFleetCompany() ? [{ route: '/fleet', icon: Users, title: 'Fleet' }] : []),
+    { route: '/maintenance', icon: Wrench, title: 'Maintenance' },
+    { route: '/ai-assistant', icon: Bot, title: 'Assistant' },
+    { route: '/integrations', icon: Zap, title: 'Integrations' },
+    { route: '/pricing', icon: CreditCard, title: 'Pricing' },
+    { route: '/settings', icon: Settings, title: 'Settings' },
+  ];
+
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: activeColors.primary,
-        tabBarInactiveTintColor: activeColors.textSecondary,
-        tabBarStyle: {
-          backgroundColor: activeColors.background,
-          borderTopColor: activeColors.border,
-          borderTopWidth: 1,
-          paddingBottom: Platform.OS === 'ios' ? 20 : 10,
-          paddingTop: 12,
-          elevation: 8,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: -2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 4,
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          right: 0,
-          height: expanded ? 100 : 80,
-        },
-        tabBarLabelStyle: {
-          fontSize: expanded ? 12 : 10,
-          fontWeight: '500',
-          marginTop: expanded ? 6 : 4,
-          paddingHorizontal: 4,
-          textAlign: 'center',
-          lineHeight: expanded ? 14 : 12,
-        },
-        tabBarItemStyle: {
-          paddingVertical: expanded ? 8 : 6,
-          paddingHorizontal: 12,
-          minWidth: 80,
-          justifyContent: 'center',
-          alignItems: 'center',
-        },
-        tabBarIconStyle: {
-          marginBottom: expanded ? 4 : 2,
-        },
-        tabBarPressColor: activeColors.primary + '20',
-        tabBarButton: (props) => (
-          <Animated.View
-            {...props}
-            onTouchStart={handleTabBarPress}
-            style={[
-              props.style,
-              {
-                flex: 1,
-                justifyContent: 'center',
-                alignItems: 'center',
-              }
-            ]}
-          />
-        ),
-        headerStyle: {
-          backgroundColor: activeColors.background,
-        },
-        headerTintColor: activeColors.text,
-        headerTitleStyle: {
-          fontWeight: '600',
-        },
-      }}
-    >
+    <View style={{ flex: 1 }}>
+      <Tabs
+        screenOptions={{
+          tabBarActiveTintColor: activeColors.primary,
+          tabBarInactiveTintColor: activeColors.textSecondary,
+          tabBarStyle: {
+            display: 'none', // Hide default tab bar
+          },
+          headerStyle: {
+            backgroundColor: activeColors.background,
+          },
+          headerTintColor: activeColors.text,
+          headerTitleStyle: {
+            fontWeight: '600',
+          },
+          contentStyle: {
+            paddingBottom: Platform.OS === 'ios' ? 80 : 70, // Add padding for custom nav bar
+          },
+        }}
+      >
           <Tabs.Screen
             name="index"
             options={{
@@ -213,5 +224,82 @@ export default function TabLayout() {
             }}
           />
         </Tabs>
+      
+      {/* Custom Expandable Bottom Navigation */}
+      <TouchableWithoutFeedback
+        onPressIn={expandTabBar}
+        onPressOut={collapseTabBar}
+      >
+        <Animated.View
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: heightAnim,
+            backgroundColor: activeColors.background,
+            borderTopColor: activeColors.border,
+            borderTopWidth: 1,
+            paddingBottom: Platform.OS === 'ios' ? 20 : 10,
+            paddingTop: 8,
+            elevation: 8,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: -2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 4,
+            opacity: opacityAnim,
+          }}
+        >
+          <Animated.ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              paddingHorizontal: 8,
+              minWidth: '100%',
+              justifyContent: 'space-around',
+            }}
+            style={{ flex: 1 }}
+          >
+            {tabItems.slice(0, 5).map((item, index) => {
+              const IconComponent = item.icon;
+              const isActive = isActiveTab(item.route);
+              
+              return (
+                <Pressable
+                  key={index}
+                  onPress={() => navigateToTab(item.route)}
+                  style={{
+                    alignItems: 'center',
+                    minWidth: 80,
+                    paddingHorizontal: 4,
+                    paddingVertical: 4,
+                  }}
+                >
+                  <IconComponent 
+                    color={isActive ? activeColors.primary : activeColors.textSecondary} 
+                    size={expanded ? 20 : 18} 
+                  />
+                  <Animated.Text
+                    style={{
+                      fontSize: expanded ? 12 : 10,
+                      fontWeight: '500',
+                      color: isActive ? activeColors.primary : activeColors.textSecondary,
+                      marginTop: expanded ? 4 : 2,
+                      textAlign: 'center',
+                      opacity: expanded ? 1 : 0.8,
+                    }}
+                    numberOfLines={expanded ? 2 : 1}
+                  >
+                    {item.title}
+                  </Animated.Text>
+                </Pressable>
+              );
+            })}
+          </Animated.ScrollView>
+        </Animated.View>
+      </TouchableWithoutFeedback>
+    </View>
   );
 }
