@@ -1,480 +1,397 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, Pressable, Switch } from 'react-native';
-import { Settings, Activity, AlertTriangle, CheckCircle, Zap, Globe } from 'lucide-react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, Pressable, Switch } from 'react-native';
+import { Shield, Activity, AlertCircle, CheckCircle, Clock } from 'lucide-react-native';
+import { useAdminStore } from '@/store/adminStore';
 
-interface APIEndpoint {
-  id: string;
-  name: string;
-  service: string;
-  tier: 'trial' | 'paid';
-  status: 'active' | 'inactive' | 'limited';
-  costPerRequest: number;
-  requestsToday: number;
-  errorRate: number;
-  responseTime: number;
-  endpoint: string;
-}
+export default function ApiGateway() {
+  const { apiEndpoints, toggleApiEndpoint } = useAdminStore();
+  const [selectedTier, setSelectedTier] = useState<'all' | 'trial' | 'paid'>('all');
 
-const APIGatewayControl = () => {
-  const [autoScaling, setAutoScaling] = useState(true);
-  const [costProtection, setCostProtection] = useState(true);
+  const filteredEndpoints = apiEndpoints.filter(endpoint => 
+    selectedTier === 'all' || endpoint.tier === selectedTier
+  );
 
-  const endpoints: APIEndpoint[] = [
-    {
-      id: '1',
-      name: 'Geotab Telematics',
-      service: 'Location Tracking',
-      tier: 'paid',
-      status: 'active',
-      costPerRequest: 0.05,
-      requestsToday: 12847,
-      errorRate: 0.2,
-      responseTime: 145,
-      endpoint: 'https://my.geotab.com/apiv1'
-    },
-    {
-      id: '2',
-      name: 'IP API Location',
-      service: 'Location Tracking',
-      tier: 'trial',
-      status: 'active',
-      costPerRequest: 0.001,
-      requestsToday: 8934,
-      errorRate: 1.2,
-      responseTime: 89,
-      endpoint: 'https://api.ipapi.com'
-    },
-    {
-      id: '3',
-      name: 'Hugging Face AI',
-      service: 'Diagnostics',
-      tier: 'paid',
-      status: 'active',
-      costPerRequest: 0.02,
-      requestsToday: 5672,
-      errorRate: 0.8,
-      responseTime: 234,
-      endpoint: 'https://api-inference.huggingface.co'
-    },
-    {
-      id: '4',
-      name: 'Google AI',
-      service: 'Diagnostics',
-      tier: 'trial',
-      status: 'limited',
-      costPerRequest: 0.003,
-      requestsToday: 3421,
-      errorRate: 0.5,
-      responseTime: 178,
-      endpoint: 'https://generativelanguage.googleapis.com'
-    },
-    {
-      id: '5',
-      name: 'Mapbox Routing',
-      service: 'Route Optimization',
-      tier: 'paid',
-      status: 'active',
-      costPerRequest: 0.01,
-      requestsToday: 7823,
-      errorRate: 0.3,
-      responseTime: 112,
-      endpoint: 'https://api.mapbox.com'
-    },
-    {
-      id: '6',
-      name: 'OSRM Routing',
-      service: 'Route Optimization',
-      tier: 'trial',
-      status: 'active',
-      costPerRequest: 0.0,
-      requestsToday: 4567,
-      errorRate: 2.1,
-      responseTime: 298,
-      endpoint: 'https://router.project-osrm.org'
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'active':
+        return <CheckCircle size={20} color="#10B981" />;
+      case 'inactive':
+        return <AlertCircle size={20} color="#F59E0B" />;
+      case 'error':
+        return <AlertCircle size={20} color="#E5252C" />;
+      default:
+        return <Clock size={20} color="#666666" />;
     }
-  ];
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return '#10b981';
-      case 'limited': return '#f59e0b';
-      case 'inactive': return '#ef4444';
-      default: return '#6b7280';
+      case 'active':
+        return '#10B981';
+      case 'inactive':
+        return '#F59E0B';
+      case 'error':
+        return '#E5252C';
+      default:
+        return '#666666';
     }
   };
 
-  const getTierColor = (tier: string) => {
-    return tier === 'paid' ? '#3b82f6' : '#6b7280';
-  };
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 3
-    }).format(amount);
-  };
-
-  const gatewayStats = {
-    totalRequests: endpoints.reduce((sum, ep) => sum + ep.requestsToday, 0),
-    totalCost: endpoints.reduce((sum, ep) => sum + (ep.requestsToday * ep.costPerRequest), 0),
-    avgResponseTime: endpoints.reduce((sum, ep) => sum + ep.responseTime, 0) / endpoints.length,
-    avgErrorRate: endpoints.reduce((sum, ep) => sum + ep.errorRate, 0) / endpoints.length
-  };
-
-  const routingRules = [
-    {
-      name: 'Trial User Routing',
-      condition: 'user.tier == "trial"',
-      action: 'Route to free/low-cost APIs',
-      status: 'active'
-    },
-    {
-      name: 'Cost Breach Protection',
-      condition: 'api_ratio >= 0.35',
-      action: 'Auto-downgrade to trial APIs',
-      status: 'active'
-    },
-    {
-      name: 'High Volume Scaling',
-      condition: 'requests > 10000/hour',
-      action: 'Load balance across endpoints',
-      status: 'active'
-    },
-    {
-      name: 'Error Rate Failover',
-      condition: 'error_rate > 5%',
-      action: 'Switch to backup endpoint',
-      status: 'active'
-    }
-  ];
+  const totalRequests = apiEndpoints.reduce((sum, endpoint) => sum + endpoint.requests_today, 0);
+  const totalCost = apiEndpoints.reduce((sum, endpoint) => sum + (endpoint.requests_today * endpoint.cost_per_request), 0);
+  const activeEndpoints = apiEndpoints.filter(e => e.status === 'active').length;
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.headerContent}>
-          <Settings size={32} color="#8b5cf6" />
-          <View style={styles.headerText}>
-            <Text style={styles.headerTitle}>API Gateway Control</Text>
-            <Text style={styles.headerSubtitle}>Manage routing and cost limits</Text>
-          </View>
-        </View>
-      </View>
-
+      {/* Gateway Stats */}
       <View style={styles.statsContainer}>
         <View style={styles.statCard}>
-          <Activity size={20} color="#3b82f6" />
-          <Text style={styles.statValue}>{gatewayStats.totalRequests.toLocaleString()}</Text>
+          <Shield size={24} color="#117ACA" />
+          <Text style={styles.statValue}>{activeEndpoints}/{apiEndpoints.length}</Text>
+          <Text style={styles.statLabel}>Active Endpoints</Text>
+        </View>
+        <View style={styles.statCard}>
+          <Activity size={24} color="#10B981" />
+          <Text style={styles.statValue}>{totalRequests.toLocaleString()}</Text>
           <Text style={styles.statLabel}>Requests Today</Text>
         </View>
         <View style={styles.statCard}>
-          <Zap size={20} color="#10b981" />
-          <Text style={styles.statValue}>{formatCurrency(gatewayStats.totalCost)}</Text>
+          <AlertCircle size={24} color="#FFB81C" />
+          <Text style={styles.statValue}>${totalCost.toFixed(2)}</Text>
           <Text style={styles.statLabel}>Daily Cost</Text>
         </View>
-        <View style={styles.statCard}>
-          <Globe size={20} color="#f59e0b" />
-          <Text style={styles.statValue}>{Math.round(gatewayStats.avgResponseTime)}ms</Text>
-          <Text style={styles.statLabel}>Avg Response</Text>
-        </View>
-        <View style={styles.statCard}>
-          <AlertTriangle size={20} color="#ef4444" />
-          <Text style={styles.statValue}>{gatewayStats.avgErrorRate.toFixed(1)}%</Text>
-          <Text style={styles.statLabel}>Error Rate</Text>
+      </View>
+
+      {/* Tier Filter */}
+      <View style={styles.filterContainer}>
+        <Text style={styles.filterTitle}>Filter by Tier:</Text>
+        <View style={styles.filterButtons}>
+          {['all', 'trial', 'paid'].map((tier) => (
+            <Pressable
+              key={tier}
+              style={[
+                styles.filterButton,
+                selectedTier === tier && styles.filterButtonActive
+              ]}
+              onPress={() => setSelectedTier(tier as any)}
+            >
+              <Text style={[
+                styles.filterButtonText,
+                selectedTier === tier && styles.filterButtonTextActive
+              ]}>
+                {tier.charAt(0).toUpperCase() + tier.slice(1)}
+              </Text>
+            </Pressable>
+          ))}
         </View>
       </View>
 
-      <View style={styles.controlsSection}>
-        <Text style={styles.sectionTitle}>Gateway Controls</Text>
-        <View style={styles.controlCard}>
-          <View style={styles.controlRow}>
-            <View style={styles.controlInfo}>
-              <Text style={styles.controlTitle}>Auto-Scaling</Text>
-              <Text style={styles.controlDescription}>Automatically scale based on demand</Text>
-            </View>
-            <Switch
-              value={autoScaling}
-              onValueChange={setAutoScaling}
-              trackColor={{ false: '#e5e7eb', true: '#3b82f6' }}
-              thumbColor={autoScaling ? '#fff' : '#f4f3f4'}
-            />
-          </View>
-        </View>
-        
-        <View style={styles.controlCard}>
-          <View style={styles.controlRow}>
-            <View style={styles.controlInfo}>
-              <Text style={styles.controlTitle}>Cost Protection</Text>
-              <Text style={styles.controlDescription}>Auto-downgrade when cost ratio exceeds 35%</Text>
-            </View>
-            <Switch
-              value={costProtection}
-              onValueChange={setCostProtection}
-              trackColor={{ false: '#e5e7eb', true: '#10b981' }}
-              thumbColor={costProtection ? '#fff' : '#f4f3f4'}
-            />
-          </View>
-        </View>
-      </View>
-
-      <View style={styles.section}>
+      {/* API Endpoints */}
+      <View style={styles.endpointsContainer}>
         <Text style={styles.sectionTitle}>API Endpoints</Text>
-        {endpoints.map((endpoint) => (
-          <View key={endpoint.id} style={styles.endpointCard}>
+        
+        {filteredEndpoints.map((endpoint, index) => (
+          <View key={index} style={styles.endpointCard}>
             <View style={styles.endpointHeader}>
               <View style={styles.endpointInfo}>
-                <Text style={styles.endpointName}>{endpoint.name}</Text>
-                <Text style={styles.endpointService}>{endpoint.service}</Text>
+                <View style={styles.endpointTitleRow}>
+                  <Text style={styles.endpointName}>{endpoint.name}</Text>
+                  <View style={[
+                    styles.tierBadge,
+                    { backgroundColor: endpoint.tier === 'paid' ? '#10B981' : '#F59E0B' }
+                  ]}>
+                    <Text style={styles.tierBadgeText}>
+                      {endpoint.tier.toUpperCase()}
+                    </Text>
+                  </View>
+                </View>
+                <Text style={styles.endpointUrl}>{endpoint.url}</Text>
               </View>
-              <View style={styles.endpointBadges}>
-                <View style={[styles.tierBadge, { backgroundColor: getTierColor(endpoint.tier) }]}>
-                  <Text style={styles.tierText}>{endpoint.tier.toUpperCase()}</Text>
+              
+              <View style={styles.endpointControls}>
+                <View style={styles.statusRow}>
+                  {getStatusIcon(endpoint.status)}
+                  <Text style={[styles.statusText, { color: getStatusColor(endpoint.status) }]}>
+                    {endpoint.status.toUpperCase()}
+                  </Text>
                 </View>
-                <View style={[styles.statusIndicator, { backgroundColor: getStatusColor(endpoint.status) }]}>
-                  {endpoint.status === 'active' ? (
-                    <CheckCircle size={12} color="#fff" />
-                  ) : (
-                    <AlertTriangle size={12} color="#fff" />
-                  )}
-                </View>
+                <Switch
+                  value={endpoint.status === 'active'}
+                  onValueChange={() => toggleApiEndpoint(endpoint.name)}
+                  trackColor={{ false: '#E5E5E5', true: '#117ACA' }}
+                  thumbColor={endpoint.status === 'active' ? '#FFFFFF' : '#FFFFFF'}
+                />
               </View>
             </View>
-
+            
             <View style={styles.endpointMetrics}>
-              <View style={styles.metricItem}>
-                <Text style={styles.metricLabel}>Cost/Request</Text>
-                <Text style={styles.metricValue}>{formatCurrency(endpoint.costPerRequest)}</Text>
+              <View style={styles.metric}>
+                <Text style={styles.metricValue}>{endpoint.requests_today.toLocaleString()}</Text>
+                <Text style={styles.metricLabel}>Requests Today</Text>
               </View>
-              <View style={styles.metricItem}>
-                <Text style={styles.metricLabel}>Requests</Text>
-                <Text style={styles.metricValue}>{endpoint.requestsToday.toLocaleString()}</Text>
+              <View style={styles.metric}>
+                <Text style={styles.metricValue}>${endpoint.cost_per_request.toFixed(4)}</Text>
+                <Text style={styles.metricLabel}>Cost per Request</Text>
               </View>
-              <View style={styles.metricItem}>
-                <Text style={styles.metricLabel}>Error Rate</Text>
-                <Text style={[styles.metricValue, { 
-                  color: endpoint.errorRate > 2 ? '#ef4444' : '#10b981' 
-                }]}>
-                  {endpoint.errorRate}%
+              <View style={styles.metric}>
+                <Text style={styles.metricValue}>
+                  ${(endpoint.requests_today * endpoint.cost_per_request).toFixed(2)}
                 </Text>
-              </View>
-              <View style={styles.metricItem}>
-                <Text style={styles.metricLabel}>Response</Text>
-                <Text style={styles.metricValue}>{endpoint.responseTime}ms</Text>
+                <Text style={styles.metricLabel}>Daily Cost</Text>
               </View>
             </View>
-
-            <Text style={styles.endpointUrl}>{endpoint.endpoint}</Text>
+            
+            {/* Usage Chart Placeholder */}
+            <View style={styles.usageChart}>
+              <Text style={styles.chartTitle}>24h Usage Pattern</Text>
+              <View style={styles.chartBars}>
+                {Array.from({ length: 24 }, (_, i) => (
+                  <View
+                    key={i}
+                    style={[
+                      styles.chartBar,
+                      { height: Math.random() * 40 + 10 }
+                    ]}
+                  />
+                ))}
+              </View>
+            </View>
           </View>
         ))}
       </View>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Routing Rules</Text>
-        {routingRules.map((rule, index) => (
-          <View key={index} style={styles.ruleCard}>
-            <View style={styles.ruleHeader}>
-              <Text style={styles.ruleName}>{rule.name}</Text>
-              <View style={[styles.ruleStatus, { 
-                backgroundColor: rule.status === 'active' ? '#10b981' : '#6b7280' 
-              }]}>
-                <Text style={styles.ruleStatusText}>{rule.status.toUpperCase()}</Text>
-              </View>
+      {/* Gateway Rules */}
+      <View style={styles.rulesContainer}>
+        <Text style={styles.sectionTitle}>Gateway Rules</Text>
+        
+        <View style={styles.ruleCard}>
+          <View style={styles.ruleHeader}>
+            <Text style={styles.ruleName}>Trial User Routing</Text>
+            <View style={styles.ruleStatus}>
+              <CheckCircle size={16} color="#10B981" />
+              <Text style={styles.ruleStatusText}>Active</Text>
             </View>
-            <Text style={styles.ruleCondition}>When: {rule.condition}</Text>
-            <Text style={styles.ruleAction}>Then: {rule.action}</Text>
           </View>
-        ))}
+          <Text style={styles.ruleDescription}>
+            Route trial users to cost-effective APIs (ipapi, Google AI, OpenWeather)
+          </Text>
+          <Text style={styles.ruleCondition}>
+            Condition: user.tier == 'trial'
+          </Text>
+        </View>
+        
+        <View style={styles.ruleCard}>
+          <View style={styles.ruleHeader}>
+            <Text style={styles.ruleName}>Paid User Routing</Text>
+            <View style={styles.ruleStatus}>
+              <CheckCircle size={16} color="#10B981" />
+              <Text style={styles.ruleStatusText}>Active</Text>
+            </View>
+          </View>
+          <Text style={styles.ruleDescription}>
+            Route paid users to premium APIs when cost ratio {'<'} 35%
+          </Text>
+          <Text style={styles.ruleCondition}>
+            Condition: user.tier == 'paid' && api_ratio {'<'} 0.35
+          </Text>
+        </View>
+        
+        <View style={styles.ruleCard}>
+          <View style={styles.ruleHeader}>
+            <Text style={styles.ruleName}>Cost Breach Fallback</Text>
+            <View style={styles.ruleStatus}>
+              <AlertCircle size={16} color="#F59E0B" />
+              <Text style={styles.ruleStatusText}>Monitoring</Text>
+            </View>
+          </View>
+          <Text style={styles.ruleDescription}>
+            Auto-downgrade users to trial APIs when cost ratio exceeds 35%
+          </Text>
+          <Text style={styles.ruleCondition}>
+            Condition: api_ratio {'>='} 0.35
+          </Text>
+        </View>
       </View>
     </ScrollView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f9fafb',
-  },
-  header: {
-    backgroundColor: '#fff',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
-  },
-  headerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  headerText: {
-    marginLeft: 12,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: '700' as const,
-    color: '#1f2937',
-  },
-  headerSubtitle: {
-    fontSize: 16,
-    color: '#6b7280',
+    backgroundColor: '#F7F7F7',
   },
   statsContainer: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     padding: 16,
-    gap: 12,
   },
   statCard: {
     flex: 1,
-    minWidth: 120,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     padding: 16,
-    borderRadius: 12,
+    marginHorizontal: 4,
+    borderRadius: 8,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
   },
   statValue: {
-    fontSize: 18,
-    fontWeight: '700' as const,
-    color: '#1f2937',
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333333',
     marginTop: 8,
-    marginBottom: 4,
   },
   statLabel: {
     fontSize: 12,
-    color: '#6b7280',
+    color: '#666666',
+    marginTop: 4,
     textAlign: 'center',
   },
-  controlsSection: {
+  filterContainer: {
+    backgroundColor: '#FFFFFF',
+    padding: 16,
+    marginBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E5E5',
+  },
+  filterTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333333',
+    marginBottom: 12,
+  },
+  filterButtons: {
+    flexDirection: 'row',
+  },
+  filterButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginRight: 8,
+    backgroundColor: '#F7F7F7',
+  },
+  filterButtonActive: {
+    backgroundColor: '#117ACA',
+  },
+  filterButtonText: {
+    fontSize: 14,
+    color: '#666666',
+  },
+  filterButtonTextActive: {
+    color: '#FFFFFF',
+  },
+  endpointsContainer: {
     padding: 16,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: '700' as const,
-    color: '#1f2937',
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333333',
     marginBottom: 16,
   },
-  controlCard: {
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 12,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  controlRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  controlInfo: {
-    flex: 1,
-  },
-  controlTitle: {
-    fontSize: 16,
-    fontWeight: '600' as const,
-    color: '#1f2937',
-    marginBottom: 4,
-  },
-  controlDescription: {
-    fontSize: 14,
-    color: '#6b7280',
-  },
-  section: {
-    padding: 16,
-  },
   endpointCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     padding: 16,
-    borderRadius: 12,
     marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    borderRadius: 8,
   },
   endpointHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 12,
+    marginBottom: 16,
   },
   endpointInfo: {
     flex: 1,
   },
-  endpointName: {
-    fontSize: 16,
-    fontWeight: '600' as const,
-    color: '#1f2937',
+  endpointTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 4,
   },
-  endpointService: {
-    fontSize: 14,
-    color: '#6b7280',
-  },
-  endpointBadges: {
-    flexDirection: 'row',
-    gap: 8,
+  endpointName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333333',
+    marginRight: 12,
   },
   tierBadge: {
     paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
   },
-  tierText: {
+  tierBadgeText: {
     fontSize: 10,
-    fontWeight: '600' as const,
-    color: '#fff',
-  },
-  statusIndicator: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  endpointMetrics: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 12,
-  },
-  metricItem: {
-    alignItems: 'center',
-  },
-  metricLabel: {
-    fontSize: 12,
-    color: '#6b7280',
-    marginBottom: 4,
-  },
-  metricValue: {
-    fontSize: 14,
-    fontWeight: '600' as const,
-    color: '#1f2937',
+    fontWeight: 'bold',
+    color: '#FFFFFF',
   },
   endpointUrl: {
     fontSize: 12,
-    color: '#9ca3af',
+    color: '#666666',
     fontFamily: 'monospace',
-    backgroundColor: '#f3f4f6',
-    padding: 8,
-    borderRadius: 6,
+  },
+  endpointControls: {
+    alignItems: 'flex-end',
+  },
+  statusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    marginLeft: 4,
+  },
+  endpointMetrics: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#F0F0F0',
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  metric: {
+    alignItems: 'center',
+  },
+  metricValue: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#117ACA',
+  },
+  metricLabel: {
+    fontSize: 10,
+    color: '#666666',
+    marginTop: 2,
+  },
+  usageChart: {
+    marginTop: 16,
+  },
+  chartTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333333',
+    marginBottom: 8,
+  },
+  chartBars: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    height: 50,
+  },
+  chartBar: {
+    flex: 1,
+    backgroundColor: '#117ACA',
+    marginHorizontal: 1,
+    borderRadius: 1,
+    opacity: 0.7,
+  },
+  rulesContainer: {
+    padding: 16,
   },
   ruleCard: {
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     padding: 16,
-    borderRadius: 12,
     marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    borderRadius: 8,
   },
   ruleHeader: {
     flexDirection: 'row',
@@ -484,30 +401,29 @@ const styles = StyleSheet.create({
   },
   ruleName: {
     fontSize: 16,
-    fontWeight: '600' as const,
-    color: '#1f2937',
+    fontWeight: 'bold',
+    color: '#333333',
   },
   ruleStatus: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   ruleStatusText: {
-    fontSize: 10,
-    fontWeight: '600' as const,
-    color: '#fff',
+    fontSize: 12,
+    color: '#666666',
+    marginLeft: 4,
+  },
+  ruleDescription: {
+    fontSize: 14,
+    color: '#666666',
+    marginBottom: 8,
   },
   ruleCondition: {
-    fontSize: 14,
-    color: '#6b7280',
-    marginBottom: 4,
+    fontSize: 12,
+    color: '#999999',
     fontFamily: 'monospace',
-  },
-  ruleAction: {
-    fontSize: 14,
-    color: '#3b82f6',
-    fontWeight: '500' as const,
+    backgroundColor: '#F7F7F7',
+    padding: 8,
+    borderRadius: 4,
   },
 });
-
-export default APIGatewayControl;

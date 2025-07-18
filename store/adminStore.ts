@@ -1,294 +1,320 @@
 import { create } from 'zustand';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export interface UserTier {
-  id: string;
+export interface User {
+  uid: string;
+  name: string;
   email: string;
   tier: 'trial' | 'paid';
-  monthlyRevenue: number;
-  apiCosts: number;
-  apiCostRatio: number;
-  joinedAt: string;
-  lastActive: string;
+  subscription_id?: string;
+  created_at: string;
+  last_active: string;
+  api_usage: number;
+  monthly_cost: number;
 }
 
-export interface ApiUsage {
-  service: string;
-  provider: string;
-  requests: number;
-  cost: number;
+export interface ApiEndpoint {
+  name: string;
+  url: string;
+  tier: 'trial' | 'paid';
+  cost_per_request: number;
+  requests_today: number;
+  status: 'active' | 'inactive' | 'error';
+}
+
+export interface CostMetric {
   date: string;
+  api_costs: number;
+  user_revenue: number;
+  ratio: number;
 }
 
-export interface ProfitMetrics {
-  monthlyRevenue: number;
-  totalApiCosts: number;
-  netProfit: number;
-  profitMargin: number;
-  userCount: {
-    trial: number;
-    paid: number;
-  };
-}
-
-export interface CostAlert {
+export interface Alert {
   id: string;
-  userId: string;
-  type: 'cost_threshold' | 'profit_margin' | 'api_failure';
+  title: string;
   message: string;
   severity: 'low' | 'medium' | 'high';
   timestamp: string;
   resolved: boolean;
 }
 
+export interface PaymentData {
+  subscription_id: string;
+  user_id: string;
+  plan: string;
+  amount: number;
+  status: 'active' | 'cancelled' | 'past_due';
+  next_billing: string;
+}
+
 interface AdminState {
-  // User Management
-  users: UserTier[];
-  selectedUser: UserTier | null;
-  
   // Metrics
-  profitMetrics: ProfitMetrics;
-  apiUsage: ApiUsage[];
-  
-  // Alerts
-  alerts: CostAlert[];
-  unreadAlerts: number;
-  
-  // Configuration
-  costThresholds: {
-    apiCostRatio: number;
-    profitMarginMin: number;
-    maxApiCostPerUser: number;
+  metrics: {
+    totalUsers: number;
+    activeUsers: number;
+    trialUsers: number;
+    paidUsers: number;
+    apiRequests: number;
+    costRatio: number;
+    monthlyRevenue: number;
+    dailyApiCost: number;
   };
   
+  // Data
+  users: User[];
+  apiEndpoints: ApiEndpoint[];
+  costHistory: CostMetric[];
+  alerts: Alert[];
+  payments: PaymentData[];
+  
   // Loading states
-  isLoading: boolean;
-  isUpdating: boolean;
+  loading: {
+    users: boolean;
+    metrics: boolean;
+    costs: boolean;
+    payments: boolean;
+  };
   
   // Actions
-  loadAdminData: () => Promise<void>;
+  fetchUsers: () => Promise<void>;
+  fetchMetrics: () => Promise<void>;
+  fetchCostHistory: () => Promise<void>;
+  fetchPayments: () => Promise<void>;
   updateUserTier: (userId: string, tier: 'trial' | 'paid') => Promise<void>;
+  toggleApiEndpoint: (endpointName: string) => Promise<void>;
   resolveAlert: (alertId: string) => void;
-  updateCostThresholds: (thresholds: Partial<AdminState['costThresholds']>) => void;
-  refreshMetrics: () => Promise<void>;
-  exportUserData: () => Promise<string>;
+  addAlert: (alert: Omit<Alert, 'id' | 'timestamp'>) => void;
 }
 
 export const useAdminStore = create<AdminState>((set, get) => ({
-  // Initial state
-  users: [],
-  selectedUser: null,
-  profitMetrics: {
-    monthlyRevenue: 0,
-    totalApiCosts: 0,
-    netProfit: 0,
-    profitMargin: 0,
-    userCount: { trial: 0, paid: 0 }
+  metrics: {
+    totalUsers: 1247,
+    activeUsers: 892,
+    trialUsers: 1089,
+    paidUsers: 158,
+    apiRequests: 15420,
+    costRatio: 0.28,
+    monthlyRevenue: 23700,
+    dailyApiCost: 186.50,
   },
-  apiUsage: [],
-  alerts: [],
-  unreadAlerts: 0,
-  costThresholds: {
-    apiCostRatio: 0.3,
-    profitMarginMin: 0.2,
-    maxApiCostPerUser: 4.50
+  
+  users: [
+    {
+      uid: '1',
+      name: 'John Smith',
+      email: 'john@example.com',
+      tier: 'paid',
+      subscription_id: 'sub_123',
+      created_at: '2024-01-15',
+      last_active: '2024-01-18 14:30',
+      api_usage: 450,
+      monthly_cost: 15.00,
+    },
+    {
+      uid: '2',
+      name: 'Sarah Johnson',
+      email: 'sarah@example.com',
+      tier: 'trial',
+      created_at: '2024-01-17',
+      last_active: '2024-01-18 09:15',
+      api_usage: 85,
+      monthly_cost: 0.00,
+    },
+    {
+      uid: '3',
+      name: 'Mike Wilson',
+      email: 'mike@example.com',
+      tier: 'paid',
+      subscription_id: 'sub_456',
+      created_at: '2024-01-10',
+      last_active: '2024-01-18 16:45',
+      api_usage: 720,
+      monthly_cost: 15.00,
+    },
+  ],
+  
+  apiEndpoints: [
+    {
+      name: 'Location (Trial)',
+      url: 'https://api.ipapi.com',
+      tier: 'trial',
+      cost_per_request: 0.001,
+      requests_today: 8420,
+      status: 'active',
+    },
+    {
+      name: 'Location (Paid)',
+      url: 'https://my.geotab.com/apiv1',
+      tier: 'paid',
+      cost_per_request: 0.005,
+      requests_today: 3200,
+      status: 'active',
+    },
+    {
+      name: 'Diagnostics (Trial)',
+      url: 'https://generativelanguage.googleapis.com',
+      tier: 'trial',
+      cost_per_request: 0.002,
+      requests_today: 2100,
+      status: 'active',
+    },
+    {
+      name: 'Diagnostics (Paid)',
+      url: 'https://api-inference.huggingface.co',
+      tier: 'paid',
+      cost_per_request: 0.008,
+      requests_today: 1800,
+      status: 'active',
+    },
+  ],
+  
+  costHistory: [
+    { date: '2024-01-14', api_costs: 145.20, user_revenue: 580.00, ratio: 0.25 },
+    { date: '2024-01-15', api_costs: 162.30, user_revenue: 595.00, ratio: 0.27 },
+    { date: '2024-01-16', api_costs: 178.90, user_revenue: 610.00, ratio: 0.29 },
+    { date: '2024-01-17', api_costs: 195.40, user_revenue: 625.00, ratio: 0.31 },
+    { date: '2024-01-18', api_costs: 186.50, user_revenue: 640.00, ratio: 0.29 },
+  ],
+  
+  alerts: [
+    {
+      id: '1',
+      title: 'High API Usage Detected',
+      message: 'User john@example.com exceeded daily limit',
+      severity: 'medium',
+      timestamp: '2 hours ago',
+      resolved: false,
+    },
+    {
+      id: '2',
+      title: 'Payment Failed',
+      message: 'Subscription renewal failed for user sarah@example.com',
+      severity: 'high',
+      timestamp: '4 hours ago',
+      resolved: false,
+    },
+    {
+      id: '3',
+      title: 'API Endpoint Slow Response',
+      message: 'Geotab API response time > 5 seconds',
+      severity: 'low',
+      timestamp: '6 hours ago',
+      resolved: true,
+    },
+  ],
+  
+  payments: [
+    {
+      subscription_id: 'sub_123',
+      user_id: '1',
+      plan: 'Pro Plan',
+      amount: 15.00,
+      status: 'active',
+      next_billing: '2024-02-15',
+    },
+    {
+      subscription_id: 'sub_456',
+      user_id: '3',
+      plan: 'Pro Plan',
+      amount: 15.00,
+      status: 'active',
+      next_billing: '2024-02-10',
+    },
+  ],
+  
+  loading: {
+    users: false,
+    metrics: false,
+    costs: false,
+    payments: false,
   },
-  isLoading: false,
-  isUpdating: false,
-
-  // Load admin data from storage and API
-  loadAdminData: async () => {
-    set({ isLoading: true });
+  
+  fetchUsers: async () => {
+    set((state) => ({ loading: { ...state.loading, users: true } }));
     
-    try {
-      // Load from AsyncStorage first for offline capability
-      const storedData = await AsyncStorage.getItem('admin_data');
-      if (storedData) {
-        const data = JSON.parse(storedData);
-        set({
-          users: data.users || [],
-          profitMetrics: data.profitMetrics || get().profitMetrics,
-          apiUsage: data.apiUsage || [],
-          alerts: data.alerts || []
-        });
-      }
-
-      // Mock API call - replace with actual API integration
-      const mockUsers: UserTier[] = [
-        {
-          id: '1',
-          email: 'driver1@example.com',
-          tier: 'trial',
-          monthlyRevenue: 0,
-          apiCosts: 0,
-          apiCostRatio: 0,
-          joinedAt: '2024-01-15',
-          lastActive: '2024-01-18'
-        },
-        {
-          id: '2',
-          email: 'fleet@company.com',
-          tier: 'paid',
-          monthlyRevenue: 15,
-          apiCosts: 2.30,
-          apiCostRatio: 0.15,
-          joinedAt: '2024-01-10',
-          lastActive: '2024-01-18'
-        },
-        {
-          id: '3',
-          email: 'owner@trucking.com',
-          tier: 'paid',
-          monthlyRevenue: 15,
-          apiCosts: 5.20,
-          apiCostRatio: 0.35,
-          joinedAt: '2024-01-05',
-          lastActive: '2024-01-17'
-        }
-      ];
-
-      const mockApiUsage: ApiUsage[] = [
-        { service: 'geolocation', provider: 'ipapi', requests: 1250, cost: 0, date: '2024-01-18' },
-        { service: 'weather', provider: 'openweathermap', requests: 890, cost: 0, date: '2024-01-18' },
-        { service: 'diagnostics', provider: 'google_ai_studio', requests: 340, cost: 0, date: '2024-01-18' },
-        { service: 'geolocation', provider: 'geotab', requests: 450, cost: 3.20, date: '2024-01-18' },
-        { service: 'weather', provider: 'weatherstack', requests: 320, cost: 1.80, date: '2024-01-18' },
-        { service: 'diagnostics', provider: 'hugging_face', requests: 180, cost: 2.50, date: '2024-01-18' }
-      ];
-
-      const totalRevenue = mockUsers.reduce((sum, user) => sum + user.monthlyRevenue, 0);
-      const totalCosts = mockUsers.reduce((sum, user) => sum + user.apiCosts, 0);
-      const netProfit = totalRevenue - totalCosts;
-      const profitMargin = totalRevenue > 0 ? netProfit / totalRevenue : 0;
-
-      const mockProfitMetrics: ProfitMetrics = {
-        monthlyRevenue: totalRevenue,
-        totalApiCosts: totalCosts,
-        netProfit,
-        profitMargin,
-        userCount: {
-          trial: mockUsers.filter(u => u.tier === 'trial').length,
-          paid: mockUsers.filter(u => u.tier === 'paid').length
-        }
-      };
-
-      // Generate alerts for users exceeding cost thresholds
-      const mockAlerts: CostAlert[] = mockUsers
-        .filter(user => user.apiCostRatio > 0.3)
-        .map(user => ({
-          id: `alert_${user.id}_${Date.now()}`,
-          userId: user.id,
-          type: 'cost_threshold' as const,
-          message: `User ${user.email} exceeded 30% API cost ratio (${(user.apiCostRatio * 100).toFixed(1)}%)`,
-          severity: user.apiCostRatio > 0.4 ? 'high' as const : 'medium' as const,
-          timestamp: new Date().toISOString(),
-          resolved: false
-        }));
-
-      // Add profit margin alert if needed
-      if (profitMargin < 0.2) {
-        mockAlerts.push({
-          id: `profit_alert_${Date.now()}`,
-          userId: 'system',
-          type: 'profit_margin',
-          message: `Profit margin below 20% threshold (${(profitMargin * 100).toFixed(1)}%)`,
-          severity: 'high',
-          timestamp: new Date().toISOString(),
-          resolved: false
-        });
-      }
-
-      set({
-        users: mockUsers,
-        profitMetrics: mockProfitMetrics,
-        apiUsage: mockApiUsage,
-        alerts: mockAlerts,
-        unreadAlerts: mockAlerts.filter(a => !a.resolved).length
-      });
-
-      // Save to AsyncStorage
-      await AsyncStorage.setItem('admin_data', JSON.stringify({
-        users: mockUsers,
-        profitMetrics: mockProfitMetrics,
-        apiUsage: mockApiUsage,
-        alerts: mockAlerts
-      }));
-
-    } catch (error) {
-      console.error('Failed to load admin data:', error);
-    } finally {
-      set({ isLoading: false });
-    }
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    // In real implementation, fetch from Supabase/NocoDB
+    set((state) => ({ loading: { ...state.loading, users: false } }));
   },
-
-  // Update user tier
+  
+  fetchMetrics: async () => {
+    set((state) => ({ loading: { ...state.loading, metrics: true } }));
+    
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    // In real implementation, calculate from database
+    set((state) => ({ loading: { ...state.loading, metrics: false } }));
+  },
+  
+  fetchCostHistory: async () => {
+    set((state) => ({ loading: { ...state.loading, costs: true } }));
+    
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1200));
+    
+    set((state) => ({ loading: { ...state.loading, costs: false } }));
+  },
+  
+  fetchPayments: async () => {
+    set((state) => ({ loading: { ...state.loading, payments: true } }));
+    
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 900));
+    
+    set((state) => ({ loading: { ...state.loading, payments: false } }));
+  },
+  
   updateUserTier: async (userId: string, tier: 'trial' | 'paid') => {
-    set({ isUpdating: true });
+    // Update user tier in database
+    set((state) => ({
+      users: state.users.map(user =>
+        user.uid === userId ? { ...user, tier } : user
+      ),
+    }));
     
-    try {
-      const users = get().users.map(user => 
-        user.id === userId 
-          ? { 
-              ...user, 
-              tier,
-              monthlyRevenue: tier === 'paid' ? 15 : 0,
-              apiCostRatio: tier === 'paid' ? user.apiCosts / 15 : 0
-            }
-          : user
-      );
-      
-      set({ users });
-      
-      // Save to storage
-      const currentData = await AsyncStorage.getItem('admin_data');
-      if (currentData) {
-        const data = JSON.parse(currentData);
-        data.users = users;
-        await AsyncStorage.setItem('admin_data', JSON.stringify(data));
-      }
-      
-    } catch (error) {
-      console.error('Failed to update user tier:', error);
-    } finally {
-      set({ isUpdating: false });
-    }
+    // Update metrics
+    const { users } = get();
+    const trialUsers = users.filter(u => u.tier === 'trial').length;
+    const paidUsers = users.filter(u => u.tier === 'paid').length;
+    
+    set((state) => ({
+      metrics: {
+        ...state.metrics,
+        trialUsers,
+        paidUsers,
+      },
+    }));
   },
-
-  // Resolve alert
+  
+  toggleApiEndpoint: async (endpointName: string) => {
+    set((state) => ({
+      apiEndpoints: state.apiEndpoints.map(endpoint =>
+        endpoint.name === endpointName
+          ? { ...endpoint, status: endpoint.status === 'active' ? 'inactive' : 'active' }
+          : endpoint
+      ),
+    }));
+  },
+  
   resolveAlert: (alertId: string) => {
-    const alerts = get().alerts.map(alert =>
-      alert.id === alertId ? { ...alert, resolved: true } : alert
-    );
-    
-    set({ 
-      alerts,
-      unreadAlerts: alerts.filter(a => !a.resolved).length
-    });
+    set((state) => ({
+      alerts: state.alerts.map(alert =>
+        alert.id === alertId ? { ...alert, resolved: true } : alert
+      ),
+    }));
   },
-
-  // Update cost thresholds
-  updateCostThresholds: (thresholds) => {
-    set({ 
-      costThresholds: { ...get().costThresholds, ...thresholds }
-    });
-  },
-
-  // Refresh metrics
-  refreshMetrics: async () => {
-    await get().loadAdminData();
-  },
-
-  // Export user data
-  exportUserData: async () => {
-    const { users, profitMetrics, apiUsage } = get();
-    
-    const exportData = {
-      users,
-      profitMetrics,
-      apiUsage,
-      exportedAt: new Date().toISOString()
+  
+  addAlert: (alertData: Omit<Alert, 'id' | 'timestamp'>) => {
+    const newAlert: Alert = {
+      ...alertData,
+      id: Date.now().toString(),
+      timestamp: new Date().toLocaleString(),
     };
     
-    return JSON.stringify(exportData, null, 2);
-  }
+    set((state) => ({
+      alerts: [newAlert, ...state.alerts],
+    }));
+  },
 }));
