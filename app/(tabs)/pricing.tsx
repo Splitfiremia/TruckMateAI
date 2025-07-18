@@ -175,7 +175,7 @@ export default function PricingTabScreen() {
                            usagePercentage > 70 ? colors.warning : colors.status.success;
 
         return (
-          <View key={stat.id} style={styles.usageItem}>
+          <View key={index} style={styles.usageItem}>
             <View style={styles.usageHeader}>
               <Text style={styles.usageName}>{stat.name}</Text>
               <Text style={[styles.usagePercentage, { color: statusColor }]}>

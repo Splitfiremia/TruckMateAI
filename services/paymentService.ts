@@ -51,7 +51,7 @@ export class PaymentService {
           id: addonId,
           name: this.getAddonName(addonId),
           price: this.getAddonPrice(addonId),
-          billingType: 'monthly',
+          billingType: 'monthly' as const,
           quantity: 1,
           addedAt: new Date().toISOString(),
         })),
@@ -92,15 +92,26 @@ export class PaymentService {
         throw new Error('Subscription not found');
       }
 
+      const updatedAddons = updates.addons ? updates.addons.map(addonId => ({
+        id: addonId,
+        name: this.getAddonName(addonId),
+        price: this.getAddonPrice(addonId),
+        billingType: 'monthly' as const,
+        quantity: 1,
+        addedAt: new Date().toISOString(),
+      })) : subscription.addons;
+
       const updatedSubscription: Subscription = {
         ...subscription,
-        ...updates,
+        planId: updates.planId || subscription.planId,
+        vehicleCount: updates.vehicleCount || subscription.vehicleCount,
+        addons: updatedAddons,
         totalAmount: this.calculateTotalAmount({
           planId: updates.planId || subscription.planId,
           billingCycle: subscription.billingCycle,
           vehicleCount: updates.vehicleCount || subscription.vehicleCount,
           addons: updates.addons || subscription.addons.map(a => a.id),
-        } as any),
+        }),
       };
 
       this.subscriptions.set(subscriptionId, updatedSubscription);
