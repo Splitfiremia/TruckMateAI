@@ -92,7 +92,7 @@ export class PaymentService {
         throw new Error('Subscription not found');
       }
 
-      const updatedAddons = updates.addons ? updates.addons.map(addonId => ({
+      const updatedAddons: SubscriptionAddon[] = updates.addons ? updates.addons.map(addonId => ({
         id: addonId,
         name: this.getAddonName(addonId),
         price: this.getAddonPrice(addonId),

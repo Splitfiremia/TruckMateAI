@@ -20,7 +20,7 @@ export default function TabLayout() {
     primary: settings.primaryColor || colors.primaryLight,
     secondary: settings.secondaryColor || colors.secondary,
     background: colors.background.primary,
-    textSecondary: colors.secondary,
+    textSecondary: colors.text.secondary,
     border: colors.border,
     text: colors.text.primary,
   };
