@@ -127,9 +127,6 @@ export default function TabLayout() {
           headerTitleStyle: {
             fontWeight: '600',
           },
-          contentStyle: {
-            paddingBottom: Platform.OS === 'ios' ? 140 : 130, // Increased padding for expanded nav bar
-          },
         }}
       >
           <Tabs.Screen
