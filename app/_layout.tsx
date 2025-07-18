@@ -8,6 +8,7 @@ import { colors } from "@/constants/colors";
 import { useUserStore } from "@/store/userStore";
 import { useBrandingStore } from "@/store/brandingStore";
 import { ThemeProvider, useTheme } from "@/store/themeStore";
+import APIStatusBanner from "@/components/APIStatusBanner";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -27,22 +28,25 @@ function RootLayoutNav() {
   };
   
   return (
-    <Stack 
-      screenOptions={{ 
-        headerBackTitle: "Back",
-        headerStyle: {
-          backgroundColor: activeColors.background,
-        },
-        headerTintColor: activeColors.text,
-        contentStyle: {
-          backgroundColor: activeColors.background,
-        },
-      }}
-    >
-      <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-    </Stack>
+    <>
+      <APIStatusBanner />
+      <Stack 
+        screenOptions={{ 
+          headerBackTitle: "Back",
+          headerStyle: {
+            backgroundColor: activeColors.background,
+          },
+          headerTintColor: activeColors.text,
+          contentStyle: {
+            backgroundColor: activeColors.background,
+          },
+        }}
+      >
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      </Stack>
+    </>
   );
 }
 

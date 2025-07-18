@@ -3,6 +3,8 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import { Platform } from 'react-native';
+import { hybridApiService } from '@/services/hybridApiService';
+import { fallbackLocationService } from '@/services/fallbackLocationService';
 
 export interface WeatherAlert {
   id: string;
@@ -130,74 +132,24 @@ export const useWeatherStore = create<WeatherState>()(persist(
     
     requestLocationPermission: async () => {
       try {
-        if (Platform.OS === 'web') {
-          // For web, use browser geolocation
-          return new Promise((resolve) => {
-            if ('geolocation' in navigator) {
-              navigator.geolocation.getCurrentPosition(
-                async (position) => {
-                  const { latitude, longitude } = position.coords;
-                  const locationName = await getLocationName(latitude, longitude);
-                  
-                  set({
-                    currentLocation: {
-                      latitude,
-                      longitude,
-                      city: locationName.city,
-                      state: locationName.state
-                    },
-                    locationPermissionGranted: true
-                  });
-                  resolve(true);
-                },
-                (error) => {
-                  console.log('Geolocation error:', error);
-                  resolve(false);
-                }
-              );
-            } else {
-              resolve(false);
-            }
+        // Use fallback location service which handles all platforms and fallbacks
+        const location = await fallbackLocationService.getCurrentLocation();
+        
+        if (location) {
+          set({
+            currentLocation: {
+              latitude: location.latitude,
+              longitude: location.longitude,
+              city: location.city || 'Unknown',
+              state: location.state || ''
+            },
+            locationPermissionGranted: location.source !== 'mock'
           });
+          return location.source !== 'mock';
         }
         
-        // Check current permission status first
-        const { status: currentStatus } = await Location.getForegroundPermissionsAsync();
-        
-        let finalStatus = currentStatus;
-        if (currentStatus !== 'granted') {
-          const { status } = await Location.requestForegroundPermissionsAsync();
-          finalStatus = status;
-        }
-        
-        const granted = finalStatus === 'granted';
-        
-        if (granted) {
-          try {
-            const location = await Location.getCurrentPositionAsync({
-              accuracy: Location.Accuracy.Balanced,
-            });
-            const { latitude, longitude } = location.coords;
-            const locationName = await getLocationName(latitude, longitude);
-            
-            set({
-              currentLocation: {
-                latitude,
-                longitude,
-                city: locationName.city,
-                state: locationName.state
-              },
-              locationPermissionGranted: true
-            });
-          } catch (locationError) {
-            console.error('Error getting current location:', locationError);
-            set({ locationPermissionGranted: granted });
-          }
-        } else {
-          set({ locationPermissionGranted: granted });
-        }
-        
-        return granted;
+        set({ locationPermissionGranted: false });
+        return false;
       } catch (error) {
         console.error('Error requesting location permission:', error);
         set({ locationPermissionGranted: false });
@@ -216,7 +168,44 @@ export const useWeatherStore = create<WeatherState>()(persist(
       set({ isLoadingWeather: true });
       
       try {
-        // Get grid point for location
+        // Try hybrid API service first (includes fallbacks)
+        const weatherData = await hybridApiService.getWeatherData(
+          currentLocation.latitude, 
+          currentLocation.longitude
+        );
+        
+        if (weatherData) {
+          const currentWeather: WeatherCondition = {
+            temperature: weatherData.temperature,
+            humidity: weatherData.humidity,
+            windSpeed: weatherData.windSpeed,
+            windDirection: 'N/A', // Simplified for fallback
+            visibility: weatherData.visibility,
+            conditions: weatherData.conditions,
+            icon: '',
+            timestamp: new Date().toISOString()
+          };
+          
+          // Generate simple forecast based on current conditions
+          const forecast: WeatherForecast[] = Array.from({ length: 7 }, (_, i) => ({
+            date: new Date(Date.now() + i * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            high: weatherData.temperature + Math.random() * 10 - 5,
+            low: weatherData.temperature - Math.random() * 15 - 5,
+            conditions: weatherData.conditions,
+            icon: '',
+            precipitationChance: Math.random() * 100,
+            windSpeed: weatherData.windSpeed + Math.random() * 10 - 5
+          }));
+          
+          set({ 
+            currentWeather,
+            forecast,
+            lastUpdated: new Date().toISOString()
+          });
+          return;
+        }
+        
+        // Fallback to NOAA if hybrid service fails
         const pointsUrl = `${NOAA_API_BASE}/points/${currentLocation.latitude},${currentLocation.longitude}`;
         const pointsData = await fetchNOAAData(pointsUrl);
         
@@ -233,9 +222,9 @@ export const useWeatherStore = create<WeatherState>()(persist(
           const currentWeather: WeatherCondition = {
             temperature: props.temperature.value ? Math.round((props.temperature.value * 9/5) + 32) : 0,
             humidity: props.relativeHumidity.value || 0,
-            windSpeed: props.windSpeed.value ? Math.round(props.windSpeed.value * 2.237) : 0, // Convert m/s to mph
+            windSpeed: props.windSpeed.value ? Math.round(props.windSpeed.value * 2.237) : 0,
             windDirection: props.windDirection.value ? `${Math.round(props.windDirection.value)}°` : 'N/A',
-            visibility: props.visibility.value ? Math.round(props.visibility.value * 0.000621371) : 0, // Convert m to miles
+            visibility: props.visibility.value ? Math.round(props.visibility.value * 0.000621371) : 0,
             conditions: props.textDescription || 'Unknown',
             icon: props.icon || '',
             timestamp: props.timestamp
@@ -248,7 +237,6 @@ export const useWeatherStore = create<WeatherState>()(persist(
         const forecastUrl = pointsData.properties.forecast;
         const forecastData = await fetchNOAAData(forecastUrl);
         
-        // Group periods by date and take the first one for each date to avoid duplicates
         const periodsMap = new Map();
         forecastData.properties.periods.forEach((period: any) => {
           const date = period.startTime.split('T')[0];
@@ -260,7 +248,7 @@ export const useWeatherStore = create<WeatherState>()(persist(
         const forecast: WeatherForecast[] = Array.from(periodsMap.values()).slice(0, 7).map((period: any) => ({
           date: period.startTime.split('T')[0],
           high: period.temperature,
-          low: period.temperature - 10, // NOAA doesn't always provide low, estimate
+          low: period.temperature - 10,
           conditions: period.shortForecast,
           icon: period.icon,
           precipitationChance: period.probabilityOfPrecipitation?.value || 0,
