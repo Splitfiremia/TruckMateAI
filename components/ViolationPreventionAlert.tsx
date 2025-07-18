@@ -9,7 +9,8 @@ import {
   Alert,
   Vibration,
   Platform,
-  TextInput
+  TextInput,
+  ScrollView
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { 
@@ -49,6 +50,7 @@ export const ViolationPreventionAlert: React.FC<ViolationPreventionAlertProps> =
   const [overrideReason, setOverrideReason] = useState('');
   const [riskAcknowledged, setRiskAcknowledged] = useState(false);
   const [fineAccepted, setFineAccepted] = useState(false);
+  const [isPulsing, setIsPulsing] = useState(false);
   
   const { executePreventionAction, overrideViolationPrediction, canOverrideViolation } = usePredictiveComplianceStore();
   const { startBreak, changeStatus, currentTripId, getWeeklyOverrideCount, logViolationOverride } = useLogbookStore();
@@ -60,21 +62,25 @@ export const ViolationPreventionAlert: React.FC<ViolationPreventionAlertProps> =
         Vibration.vibrate([0, 500, 200, 500]);
       }
 
-      // Start pulse animation
+      // Start subtle pulse animation only for the border/glow effect
+      setIsPulsing(true);
       Animated.loop(
         Animated.sequence([
           Animated.timing(pulseAnim, {
-            toValue: 1.1,
-            duration: 600,
-            useNativeDriver: true,
+            toValue: 1.05,
+            duration: 1000,
+            useNativeDriver: false, // Changed to false for border effects
           }),
           Animated.timing(pulseAnim, {
             toValue: 1,
-            duration: 600,
-            useNativeDriver: true,
+            duration: 1000,
+            useNativeDriver: false,
           }),
         ])
       ).start();
+    } else {
+      setIsPulsing(false);
+      pulseAnim.setValue(1);
     }
 
     // Countdown timer
@@ -252,16 +258,30 @@ export const ViolationPreventionAlert: React.FC<ViolationPreventionAlertProps> =
       onRequestClose={onDismiss}
     >
       <View style={styles.overlay}>
-        <Animated.View 
-          style={[
-            styles.alertContainer,
-            { transform: [{ scale: pulseAnim }] }
-          ]}
-        >
-          <LinearGradient
-            colors={[getSeverityColor() + '20', getSeverityColor() + '05']}
-            style={styles.alertCard}
+        <View style={styles.alertContainer}>
+          <Animated.View
+            style={[
+              styles.alertCard,
+              isPulsing && {
+                borderWidth: pulseAnim.interpolate({
+                  inputRange: [1, 1.05],
+                  outputRange: [2, 4],
+                }),
+                shadowOpacity: pulseAnim.interpolate({
+                  inputRange: [1, 1.05],
+                  outputRange: [0.1, 0.3],
+                }),
+              }
+            ]}
           >
+            <LinearGradient
+              colors={[getSeverityColor() + '20', getSeverityColor() + '05']}
+              style={styles.alertCardGradient}
+            >
+              <ScrollView 
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.scrollContent}
+              >
             {/* Header */}
             <View style={styles.header}>
               <View style={styles.headerLeft}>
@@ -443,8 +463,8 @@ export const ViolationPreventionAlert: React.FC<ViolationPreventionAlertProps> =
                 </Text>
               </View>
             )}
-          </LinearGradient>
-        </Animated.View>
+            </LinearGradient>
+          </Animated.View>
       </View>
       
       {/* Override Request Modal */}
@@ -546,17 +566,29 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    paddingTop: 60, // Add top padding to prevent cutoff
   },
   alertContainer: {
     width: '100%',
     maxWidth: 400,
+    maxHeight: '90%', // Prevent modal from being too tall
   },
   alertCard: {
     borderRadius: 20,
-    padding: 24,
     borderWidth: 2,
     borderColor: colors.border,
     backgroundColor: colors.surface,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  alertCardGradient: {
+    borderRadius: 18,
+    padding: 24,
   },
   header: {
     flexDirection: 'row',
@@ -593,12 +625,12 @@ const styles = StyleSheet.create({
     gap: 8,
     marginBottom: 16,
     padding: 16,
-    backgroundColor: colors.background.primary,
+    backgroundColor: colors.surface,
     borderRadius: 12,
   },
   countdownLabel: {
     fontSize: 14,
-    color: colors.text.primary,
+    color: colors.white,
     flex: 1,
   },
   countdownTime: {
@@ -607,7 +639,7 @@ const styles = StyleSheet.create({
   },
   message: {
     fontSize: 16,
-    color: colors.text.primary,
+    color: colors.white,
     marginBottom: 16,
     lineHeight: 22,
   },
@@ -622,7 +654,7 @@ const styles = StyleSheet.create({
   statusValue: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text.primary,
+    color: colors.white,
     marginBottom: 8,
   },
   progressBar: {
@@ -640,7 +672,7 @@ const styles = StyleSheet.create({
   quickActionsTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: colors.text.primary,
+    color: colors.white,
     marginBottom: 12,
   },
   quickActions: {
@@ -676,13 +708,13 @@ const styles = StyleSheet.create({
   preventionTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: colors.text.primary,
+    color: colors.white,
     marginBottom: 12,
   },
   preventionAction: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.background.primary,
+    backgroundColor: colors.surface,
     borderRadius: 8,
     padding: 12,
     marginBottom: 8,
@@ -699,7 +731,7 @@ const styles = StyleSheet.create({
   actionTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: colors.text.primary,
+    color: colors.white,
   },
   actionDescription: {
     fontSize: 12,
@@ -743,7 +775,7 @@ const styles = StyleSheet.create({
   },
   fineLabel: {
     fontSize: 14,
-    color: colors.text.primary,
+    color: colors.white,
   },
   fineAmount: {
     fontSize: 16,
@@ -763,7 +795,7 @@ const styles = StyleSheet.create({
   overrideTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: colors.text.primary,
+    color: colors.white,
     marginBottom: 4,
   },
   overrideDescription: {
@@ -817,7 +849,7 @@ const styles = StyleSheet.create({
   },
   overrideReason: {
     fontSize: 12,
-    color: colors.text.primary,
+    color: colors.white,
     fontStyle: 'italic',
   },
   
@@ -845,7 +877,7 @@ const styles = StyleSheet.create({
   overrideModalTitle: {
     fontSize: 18,
     fontWeight: '700',
-    color: colors.text.primary,
+    color: colors.white,
   },
   overrideModalClose: {
     width: 32,
@@ -870,7 +902,7 @@ const styles = StyleSheet.create({
   overrideFormLabel: {
     fontSize: 14,
     fontWeight: '600',
-    color: colors.text.primary,
+    color: colors.white,
     marginBottom: 8,
   },
   overrideReasonInput: {
@@ -879,8 +911,8 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     fontSize: 14,
-    color: colors.text.primary,
-    backgroundColor: colors.background.primary,
+    color: colors.white,
+    backgroundColor: colors.surface,
     textAlignVertical: 'top',
     minHeight: 80,
   },
@@ -909,7 +941,7 @@ const styles = StyleSheet.create({
   },
   checkboxText: {
     fontSize: 14,
-    color: colors.text.primary,
+    color: colors.white,
     flex: 1,
     lineHeight: 18,
   },
