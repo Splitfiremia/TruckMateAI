@@ -33,12 +33,13 @@ export default function TabLayout() {
   
   // Use custom colors if branding is customized - Updated for Chase professional palette
   const activeColors = {
-    primary: settings.primaryColor || colors.primary, // Chase blue for active states
-    secondary: settings.secondaryColor || colors.secondary, // Dark gray for contrast
+    primary: settings.primaryColor || colors.primary, // Chase blue (#117ACA) for active states
+    secondary: settings.secondaryColor || colors.secondary, // Dark gray (#2D2D2D) for contrast
     background: colors.secondary, // Dark gray background for professional look
     textSecondary: colors.white, // White text for maximum contrast
     border: colors.primary, // Chase blue for borders
     text: colors.white, // White text for readability
+    accent: colors.accent, // Chase gold (#FFB81C) for highlights
   };
 
   const expandTabBar = () => {
@@ -115,17 +116,18 @@ export default function TabLayout() {
     <View style={{ flex: 1 }}>
       <Tabs
         screenOptions={{
-          tabBarActiveTintColor: colors.primary, // Chase blue
-          tabBarInactiveTintColor: '#888888', // Inactive gray
+          tabBarActiveTintColor: colors.primary, // Chase blue (#117ACA)
+          tabBarInactiveTintColor: '#888888', // Inactive gray for contrast
           tabBarStyle: {
-            display: 'none', // Hide default tab bar
+            display: 'none', // Hide default tab bar (using custom expandable nav)
           },
           headerStyle: {
-            backgroundColor: colors.background.primary, // Light gray background
+            backgroundColor: colors.background.primary, // Light gray background (#F7F7F7)
           },
-          headerTintColor: colors.text.primary, // Primary text color
+          headerTintColor: colors.text.primary, // Primary text color (#333333)
           headerTitleStyle: {
             fontWeight: '600',
+            color: colors.text.primary, // Ensure consistent text color
           },
         }}
       >
@@ -254,8 +256,8 @@ export default function TabLayout() {
             left: 0,
             right: 0,
             height: heightAnim,
-            backgroundColor: colors.secondary, // Dark gray background
-            borderTopColor: colors.primary, // Chase blue border
+            backgroundColor: colors.secondary, // Dark gray background (#2D2D2D)
+            borderTopColor: colors.primary, // Chase blue border (#117ACA)
             borderTopWidth: 1,
             paddingBottom: Platform.OS === 'ios' ? 25 : 15,
             paddingTop: expanded ? 16 : 12,
@@ -296,14 +298,14 @@ export default function TabLayout() {
                   }}
                 >
                   <IconComponent 
-                    color={isActive ? colors.primary : colors.white} 
+                    color={isActive ? colors.primary : colors.white} // Chase blue for active, white for inactive
                     size={expanded ? 20 : 16} 
                   />
                   <Animated.Text
                     style={{
                       fontSize: expanded ? 12 : 9,
                       fontWeight: '500',
-                      color: isActive ? colors.primary : colors.white,
+                      color: isActive ? colors.primary : colors.white, // Chase blue for active text
                       marginTop: expanded ? 8 : 2,
                       textAlign: 'center',
                       opacity: expanded ? 1 : 0.8,
