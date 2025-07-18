@@ -42,20 +42,24 @@ class AuthService {
 
   private async signInWithGoogleWeb(): Promise<AuthResult> {
     const redirectUri = AuthSession.makeRedirectUri();
+    
+    // Generate a random code verifier
+    const codeVerifier = AuthSession.AuthRequest.createRandomCodeChallenge();
+    
+    // Create code challenge from verifier
+    const codeChallenge = await Crypto.digestStringAsync(
+      Crypto.CryptoDigestAlgorithm.SHA256,
+      codeVerifier,
+      { encoding: Crypto.CryptoEncoding.BASE64URL }
+    );
 
     const request = new AuthSession.AuthRequest({
       clientId: this.googleClientId!,
       scopes: ['openid', 'profile', 'email'],
       responseType: AuthSession.ResponseType.Code,
       redirectUri,
-      extraParams: {
-        code_challenge: await Crypto.digestStringAsync(
-          Crypto.CryptoDigestAlgorithm.SHA256,
-          'code_verifier',
-          { encoding: Crypto.CryptoEncoding.BASE64 }
-        ),
-        code_challenge_method: 'S256',
-      },
+      codeChallenge,
+      codeChallengeMethod: AuthSession.CodeChallengeMethod.S256,
     });
 
     const result = await request.promptAsync({
@@ -70,7 +74,7 @@ class AuthService {
           code: result.params.code,
           redirectUri,
           extraParams: {
-            code_verifier: 'code_verifier',
+            code_verifier: codeVerifier,
           },
         },
         {
