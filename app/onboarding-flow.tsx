@@ -14,7 +14,7 @@ import FeatureSelectionStep from '@/components/onboarding/FeatureSelectionStep';
 
 export default function OnboardingFlowScreen() {
   const { onboardingFlow, updateOnboardingStep, completeOnboarding, trackEvent } = usePricingStore();
-  const { updateUser, setUserType } = useUserStore();
+  const { user, updateUser, setUserType } = useUserStore();
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
 
   useEffect(() => {
