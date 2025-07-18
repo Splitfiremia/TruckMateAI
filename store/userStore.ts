@@ -79,27 +79,22 @@ export const useUserStore = create<UserState>()(persist(
     },
     
     logout: () => {
-      // Clear user state immediately
       set({ user: null, isAuthenticated: false, isOnboarded: false });
       
-      // Clear AsyncStorage to ensure complete logout
       AsyncStorage.removeItem('user-storage').catch(error => {
         console.error('Error clearing user storage:', error);
       });
       
-      // Navigate to sign-in screen after logout with multiple fallbacks
       const navigateToSignIn = () => {
         try {
           router.replace('/sign-in');
         } catch (error) {
           console.error('Navigation error after logout:', error);
-          // Try push instead of replace
           setTimeout(() => {
             try {
               router.push('/sign-in');
             } catch (pushError) {
               console.error('Push navigation error after logout:', pushError);
-              // Final fallback - navigate to root
               setTimeout(() => {
                 try {
                   router.replace('/');
@@ -112,7 +107,6 @@ export const useUserStore = create<UserState>()(persist(
         }
       };
       
-      // Small delay to ensure state is updated
       setTimeout(navigateToSignIn, 100);
     },
     
