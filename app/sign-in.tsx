@@ -20,6 +20,7 @@ import { useUserStore, UserProfile } from '@/store/userStore';
 export default function SignInScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [isAppleAvailable, setIsAppleAvailable] = useState(false);
+  const [isDevelopmentMode, setIsDevelopmentMode] = useState(authService.isDevelopmentModeEnabled());
   const { setUser } = useUserStore();
 
   useEffect(() => {
@@ -76,6 +77,12 @@ export default function SignInScreen() {
     
     setUser(mockUser);
     router.replace('/onboarding');
+  };
+
+  const toggleDevelopmentMode = () => {
+    const newMode = !isDevelopmentMode;
+    setIsDevelopmentMode(newMode);
+    authService.setDevelopmentMode(newMode);
   };
 
   return (
@@ -158,6 +165,16 @@ export default function SignInScreen() {
           <Text style={styles.footerText}>
             By continuing, you agree to our Terms of Service and Privacy Policy
           </Text>
+          
+          {/* Development Mode Toggle */}
+          <TouchableOpacity 
+            style={styles.devModeToggle}
+            onPress={toggleDevelopmentMode}
+          >
+            <Text style={styles.devModeText}>
+              Dev Mode: {isDevelopmentMode ? 'ON' : 'OFF'}
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
     </SafeAreaView>
@@ -295,5 +312,20 @@ const styles = StyleSheet.create({
     color: colors.text.secondary,
     textAlign: 'center',
     lineHeight: 18,
+  },
+  devModeToggle: {
+    marginTop: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.primary,
+  },
+  devModeText: {
+    fontSize: 12,
+    color: colors.primary,
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });

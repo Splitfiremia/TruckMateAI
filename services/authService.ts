@@ -18,6 +18,9 @@ export interface AuthResult {
 }
 
 class AuthService {
+  // Development mode - set to true for testing without real OAuth
+  private isDevelopmentMode = true;
+  
   private googleClientId = Platform.select({
     ios: '1234567890-abcdefghijklmnopqrstuvwxyz123456.apps.googleusercontent.com',
     android: '1234567890-abcdefghijklmnopqrstuvwxyz123456.apps.googleusercontent.com',
@@ -26,6 +29,11 @@ class AuthService {
 
   async signInWithGoogle(): Promise<AuthResult> {
     try {
+      // Development mode - return mock user immediately
+      if (this.isDevelopmentMode) {
+        return this.createMockGoogleUser();
+      }
+      
       if (Platform.OS === 'web') {
         return this.signInWithGoogleWeb();
       } else {
@@ -133,6 +141,11 @@ class AuthService {
 
   async signInWithApple(): Promise<AuthResult> {
     try {
+      // Development mode - return mock user immediately
+      if (this.isDevelopmentMode) {
+        return this.createMockAppleUser();
+      }
+      
       if (Platform.OS === 'web') {
         // For web, provide a mock Apple Sign-In experience
         return new Promise((resolve) => {
@@ -213,6 +226,49 @@ class AuthService {
     } catch {
       return false;
     }
+  }
+
+  // Development helper methods
+  private createMockGoogleUser(): Promise<AuthResult> {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({
+          success: true,
+          user: {
+            id: 'google_dev_' + Date.now(),
+            email: 'developer@gmail.com',
+            name: 'Google Dev User',
+            provider: 'google',
+            profilePicture: 'https://via.placeholder.com/100/4285F4/FFFFFF?text=G',
+          },
+        });
+      }, 500); // Simulate network delay
+    });
+  }
+
+  private createMockAppleUser(): Promise<AuthResult> {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({
+          success: true,
+          user: {
+            id: 'apple_dev_' + Date.now(),
+            email: 'developer@privaterelay.appleid.com',
+            name: 'Apple Dev User',
+            provider: 'apple',
+          },
+        });
+      }, 500); // Simulate network delay
+    });
+  }
+
+  // Toggle development mode (useful for testing)
+  setDevelopmentMode(enabled: boolean): void {
+    this.isDevelopmentMode = enabled;
+  }
+
+  isDevelopmentModeEnabled(): boolean {
+    return this.isDevelopmentMode;
   }
 }
 
