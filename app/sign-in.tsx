@@ -127,8 +127,10 @@ export default function SignInScreen() {
                   <ActivityIndicator color={colors.text.primary} />
                 ) : (
                   <>
-                    <View style={styles.appleIcon}>
-                      <Text style={styles.appleIconText}>🍎</Text>
+                    <View style={styles.appleIconContainer}>
+                      <View style={styles.silverAppleLeaf} />
+                      <View style={styles.silverAppleBody} />
+                      <View style={styles.silverAppleBite} />
                     </View>
                     <Text style={[styles.signInButtonText, styles.appleButtonText]}>
                       Continue with Apple
@@ -229,14 +231,45 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#000000',
   },
-  appleIcon: {
+  appleIconContainer: {
     width: 20,
     height: 20,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  appleIconText: {
-    fontSize: 16,
+  silverAppleLeaf: {
+    position: 'absolute',
+    top: 0,
+    right: 6,
+    width: 4,
+    height: 6,
+    backgroundColor: '#B8B8B8',
+    borderRadius: 2,
+    transform: [{ rotate: '25deg' }],
+  },
+  silverAppleBody: {
+    width: 16,
+    height: 18,
+    backgroundColor: '#C0C0C0',
+    borderRadius: 8,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+    borderBottomLeftRadius: 6,
+    borderBottomRightRadius: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.15,
+    shadowRadius: 1,
+    elevation: 2,
+  },
+  silverAppleBite: {
+    position: 'absolute',
+    top: 4,
+    right: -1,
+    width: 6,
+    height: 6,
+    backgroundColor: '#000000',
+    borderRadius: 3,
   },
   appleButtonText: {
     color: '#FFFFFF',
