@@ -36,7 +36,7 @@ export default function TabLayout() {
       setExpanded(true);
       Animated.parallel([
         Animated.timing(heightAnim, {
-          toValue: 120,
+          toValue: 140,
           duration: 300,
           useNativeDriver: false,
         }),
@@ -109,7 +109,7 @@ export default function TabLayout() {
             fontWeight: '600',
           },
           contentStyle: {
-            paddingBottom: Platform.OS === 'ios' ? 90 : 80, // Add padding for custom nav bar
+            paddingBottom: Platform.OS === 'ios' ? 110 : 100, // Add padding for custom nav bar
           },
         }}
       >
@@ -257,12 +257,11 @@ export default function TabLayout() {
               flexDirection: 'row',
               alignItems: 'center',
               paddingHorizontal: 16,
-              minWidth: '100%',
-              justifyContent: 'space-around',
+              gap: 4,
             }}
             style={{ flex: 1 }}
           >
-            {tabItems.slice(0, 5).map((item, index) => {
+            {tabItems.map((item, index) => {
               const IconComponent = item.icon;
               const isActive = isActiveTab(item.route);
               
@@ -272,24 +271,24 @@ export default function TabLayout() {
                   onPress={() => navigateToTab(item.route)}
                   style={{
                     alignItems: 'center',
-                    minWidth: 80,
-                    paddingHorizontal: 8,
+                    minWidth: expanded ? 85 : 70,
+                    paddingHorizontal: expanded ? 10 : 6,
                     paddingVertical: 6,
                   }}
                 >
                   <IconComponent 
                     color={isActive ? activeColors.primary : activeColors.textSecondary} 
-                    size={expanded ? 20 : 16} 
+                    size={expanded ? 22 : 16} 
                   />
                   <Animated.Text
                     style={{
-                      fontSize: expanded ? 12 : 9,
+                      fontSize: expanded ? 11 : 9,
                       fontWeight: '500',
                       color: isActive ? activeColors.primary : activeColors.textSecondary,
-                      marginTop: expanded ? 8 : 2,
+                      marginTop: expanded ? 6 : 2,
                       textAlign: 'center',
                       opacity: expanded ? 1 : 0.8,
-                      lineHeight: expanded ? 14 : 12,
+                      lineHeight: expanded ? 13 : 12,
                     }}
                     numberOfLines={expanded ? 2 : 1}
                     ellipsizeMode="tail"
