@@ -71,7 +71,7 @@ export default function APIStatusBanner({ visible = true }: APIStatusBannerProps
       case 'warning':
         return <AlertTriangle size={16} color={colors.warning} />;
       case 'critical':
-        return <WifiOff size={16} color={colors.danger} />;
+        return <WifiOff size={16} color={colors.error} />;
     }
   };
 
@@ -139,7 +139,7 @@ export default function APIStatusBanner({ visible = true }: APIStatusBannerProps
                         styles.progressFill,
                         { 
                           width: `${Math.min((api.dailyUsage / api.dailyLimit) * 100, 100)}%`,
-                          backgroundColor: api.status === 'critical' ? colors.danger : 
+                          backgroundColor: api.status === 'critical' ? colors.error : 
                                          api.status === 'warning' ? colors.warning : colors.success
                         }
                       ]} 
@@ -158,7 +158,7 @@ export default function APIStatusBanner({ visible = true }: APIStatusBannerProps
                         styles.progressFill,
                         { 
                           width: `${Math.min((api.monthlyUsage / api.monthlyLimit) * 100, 100)}%`,
-                          backgroundColor: api.status === 'critical' ? colors.danger : 
+                          backgroundColor: api.status === 'critical' ? colors.error : 
                                          api.status === 'warning' ? colors.warning : colors.success
                         }
                       ]} 
@@ -212,7 +212,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.warning,
   },
   criticalBanner: {
-    backgroundColor: colors.danger,
+    backgroundColor: colors.error,
   },
   bannerContent: {
     flexDirection: 'row',
@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
     color: colors.warning,
   },
   criticalStatus: {
-    color: colors.danger,
+    color: colors.error,
   },
   usageContainer: {
     gap: 8,
