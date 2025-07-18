@@ -1,83 +1,83 @@
-// Light Theme Colors - Trucker-Friendly Blue Palette
+// Light Theme Colors - Chase Bank Professional Palette
 const lightTheme = {
-  primary: "#2563EB", // Bold, high visibility blue for buttons and CTAs
-  primaryLight: "#3B82F6", // Softer contrast blue for navigation and headers
-  secondary: "#1E40AF", // Dark blue readable in daylight for text on light backgrounds
-  accent: "#60A5FA", // Attention-grabbing blue for alerts and warnings
+  primary: "#117ACA", // Chase blue for main buttons and CTAs
+  primaryLight: "#117ACA", // Chase blue for navigation and headers
+  secondary: "#2D2D2D", // Dark gray for headers and subtitles
+  accent: "#FFB81C", // Chase gold for notifications and badges
   success: "#28A745", // Professional green
   warning: "#F59E0B", // Amber for maintenance warnings
-  danger: "#DC2626", // Red for critical alerts
-  error: "#DC2626", // Red for critical alerts (alias for danger)
+  danger: "#E5252C", // Chase red for critical alerts
+  error: "#E5252C", // Chase red for critical alerts (alias for danger)
   white: "#FFFFFF",
-  black: "#1A1A1A", // Deep charcoal
+  black: "#333333", // Primary text color
   
-  // Background colors - Professional blue tones with high contrast
+  // Background colors - Professional Chase tones
   background: {
-    primary: "#FFFFFF", // White primary background for daylight visibility
-    secondary: "#93C5FD", // Light blue for cards and non-intrusive backgrounds
-    tertiary: "#DBEAFE", // Very light blue for subtle backgrounds
+    primary: "#F7F7F7", // Light gray app background
+    secondary: "#FFFFFF", // White for cards and secondary areas
+    tertiary: "#F7F7F7", // Light gray for subtle backgrounds
   },
   
   // Text colors - High contrast for readability
   text: {
-    primary: "#1E40AF", // Dark blue for primary text on light backgrounds
-    secondary: "#1E3A8A", // Darker blue for secondary text
-    tertiary: "#3730A3", // Medium blue for tertiary text
+    primary: "#333333", // Primary text color
+    secondary: "#2D2D2D", // Secondary text
+    tertiary: "#666666", // Tertiary text
   },
   
   // Status colors - High visibility for safety
   status: {
     success: "#16A34A", // Bright green for visibility
-    warning: "#F59E0B", // Amber for maintenance alerts
-    error: "#DC2626", // Red for critical warnings
+    warning: "#FFB81C", // Chase gold for warnings
+    error: "#E5252C", // Chase red for critical warnings
   },
   
   // Border and surface
-  border: "#3B82F6", // Secondary blue for borders
-  surface: "#F8FAFC", // Very light surface for cards
+  border: "#E0E0E0", // Light gray for borders
+  surface: "#F7F7F7", // Light gray surface for cards
   card: "#FFFFFF", // White card backgrounds for maximum contrast
-  shadow: "rgba(37, 99, 235, 0.1)", // Light blue shadow
+  shadow: "rgba(17, 122, 202, 0.1)", // Chase blue shadow
 };
 
-// Dark Theme Colors - Trucker-Friendly Blue Palette for Night Driving
+// Dark Theme Colors - Chase Bank Professional Dark Palette for Night Driving
 const darkTheme = {
-  primary: "#3B82F6", // Softer blue for dark mode to reduce eye strain
-  primaryLight: "#60A5FA", // Light blue for highlights
-  secondary: "#1E40AF", // Dark blue for contrast elements
-  accent: "#93C5FD", // Light blue accent for attention
+  primary: "#117ACA", // Chase blue for dark mode
+  primaryLight: "#4A9FE7", // Lighter Chase blue for highlights
+  secondary: "#2D2D2D", // Dark gray for contrast elements
+  accent: "#FFB81C", // Chase gold accent for attention
   success: "#22C55E", // Professional green
-  warning: "#F59E0B", // Amber for maintenance warnings
-  danger: "#DC2626", // Red for critical alerts
-  error: "#DC2626", // Red for critical alerts (alias for danger)
+  warning: "#FFB81C", // Chase gold for maintenance warnings
+  danger: "#E5252C", // Chase red for critical alerts
+  error: "#E5252C", // Chase red for critical alerts (alias for danger)
   white: "#FFFFFF",
   black: "#000000",
   
   // Background colors - Professional dark tones for night visibility
   background: {
-    primary: "#0F172A", // Very dark slate for primary background
-    secondary: "#1E293B", // Dark slate blue for secondary areas
-    tertiary: "#334155", // Medium slate for cards
+    primary: "#1A1A1A", // Very dark background
+    secondary: "#2D2D2D", // Dark gray for secondary areas
+    tertiary: "#3A3A3A", // Medium gray for cards
   },
   
   // Text colors - High contrast whites for night readability
   text: {
     primary: "#FFFFFF", // Pure white text for maximum contrast
-    secondary: "#F1F5F9", // Very light text
-    tertiary: "#CBD5E1", // Light gray-blue text
+    secondary: "#E0E0E0", // Very light text
+    tertiary: "#B0B0B0", // Light gray text
   },
   
   // Status colors - High visibility for night driving safety
   status: {
     success: "#22C55E", // Bright green for visibility
-    warning: "#F59E0B", // Bright amber for alerts
-    error: "#EF4444", // Bright red for warnings
+    warning: "#FFB81C", // Chase gold for alerts
+    error: "#E5252C", // Chase red for warnings
   },
   
   // Border and surface
-  border: "#3B82F6", // Secondary blue for borders
-  surface: "#1E293B", // Dark slate surface
-  card: "#334155", // Medium slate card background
-  shadow: "rgba(15, 23, 42, 0.5)", // Deep slate shadow
+  border: "#4A4A4A", // Gray for borders
+  surface: "#2D2D2D", // Dark gray surface
+  card: "#3A3A3A", // Medium gray card background
+  shadow: "rgba(0, 0, 0, 0.5)", // Deep shadow
 };
 
 // Export themes

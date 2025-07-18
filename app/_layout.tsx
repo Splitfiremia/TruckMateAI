@@ -76,5 +76,5 @@ export default function RootLayout() {
 
 function StatusBarWrapper() {
   const { isDark } = useTheme();
-  return <StatusBar style={isDark ? "light" : "dark"} />;
+  return <StatusBar style="dark" backgroundColor={colors.background.primary} />;
 }

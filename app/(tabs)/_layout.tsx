@@ -31,13 +31,13 @@ export default function TabLayout() {
     return <Redirect href="/onboarding" />;
   }
   
-  // Use custom colors if branding is customized - Updated for trucker-friendly blue palette
+  // Use custom colors if branding is customized - Updated for Chase professional palette
   const activeColors = {
-    primary: settings.primaryColor || colors.primary, // Bold blue for active states
-    secondary: settings.secondaryColor || colors.secondary, // Dark blue for contrast
-    background: colors.secondary, // Dark blue background for high visibility
+    primary: settings.primaryColor || colors.primary, // Chase blue for active states
+    secondary: settings.secondaryColor || colors.secondary, // Dark gray for contrast
+    background: colors.secondary, // Dark gray background for professional look
     textSecondary: colors.white, // White text for maximum contrast
-    border: colors.primaryLight, // Softer blue for borders
+    border: colors.primary, // Chase blue for borders
     text: colors.white, // White text for readability
   };
 
@@ -115,15 +115,15 @@ export default function TabLayout() {
     <View style={{ flex: 1 }}>
       <Tabs
         screenOptions={{
-          tabBarActiveTintColor: activeColors.primary,
-          tabBarInactiveTintColor: activeColors.textSecondary,
+          tabBarActiveTintColor: colors.primary, // Chase blue
+          tabBarInactiveTintColor: '#888888', // Inactive gray
           tabBarStyle: {
             display: 'none', // Hide default tab bar
           },
           headerStyle: {
-            backgroundColor: activeColors.background,
+            backgroundColor: colors.background.primary, // Light gray background
           },
-          headerTintColor: activeColors.text,
+          headerTintColor: colors.text.primary, // Primary text color
           headerTitleStyle: {
             fontWeight: '600',
           },
@@ -254,8 +254,8 @@ export default function TabLayout() {
             left: 0,
             right: 0,
             height: heightAnim,
-            backgroundColor: activeColors.background,
-            borderTopColor: activeColors.border,
+            backgroundColor: colors.secondary, // Dark gray background
+            borderTopColor: colors.primary, // Chase blue border
             borderTopWidth: 1,
             paddingBottom: Platform.OS === 'ios' ? 25 : 15,
             paddingTop: expanded ? 16 : 12,
@@ -296,14 +296,14 @@ export default function TabLayout() {
                   }}
                 >
                   <IconComponent 
-                    color={isActive ? activeColors.primary : activeColors.textSecondary} 
+                    color={isActive ? colors.primary : colors.white} 
                     size={expanded ? 20 : 16} 
                   />
                   <Animated.Text
                     style={{
                       fontSize: expanded ? 12 : 9,
                       fontWeight: '500',
-                      color: isActive ? activeColors.primary : activeColors.textSecondary,
+                      color: isActive ? colors.primary : colors.white,
                       marginTop: expanded ? 8 : 2,
                       textAlign: 'center',
                       opacity: expanded ? 1 : 0.8,
