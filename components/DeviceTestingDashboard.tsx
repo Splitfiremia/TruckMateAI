@@ -10,10 +10,10 @@ export const DeviceTestingDashboard: React.FC = () => {
     simulateDevice,
     runAccessibilityTest,
     simulateLowBattery,
-    getDeviceInfo
+    getCurrentDeviceInfo
   } = useDeviceTesting();
 
-  const deviceInfo = getDeviceInfo();
+  const deviceInfo = getCurrentDeviceInfo();
 
   const testButtons = [
     {
@@ -75,7 +75,7 @@ export const DeviceTestingDashboard: React.FC = () => {
         <View style={styles.infoSection}>
           <Text style={styles.sectionTitle}>Current Device Info</Text>
           <Text style={styles.infoText}>Platform: {deviceInfo.platform}</Text>
-          <Text style={styles.infoText}>Screen: {deviceInfo.screenSize.width}×{deviceInfo.screenSize.height}</Text>
+          <Text style={styles.infoText}>Screen: {deviceInfo.screenWidth}×{deviceInfo.screenHeight}</Text>
           <Text style={styles.infoText}>Simulating: {deviceInfo.currentDevice}</Text>
         </View>
 
