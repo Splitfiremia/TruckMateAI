@@ -43,14 +43,14 @@ class AuthService {
   private async signInWithGoogleWeb(): Promise<AuthResult> {
     const redirectUri = AuthSession.makeRedirectUri();
     
-    // Generate a random code verifier
-    const codeVerifier = AuthSession.AuthRequest.createRandomCodeChallenge();
+    // Generate a random code verifier (43-128 characters)
+    const codeVerifier = Crypto.randomUUID() + Crypto.randomUUID();
     
     // Create code challenge from verifier
     const codeChallenge = await Crypto.digestStringAsync(
       Crypto.CryptoDigestAlgorithm.SHA256,
       codeVerifier,
-      { encoding: Crypto.CryptoEncoding.BASE64URL }
+      { encoding: Crypto.CryptoEncoding.BASE64 }
     );
 
     const request = new AuthSession.AuthRequest({
