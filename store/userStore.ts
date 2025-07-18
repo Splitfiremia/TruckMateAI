@@ -3,8 +3,8 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 
-export type UserRole = 'owner-operator' | 'fleet-company';
-export type AuthProvider = 'google' | 'apple' | 'email';
+export type UserRole = "owner-operator" | "fleet-company";
+export type AuthProvider = "google" | "apple" | "email";
 
 export interface UserProfile {
   id: string;
@@ -81,25 +81,25 @@ export const useUserStore = create<UserState>()(persist(
     logout: () => {
       set({ user: null, isAuthenticated: false, isOnboarded: false });
       
-      AsyncStorage.removeItem('user-storage').catch(error => {
-        console.error('Error clearing user storage:', error);
+      AsyncStorage.removeItem("user-storage").catch(error => {
+        console.error("Error clearing user storage:", error);
       });
       
       const navigateToSignIn = () => {
         try {
-          router.replace('/sign-in');
+          router.replace("/sign-in");
         } catch (error) {
-          console.error('Navigation error after logout:', error);
+          console.error("Navigation error after logout:", error);
           setTimeout(() => {
             try {
-              router.push('/sign-in');
+              router.push("/sign-in");
             } catch (pushError) {
-              console.error('Push navigation error after logout:', pushError);
+              console.error("Push navigation error after logout:", pushError);
               setTimeout(() => {
                 try {
-                  router.replace('/');
+                  router.replace("/");
                 } catch (rootError) {
-                  console.error('Root navigation error after logout:', rootError);
+                  console.error("Root navigation error after logout:", rootError);
                 }
               }, 500);
             }
@@ -112,16 +112,16 @@ export const useUserStore = create<UserState>()(persist(
     
     isOwnerOperator: () => {
       const user = get().user;
-      return user?.role === 'owner-operator';
+      return user?.role === "owner-operator";
     },
     
     isFleetCompany: () => {
       const user = get().user;
-      return user?.role === 'fleet-company';
+      return user?.role === "fleet-company";
     },
   }),
   {
-    name: 'user-storage',
+    name: "user-storage",
     storage: createJSONStorage(() => AsyncStorage),
   }
 ));
