@@ -349,13 +349,13 @@ export default function FleetAdminScreen() {
       <View style={styles.tabBar}>
         <View style={styles.tabGrid}>
           <View style={styles.tabRow}>
-            {renderTabButton('overview', <BarChart3 size={18} color={activeTab === 'overview' ? colors.text : colors.textSecondary} />, 'Fleet Overview')}
-            {renderTabButton('drivers', <Users size={18} color={activeTab === 'drivers' ? colors.text : colors.textSecondary} />, 'Driver Management')}
-            {renderTabButton('branding', <Palette size={18} color={activeTab === 'branding' ? (settings.primaryColor || colors.text) : colors.textSecondary} />, 'White-Label Branding')}
+            {renderTabButton('overview', <BarChart3 size={18} color={activeTab === 'overview' ? colors.text.primary : colors.textSecondary} />, 'Fleet Overview')}
+            {renderTabButton('drivers', <Users size={18} color={activeTab === 'drivers' ? colors.text.primary : colors.textSecondary} />, 'Driver Management')}
+            {renderTabButton('branding', <Palette size={18} color={activeTab === 'branding' ? (settings.primaryColor || colors.text.primary) : colors.textSecondary} />, 'White-Label Branding')}
           </View>
           <View style={styles.tabRow}>
-            {renderTabButton('compliance', <Shield size={18} color={activeTab === 'compliance' ? colors.text : colors.textSecondary} />, 'Compliance Monitor')}
-            {renderTabButton('settings', <Settings size={18} color={activeTab === 'settings' ? colors.text : colors.textSecondary} />, 'Fleet Settings')}
+            {renderTabButton('compliance', <Shield size={18} color={activeTab === 'compliance' ? colors.text.primary : colors.textSecondary} />, 'Compliance Monitor')}
+            {renderTabButton('settings', <Settings size={18} color={activeTab === 'settings' ? colors.text.primary : colors.textSecondary} />, 'Fleet Settings')}
             <View style={styles.tabPlaceholder} />
           </View>
         </View>
