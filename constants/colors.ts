@@ -90,6 +90,8 @@ export const themes = {
 export const colors = {
   ...lightTheme,
   textSecondary: lightTheme.text.secondary,
+  backgroundLight: lightTheme.background.secondary,
+  backgroundSecondary: lightTheme.background.secondary,
 };
 
 // Deprecated properties for backward compatibility

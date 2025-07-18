@@ -18,7 +18,7 @@ export interface UserProfile {
   onboardingCompleted: boolean;
 }
 
-interface UserState {
+export interface UserState {
   user: UserProfile | null;
   isOnboarded: boolean;
   
