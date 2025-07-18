@@ -463,8 +463,10 @@ export const ViolationPreventionAlert: React.FC<ViolationPreventionAlertProps> =
                 </Text>
               </View>
             )}
+              </ScrollView>
             </LinearGradient>
           </Animated.View>
+        </View>
       </View>
       
       {/* Override Request Modal */}
