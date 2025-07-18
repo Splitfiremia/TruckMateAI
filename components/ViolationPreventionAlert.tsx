@@ -592,6 +592,9 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     padding: 24,
   },
+  scrollContent: {
+    flexGrow: 1,
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
