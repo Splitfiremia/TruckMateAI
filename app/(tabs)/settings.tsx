@@ -364,14 +364,13 @@ export default function SettingsScreen() {
             <View style={styles.inputGroup}>
               <Text style={styles.inputLabel}>Email Address</Text>
               <TextInput
-                style={styles.textInput}
+                style={[styles.textInput, styles.disabledInput]}
                 value={user?.email}
                 placeholder="Enter email address"
                 placeholderTextColor={theme.text.secondary}
                 keyboardType="email-address"
                 autoCapitalize="none"
                 editable={false}
-                style={[styles.textInput, styles.disabledInput]}
               />
               <Text style={styles.helpText}>Email cannot be changed after sign-in</Text>
             </View>

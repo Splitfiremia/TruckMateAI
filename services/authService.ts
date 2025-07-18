@@ -41,21 +41,18 @@ class AuthService {
   }
 
   private async signInWithGoogleWeb(): Promise<AuthResult> {
-    const redirectUri = AuthSession.makeRedirectUri({
-      useProxy: true,
-    });
+    const redirectUri = AuthSession.makeRedirectUri();
 
     const request = new AuthSession.AuthRequest({
       clientId: this.googleClientId!,
       scopes: ['openid', 'profile', 'email'],
       responseType: AuthSession.ResponseType.Code,
       redirectUri,
-      additionalParameters: {},
       extraParams: {
         code_challenge: await Crypto.digestStringAsync(
           Crypto.CryptoDigestAlgorithm.SHA256,
           'code_verifier',
-          { encoding: Crypto.CryptoEncoding.BASE64URL }
+          { encoding: Crypto.CryptoEncoding.BASE64 }
         ),
         code_challenge_method: 'S256',
       },
