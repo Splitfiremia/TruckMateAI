@@ -31,14 +31,14 @@ export default function TabLayout() {
     return <Redirect href="/onboarding" />;
   }
   
-  // Use custom colors if branding is customized
+  // Use custom colors if branding is customized - Updated for trucker-friendly blue palette
   const activeColors = {
-    primary: settings.primaryColor || colors.primaryLight,
-    secondary: settings.secondaryColor || colors.secondary,
-    background: colors.background.primary,
-    textSecondary: colors.textSecondary,
-    border: colors.border,
-    text: colors.text.primary,
+    primary: settings.primaryColor || colors.primary, // Bold blue for active states
+    secondary: settings.secondaryColor || colors.secondary, // Dark blue for contrast
+    background: colors.secondary, // Dark blue background for high visibility
+    textSecondary: colors.white, // White text for maximum contrast
+    border: colors.primaryLight, // Softer blue for borders
+    text: colors.white, // White text for readability
   };
 
   const expandTabBar = () => {
