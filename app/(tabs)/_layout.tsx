@@ -1,5 +1,5 @@
 import { Tabs, Redirect } from "expo-router";
-import { BarChart, Clipboard, Home, Receipt, Settings, Users, Shield, Cloud, Zap, Wrench, Navigation, Bot, Truck } from "lucide-react-native";
+import { BarChart, Clipboard, Home, Receipt, Settings, Users, Shield, Cloud, Zap, Wrench, Navigation, Bot, Truck, CreditCard } from "lucide-react-native";
 import React from "react";
 
 import { colors } from "@/constants/colors";
@@ -20,7 +20,7 @@ export default function TabLayout() {
     primary: settings.primaryColor || colors.primaryLight,
     secondary: settings.secondaryColor || colors.secondary,
     background: colors.background.primary,
-    textSecondary: colors.textSecondary,
+    textSecondary: colors.text.secondary,
     border: colors.border,
     text: colors.text.primary,
   };
@@ -148,6 +148,13 @@ export default function TabLayout() {
         options={{
           title: "Integrations",
           tabBarIcon: ({ color }) => <Zap color={color} size={20} />,
+        }}
+      />
+      <Tabs.Screen
+        name="pricing"
+        options={{
+          title: "Pricing",
+          tabBarIcon: ({ color }) => <CreditCard color={color} size={20} />,
         }}
       />
       <Tabs.Screen
