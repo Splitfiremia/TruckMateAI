@@ -27,6 +27,13 @@ export default function OnboardingScreen() {
   const [currentStep, setCurrentStep] = useState<OnboardingStep>('role-selection');
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
   
+  // All refs at the top level to avoid hooks order issues
+  const nameInputRef = useRef<TextInput>(null);
+  const emailInputRef = useRef<TextInput>(null);
+  const phoneInputRef = useRef<TextInput>(null);
+  const companyNameInputRef = useRef<TextInput>(null);
+  const fleetSizeInputRef = useRef<TextInput>(null);
+  
   // Define validation rules based on selected role
   const getValidationRules = () => {
     const baseRules = {
@@ -173,10 +180,6 @@ export default function OnboardingScreen() {
   );
 
   const renderProfileSetup = () => {
-    const nameInputRef = useRef<TextInput>(null);
-    const emailInputRef = useRef<TextInput>(null);
-    const phoneInputRef = useRef<TextInput>(null);
-
     return (
       <View style={styles.stepContainer}>
         <Text style={styles.stepTitle}>Create Your Profile</Text>
@@ -261,9 +264,6 @@ export default function OnboardingScreen() {
   };
 
   const renderCompanyDetails = () => {
-    const companyNameInputRef = useRef<TextInput>(null);
-    const fleetSizeInputRef = useRef<TextInput>(null);
-
     return (
       <View style={styles.stepContainer}>
         <Text style={styles.stepTitle}>Company Information</Text>
