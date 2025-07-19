@@ -100,7 +100,7 @@ export default function OnboardingFlowScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
       >
-        <Pressable style={styles.dismissKeyboard} onPress={Keyboard.dismiss} activeOpacity={1}>
+        <Pressable style={styles.dismissKeyboard} onPress={Keyboard.dismiss}>
 
       {/* Progress Indicator */}
       <View style={styles.progressContainer}>
