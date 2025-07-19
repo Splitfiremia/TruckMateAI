@@ -1,7 +1,7 @@
 import { Tabs, Redirect, useRouter, usePathname } from "expo-router";
 import { BarChart, Clipboard, Home, Receipt, Settings, Users, Shield, Cloud, Zap, Wrench, Navigation, Bot, Truck, CreditCard, ChevronLeft, ChevronRight } from "lucide-react-native";
 import React, { useState, useRef, useEffect } from "react";
-import { Animated, Platform, TouchableWithoutFeedback, View, Text, Pressable, ScrollView } from "react-native";
+import { Animated, Platform, TouchableWithoutFeedback, View, Text, Pressable, ScrollView, StyleSheet } from "react-native";
 
 import { colors } from "@/constants/colors";
 import { useUserStore } from "@/store/userStore";
@@ -34,15 +34,19 @@ export default function TabLayout() {
     return <Redirect href="/onboarding" />;
   }
   
-  // Use custom colors if branding is customized - Updated for Chase professional palette
-  const activeColors = {
-    primary: settings.primaryColor || colors.primary, // Chase blue (#117ACA) for active states
-    secondary: settings.secondaryColor || colors.secondary, // Dark gray (#2D2D2D) for contrast
-    background: colors.secondary, // Dark gray background for professional look
-    textSecondary: colors.white, // White text for maximum contrast
-    border: colors.primary, // Chase blue for borders
-    text: colors.white, // White text for readability
-    accent: colors.accent, // Chase gold (#FFB81C) for highlights
+  // Professional color palette for enhanced navigation
+  const navColors = {
+    primary: settings.primaryColor || colors.primary,
+    secondary: settings.secondaryColor || colors.secondary,
+    background: '#0F172A', // Sophisticated dark blue-gray
+    backgroundGradient: ['#1E293B', '#0F172A'], // Gradient for depth
+    activeBackground: 'rgba(59, 130, 246, 0.15)', // Subtle blue glow for active items
+    activeBorder: '#3B82F6', // Bright blue for active indicators
+    text: '#F8FAFC', // Clean white text
+    textSecondary: '#CBD5E1', // Muted text for inactive items
+    accent: colors.accent,
+    shadow: 'rgba(0, 0, 0, 0.25)', // Enhanced shadow
+    border: 'rgba(148, 163, 184, 0.2)', // Subtle border
   };
 
   const expandTabBar = () => {
@@ -255,67 +259,39 @@ export default function TabLayout() {
           />
         </Tabs>
       
-      {/* Custom Expandable Bottom Navigation */}
+      {/* Professional Enhanced Bottom Navigation */}
       <TouchableWithoutFeedback
         onPressIn={expandTabBar}
         onPressOut={collapseTabBar}
         onPress={expandTabBar}
       >
         <Animated.View
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: heightAnim,
-            backgroundColor: '#1e3a8a', // Dark blue background
-            borderTopColor: colors.primary, // Chase blue border (#117ACA)
-            borderTopWidth: 1,
-            paddingBottom: Platform.OS === 'ios' ? 25 : 15,
-            paddingTop: expanded ? 16 : 12,
-            elevation: 8,
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: -2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 4,
-            opacity: opacityAnim,
-          }}
+          style={[
+            styles.navigationContainer,
+            {
+              height: heightAnim,
+              opacity: opacityAnim,
+              paddingBottom: Platform.OS === 'ios' ? 34 : 20,
+              paddingTop: expanded ? 20 : 16,
+            }
+          ]}
         >
-          {/* Left Arrow */}
+          {/* Gradient overlay for enhanced depth */}
+          <View style={styles.gradientOverlay} />
+          {/* Enhanced Navigation Arrows */}
           {showLeftArrow && (
-            <View
-              style={{
-                position: 'absolute',
-                left: 0,
-                top: 0,
-                bottom: 0,
-                width: 30,
-                backgroundColor: 'rgba(30, 58, 138, 0.9)',
-                justifyContent: 'center',
-                alignItems: 'center',
-                zIndex: 10,
-              }}
-            >
-              <ChevronLeft color={colors.white} size={20} />
+            <View style={[styles.arrowContainer, styles.leftArrow]}>
+              <View style={styles.arrowBackground}>
+                <ChevronLeft color={navColors.text} size={18} strokeWidth={2.5} />
+              </View>
             </View>
           )}
 
-          {/* Right Arrow */}
           {showRightArrow && (
-            <View
-              style={{
-                position: 'absolute',
-                right: 0,
-                top: 0,
-                bottom: 0,
-                width: 30,
-                backgroundColor: 'rgba(30, 58, 138, 0.9)',
-                justifyContent: 'center',
-                alignItems: 'center',
-                zIndex: 10,
-              }}
-            >
-              <ChevronRight color={colors.white} size={20} />
+            <View style={[styles.arrowContainer, styles.rightArrow]}>
+              <View style={styles.arrowBackground}>
+                <ChevronRight color={navColors.text} size={18} strokeWidth={2.5} />
+              </View>
             </View>
           )}
 
@@ -325,13 +301,15 @@ export default function TabLayout() {
             showsHorizontalScrollIndicator={false}
             onScroll={handleScroll}
             scrollEventThrottle={16}
-            contentContainerStyle={{
-              flexDirection: 'row',
-              alignItems: expanded ? 'flex-start' : 'center',
-              paddingHorizontal: showLeftArrow || showRightArrow ? 40 : 16,
-              gap: expanded ? 8 : 4,
-              minHeight: expanded ? 80 : 60,
-            }}
+            contentContainerStyle={[
+              styles.scrollContent,
+              {
+                alignItems: expanded ? 'flex-start' : 'center',
+                paddingHorizontal: showLeftArrow || showRightArrow ? 50 : 20,
+                gap: expanded ? 12 : 8,
+                minHeight: expanded ? 90 : 60,
+              }
+            ]}
             style={{ flex: 1 }}
           >
             {tabItems.map((item, index) => {
@@ -342,29 +320,46 @@ export default function TabLayout() {
                 <Pressable
                   key={index}
                   onPress={() => navigateToTab(item.route)}
-                  style={{
-                    alignItems: 'center',
-                    minWidth: expanded ? 90 : 70,
-                    paddingHorizontal: expanded ? 12 : 6,
-                    paddingVertical: expanded ? 8 : 6,
-                    justifyContent: expanded ? 'flex-start' : 'center',
-                  }}
+                  style={[
+                    styles.tabItem,
+                    {
+                      minWidth: expanded ? 85 : 65,
+                      paddingHorizontal: expanded ? 14 : 8,
+                      paddingVertical: expanded ? 12 : 8,
+                      backgroundColor: isActive ? navColors.activeBackground : 'transparent',
+                      borderRadius: expanded ? 12 : 8,
+                      borderWidth: isActive ? 1 : 0,
+                      borderColor: isActive ? navColors.activeBorder : 'transparent',
+                    }
+                  ]}
                 >
-                  <IconComponent 
-                    color={isActive ? colors.primary : colors.white} // Chase blue for active, white for inactive
-                    size={expanded ? 20 : 16} 
-                  />
+                  <View style={[
+                    styles.iconContainer,
+                    {
+                      backgroundColor: isActive ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
+                      borderRadius: expanded ? 8 : 6,
+                      padding: expanded ? 6 : 4,
+                    }
+                  ]}>
+                    <IconComponent 
+                      color={isActive ? navColors.activeBorder : navColors.textSecondary}
+                      size={expanded ? 22 : 18} 
+                      strokeWidth={isActive ? 2.5 : 2}
+                    />
+                  </View>
                   <Animated.Text
-                    style={{
-                      fontSize: expanded ? 12 : 9,
-                      fontWeight: '500',
-                      color: isActive ? colors.primary : colors.white, // Chase blue for active text
-                      marginTop: expanded ? 8 : 2,
-                      textAlign: 'center',
-                      opacity: expanded ? 1 : 0.8,
-                      lineHeight: expanded ? 14 : 12,
-                      width: expanded ? 80 : 'auto',
-                    }}
+                    style={[
+                      styles.tabText,
+                      {
+                        fontSize: expanded ? 11 : 9,
+                        fontWeight: isActive ? '600' : '500',
+                        color: isActive ? navColors.text : navColors.textSecondary,
+                        marginTop: expanded ? 6 : 3,
+                        opacity: expanded ? 1 : 0.9,
+                        lineHeight: expanded ? 13 : 11,
+                        width: expanded ? 75 : 'auto',
+                      }
+                    ]}
                     numberOfLines={expanded ? 2 : 1}
                     ellipsizeMode="tail"
                   >
@@ -379,3 +374,89 @@ export default function TabLayout() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  navigationContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#0F172A',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(148, 163, 184, 0.3)',
+    elevation: 25,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 15,
+    overflow: 'hidden',
+  },
+  gradientOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 4,
+    backgroundColor: 'rgba(59, 130, 246, 0.4)',
+    shadowColor: '#3B82F6',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 8,
+  },
+  arrowContainer: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    width: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  leftArrow: {
+    left: 0,
+    backgroundColor: 'rgba(15, 23, 42, 0.95)',
+  },
+  rightArrow: {
+    right: 0,
+    backgroundColor: 'rgba(15, 23, 42, 0.95)',
+  },
+  arrowBackground: {
+    backgroundColor: 'rgba(59, 130, 246, 0.15)',
+    borderRadius: 20,
+    padding: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.3)',
+    shadowColor: '#3B82F6',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  scrollContent: {
+    flexDirection: 'row',
+  },
+  tabItem: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  iconContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#3B82F6',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+  },
+  tabText: {
+    textAlign: 'center',
+    letterSpacing: 0.3,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+});
