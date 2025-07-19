@@ -28,11 +28,21 @@ export default function SettingsScreen() {
   const [showLogoGeneratorModal, setShowLogoGeneratorModal] = useState(false);
   const [showTelematicsModal, setShowTelematicsModal] = useState(false);
   
+  // Form state for profile editing
+  const [profileForm, setProfileForm] = useState({
+    name: '',
+    phone: '',
+    companyName: '',
+    cdlNumber: '',
+    dotNumber: '',
+    mcNumber: '',
+  });
+  
   const { theme } = useTheme();
   const styles = createStyles(theme);
   const { lastCommand, lastResponse } = useVoiceCommandStore();
   const { currentStatus, changeStatus } = useLogbookStore();
-  const { user, isFleetCompany, logout } = useUserStore();
+  const { user, isFleetCompany, logout, updateUser } = useUserStore();
   const { 
     autoTrackDriving,
     voiceCommands,
@@ -68,6 +78,38 @@ export default function SettingsScreen() {
   
   const handleCommandProcessed = () => {
     setCommandModalVisible(true);
+  };
+  
+  const handleEditProfile = () => {
+    // Initialize form with current user data
+    setProfileForm({
+      name: user?.name || driverInfo.name,
+      phone: user?.phone || '',
+      companyName: user?.companyName || driverInfo.company,
+      cdlNumber: user?.cdlNumber || driverInfo.licenseNumber,
+      dotNumber: user?.dotNumber || '',
+      mcNumber: user?.mcNumber || '',
+    });
+    setPersonalInfoModalVisible(true);
+  };
+  
+  const handleSaveProfile = () => {
+    if (user) {
+      updateUser({
+        name: profileForm.name,
+        phone: profileForm.phone,
+        companyName: profileForm.companyName,
+        cdlNumber: profileForm.cdlNumber,
+        dotNumber: profileForm.dotNumber,
+        mcNumber: profileForm.mcNumber,
+      });
+      
+      Alert.alert(
+        'Profile Updated',
+        'Your profile has been successfully updated.',
+        [{ text: 'OK', onPress: () => setPersonalInfoModalVisible(false) }]
+      );
+    }
   };
   
   const handleLogout = () => {
@@ -155,7 +197,7 @@ export default function SettingsScreen() {
             </View>
           </View>
           
-          <TouchableOpacity style={styles.editProfileButton}>
+          <TouchableOpacity style={styles.editProfileButton} onPress={handleEditProfile}>
             <Text style={styles.editProfileText}>Edit Profile</Text>
           </TouchableOpacity>
         </View>
@@ -355,7 +397,8 @@ export default function SettingsScreen() {
               <Text style={styles.inputLabel}>Full Name</Text>
               <TextInput
                 style={styles.textInput}
-                value={user?.name || driverInfo.name}
+                value={profileForm.name}
+                onChangeText={(text) => setProfileForm(prev => ({ ...prev, name: text }))}
                 placeholder="Enter your full name"
                 placeholderTextColor={theme.text.secondary}
               />
@@ -379,7 +422,8 @@ export default function SettingsScreen() {
               <Text style={styles.inputLabel}>Phone Number</Text>
               <TextInput
                 style={styles.textInput}
-                value={user?.phone}
+                value={profileForm.phone}
+                onChangeText={(text) => setProfileForm(prev => ({ ...prev, phone: text }))}
                 placeholder="Enter phone number"
                 placeholderTextColor={theme.text.secondary}
                 keyboardType="phone-pad"
@@ -390,7 +434,8 @@ export default function SettingsScreen() {
               <Text style={styles.inputLabel}>Company Name</Text>
               <TextInput
                 style={styles.textInput}
-                value={user?.companyName || driverInfo.company}
+                value={profileForm.companyName}
+                onChangeText={(text) => setProfileForm(prev => ({ ...prev, companyName: text }))}
                 placeholder="Enter company name"
                 placeholderTextColor={theme.text.secondary}
               />
@@ -401,7 +446,8 @@ export default function SettingsScreen() {
               <Text style={styles.inputLabel}>CDL Number</Text>
               <TextInput
                 style={styles.textInput}
-                value={user?.cdlNumber || driverInfo.licenseNumber}
+                value={profileForm.cdlNumber}
+                onChangeText={(text) => setProfileForm(prev => ({ ...prev, cdlNumber: text }))}
                 placeholder="Enter CDL number"
                 placeholderTextColor={theme.text.secondary}
                 autoCapitalize="characters"
@@ -413,7 +459,8 @@ export default function SettingsScreen() {
               <Text style={styles.inputLabel}>DOT Number</Text>
               <TextInput
                 style={styles.textInput}
-                value={user?.dotNumber}
+                value={profileForm.dotNumber}
+                onChangeText={(text) => setProfileForm(prev => ({ ...prev, dotNumber: text }))}
                 placeholder="Enter DOT number"
                 placeholderTextColor={theme.text.secondary}
                 keyboardType="numeric"
@@ -425,7 +472,8 @@ export default function SettingsScreen() {
               <Text style={styles.inputLabel}>MC Number</Text>
               <TextInput
                 style={styles.textInput}
-                value={user?.mcNumber}
+                value={profileForm.mcNumber}
+                onChangeText={(text) => setProfileForm(prev => ({ ...prev, mcNumber: text }))}
                 placeholder="Enter MC number"
                 placeholderTextColor={theme.text.secondary}
                 keyboardType="numeric"
@@ -434,7 +482,7 @@ export default function SettingsScreen() {
             </View>
           </ScrollView>
           
-          <TouchableOpacity style={styles.saveButton}>
+          <TouchableOpacity style={styles.saveButton} onPress={handleSaveProfile}>
             <Save size={20} color={theme.white} />
             <Text style={styles.saveButtonText}>Save Changes</Text>
           </TouchableOpacity>
