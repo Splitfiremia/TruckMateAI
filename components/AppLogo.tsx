@@ -1,6 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
-import Svg, { Defs, RadialGradient, Stop, Filter, FeDropShadow, Circle, Ellipse, Animate, AnimateTransform } from 'react-native-svg';
+import Svg, { Defs, RadialGradient, Stop, Filter, FeDropShadow, Circle, Ellipse } from 'react-native-svg';
 
 interface AppLogoProps {
   size?: number;
@@ -38,34 +38,13 @@ export default function AppLogo({ size = 120, animated = true }: AppLogoProps) {
         </Defs>
         
         {/* Outer pulse ring */}
-        <Circle cx="60" cy="60" r="50" fill="none" stroke="#1e40af" strokeWidth="2" opacity="0.3">
-          {animated && (
-            <>
-              <Animate attributeName="r" values="50;65;50" dur="3s" repeatCount="indefinite"/>
-              <Animate attributeName="opacity" values="0.3;0;0.3" dur="3s" repeatCount="indefinite"/>
-            </>
-          )}
-        </Circle>
+        <Circle cx="60" cy="60" r="50" fill="none" stroke="#1e40af" strokeWidth="2" opacity="0.3" />
         
         {/* Middle pulse ring */}
-        <Circle cx="60" cy="60" r="45" fill="none" stroke="#2563eb" strokeWidth="2" opacity="0.4">
-          {animated && (
-            <>
-              <Animate attributeName="r" values="45;54;45" dur="2.4s" repeatCount="indefinite" begin="0.6s"/>
-              <Animate attributeName="opacity" values="0.4;0;0.4" dur="2.4s" repeatCount="indefinite" begin="0.6s"/>
-            </>
-          )}
-        </Circle>
+        <Circle cx="60" cy="60" r="45" fill="none" stroke="#2563eb" strokeWidth="2" opacity="0.4" />
         
         {/* Main eye sphere */}
-        <Circle cx="60" cy="60" r="40" fill="url(#eyeGradient)" filter="url(#shadow)">
-          {animated && (
-            <>
-              <Animate attributeName="r" values="40;44;40" dur="2s" repeatCount="indefinite"/>
-              <AnimateTransform attributeName="transform" type="scale" values="1;1.1;1" dur="2s" repeatCount="indefinite"/>
-            </>
-          )}
-        </Circle>
+        <Circle cx="60" cy="60" r="40" fill="url(#eyeGradient)" filter="url(#shadow)" />
         
         {/* Iris */}
         <Circle cx="60" cy="60" r="28" fill="url(#irisGradient)"/>
