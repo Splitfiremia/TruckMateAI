@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
-import { BarChart3, Users, Shield, DollarSign, Activity, AlertTriangle } from 'lucide-react-native';
+import { BarChart3, Users, Shield, DollarSign, Activity, AlertTriangle, FileText } from 'lucide-react-native';
 import { useAdminStore } from '@/store/adminStore';
 
 export default function AdminDashboard() {
@@ -32,10 +32,17 @@ export default function AdminDashboard() {
     },
     {
       title: 'Payment System',
-      subtitle: `$${metrics.monthlyRevenue.toLocaleString()} this month`,
+      subtitle: `${metrics.monthlyRevenue.toLocaleString()} this month`,
       icon: BarChart3,
       route: '/admin/payments',
       color: '#FFB81C'
+    },
+    {
+      title: 'API Reports',
+      subtitle: 'Detailed performance analytics',
+      icon: FileText,
+      route: '/admin/api-reports',
+      color: '#10B981'
     }
   ];
 

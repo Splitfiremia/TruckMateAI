@@ -47,6 +47,14 @@ export default function AdminLayout() {
             headerTintColor: '#FFFFFF'
           }} 
         />
+        <Stack.Screen 
+          name="api-reports" 
+          options={{ 
+            title: 'API Reports',
+            headerStyle: { backgroundColor: '#117ACA' },
+            headerTintColor: '#FFFFFF'
+          }} 
+        />
       </Stack>
     </>
   );
