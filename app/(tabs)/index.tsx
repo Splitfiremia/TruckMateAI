@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
 import { Stack, router } from 'expo-router';
 import { Mic, Camera, Clock, AlertTriangle, Truck, DollarSign, Clipboard, Upload, Shield, Cloud, Coffee, Bed, LogOut } from 'lucide-react-native';
+import AppLogo from '@/components/AppLogo';
 
 import { colors } from '@/constants/colors';
 import { ComplianceViolationPrediction, DutyStatus } from '@/types';
@@ -242,27 +243,36 @@ export default function DashboardScreen() {
     <View style={styles.container}>
       <Stack.Screen 
         options={{ 
-          title: !settings.hideDefaultBranding ? appName : (companyName || appName),
-          headerTitleStyle: {
-            fontWeight: 'bold',
-            color: settings.primaryColor || colors.text,
-          },
+          headerTitle: () => (
+            <View style={styles.headerTitleContainer}>
+              <AppLogo size={32} animated={true} />
+              <Text style={[styles.headerTitleText, { color: settings.primaryColor || colors.text.primary }]}>
+                {!settings.hideDefaultBranding ? appName : (companyName || appName)}
+              </Text>
+            </View>
+          ),
+          headerTitleAlign: 'left',
         }} 
       />
       
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <View style={styles.headerLeft}>
+            <View style={styles.logoGreetingContainer}>
+              <AppLogo size={48} animated={true} />
+              <View style={styles.greetingTextContainer}>
+                <Text style={[styles.greeting, { color: settings.primaryColor || colors.text.primary }]}>
+                  Hello, {user?.name || driverInfo.name}
+                </Text>
+                <Text style={styles.subGreeting}>
+                  {companyName || driverInfo.company}
+                </Text>
+                <Text style={styles.welcomeMessage}>{welcomeMessage}</Text>
+              </View>
+            </View>
             {settings.logoUrl && settings.showCompanyLogo && (
-              <Image source={{ uri: settings.logoUrl }} style={styles.logo} />
+              <Image source={{ uri: settings.logoUrl }} style={styles.companyLogo} />
             )}
-            <Text style={[styles.greeting, { color: settings.primaryColor || colors.text }]}>
-              Hello, {user?.name || driverInfo.name}
-            </Text>
-            <Text style={styles.subGreeting}>
-              {companyName || driverInfo.company}
-            </Text>
-            <Text style={styles.welcomeMessage}>{welcomeMessage}</Text>
           </View>
           
           <TouchableOpacity 
@@ -647,11 +657,20 @@ const styles = StyleSheet.create({
     marginTop: 2,
     fontStyle: 'italic',
   },
-  logo: {
+  logoGreetingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 8,
+  },
+  greetingTextContainer: {
+    flex: 1,
+  },
+  companyLogo: {
     width: 40,
     height: 40,
     borderRadius: 8,
-    marginBottom: 8,
+    marginTop: 8,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -882,5 +901,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     color: colors.text.secondary,
+  },
+  headerTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  headerTitleText: {
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });
