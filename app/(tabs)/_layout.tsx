@@ -1,5 +1,5 @@
 import { Tabs, Redirect, useRouter, usePathname } from "expo-router";
-import { BarChart, Clipboard, Home, Receipt, Settings, Users, Shield, Cloud, Zap, Wrench, Navigation, Bot, Truck, CreditCard } from "lucide-react-native";
+import { BarChart, Clipboard, Home, Receipt, Settings, Users, Shield, Cloud, Zap, Wrench, Navigation, Bot, Truck, CreditCard, ChevronLeft, ChevronRight } from "lucide-react-native";
 import React, { useState, useRef, useEffect } from "react";
 import { Animated, Platform, TouchableWithoutFeedback, View, Text, Pressable, ScrollView } from "react-native";
 
@@ -16,6 +16,9 @@ export default function TabLayout() {
   const heightAnim = useRef(new Animated.Value(60)).current;
   const opacityAnim = useRef(new Animated.Value(0.8)).current;
   const collapseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const scrollViewRef = useRef<ScrollView>(null);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(true);
   
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -93,6 +96,15 @@ export default function TabLayout() {
 
   const isActiveTab = (route: string) => {
     return pathname === route || pathname.startsWith(route);
+  };
+
+  const handleScroll = (event: any) => {
+    const { contentOffset, contentSize, layoutMeasurement } = event.nativeEvent;
+    const scrollX = contentOffset.x;
+    const maxScrollX = contentSize.width - layoutMeasurement.width;
+    
+    setShowLeftArrow(scrollX > 10);
+    setShowRightArrow(scrollX < maxScrollX - 10);
   };
 
   const tabItems = [
@@ -256,7 +268,7 @@ export default function TabLayout() {
             left: 0,
             right: 0,
             height: heightAnim,
-            backgroundColor: colors.secondary, // Dark gray background (#2D2D2D)
+            backgroundColor: '#1e3a8a', // Dark blue background
             borderTopColor: colors.primary, // Chase blue border (#117ACA)
             borderTopWidth: 1,
             paddingBottom: Platform.OS === 'ios' ? 25 : 15,
@@ -269,13 +281,54 @@ export default function TabLayout() {
             opacity: opacityAnim,
           }}
         >
+          {/* Left Arrow */}
+          {showLeftArrow && (
+            <View
+              style={{
+                position: 'absolute',
+                left: 0,
+                top: 0,
+                bottom: 0,
+                width: 30,
+                backgroundColor: 'rgba(30, 58, 138, 0.9)',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 10,
+              }}
+            >
+              <ChevronLeft color={colors.white} size={20} />
+            </View>
+          )}
+
+          {/* Right Arrow */}
+          {showRightArrow && (
+            <View
+              style={{
+                position: 'absolute',
+                right: 0,
+                top: 0,
+                bottom: 0,
+                width: 30,
+                backgroundColor: 'rgba(30, 58, 138, 0.9)',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 10,
+              }}
+            >
+              <ChevronRight color={colors.white} size={20} />
+            </View>
+          )}
+
           <Animated.ScrollView
+            ref={scrollViewRef}
             horizontal
             showsHorizontalScrollIndicator={false}
+            onScroll={handleScroll}
+            scrollEventThrottle={16}
             contentContainerStyle={{
               flexDirection: 'row',
               alignItems: expanded ? 'flex-start' : 'center',
-              paddingHorizontal: 16,
+              paddingHorizontal: showLeftArrow || showRightArrow ? 40 : 16,
               gap: expanded ? 8 : 4,
               minHeight: expanded ? 80 : 60,
             }}
