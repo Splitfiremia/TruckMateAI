@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background.primary,
     paddingTop: 16,
     paddingHorizontal: 16,
-    paddingBottom: Platform.OS === 'ios' ? 145 : 135, // Increased to account for custom nav bar
+    paddingBottom: Platform.OS === 'ios' ? 160 : 150, // Increased to account for enhanced custom nav bar
   },
   statsCard: {
     backgroundColor: colors.card,
