@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -6,6 +6,10 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  KeyboardAvoidingView,
+  Platform,
+  Keyboard,
+  TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -168,129 +172,178 @@ export default function OnboardingScreen() {
     </View>
   );
 
-  const renderProfileSetup = () => (
-    <View style={styles.stepContainer}>
-      <Text style={styles.stepTitle}>Create Your Profile</Text>
-      <Text style={styles.stepSubtitle}>
-        Tell us a bit about yourself to personalize your experience
-      </Text>
-      
-      <View style={styles.form}>
-        <ValidatedTextInput
-          label="Full Name"
-          required
-          value={formData.name}
-          onChangeText={(text) => handleFieldChange('name', text)}
-          onBlur={() => handleFieldBlur('name')}
-          placeholder="Enter your full name"
-          icon={<User size={20} color={colors.text.secondary} />}
-          error={errors.name}
-          touched={touched.name}
-          autoCapitalize="words"
-        />
-        
-        <ValidatedTextInput
-          label="Email Address"
-          required
-          value={formData.email}
-          onChangeText={(text) => handleFieldChange('email', text)}
-          onBlur={() => handleFieldBlur('email')}
-          placeholder="Enter your email"
-          icon={<Mail size={20} color={colors.text.secondary} />}
-          error={errors.email}
-          touched={touched.email}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-        
-        <ValidatedTextInput
-          label="Phone Number"
-          value={formData.phone}
-          onChangeText={(text) => handleFieldChange('phone', text)}
-          onBlur={() => handleFieldBlur('phone')}
-          placeholder="(555) 123-4567"
-          icon={<Phone size={20} color={colors.text.secondary} />}
-          error={errors.phone}
-          touched={touched.phone}
-          keyboardType="phone-pad"
-          helpText="Optional - for account recovery and notifications"
-        />
-      </View>
-      
-      <TouchableOpacity 
-        style={[
-          styles.continueButton,
-          hasErrors && styles.continueButtonDisabled
-        ]} 
-        onPress={handleProfileSetup}
-        disabled={hasErrors}
-      >
-        <Text style={[
-          styles.continueButtonText,
-          hasErrors && styles.continueButtonTextDisabled
-        ]}>
-          Continue
-        </Text>
-      </TouchableOpacity>
-    </View>
-  );
+  const renderProfileSetup = () => {
+    const nameInputRef = useRef<TextInput>(null);
+    const emailInputRef = useRef<TextInput>(null);
+    const phoneInputRef = useRef<TextInput>(null);
 
-  const renderCompanyDetails = () => (
-    <View style={styles.stepContainer}>
-      <Text style={styles.stepTitle}>Company Information</Text>
-      <Text style={styles.stepSubtitle}>
-        Set up your fleet company details for white-label customization
-      </Text>
-      
-      <View style={styles.form}>
-        <ValidatedTextInput
-          label="Company Name"
-          required
-          value={formData.companyName}
-          onChangeText={(text) => handleFieldChange('companyName', text)}
-          onBlur={() => handleFieldBlur('companyName')}
-          placeholder="Enter your company name"
-          icon={<Building2 size={20} color={colors.text.secondary} />}
-          error={errors.companyName}
-          touched={touched.companyName}
-          autoCapitalize="words"
-        />
-        
-        <ValidatedTextInput
-          label="Fleet Size"
-          value={formData.fleetSize}
-          onChangeText={(text) => handleFieldChange('fleetSize', text)}
-          onBlur={() => handleFieldBlur('fleetSize')}
-          placeholder="Number of vehicles"
-          icon={<Truck size={20} color={colors.text.secondary} />}
-          error={errors.fleetSize}
-          touched={touched.fleetSize}
-          keyboardType="numeric"
-          helpText="Optional - helps customize features for your fleet size"
-        />
-      </View>
-      
-      <TouchableOpacity 
-        style={[
-          styles.continueButton,
-          hasErrors && styles.continueButtonDisabled
-        ]} 
-        onPress={handleCompanyDetails}
-        disabled={hasErrors}
-      >
-        <Text style={[
-          styles.continueButtonText,
-          hasErrors && styles.continueButtonTextDisabled
-        ]}>
-          Complete Setup
+    return (
+      <View style={styles.stepContainer}>
+        <Text style={styles.stepTitle}>Create Your Profile</Text>
+        <Text style={styles.stepSubtitle}>
+          Tell us a bit about yourself to personalize your experience
         </Text>
-      </TouchableOpacity>
-    </View>
-  );
+        
+        <View style={styles.form}>
+          <ValidatedTextInput
+            label="Full Name"
+            required
+            value={formData.name}
+            onChangeText={(text) => handleFieldChange('name', text)}
+            onBlur={() => handleFieldBlur('name')}
+            placeholder="Enter your full name"
+            icon={<User size={20} color={colors.text.secondary} />}
+            error={errors.name}
+            touched={touched.name}
+            autoCapitalize="words"
+            returnKeyType="next"
+            onSubmitEditing={() => emailInputRef.current?.focus()}
+            blurOnSubmit={false}
+          />
+          
+          <ValidatedTextInput
+            ref={emailInputRef}
+            label="Email Address"
+            required
+            value={formData.email}
+            onChangeText={(text) => handleFieldChange('email', text)}
+            onBlur={() => handleFieldBlur('email')}
+            placeholder="Enter your email"
+            icon={<Mail size={20} color={colors.text.secondary} />}
+            error={errors.email}
+            touched={touched.email}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            returnKeyType="next"
+            onSubmitEditing={() => phoneInputRef.current?.focus()}
+            blurOnSubmit={false}
+          />
+          
+          <ValidatedTextInput
+            ref={phoneInputRef}
+            label="Phone Number"
+            value={formData.phone}
+            onChangeText={(text) => handleFieldChange('phone', text)}
+            onBlur={() => handleFieldBlur('phone')}
+            placeholder="(555) 123-4567"
+            icon={<Phone size={20} color={colors.text.secondary} />}
+            error={errors.phone}
+            touched={touched.phone}
+            keyboardType="phone-pad"
+            helpText="Optional - for account recovery and notifications"
+            returnKeyType="done"
+            onSubmitEditing={() => {
+              Keyboard.dismiss();
+              if (!hasErrors) {
+                handleProfileSetup();
+              }
+            }}
+          />
+          </View>
+        
+        <TouchableOpacity 
+          style={[
+            styles.continueButton,
+            hasErrors && styles.continueButtonDisabled
+          ]} 
+          onPress={handleProfileSetup}
+          disabled={hasErrors}
+        >
+          <Text style={[
+            styles.continueButtonText,
+            hasErrors && styles.continueButtonTextDisabled
+          ]}>
+            Continue
+          </Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
+  const renderCompanyDetails = () => {
+    const companyNameInputRef = useRef<TextInput>(null);
+    const fleetSizeInputRef = useRef<TextInput>(null);
+
+    return (
+      <View style={styles.stepContainer}>
+        <Text style={styles.stepTitle}>Company Information</Text>
+        <Text style={styles.stepSubtitle}>
+          Set up your fleet company details for white-label customization
+        </Text>
+        
+        <View style={styles.form}>
+          <ValidatedTextInput
+            ref={companyNameInputRef}
+            label="Company Name"
+            required
+            value={formData.companyName}
+            onChangeText={(text) => handleFieldChange('companyName', text)}
+            onBlur={() => handleFieldBlur('companyName')}
+            placeholder="Enter your company name"
+            icon={<Building2 size={20} color={colors.text.secondary} />}
+            error={errors.companyName}
+            touched={touched.companyName}
+            autoCapitalize="words"
+            returnKeyType="next"
+            onSubmitEditing={() => fleetSizeInputRef.current?.focus()}
+            blurOnSubmit={false}
+          />
+          
+          <ValidatedTextInput
+            ref={fleetSizeInputRef}
+            label="Fleet Size"
+            value={formData.fleetSize}
+            onChangeText={(text) => handleFieldChange('fleetSize', text)}
+            onBlur={() => handleFieldBlur('fleetSize')}
+            placeholder="Number of vehicles"
+            icon={<Truck size={20} color={colors.text.secondary} />}
+            error={errors.fleetSize}
+            touched={touched.fleetSize}
+            keyboardType="numeric"
+            helpText="Optional - helps customize features for your fleet size"
+            returnKeyType="done"
+            onSubmitEditing={() => {
+              Keyboard.dismiss();
+              if (!hasErrors) {
+                handleCompanyDetails();
+              }
+            }}
+          />
+          </View>
+        
+        <TouchableOpacity 
+          style={[
+            styles.continueButton,
+            hasErrors && styles.continueButtonDisabled
+          ]} 
+          onPress={handleCompanyDetails}
+          disabled={hasErrors}
+        >
+          <Text style={[
+            styles.continueButtonText,
+            hasErrors && styles.continueButtonTextDisabled
+          ]}>
+            Complete Setup
+          </Text>
+        </TouchableOpacity>
+      </View>
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <KeyboardAvoidingView 
+        style={styles.keyboardAvoidingView}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
+      >
+        <ScrollView 
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          onScrollBeginDrag={() => Keyboard.dismiss()}
+        >
         <View style={styles.header}>
           <Text style={styles.title}>Welcome to TruckMate AI</Text>
           <View style={styles.progressIndicator}>
@@ -312,7 +365,8 @@ export default function OnboardingScreen() {
             onSkip={handleDeviceSetupSkip}
           />
         )}
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -322,9 +376,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background.primary,
   },
+  keyboardAvoidingView: {
+    flex: 1,
+  },
   scrollContent: {
     flexGrow: 1,
     padding: 20,
+    paddingBottom: Platform.OS === 'ios' ? 40 : 20,
   },
   header: {
     alignItems: 'center',
@@ -437,6 +495,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',
+    marginTop: 16,
   },
   continueButtonText: {
     fontSize: 16,

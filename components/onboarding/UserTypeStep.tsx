@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { User, Users, Truck, BarChart3 } from 'lucide-react-native';
 import { colors } from '@/constants/colors';
 import { UserType } from '@/types/pricing';
@@ -47,7 +47,15 @@ export default function UserTypeStep({ onNext }: UserTypeStepProps) {
   ];
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView 
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
       <View style={styles.header}>
         <Text style={styles.title}>Tell us about your operation</Text>
         <Text style={styles.subtitle}>
@@ -119,24 +127,29 @@ export default function UserTypeStep({ onNext }: UserTypeStepProps) {
         </View>
       </View>
 
-      <Pressable 
-        style={[styles.nextButton, !selectedType && styles.disabledButton]} 
-        onPress={handleNext}
-        disabled={!selectedType}
-      >
-        <Text style={[styles.nextButtonText, !selectedType && styles.disabledText]}>
-          Continue
-        </Text>
-      </Pressable>
-    </View>
+        <Pressable 
+          style={[styles.nextButton, !selectedType && styles.disabledButton]} 
+          onPress={handleNext}
+          disabled={!selectedType}
+        >
+          <Text style={[styles.nextButtonText, !selectedType && styles.disabledText]}>
+            Continue
+          </Text>
+        </Pressable>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     backgroundColor: colors.background.primary,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    padding: 20,
+    paddingBottom: Platform.OS === 'ios' ? 40 : 20,
   },
   header: {
     alignItems: 'center',
@@ -268,6 +281,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
+    marginTop: 16,
   },
   disabledButton: {
     backgroundColor: colors.border,

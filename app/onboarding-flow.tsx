@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Pressable, SafeAreaView } from 'react-native';
+import { View, Text, StyleSheet, Pressable, SafeAreaView, KeyboardAvoidingView, Platform, Keyboard } from 'react-native';
 import { Stack, router } from 'expo-router';
 import { ChevronLeft, Check } from 'lucide-react-native';
 
@@ -94,6 +94,13 @@ export default function OnboardingFlowScreen() {
           ) : undefined,
         }} 
       />
+      
+      <KeyboardAvoidingView 
+        style={styles.keyboardAvoidingView}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
+      >
+        <Pressable style={styles.dismissKeyboard} onPress={Keyboard.dismiss} activeOpacity={1}>
 
       {/* Progress Indicator */}
       <View style={styles.progressContainer}>
@@ -140,10 +147,12 @@ export default function OnboardingFlowScreen() {
         ))}
       </View>
 
-      {/* Step Content */}
-      <View style={styles.stepContent}>
-        {renderStepContent()}
-      </View>
+          {/* Step Content */}
+          <View style={styles.stepContent}>
+            {renderStepContent()}
+          </View>
+        </Pressable>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -152,6 +161,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background.primary,
+  },
+  keyboardAvoidingView: {
+    flex: 1,
+  },
+  dismissKeyboard: {
+    flex: 1,
   },
   backButton: {
     padding: 8,

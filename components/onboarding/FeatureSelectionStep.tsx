@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { 
   Fuel, 
   Wrench, 
@@ -112,7 +112,10 @@ export default function FeatureSelectionStep({ onNext }: FeatureSelectionStepPro
   const roi = totalMonthlyCost > 0 ? Math.round(((totalMonthlySavings - totalMonthlyCost) / totalMonthlyCost) * 100) : 0;
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView 
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
       <View style={styles.header}>
         <Text style={styles.title}>Which features matter most?</Text>
         <Text style={styles.subtitle}>
@@ -120,7 +123,12 @@ export default function FeatureSelectionStep({ onNext }: FeatureSelectionStepPro
         </Text>
       </View>
 
-      <ScrollView style={styles.featuresContainer} showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        style={styles.featuresContainer} 
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={styles.featuresScrollContent}
+      >
         {features.map((feature) => {
           const IconComponent = feature.icon;
           const isSelected = selectedFeatures.includes(feature.id);
@@ -225,7 +233,7 @@ export default function FeatureSelectionStep({ onNext }: FeatureSelectionStepPro
           {selectedFeatures.length > 0 ? 'Continue with Selected Features' : 'Skip for Now'}
         </Text>
       </Pressable>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -254,6 +262,9 @@ const styles = StyleSheet.create({
   featuresContainer: {
     flex: 1,
     paddingHorizontal: 20,
+  },
+  featuresScrollContent: {
+    paddingBottom: Platform.OS === 'ios' ? 40 : 20,
   },
   featureCard: {
     backgroundColor: colors.background.secondary,
@@ -423,7 +434,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     paddingVertical: 16,
     marginHorizontal: 20,
-    marginBottom: 20,
+    marginBottom: Platform.OS === 'ios' ? 40 : 20,
+    marginTop: 16,
     borderRadius: 12,
     alignItems: 'center',
   },

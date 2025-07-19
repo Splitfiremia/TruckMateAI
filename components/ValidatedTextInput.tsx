@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, forwardRef } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,8 @@ import {
   TextInputProps,
   ViewStyle,
   TextStyle,
+  Platform,
+  Pressable,
 } from 'react-native';
 import { AlertCircle, CheckCircle } from 'lucide-react-native';
 import { colors } from '@/constants/colors';
@@ -22,23 +24,40 @@ interface ValidatedTextInputProps extends TextInputProps {
   labelStyle?: TextStyle;
   showValidIcon?: boolean;
   helpText?: string;
+  enablesReturnKeyAutomatically?: boolean;
+  blurOnSubmit?: boolean;
+  onSubmitEditing?: () => void;
 }
 
-export default function ValidatedTextInput({
-  label,
-  error,
-  touched,
-  required,
-  icon,
-  containerStyle,
-  inputStyle,
-  labelStyle,
-  showValidIcon = true,
-  helpText,
-  ...textInputProps
-}: ValidatedTextInputProps) {
+const ValidatedTextInput = forwardRef<TextInput, ValidatedTextInputProps>((
+  {
+    label,
+    error,
+    touched,
+    required,
+    icon,
+    containerStyle,
+    inputStyle,
+    labelStyle,
+    showValidIcon = true,
+    helpText,
+    enablesReturnKeyAutomatically = true,
+    blurOnSubmit = true,
+    onSubmitEditing,
+    ...textInputProps
+  },
+  ref
+) => {
+  const internalRef = useRef<TextInput>(null);
+  const inputRef = ref || internalRef;
   const hasError = touched && error && error.trim && error.trim().length > 0;
   const isValid = touched && !hasError && textInputProps.value && textInputProps.value.length > 0;
+
+  const handleContainerPress = () => {
+    if (typeof inputRef === 'object' && inputRef?.current) {
+      inputRef.current.focus();
+    }
+  };
 
   return (
     <View style={[styles.container, containerStyle]}>
@@ -52,14 +71,18 @@ export default function ValidatedTextInput({
         </View>
       )}
       
-      <View style={[
-        styles.inputContainer,
-        hasError && styles.inputContainerError,
-        isValid && styles.inputContainerValid,
-      ]}>
+      <Pressable 
+        style={[
+          styles.inputContainer,
+          hasError && styles.inputContainerError,
+          isValid && styles.inputContainerValid,
+        ]}
+        onPress={handleContainerPress}
+      >
         {icon && <View style={styles.iconContainer}>{icon}</View>}
         
         <TextInput
+          ref={inputRef}
           style={[
             styles.input,
             icon && styles.inputWithIcon,
@@ -67,6 +90,12 @@ export default function ValidatedTextInput({
             inputStyle,
           ]}
           placeholderTextColor={colors.text.secondary}
+          enablesReturnKeyAutomatically={enablesReturnKeyAutomatically}
+          blurOnSubmit={blurOnSubmit}
+          onSubmitEditing={onSubmitEditing}
+          returnKeyType={onSubmitEditing ? 'next' : 'done'}
+          textContentType={getTextContentType(textInputProps.keyboardType, label)}
+          autoComplete={getAutoComplete(textInputProps.keyboardType, label)}
           {...textInputProps}
         />
         
@@ -76,7 +105,7 @@ export default function ValidatedTextInput({
             {isValid && <CheckCircle size={16} color={colors.success} />}
           </View>
         )}
-      </View>
+      </Pressable>
       
       {hasError && error && error.trim() && (
         <View style={styles.errorContainer}>
@@ -86,7 +115,11 @@ export default function ValidatedTextInput({
       )}
     </View>
   );
-}
+});
+
+ValidatedTextInput.displayName = 'ValidatedTextInput';
+
+export default ValidatedTextInput;
 
 const styles = StyleSheet.create({
   container: {
@@ -161,3 +194,39 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
+
+// Helper functions for better mobile UX
+function getTextContentType(keyboardType?: string, label?: string): TextInputProps['textContentType'] {
+  if (Platform.OS !== 'ios') return undefined;
+  
+  if (keyboardType === 'email-address' || label?.toLowerCase().includes('email')) {
+    return 'emailAddress';
+  }
+  if (keyboardType === 'phone-pad' || label?.toLowerCase().includes('phone')) {
+    return 'telephoneNumber';
+  }
+  if (label?.toLowerCase().includes('name')) {
+    return 'name';
+  }
+  if (label?.toLowerCase().includes('company')) {
+    return 'organizationName';
+  }
+  
+  return undefined;
+}
+
+function getAutoComplete(keyboardType?: string, label?: string): TextInputProps['autoComplete'] {
+  if (Platform.OS !== 'android') return undefined;
+  
+  if (keyboardType === 'email-address' || label?.toLowerCase().includes('email')) {
+    return 'email';
+  }
+  if (keyboardType === 'phone-pad' || label?.toLowerCase().includes('phone')) {
+    return 'tel';
+  }
+  if (label?.toLowerCase().includes('name')) {
+    return 'name';
+  }
+  
+  return 'off';
+}

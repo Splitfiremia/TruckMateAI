@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { Truck, Plus, Minus } from 'lucide-react-native';
 import { colors } from '@/constants/colors';
 
@@ -29,7 +29,15 @@ export default function VehicleCountStep({
   const presetCounts = [1, 2, 5, 10, 25, 50];
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView 
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView 
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
       <View style={styles.header}>
         <Truck color={colors.primary} size={48} />
         <Text style={styles.title}>How many trucks need tracking?</Text>
@@ -109,18 +117,23 @@ export default function VehicleCountStep({
         )}
       </View>
 
-      <Pressable style={styles.nextButton} onPress={handleNext}>
-        <Text style={styles.nextButtonText}>Continue</Text>
-      </Pressable>
-    </View>
+        <Pressable style={styles.nextButton} onPress={handleNext}>
+          <Text style={styles.nextButtonText}>Continue</Text>
+        </Pressable>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     backgroundColor: colors.background.primary,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    padding: 20,
+    paddingBottom: Platform.OS === 'ios' ? 40 : 20,
   },
   header: {
     alignItems: 'center',
@@ -226,6 +239,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
+    marginTop: 16,
   },
   nextButtonText: {
     fontSize: 18,
