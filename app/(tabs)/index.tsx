@@ -287,7 +287,7 @@ export default function DashboardScreen() {
         
         {/* Quick Duty Status Change Section */}
         <View style={styles.quickStatusSection}>
-          <View style={styles.sectionHeader}>
+          <View style={styles.quickStatusSectionHeader}>
             <Text style={styles.sectionTitle}>Quick Status Change</Text>
             <TouchableOpacity onPress={handleStatusCardPress}>
               <Text style={styles.seeAllText}>More Options</Text>
@@ -819,6 +819,12 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
+  },
+  quickStatusSectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
   },
   quickStatusGrid: {
     flexDirection: 'row',
