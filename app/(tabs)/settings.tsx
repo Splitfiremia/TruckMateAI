@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Switch, Alert, Modal, TextInput } from 'react-native';
 import { Stack } from 'expo-router';
-import { User, Truck, Bell, Shield, HelpCircle, LogOut, ChevronRight, AlertTriangle, X, Save, Cloud, Palette, Building2, Sparkles, Smartphone } from 'lucide-react-native';
+import { User, Truck, Bell, Shield, HelpCircle, LogOut, ChevronRight, AlertTriangle, X, Save, Cloud, Palette, Building2, Sparkles, Smartphone, Settings } from 'lucide-react-native';
+import Constants from 'expo-constants';
 import AppBrand from '@/components/AppBrand';
 
 import { colors, deprecatedColors } from '@/constants/colors';
@@ -359,6 +360,13 @@ export default function SettingsScreen() {
             <HelpCircle size={20} color={theme.primaryLight} />,
             'Help & Support',
             () => setHelpModalVisible(true)
+          )}
+          
+          {/* Admin Access - Development Only */}
+          {__DEV__ && renderSettingLink(
+            <Settings size={20} color={theme.warning} />,
+            'Admin Panel (Dev Only)',
+            () => router.push('/admin')
           )}
         </View>
         
