@@ -1123,14 +1123,4 @@ const createStyles = (theme: any) => StyleSheet.create({
     marginTop: 4,
     fontStyle: 'italic',
   },
-  headerTitleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  headerTitleText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: theme.text.primary,
-    marginLeft: 8,
-  },
 });
