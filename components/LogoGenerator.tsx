@@ -22,7 +22,11 @@ interface GeneratedLogo {
   mimeType: string;
 }
 
-export default function LogoGenerator() {
+interface LogoGeneratorProps {
+  onClose?: () => void;
+}
+
+export default function LogoGenerator({ onClose }: LogoGeneratorProps = {}) {
   const [selectedDesign, setSelectedDesign] = useState<LogoDesign | null>(null);
   const [generatedLogos, setGeneratedLogos] = useState<GeneratedLogo[]>([]);
   const [favoriteLogos, setFavoriteLogos] = useState<string[]>([]);
@@ -216,6 +220,23 @@ export default function LogoGenerator() {
           <DesignCard key={design.id} design={design} />
         ))}
       </ScrollView>
+      
+      {generatedLogos.length > 0 && (
+        <View style={componentStyles.footer}>
+          <TouchableOpacity 
+            style={componentStyles.doneButton}
+            onPress={() => {
+              Alert.alert(
+                'Logos Generated',
+                'Your logos have been generated successfully. You can download them from the preview cards above.',
+                [{ text: 'OK', onPress: () => onClose?.() }]
+              );
+            }}
+          >
+            <Text style={componentStyles.doneButtonText}>Done</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }
@@ -374,6 +395,24 @@ const componentStyles = StyleSheet.create({
     backgroundColor: '#94a3b8',
   },
   generateButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  footer: {
+    padding: 20,
+    backgroundColor: '#ffffff',
+    borderTopWidth: 1,
+    borderTopColor: '#e2e8f0',
+  },
+  doneButton: {
+    backgroundColor: '#2563eb',
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  doneButtonText: {
     color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',

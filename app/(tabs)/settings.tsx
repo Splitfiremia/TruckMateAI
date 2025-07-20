@@ -559,7 +559,16 @@ export default function SettingsScreen() {
             </View>
           </ScrollView>
           
-          <TouchableOpacity style={styles.saveButton}>
+          <TouchableOpacity 
+            style={styles.saveButton}
+            onPress={() => {
+              Alert.alert(
+                'Settings Saved',
+                'Vehicle settings have been saved successfully.',
+                [{ text: 'OK', onPress: () => setVehicleSettingsModalVisible(false) }]
+              );
+            }}
+          >
             <Save size={20} color={theme.white} />
             <Text style={styles.saveButtonText}>Save Changes</Text>
           </TouchableOpacity>
@@ -628,7 +637,16 @@ export default function SettingsScreen() {
             </View>
           </ScrollView>
           
-          <TouchableOpacity style={styles.saveButton}>
+          <TouchableOpacity 
+            style={styles.saveButton}
+            onPress={() => {
+              Alert.alert(
+                'Preferences Saved',
+                'Notification preferences have been saved successfully.',
+                [{ text: 'OK', onPress: () => setNotificationModalVisible(false) }]
+              );
+            }}
+          >
             <Save size={20} color={theme.white} />
             <Text style={styles.saveButtonText}>Save Preferences</Text>
           </TouchableOpacity>
@@ -704,6 +722,20 @@ export default function SettingsScreen() {
               </TouchableOpacity>
             </View>
           </ScrollView>
+          
+          <TouchableOpacity 
+            style={styles.saveButton}
+            onPress={() => {
+              Alert.alert(
+                'Settings Saved',
+                'Privacy and security settings have been saved successfully.',
+                [{ text: 'OK', onPress: () => setPrivacyModalVisible(false) }]
+              );
+            }}
+          >
+            <Save size={20} color={theme.white} />
+            <Text style={styles.saveButtonText}>Save Preferences</Text>
+          </TouchableOpacity>
         </View>
       </Modal>
       
@@ -763,6 +795,20 @@ export default function SettingsScreen() {
               <Text style={styles.supportEmail}>support@truckmate.com</Text>
             </View>
           </ScrollView>
+          
+          <TouchableOpacity 
+            style={styles.saveButton}
+            onPress={() => {
+              Alert.alert(
+                'Settings Saved',
+                'Help and support preferences have been saved successfully.',
+                [{ text: 'OK', onPress: () => setHelpModalVisible(false) }]
+              );
+            }}
+          >
+            <Save size={20} color={theme.white} />
+            <Text style={styles.saveButtonText}>Save Preferences</Text>
+          </TouchableOpacity>
         </View>
       </Modal>
       
@@ -802,7 +848,7 @@ export default function SettingsScreen() {
               <X size={24} color={theme.text.primary} />
             </TouchableOpacity>
           </View>
-          <LogoGenerator />
+          <LogoGenerator onClose={() => setShowLogoGeneratorModal(false)} />
         </View>
       </Modal>
     </View>
