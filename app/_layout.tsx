@@ -10,6 +10,7 @@ import { useBrandingStore } from "@/store/brandingStore";
 import { ThemeProvider, useTheme } from "@/store/themeStore";
 import APIStatusBanner from "@/components/APIStatusBanner";
 import { DeviceTestingDashboard } from "@/components/DeviceTestingDashboard";
+import { trpc, trpcClient } from "@/lib/trpc";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -64,14 +65,16 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <StatusBarWrapper />
-          <RootLayoutNav />
-        </GestureHandlerRootView>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <trpc.Provider client={trpcClient} queryClient={queryClient}>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <StatusBarWrapper />
+            <RootLayoutNav />
+          </GestureHandlerRootView>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </trpc.Provider>
   );
 }
 
