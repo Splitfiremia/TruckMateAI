@@ -257,8 +257,16 @@ export const ViolationPreventionAlert: React.FC<ViolationPreventionAlertProps> =
       animationType="slide"
       onRequestClose={onDismiss}
     >
-      <View style={styles.overlay}>
-        <View style={styles.alertContainer}>
+      <TouchableOpacity 
+        style={styles.overlay} 
+        activeOpacity={1} 
+        onPress={onDismiss}
+      >
+        <TouchableOpacity 
+          style={styles.alertContainer} 
+          activeOpacity={1} 
+          onPress={(e) => e.stopPropagation()}
+        >
           <Animated.View
             style={[
               styles.alertCard,
@@ -295,7 +303,12 @@ export const ViolationPreventionAlert: React.FC<ViolationPreventionAlertProps> =
                   </Text>
                 </View>
               </View>
-              <TouchableOpacity onPress={onDismiss} style={styles.closeButton}>
+              <TouchableOpacity 
+                onPress={onDismiss} 
+                style={styles.closeButton}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                activeOpacity={0.7}
+              >
                 <X size={20} color={colors.textSecondary} />
               </TouchableOpacity>
             </View>
@@ -466,8 +479,8 @@ export const ViolationPreventionAlert: React.FC<ViolationPreventionAlertProps> =
               </ScrollView>
             </LinearGradient>
           </Animated.View>
-        </View>
-      </View>
+        </TouchableOpacity>
+      </TouchableOpacity>
       
       {/* Override Request Modal */}
       <Modal
@@ -604,6 +617,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: 20,
+    zIndex: 999,
   },
   headerLeft: {
     flexDirection: 'row',
@@ -627,6 +641,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.border,
     alignItems: 'center',
     justifyContent: 'center',
+    zIndex: 1000,
+    elevation: 5,
   },
   countdownSection: {
     flexDirection: 'row',
