@@ -144,7 +144,7 @@ export default function OnboardingScreen() {
           onPress={() => handleRoleSelection('owner-operator')}
         >
           <View style={styles.roleIcon}>
-            <Truck size={32} color={colors.primary} />
+            <Truck size={24} color={colors.primary} />
           </View>
           <Text style={styles.roleTitle}>Owner/Operator</Text>
           <Text style={styles.roleDescription}>
@@ -163,7 +163,7 @@ export default function OnboardingScreen() {
           onPress={() => handleRoleSelection('fleet-company')}
         >
           <View style={styles.roleIcon}>
-            <Building2 size={32} color={colors.secondary} />
+            <Building2 size={24} color={colors.secondary} />
           </View>
           <Text style={styles.roleTitle}>Fleet Company</Text>
           <Text style={styles.roleDescription}>
@@ -384,12 +384,12 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    padding: 20,
-    paddingBottom: Platform.OS === 'ios' ? 40 : 20,
+    padding: 16,
+    paddingBottom: Platform.OS === 'ios' ? 30 : 16,
   },
   header: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: 20,
   },
   logoContainer: {
     marginBottom: 16,
@@ -425,50 +425,50 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   stepSubtitle: {
-    fontSize: 16,
+    fontSize: 14,
     color: colors.text.secondary,
     textAlign: 'center',
-    marginBottom: 32,
-    lineHeight: 22,
+    marginBottom: 20,
+    lineHeight: 20,
   },
   roleOptions: {
-    gap: 16,
+    gap: 12,
   },
   roleCard: {
     backgroundColor: colors.card,
     borderRadius: 16,
-    padding: 20,
+    padding: 16,
     alignItems: 'center',
   },
   roleIcon: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: colors.background.secondary,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 16,
+    marginBottom: 12,
   },
   roleTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '600',
     color: colors.text.primary,
-    marginBottom: 8,
+    marginBottom: 6,
   },
   roleDescription: {
-    fontSize: 14,
+    fontSize: 13,
     color: colors.text.secondary,
     textAlign: 'center',
-    marginBottom: 16,
-    lineHeight: 20,
+    marginBottom: 12,
+    lineHeight: 18,
   },
   roleFeatures: {
     alignSelf: 'stretch',
   },
   roleFeature: {
-    fontSize: 14,
+    fontSize: 13,
     color: colors.text.primary,
-    marginBottom: 4,
+    marginBottom: 2,
   },
   form: {
     gap: 20,
