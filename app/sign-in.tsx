@@ -91,8 +91,12 @@ export default function SignInScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <View style={styles.header}>
-          <Text style={styles.appTitle}>TruckMate AI</Text>
-          <AppLogo size={100} />
+          <View style={styles.brandContainer}>
+            <Text style={styles.appTitle}>TruckMate AI</Text>
+            <View style={styles.logoContainer}>
+              <AppLogo size={80} />
+            </View>
+          </View>
           <Text style={styles.subtitle}>
             Your intelligent trucking companion for compliance, efficiency, and success
           </Text>
@@ -208,25 +212,43 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 24,
     justifyContent: 'center',
+    paddingTop: 20,
   },
   header: {
     alignItems: 'center',
     marginBottom: 48,
   },
+  brandContainer: {
+    alignItems: 'center',
+    marginBottom: 24,
+  },
   appTitle: {
-    fontSize: 32,
-    fontWeight: '700',
+    fontSize: 36,
+    fontWeight: '800',
     color: colors.primary,
-    marginBottom: 16,
     textAlign: 'center',
+    letterSpacing: -0.5,
+    marginBottom: 8,
+    textShadowColor: 'rgba(37, 99, 235, 0.1)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+  },
+  logoContainer: {
+    marginTop: 4,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 8,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 17,
     color: colors.text.secondary,
     textAlign: 'center',
-    lineHeight: 24,
-    paddingHorizontal: 20,
-    marginTop: 16,
+    lineHeight: 26,
+    paddingHorizontal: 16,
+    fontWeight: '500',
+    opacity: 0.9,
   },
   signInOptions: {
     gap: 16,
@@ -236,14 +258,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 16,
+    paddingVertical: 18,
     paddingHorizontal: 24,
-    borderRadius: 12,
+    borderRadius: 14,
     gap: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
   },
   googleButton: {
     backgroundColor: colors.card,
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: colors.border,
   },
 
@@ -252,7 +279,7 @@ const styles = StyleSheet.create({
   },
   appleButtonCustom: {
     backgroundColor: '#000000',
-    borderWidth: 1,
+    borderWidth: 1.5,
     borderColor: '#000000',
   },
   appleIconContainer: {
@@ -299,14 +326,15 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   emailButton: {
-    backgroundColor: 'rgba(59, 130, 246, 0.1)',
-    borderWidth: 1,
+    backgroundColor: 'rgba(59, 130, 246, 0.08)',
+    borderWidth: 1.5,
     borderColor: colors.primary,
   },
   signInButtonText: {
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '600',
     color: colors.text.primary,
+    letterSpacing: -0.2,
   },
   emailButtonText: {
     color: colors.primary,
