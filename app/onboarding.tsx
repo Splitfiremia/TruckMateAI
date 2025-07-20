@@ -18,6 +18,7 @@ import { colors } from '@/constants/colors';
 import { useUserStore, UserRole, UserProfile } from '@/store/userStore';
 import DeviceDetectionStep from '@/components/DeviceDetectionStep';
 import ValidatedTextInput from '@/components/ValidatedTextInput';
+import AppLogo from '@/components/AppLogo';
 import { useFormValidation, commonValidationRules } from '@/utils/validation';
 
 type OnboardingStep = 'role-selection' | 'profile-setup' | 'company-details' | 'device-setup';
@@ -389,6 +390,9 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     marginBottom: 32,
+  },
+  logoContainer: {
+    marginBottom: 16,
   },
   title: {
     fontSize: 28,

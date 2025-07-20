@@ -1133,14 +1133,4 @@ const createStyles = (theme: any) => StyleSheet.create({
     color: theme.text.primary,
     marginLeft: 8,
   },
-  headerTitleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  headerTitleText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: theme.text.primary,
-    marginLeft: 8,
-  },
 });
