@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
 import { Stack, router } from 'expo-router';
 import { Mic, Camera, Clock, AlertTriangle, Truck, DollarSign, Clipboard, Upload, Shield, Cloud, Coffee, Bed, LogOut } from 'lucide-react-native';
-import AppLogo from '@/components/AppLogo';
+import AppBrand from '@/components/AppBrand';
 
 import { colors } from '@/constants/colors';
 import { ComplianceViolationPrediction, DutyStatus } from '@/types';
@@ -245,7 +245,7 @@ export default function DashboardScreen() {
         options={{ 
           headerTitle: () => (
             <View style={styles.headerTitleContainer}>
-              <AppLogo size={40} animated={true} />
+              <AppBrand size="small" showText={false} logoSize={40} />
             </View>
           ),
           headerTitleAlign: 'left',
@@ -256,7 +256,7 @@ export default function DashboardScreen() {
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <View style={styles.logoGreetingContainer}>
-              <AppLogo size={48} animated={true} />
+              <AppBrand size="small" showText={false} logoSize={48} />
               <View style={styles.greetingTextContainer}>
                 <Text style={[styles.greeting, { color: settings.primaryColor || colors.text.primary }]}>
                   Hello, {user?.name || driverInfo.name}

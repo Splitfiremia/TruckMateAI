@@ -17,7 +17,7 @@ import * as AppleAuthentication from 'expo-apple-authentication';
 import { colors } from '@/constants/colors';
 import { authService, AuthResult } from '@/services/authService';
 import { useUserStore, UserProfile } from '@/store/userStore';
-import AppLogo from '@/components/AppLogo';
+import AppBrand from '@/components/AppBrand';
 
 export default function SignInScreen() {
   const [isLoading, setIsLoading] = useState(false);
@@ -92,10 +92,7 @@ export default function SignInScreen() {
       <View style={styles.content}>
         <View style={styles.header}>
           <View style={styles.brandContainer}>
-            <Text style={styles.appTitle}>TruckMate AI</Text>
-            <View style={styles.logoContainer}>
-              <AppLogo size={80} />
-            </View>
+            <AppBrand size="large" />
           </View>
           <Text style={styles.subtitle}>
             Your intelligent trucking companion for compliance, efficiency, and success

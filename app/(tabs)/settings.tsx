@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Switch, Alert, Modal, TextInput } from 'react-native';
 import { Stack } from 'expo-router';
 import { User, Truck, Bell, Shield, HelpCircle, LogOut, ChevronRight, AlertTriangle, X, Save, Cloud, Palette, Building2, Sparkles, Smartphone } from 'lucide-react-native';
-import AppLogo from '@/components/AppLogo';
+import AppBrand from '@/components/AppBrand';
 
 import { colors, deprecatedColors } from '@/constants/colors';
 import { useTheme } from '@/store/themeStore';
@@ -177,7 +177,7 @@ export default function SettingsScreen() {
         options={{ 
           headerTitle: () => (
             <View style={styles.headerTitleContainer}>
-              <AppLogo size={32} animated={true} />
+              <AppBrand size="small" showText={false} logoSize={32} />
             </View>
           ),
           headerTitleAlign: 'left',

@@ -18,7 +18,7 @@ import { colors } from '@/constants/colors';
 import { useUserStore, UserRole, UserProfile } from '@/store/userStore';
 import DeviceDetectionStep from '@/components/DeviceDetectionStep';
 import ValidatedTextInput from '@/components/ValidatedTextInput';
-import AppLogo from '@/components/AppLogo';
+import AppBrand from '@/components/AppBrand';
 import { useFormValidation, commonValidationRules } from '@/utils/validation';
 
 type OnboardingStep = 'role-selection' | 'profile-setup' | 'company-details' | 'device-setup';
@@ -347,7 +347,7 @@ export default function OnboardingScreen() {
         >
         <View style={styles.header}>
           <View style={styles.logoContainer}>
-            <AppLogo size={80} animated={true} />
+            <AppBrand size="large" />
           </View>
           <View style={styles.progressIndicator}>
             <View style={[styles.progressDot, currentStep === 'role-selection' && styles.progressDotActive]} />
