@@ -16,6 +16,7 @@ import * as AppleAuthentication from 'expo-apple-authentication';
 import { colors } from '@/constants/colors';
 import { authService, AuthResult } from '@/services/authService';
 import { useUserStore, UserProfile } from '@/store/userStore';
+import AppLogo from '@/components/AppLogo';
 
 export default function SignInScreen() {
   const [isLoading, setIsLoading] = useState(false);
@@ -89,7 +90,7 @@ export default function SignInScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <View style={styles.header}>
-          <Text style={styles.title}>Welcome to TruckMate AI</Text>
+          <AppLogo size={100} />
           <Text style={styles.subtitle}>
             Your intelligent trucking companion for compliance, efficiency, and success
           </Text>
@@ -195,19 +196,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 48,
   },
-  title: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: colors.text.primary,
-    textAlign: 'center',
-    marginBottom: 16,
-  },
   subtitle: {
     fontSize: 16,
     color: colors.text.secondary,
     textAlign: 'center',
     lineHeight: 24,
     paddingHorizontal: 20,
+    marginTop: 16,
   },
   signInOptions: {
     gap: 16,
