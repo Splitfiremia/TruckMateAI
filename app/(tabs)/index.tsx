@@ -245,10 +245,7 @@ export default function DashboardScreen() {
         options={{ 
           headerTitle: () => (
             <View style={styles.headerTitleContainer}>
-              <AppLogo size={32} animated={true} />
-              <Text style={[styles.headerTitleText, { color: settings.primaryColor || colors.text.primary }]}>
-                {!settings.hideDefaultBranding ? appName : (companyName || appName)}
-              </Text>
+              <AppLogo size={40} animated={true} />
             </View>
           ),
           headerTitleAlign: 'left',

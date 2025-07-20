@@ -345,7 +345,9 @@ export default function OnboardingScreen() {
           onScrollBeginDrag={() => Keyboard.dismiss()}
         >
         <View style={styles.header}>
-          <Text style={styles.title}>Welcome to TruckMate AI</Text>
+          <View style={styles.logoContainer}>
+            <AppLogo size={80} animated={true} />
+          </View>
           <View style={styles.progressIndicator}>
             <View style={[styles.progressDot, currentStep === 'role-selection' && styles.progressDotActive]} />
             <View style={[styles.progressDot, currentStep === 'profile-setup' && styles.progressDotActive]} />

@@ -177,8 +177,7 @@ export default function SettingsScreen() {
         options={{ 
           headerTitle: () => (
             <View style={styles.headerTitleContainer}>
-              <AppLogo size={28} animated={true} />
-              <Text style={styles.headerTitleText}>Settings</Text>
+              <AppLogo size={32} animated={true} />
             </View>
           ),
           headerTitleAlign: 'left',
@@ -1123,6 +1122,16 @@ const createStyles = (theme: any) => StyleSheet.create({
     color: theme.text.secondary,
     marginTop: 4,
     fontStyle: 'italic',
+  },
+  headerTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  headerTitleText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: theme.text.primary,
+    marginLeft: 8,
   },
   headerTitleContainer: {
     flexDirection: 'row',
