@@ -565,7 +565,12 @@ export default function SettingsScreen() {
               Alert.alert(
                 'Settings Saved',
                 'Vehicle settings have been saved successfully.',
-                [{ text: 'OK', onPress: () => setVehicleSettingsModalVisible(false) }]
+                [{ 
+                  text: 'OK', 
+                  onPress: () => {
+                    setVehicleSettingsModalVisible(false);
+                  }
+                }]
               );
             }}
           >
@@ -643,7 +648,12 @@ export default function SettingsScreen() {
               Alert.alert(
                 'Preferences Saved',
                 'Notification preferences have been saved successfully.',
-                [{ text: 'OK', onPress: () => setNotificationModalVisible(false) }]
+                [{ 
+                  text: 'OK', 
+                  onPress: () => {
+                    setNotificationModalVisible(false);
+                  }
+                }]
               );
             }}
           >
@@ -729,7 +739,12 @@ export default function SettingsScreen() {
               Alert.alert(
                 'Settings Saved',
                 'Privacy and security settings have been saved successfully.',
-                [{ text: 'OK', onPress: () => setPrivacyModalVisible(false) }]
+                [{ 
+                  text: 'OK', 
+                  onPress: () => {
+                    setPrivacyModalVisible(false);
+                  }
+                }]
               );
             }}
           >
@@ -802,7 +817,12 @@ export default function SettingsScreen() {
               Alert.alert(
                 'Settings Saved',
                 'Help and support preferences have been saved successfully.',
-                [{ text: 'OK', onPress: () => setHelpModalVisible(false) }]
+                [{ 
+                  text: 'OK', 
+                  onPress: () => {
+                    setHelpModalVisible(false);
+                  }
+                }]
               );
             }}
           >
