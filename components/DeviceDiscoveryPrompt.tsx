@@ -60,14 +60,7 @@ export default function DeviceDiscoveryPrompt({
   };
 
   const handleSkip = () => {
-    Alert.alert(
-      'Skip Device Setup?',
-      'You can connect your device later in Settings > Integrations.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Skip', onPress: onClose }
-      ]
-    );
+    onClose();
   };
 
   if (!detectedDevice) return null;
