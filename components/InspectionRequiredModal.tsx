@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
     textAlign: 'center',
     marginBottom: 12,
   },
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
   },
   requirementText: {
     fontSize: 16,
-    color: colors.text,
+    color: colors.text.primary,
     marginLeft: 12,
   },
   buttonContainer: {
@@ -163,7 +163,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   dismissButton: {
-    backgroundColor: colors.background.secondary,
+    backgroundColor: colors.backgroundSecondary,
     borderRadius: 12,
     paddingVertical: 14,
     paddingHorizontal: 24,
@@ -175,12 +175,12 @@ const styles = StyleSheet.create({
   dismissButtonText: {
     fontSize: 16,
     fontWeight: '500',
-    color: colors.text.secondary,
+    color: colors.textSecondary,
   },
   startButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.white,
   },
   disclaimer: {
     fontSize: 12,
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
   },
   boldText: {
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
   },
   recommendationNotice: {
     flexDirection: 'row',
