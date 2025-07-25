@@ -466,7 +466,7 @@ export default function SettingsScreen() {
                 placeholderTextColor={theme.text.secondary}
                 autoCapitalize="characters"
               />
-              <Text style={styles.helpText}>Commercial Driver's License number</Text>
+              <Text style={styles.helpText}>Commercial Driver&apos;s License number</Text>
             </View>
             
             <View style={styles.inputGroup}>

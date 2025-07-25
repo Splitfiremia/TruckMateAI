@@ -68,7 +68,7 @@ export default function InspectionRequiredModal({
               style={styles.startButton}
               onPress={onStartInspection}
             >
-              <Clipboard size={20} color={colors.text.primary} />
+              <Clipboard size={20} color={colors.white} />
               <Text style={styles.startButtonText}>Start Pre-Trip Inspection</Text>
             </TouchableOpacity>
             
@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   container: {
-    backgroundColor: colors.background.primary,
+    backgroundColor: colors.white,
     borderRadius: 16,
     width: '85%',
     padding: 24,
