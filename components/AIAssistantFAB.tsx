@@ -136,6 +136,7 @@ const styles = StyleSheet.create({
   fabButton: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 25,
@@ -154,6 +155,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     marginLeft: 8,
+    textAlign: 'center',
   },
   activityIndicator: {
     position: 'absolute',
