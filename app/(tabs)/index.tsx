@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
 import { Stack, router } from 'expo-router';
-import { Mic, Camera, Clock, AlertTriangle, Truck, DollarSign, Clipboard, Upload, Shield, Cloud, Coffee, Bed, LogOut } from 'lucide-react-native';
+import { Mic, Camera, Clock, AlertTriangle, Truck, DollarSign, Clipboard, Upload, Shield, Cloud, Coffee, Bed, LogOut, Calendar, MessageSquare, FileText, CreditCard, Activity, Settings } from 'lucide-react-native';
 import AppBrand from '@/components/AppBrand';
 
 import { colors } from '@/constants/colors';
@@ -243,150 +243,164 @@ export default function DashboardScreen() {
     <View style={styles.container}>
       <Stack.Screen 
         options={{ 
-          headerTitle: () => (
-            <View style={styles.headerTitleContainer}>
-              <AppBrand size="small" showText={false} logoSize={40} />
-            </View>
-          ),
-          headerTitleAlign: 'left',
+          headerShown: false
         }} 
       />
       
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <View style={styles.headerLeft}>
-            <View style={styles.logoGreetingContainer}>
-              <AppBrand size="small" showText={false} logoSize={48} />
-              <View style={styles.greetingTextContainer}>
-                <Text style={[styles.greeting, { color: settings.primaryColor || colors.text.primary }]}>
-                  Hello, {user?.name || driverInfo.name}
-                </Text>
-                <Text style={styles.subGreeting}>
-                  {companyName || driverInfo.company}
-                </Text>
-                <Text style={styles.welcomeMessage}>{welcomeMessage}</Text>
-              </View>
-            </View>
-            {settings.logoUrl && settings.showCompanyLogo && (
-              <Image source={{ uri: settings.logoUrl }} style={styles.companyLogo} />
-            )}
-          </View>
-          
-          <View style={styles.headerRightContainer}>
-            <TouchableOpacity 
-              style={styles.logOutButton}
-              onPress={handleLogOut}
-            >
-              <LogOut size={20} color={colors.text.secondary} />
-              <Text style={styles.logOutText}>Log Out</Text>
-            </TouchableOpacity>
-            <AIAssistantFAB top={60} right={0} />
+      {/* Custom Header */}
+      <View style={styles.customHeader}>
+        <View style={styles.headerLeft}>
+          <TouchableOpacity style={styles.menuButton}>
+            <View style={styles.menuLine} />
+            <View style={styles.menuLine} />
+            <View style={styles.menuLine} />
+          </TouchableOpacity>
+          <View style={styles.headerBrand}>
+            <AppBrand size="small" showText={true} logoSize={32} />
           </View>
         </View>
         
+        <View style={styles.headerRight}>
+          <TouchableOpacity 
+            style={styles.profileButton}
+            onPress={handleLogOut}
+          >
+            <View style={styles.profileAvatar}>
+              <Text style={styles.profileInitial}>
+                {(user?.name || driverInfo.name).charAt(0).toUpperCase()}
+              </Text>
+            </View>
+            <View style={styles.profileDropdown}>
+              <Text style={styles.profileDropdownText}>▼</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+      </View>
+      
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        {/* Welcome Section */}
+        <View style={styles.welcomeSection}>
+          <Text style={styles.welcomeTitle}>
+            Welcome, {(user?.name || driverInfo.name).split(' ')[0]}!
+          </Text>
+          <TouchableOpacity style={styles.editButton}>
+            <Text style={styles.editButtonText}>✏️</Text>
+          </TouchableOpacity>
+        </View>
+        
+        {/* Main Action Cards Grid */}
+        <View style={styles.mainActionsGrid}>
+          <TouchableOpacity 
+            style={styles.mainActionCard}
+            onPress={() => handleQuickStatusChange('Driving')}
+          >
+            <View style={[styles.mainActionIcon, { backgroundColor: colors.primary }]}>
+              <Truck size={24} color={colors.white} />
+            </View>
+            <Text style={styles.mainActionTitle}>Start Driving</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={styles.mainActionCard}
+            onPress={() => setInspectionModalVisible(true)}
+          >
+            <View style={[styles.mainActionIcon, { backgroundColor: colors.success }]}>
+              <Clipboard size={24} color={colors.white} />
+            </View>
+            <Text style={styles.mainActionTitle}>Pre-Trip Inspection</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={styles.mainActionCard}
+            onPress={() => setScannerVisible(true)}
+          >
+            <View style={[styles.mainActionIcon, { backgroundColor: colors.accent }]}>
+              <Camera size={24} color={colors.white} />
+            </View>
+            <Text style={styles.mainActionTitle}>Scan Receipt</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={styles.mainActionCard}
+            onPress={() => setWeatherForecastVisible(true)}
+          >
+            <View style={[styles.mainActionIcon, { backgroundColor: colors.warning }]}>
+              <Cloud size={24} color={colors.white} />
+            </View>
+            <Text style={styles.mainActionTitle}>Weather</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={styles.mainActionCard}
+            onPress={() => setDotAssistantVisible(true)}
+          >
+            <View style={[styles.mainActionIcon, { backgroundColor: colors.secondary }]}>
+              <Shield size={24} color={colors.white} />
+            </View>
+            <Text style={styles.mainActionTitle}>DOT Assistant</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={styles.mainActionCard}
+            onPress={() => setBulkUploadVisible(true)}
+          >
+            <View style={[styles.mainActionIcon, { backgroundColor: colors.primaryLight }]}>
+              <Upload size={24} color={colors.white} />
+            </View>
+            <Text style={styles.mainActionTitle}>Bulk Upload</Text>
+          </TouchableOpacity>
+        </View>
+        
+        {/* Current Status Card */}
         <StatusCard onStatusChange={handleStatusCardPress} />
         
         <SmartDeviceOnboardingCard />
         
-        {/* Quick Duty Status Change Section */}
-        <View style={styles.quickStatusSection}>
-          <View style={styles.quickStatusSectionHeader}>
-            <Text style={styles.sectionTitle}>Quick Status Change</Text>
-            <TouchableOpacity onPress={handleStatusCardPress}>
-              <Text style={styles.seeAllText}>More Options</Text>
-            </TouchableOpacity>
+        {/* Upcoming Appointment Card */}
+        <View style={styles.appointmentCard}>
+          <View style={styles.appointmentHeader}>
+            <View style={styles.appointmentDateContainer}>
+              <View style={styles.appointmentCalendar}>
+                <Text style={styles.appointmentMonth}>Aug</Text>
+                <Text style={styles.appointmentDay}>16</Text>
+                <Text style={styles.appointmentDayName}>Sat</Text>
+              </View>
+            </View>
+            <View style={styles.appointmentDetails}>
+              <Text style={styles.appointmentTitle}>Next Load Pickup</Text>
+              <View style={styles.appointmentTime}>
+                <Clock size={16} color={colors.text.secondary} />
+                <Text style={styles.appointmentTimeText}>Starts at 2:45 PM EDT</Text>
+              </View>
+              <View style={styles.appointmentLocation}>
+                <Text style={styles.appointmentLocationText}>📍 Distribution Center - Atlanta, GA</Text>
+              </View>
+            </View>
           </View>
-          
-          <View style={styles.quickStatusGrid}>
-            <TouchableOpacity 
-              style={[
-                styles.quickStatusButton,
-                currentStatus === 'Driving' && styles.quickStatusButtonActive,
-                { borderColor: getStatusColor('Driving') }
-              ]}
-              onPress={() => handleQuickStatusChange('Driving')}
-            >
-              <View style={[styles.quickStatusIcon, { backgroundColor: getStatusColor('Driving') }]}>
-                <Truck size={20} color={colors.white} />
-              </View>
-              <Text style={[
-                styles.quickStatusText,
-                currentStatus === 'Driving' && styles.quickStatusTextActive
-              ]}>Driving</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={[
-                styles.quickStatusButton,
-                currentStatus === 'On Duty Not Driving' && styles.quickStatusButtonActive,
-                { borderColor: getStatusColor('On Duty Not Driving') }
-              ]}
-              onPress={() => handleQuickStatusChange('On Duty Not Driving')}
-            >
-              <View style={[styles.quickStatusIcon, { backgroundColor: getStatusColor('On Duty Not Driving') }]}>
-                <Clock size={20} color={colors.white} />
-              </View>
-              <Text style={[
-                styles.quickStatusText,
-                currentStatus === 'On Duty Not Driving' && styles.quickStatusTextActive
-              ]}>On Duty</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={[
-                styles.quickStatusButton,
-                currentStatus === 'Off Duty' && styles.quickStatusButtonActive,
-                { borderColor: getStatusColor('Off Duty') }
-              ]}
-              onPress={() => handleQuickStatusChange('Off Duty')}
-            >
-              <View style={[styles.quickStatusIcon, { backgroundColor: getStatusColor('Off Duty') }]}>
-                <Coffee size={20} color={colors.white} />
-              </View>
-              <Text style={[
-                styles.quickStatusText,
-                currentStatus === 'Off Duty' && styles.quickStatusTextActive
-              ]}>Off Duty</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={[
-                styles.quickStatusButton,
-                currentStatus === 'Sleeper Berth' && styles.quickStatusButtonActive,
-                { borderColor: getStatusColor('Sleeper Berth') }
-              ]}
-              onPress={() => handleQuickStatusChange('Sleeper Berth')}
-            >
-              <View style={[styles.quickStatusIcon, { backgroundColor: getStatusColor('Sleeper Berth') }]}>
-                <Bed size={20} color={colors.white} />
-              </View>
-              <Text style={[
-                styles.quickStatusText,
-                currentStatus === 'Sleeper Berth' && styles.quickStatusTextActive
-              ]}>Sleeper</Text>
-            </TouchableOpacity>
-          </View>
-          
-          <TouchableOpacity 
-            style={[
-              styles.breakToggleButton,
-              isOnBreak && styles.breakToggleButtonActive
-            ]}
-            onPress={handleQuickBreakToggle}
-          >
-            <Text style={[
-              styles.breakToggleText,
-              isOnBreak && styles.breakToggleTextActive
-            ]}>
-              {isOnBreak ? '⏹ End Break' : '⏸ Start 30-Min Break'}
-            </Text>
+          <TouchableOpacity style={styles.viewDetailsButton}>
+            <Text style={styles.viewDetailsText}>View details</Text>
           </TouchableOpacity>
         </View>
         
+        {/* Recent Activity Card */}
+        <View style={styles.activityCard}>
+          <View style={styles.activityHeader}>
+            <View style={styles.activityIcon}>
+              <Activity size={16} color={colors.primary} />
+            </View>
+            <Text style={styles.activityTitle}>Recent Activity</Text>
+          </View>
+          <Text style={styles.activityDescription}>
+            You completed your pre-trip inspection and logged 8.5 hours of driving time yesterday. Great work maintaining compliance!
+          </Text>
+          <TouchableOpacity style={styles.viewDetailsButton}>
+            <Text style={styles.viewDetailsText}>View details</Text>
+          </TouchableOpacity>
+        </View>
+        
+        {/* Compliance and Weather Cards */}
         <WeatherCard onPress={() => setWeatherForecastVisible(true)} />
-        
         <MaintenanceSummaryCard />
-        
         <ComplianceAlert />
         
         {/* Real-Time Compliance Monitor */}
@@ -396,70 +410,6 @@ export default function DashboardScreen() {
         />
         
         <DOTInspectionCard onPress={() => setDotAssistantVisible(true)} />
-        
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Quick Actions</Text>
-        </View>
-        
-        <View style={styles.quickActions}>
-          <View style={styles.quickActionRow}>
-            <QuickActionButton 
-              icon={<Clock size={20} color={colors.text.primary} />}
-              label="Change Status"
-              onPress={() => handleActionWithInspectionCheck(() => setStatusModalVisible(true))}
-              color={colors.primaryLight}
-            />
-            
-            <QuickActionButton 
-              icon={<Clipboard size={20} color={colors.text.primary} />}
-              label="Pre-Trip Inspection"
-              onPress={() => setInspectionModalVisible(true)}
-              color={colors.secondary}
-            />
-            
-            <QuickActionButton 
-              icon={<Camera size={20} color={colors.text.primary} />}
-              label="Scan Receipt"
-              onPress={() => handleActionWithInspectionCheck(() => setScannerVisible(true))}
-              color={colors.secondary}
-            />
-          </View>
-          
-          <View style={styles.quickActionRow}>
-            <QuickActionButton 
-              icon={<Upload size={20} color={colors.text.primary} />}
-              label="Bulk Upload"
-              onPress={() => handleActionWithInspectionCheck(() => setBulkUploadVisible(true))}
-              color={colors.primaryLight}
-            />
-            
-            <QuickActionButton 
-              icon={<Shield size={20} color={colors.text.primary} />}
-              label="DOT Assistant"
-              onPress={() => handleActionWithInspectionCheck(() => setDotAssistantVisible(true))}
-              color={colors.secondary}
-            />
-            
-            <QuickActionButton 
-              icon={<AlertTriangle size={20} color={colors.text.primary} />}
-              label="AI Compliance"
-              onPress={() => handleActionWithInspectionCheck(() => setPredictiveComplianceVisible(true))}
-              color={violationPredictions.length > 0 ? colors.warning : colors.primaryLight}
-            />
-          </View>
-          
-          <View style={styles.quickActionRow}>
-            <QuickActionButton 
-              icon={<Cloud size={20} color={colors.text.primary} />}
-              label="Weather Forecast"
-              onPress={() => setWeatherForecastVisible(true)}
-              color={colors.primaryLight}
-            />
-            
-            <View style={styles.quickActionPlaceholder} />
-            <View style={styles.quickActionPlaceholder} />
-          </View>
-        </View>
         
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>Upcoming Loads</Text>
@@ -505,6 +455,9 @@ export default function DashboardScreen() {
         
         <View style={styles.footer} />
       </ScrollView>
+      
+      {/* AI Assistant FAB positioned in top right */}
+      <AIAssistantFAB top={120} right={16} />
       
       <View style={styles.voiceButtonContainer}>
         <VoiceCommandButton onCommandProcessed={handleCommandProcessed} />
@@ -922,5 +875,244 @@ const styles = StyleSheet.create({
   headerTitleText: {
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  // New styles for redesigned dashboard
+  customHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 60,
+    paddingBottom: 16,
+    backgroundColor: colors.primary,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  menuButton: {
+    width: 40,
+    height: 40,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+  },
+  menuLine: {
+    width: 20,
+    height: 2,
+    backgroundColor: colors.white,
+    borderRadius: 1,
+  },
+  headerBrand: {
+    marginLeft: 12,
+  },
+  headerRight: {
+    alignItems: 'center',
+  },
+  profileButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    gap: 8,
+  },
+  profileAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  profileInitial: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: colors.primary,
+  },
+  profileDropdown: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  profileDropdownText: {
+    fontSize: 12,
+    color: colors.white,
+  },
+  welcomeSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 24,
+    marginBottom: 24,
+  },
+  welcomeTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: colors.text.primary,
+  },
+  editButton: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  editButtonText: {
+    fontSize: 18,
+  },
+  mainActionsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: 24,
+    gap: 12,
+  },
+  mainActionCard: {
+    width: '48%',
+    backgroundColor: colors.background.secondary,
+    borderRadius: 16,
+    padding: 20,
+    alignItems: 'center',
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  mainActionIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  mainActionTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.text.primary,
+    textAlign: 'center',
+  },
+  appointmentCard: {
+    backgroundColor: colors.background.secondary,
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  appointmentHeader: {
+    flexDirection: 'row',
+    marginBottom: 16,
+    gap: 16,
+  },
+  appointmentDateContainer: {
+    alignItems: 'center',
+  },
+  appointmentCalendar: {
+    backgroundColor: colors.primary,
+    borderRadius: 12,
+    padding: 12,
+    alignItems: 'center',
+    minWidth: 60,
+  },
+  appointmentMonth: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.white,
+  },
+  appointmentDay: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: colors.white,
+  },
+  appointmentDayName: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.white,
+  },
+  appointmentDetails: {
+    flex: 1,
+  },
+  appointmentTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: colors.text.primary,
+    marginBottom: 8,
+  },
+  appointmentTime: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+    gap: 6,
+  },
+  appointmentTimeText: {
+    fontSize: 14,
+    color: colors.text.secondary,
+  },
+  appointmentLocation: {
+    marginTop: 4,
+  },
+  appointmentLocationText: {
+    fontSize: 14,
+    color: colors.text.secondary,
+  },
+  viewDetailsButton: {
+    backgroundColor: colors.primary,
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    alignItems: 'center',
+  },
+  viewDetailsText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.white,
+  },
+  activityCard: {
+    backgroundColor: colors.background.secondary,
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  activityHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+    gap: 8,
+  },
+  activityIcon: {
+    width: 24,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  activityTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text.primary,
+  },
+  activityDescription: {
+    fontSize: 14,
+    color: colors.text.secondary,
+    lineHeight: 20,
+    marginBottom: 16,
   },
 });
