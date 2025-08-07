@@ -273,7 +273,6 @@ export default function DashboardScreen() {
           </View>
           
           <View style={styles.headerRightContainer}>
-            <AIAssistantFAB top={0} right={0} />
             <TouchableOpacity 
               style={styles.logOutButton}
               onPress={handleLogOut}
@@ -281,6 +280,7 @@ export default function DashboardScreen() {
               <LogOut size={20} color={colors.text.secondary} />
               <Text style={styles.logOutText}>Log Out</Text>
             </TouchableOpacity>
+            <AIAssistantFAB top={60} right={0} />
           </View>
         </View>
         
@@ -894,7 +894,9 @@ const styles = StyleSheet.create({
   },
   headerRightContainer: {
     alignItems: 'flex-end',
-    gap: 12,
+    gap: 8,
+    position: 'relative',
+    minWidth: 120,
   },
   logOutButton: {
     flexDirection: 'row',
