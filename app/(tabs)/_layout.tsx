@@ -101,7 +101,6 @@ export default function TabLayout() {
           useNativeDriver: false,
           tension: 120,
           friction: 9,
-          damping: 15,
         }),
         Animated.timing(opacityAnim, {
           toValue: 1,
@@ -127,7 +126,6 @@ export default function TabLayout() {
             useNativeDriver: false,
             tension: 120,
             friction: 9,
-            damping: 15,
           }),
           Animated.timing(opacityAnim, {
             toValue: 0.92,
