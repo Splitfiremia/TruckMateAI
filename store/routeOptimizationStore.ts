@@ -11,6 +11,7 @@ import {
   TruckRestriction,
   WeatherAlert
 } from '@/types';
+import { openStreetMapService } from '@/services/openStreetMapService';
 
 interface RouteOptimizationState {
   // Current route data
@@ -77,34 +78,6 @@ const defaultPreferences: RouteOptimizationPreferences = {
     weight: 80000,
   },
   hazmatEndorsement: false,
-};
-
-// Mock Google Maps API integration
-const mockOptimizeRoute = async (
-  waypoints: RouteWaypoint[],
-  preferences: RouteOptimizationPreferences
-): Promise<OptimizedRoute> => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 2000));
-  
-  const totalDistance = waypoints.length * 150 + Math.random() * 200;
-  const totalDuration = totalDistance / 55 * 60; // Assuming 55 mph average
-  
-  return {
-    id: `route_${Date.now()}`,
-    waypoints,
-    totalDistance,
-    totalDuration,
-    estimatedFuelCost: (totalDistance / preferences.mpg) * 3.85,
-    tollCosts: preferences.avoidTolls ? 0 : Math.random() * 50,
-    routePolyline: 'mock_polyline_data',
-    trafficConditions: ['light', 'moderate', 'heavy'][Math.floor(Math.random() * 3)] as any,
-    weatherAlerts: [],
-    truckRestrictions: [],
-    optimizationScore: 75 + Math.random() * 25,
-    createdAt: new Date().toISOString(),
-    lastUpdated: new Date().toISOString(),
-  };
 };
 
 // Mock route analytics data
@@ -225,13 +198,26 @@ export const useRouteOptimizationStore = create<RouteOptimizationState>()(
         set({ isOptimizing: true });
 
         try {
-          const optimizedRoute = await mockOptimizeRoute(waypoints, preferences);
+          const optimizedRoute = await openStreetMapService.optimizeRoute(waypoints, preferences);
           
-          set((state) => ({
-            currentRoute: optimizedRoute,
-            routeHistory: [optimizedRoute, ...state.routeHistory.slice(0, 9)],
-            isOptimizing: false,
-          }));
+          if (optimizedRoute) {
+            set((state) => ({
+              currentRoute: optimizedRoute,
+              routeHistory: [optimizedRoute, ...state.routeHistory.slice(0, 9)],
+              isOptimizing: false,
+            }));
+
+            // Update real-time data
+            const trafficIncidents = await openStreetMapService.getTrafficInfo(optimizedRoute.routePolyline);
+            const fuelStops = await openStreetMapService.findFuelStops(waypoints);
+            
+            set({
+              trafficIncidents,
+              nearbyFuelStops: fuelStops,
+            });
+          } else {
+            set({ isOptimizing: false });
+          }
 
           return optimizedRoute;
         } catch (error) {

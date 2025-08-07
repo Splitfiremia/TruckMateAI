@@ -441,12 +441,17 @@ export default function RouteOptimizationScreen() {
         
         <View style={styles.mapSection}>
           <View style={styles.mapHeader}>
-            <Text style={styles.mapTitle}>Route Map</Text>
+            <View style={styles.mapTitleContainer}>
+              <Text style={styles.mapTitle}>Route Map</Text>
+              <View style={styles.osmBadge}>
+                <Text style={styles.osmBadgeText}>Powered by OpenStreetMap</Text>
+              </View>
+            </View>
             <TouchableOpacity 
               style={styles.testingModeButton}
-              onPress={() => Alert.alert('Testing Mode', 'This enables testing features for route optimization.')}
+              onPress={() => Alert.alert('OpenStreetMap Integration', 'Using free OpenStreetMap APIs for geocoding and routing. No API keys required!')}
             >
-              <Text style={styles.testingModeText}>Enable Testing Mode</Text>
+              <Text style={styles.testingModeText}>OSM Info</Text>
             </TouchableOpacity>
           </View>
           
@@ -464,8 +469,8 @@ export default function RouteOptimizationScreen() {
           </View>
           
           <Text style={styles.mapSubtext}>
-            Interactive maps are available on mobile devices.{"\n"}
-            Use the mobile app for full map functionality.
+            Using OpenStreetMap free APIs for routing and geocoding.{"\n"}
+            No API keys required - completely free to use!
           </Text>
         </View>
 
@@ -603,10 +608,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
   },
+  mapTitleContainer: {
+    flex: 1,
+  },
   mapTitle: {
     fontSize: 18,
     fontWeight: '700',
     color: colors.text.primary,
+    marginBottom: 4,
+  },
+  osmBadge: {
+    backgroundColor: colors.success + '20',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+  },
+  osmBadgeText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: colors.success,
+    textTransform: 'uppercase',
   },
   testingModeButton: {
     backgroundColor: colors.primary,
@@ -616,7 +638,7 @@ const styles = StyleSheet.create({
   },
   testingModeText: {
     color: colors.white,
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '600',
   },
   mapContainer: {
