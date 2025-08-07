@@ -154,18 +154,18 @@ export default function TabLayout() {
     setShowRightArrow(scrollX < maxScrollX - 10);
   };
 
-  // Enhanced tab items with better icons and descriptions
+  // Enhanced tab items with better icons and descriptions - Rearranged for better UX
   const tabItems = [
     { route: '/', icon: Gauge, title: 'Dashboard', description: 'Overview' },
     { route: '/logbook', icon: BookOpen, title: 'Logbook', description: 'Hours & Status' },
     { route: '/loads', icon: Package, title: 'Loads', description: 'Cargo Management' },
-    { route: '/route-optimization', icon: Route, title: 'Routes', description: 'Navigation' },
     { route: '/receipts', icon: ScanLine, title: 'Receipts', description: 'Expense Tracking' },
+    { route: '/route-optimization', icon: Route, title: 'Routes', description: 'Navigation' },
+    { route: '/weather', icon: Sun, title: 'Weather', description: 'Conditions' },
     { route: '/compliance', icon: CheckCircle2, title: 'Compliance', description: 'DOT & Safety' },
     { route: '/eld-integration', icon: Activity, title: 'ELD', description: 'Electronic Logs' },
-    { route: '/weather', icon: Sun, title: 'Weather', description: 'Conditions' },
-    ...(isFleetCompany() ? [{ route: '/fleet', icon: Building2, title: 'Fleet', description: 'Team Management' }] : []),
     { route: '/maintenance', icon: Wrench, title: 'Maintenance', description: 'Vehicle Care' },
+    ...(isFleetCompany() ? [{ route: '/fleet', icon: Building2, title: 'Fleet', description: 'Team Management' }] : []),
     { route: '/ai-assistant', icon: Sparkles, title: 'AI Assist', description: 'Smart Helper' },
     { route: '/integrations', icon: Link, title: 'Integrations', description: 'Connected Apps' },
     { route: '/pricing', icon: DollarSign, title: 'Pricing', description: 'Plans & Billing' },
