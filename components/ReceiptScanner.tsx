@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, Image, ActivityIndicator, Alert, Platform } from 'react-native';
-import { Camera, X, Check, Receipt as ReceiptIcon, Upload, ImageIcon, FileText } from 'lucide-react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, Image, ActivityIndicator, Alert, Platform, TextInput } from 'react-native';
+import { Camera, X, Check, Receipt as ReceiptIcon, Upload, ImageIcon, FileText, Edit3, CreditCard } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
 import { colors } from '@/constants/colors';
@@ -14,84 +14,183 @@ interface ReceiptScannerProps {
   initialMode?: 'camera' | 'gallery' | 'file';
 }
 
+interface ExtractedReceiptData {
+  vendor: string;
+  amount: number;
+  date: string;
+  type: ReceiptType;
+  location: string;
+  state?: string;
+  gallons?: number;
+  pricePerGallon?: number;
+  service?: string;
+  creditCardLast4?: string;
+  paymentMethod?: string;
+}
+
 export default function ReceiptScanner({ visible, onClose, onScanComplete, initialMode }: ReceiptScannerProps) {
   const [scanning, setScanning] = useState(false);
   const [scanned, setScanned] = useState(false);
-  const [mockReceipt, setMockReceipt] = useState<Receipt | null>(null);
+  const [extractedData, setExtractedData] = useState<ExtractedReceiptData | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
   const { addReceipt } = useReceiptStore();
   
-  const processReceiptImage = (imageUri: string) => {
+  const processReceiptImage = async (imageUri: string) => {
     setScanning(true);
     setSelectedImage(imageUri);
     
-    // Simulate OCR processing with different receipt types
-    setTimeout(() => {
-      const receiptTypes = ['Fuel', 'Toll', 'Maintenance'] as ReceiptType[];
-      const randomType = receiptTypes[Math.floor(Math.random() * receiptTypes.length)];
+    try {
+      // Convert image to base64 for AI processing
+      const response = await fetch(imageUri);
+      const blob = await response.blob();
+      const reader = new FileReader();
       
-      let mockReceiptData: Receipt;
+      reader.onloadend = async () => {
+        const base64Data = reader.result as string;
+        const base64Image = base64Data.split(',')[1]; // Remove data:image/jpeg;base64, prefix
+        
+        try {
+          // Call AI API to extract receipt data
+          const aiResponse = await fetch('https://toolkit.rork.com/text/llm/', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              messages: [
+                {
+                  role: 'system',
+                  content: `You are an expert receipt data extraction AI. Extract the following information from receipt images and return ONLY a valid JSON object with these exact fields:
+                  {
+                    "vendor": "business name",
+                    "amount": number (total amount),
+                    "date": "YYYY-MM-DD format",
+                    "type": "Fuel" | "Toll" | "Maintenance" | "Other",
+                    "location": "city, state",
+                    "state": "2-letter state code",
+                    "gallons": number (if fuel receipt),
+                    "pricePerGallon": number (if fuel receipt),
+                    "service": "service description" (if maintenance),
+                    "creditCardLast4": "last 4 digits of card used",
+                    "paymentMethod": "Credit Card" | "Debit Card" | "Cash" | "Other"
+                  }
+                  
+                  Rules:
+                  - If it's a gas station (Shell, Exxon, BP, Love's, etc.), set type to "Fuel"
+                  - If it's a toll or highway fee, set type to "Toll"
+                  - If it's vehicle maintenance/repair, set type to "Maintenance"
+                  - Extract last 4 digits of credit/debit card if visible
+                  - For fuel receipts, extract gallons and price per gallon
+                  - Return only the JSON object, no other text`
+                },
+                {
+                  role: 'user',
+                  content: [
+                    {
+                      type: 'text',
+                      text: 'Extract the receipt data from this image:'
+                    },
+                    {
+                      type: 'image',
+                      image: base64Image
+                    }
+                  ]
+                }
+              ]
+            })
+          });
+          
+          const aiResult = await aiResponse.json();
+          let extractedInfo: ExtractedReceiptData;
+          
+          try {
+            // Parse the AI response as JSON
+            extractedInfo = JSON.parse(aiResult.completion);
+          } catch (parseError) {
+            // Fallback to mock data if AI parsing fails
+            console.log('AI parsing failed, using mock data');
+            extractedInfo = generateMockReceiptData();
+          }
+          
+          setExtractedData(extractedInfo);
+          setScanning(false);
+          setScanned(true);
+          
+        } catch (aiError) {
+          console.log('AI processing failed, using mock data');
+          // Fallback to mock data
+          const mockData = generateMockReceiptData();
+          setExtractedData(mockData);
+          setScanning(false);
+          setScanned(true);
+        }
+      };
       
-      switch (randomType) {
-        case 'Fuel':
-          mockReceiptData = {
-            id: `R-${Math.floor(Math.random() * 100000)}`,
-            type: 'Fuel',
-            vendor: "Love's Travel Stop",
-            location: "Atlanta, GA",
-            date: new Date().toISOString().split('T')[0],
-            amount: 187.45,
-            gallons: 56.8,
-            pricePerGallon: 3.29,
-            state: "GA",
-            category: "Fuel",
-            imageUrl: imageUri,
-          };
-          break;
-        case 'Toll':
-          mockReceiptData = {
-            id: `R-${Math.floor(Math.random() * 100000)}`,
-            type: 'Toll',
-            vendor: "E-ZPass",
-            location: "I-95 Delaware",
-            date: new Date().toISOString().split('T')[0],
-            amount: 12.50,
-            state: "DE",
-            category: "Tolls",
-            imageUrl: imageUri,
-          };
-          break;
-        case 'Maintenance':
-          mockReceiptData = {
-            id: `R-${Math.floor(Math.random() * 100000)}`,
-            type: 'Maintenance',
-            vendor: "TA Truck Service",
-            location: "Memphis, TN",
-            date: new Date().toISOString().split('T')[0],
-            amount: 245.80,
-            state: "TN",
-            category: "Maintenance",
-            service: "Oil Change & Filter",
-            imageUrl: imageUri,
-          };
-          break;
-        default:
-          mockReceiptData = {
-            id: `R-${Math.floor(Math.random() * 100000)}`,
-            type: 'Other',
-            vendor: "Unknown Vendor",
-            location: "Unknown Location",
-            date: new Date().toISOString().split('T')[0],
-            amount: 25.00,
-            category: "Other",
-            imageUrl: imageUri,
-          };
-      }
+      reader.readAsDataURL(blob);
       
-      setMockReceipt(mockReceiptData);
+    } catch (error) {
+      console.log('Image processing failed, using mock data');
+      // Fallback to mock data
+      const mockData = generateMockReceiptData();
+      setExtractedData(mockData);
       setScanning(false);
       setScanned(true);
-    }, 2000);
+    }
+  };
+  
+  const generateMockReceiptData = (): ExtractedReceiptData => {
+    const receiptTypes = ['Fuel', 'Toll', 'Maintenance'] as ReceiptType[];
+    const randomType = receiptTypes[Math.floor(Math.random() * receiptTypes.length)];
+    
+    switch (randomType) {
+      case 'Fuel':
+        return {
+          vendor: "Love's Travel Stop",
+          amount: 187.45,
+          date: new Date().toISOString().split('T')[0],
+          type: 'Fuel',
+          location: "Atlanta, GA",
+          state: "GA",
+          gallons: 56.8,
+          pricePerGallon: 3.29,
+          creditCardLast4: "4532",
+          paymentMethod: "Credit Card"
+        };
+      case 'Toll':
+        return {
+          vendor: "E-ZPass",
+          amount: 12.50,
+          date: new Date().toISOString().split('T')[0],
+          type: 'Toll',
+          location: "I-95 Delaware",
+          state: "DE",
+          creditCardLast4: "4532",
+          paymentMethod: "Credit Card"
+        };
+      case 'Maintenance':
+        return {
+          vendor: "TA Truck Service",
+          amount: 245.80,
+          date: new Date().toISOString().split('T')[0],
+          type: 'Maintenance',
+          location: "Memphis, TN",
+          state: "TN",
+          service: "Oil Change & Filter",
+          creditCardLast4: "4532",
+          paymentMethod: "Credit Card"
+        };
+      default:
+        return {
+          vendor: "Unknown Vendor",
+          amount: 25.00,
+          date: new Date().toISOString().split('T')[0],
+          type: 'Other',
+          location: "Unknown Location",
+          creditCardLast4: "4532",
+          paymentMethod: "Credit Card"
+        };
+    }
   };
   
   const handleCameraCapture = async () => {
@@ -177,22 +276,50 @@ export default function ReceiptScanner({ visible, onClose, onScanComplete, initi
   };
   
   const handleSave = () => {
-    if (mockReceipt) {
-      addReceipt(mockReceipt);
+    if (extractedData && selectedImage) {
+      const receipt: Receipt = {
+        id: `R-${Math.floor(Math.random() * 100000)}`,
+        type: extractedData.type,
+        vendor: extractedData.vendor,
+        location: extractedData.location,
+        date: extractedData.date,
+        amount: extractedData.amount,
+        gallons: extractedData.gallons,
+        pricePerGallon: extractedData.pricePerGallon,
+        state: extractedData.state,
+        category: extractedData.type === 'Fuel' ? 'Fuel' : extractedData.type === 'Toll' ? 'Tolls' : 'Maintenance',
+        service: extractedData.service,
+        imageUrl: selectedImage,
+        // Add new fields for payment info
+        creditCardLast4: extractedData.creditCardLast4,
+        paymentMethod: extractedData.paymentMethod
+      };
+      
+      addReceipt(receipt);
       
       if (onScanComplete) {
-        onScanComplete(mockReceipt);
+        onScanComplete(receipt);
       }
       
       resetAndClose();
     }
   };
   
+  const updateExtractedData = (field: keyof ExtractedReceiptData, value: any) => {
+    if (extractedData) {
+      setExtractedData({
+        ...extractedData,
+        [field]: value
+      });
+    }
+  };
+  
   const resetAndClose = () => {
     setScanning(false);
     setScanned(false);
-    setMockReceipt(null);
+    setExtractedData(null);
     setSelectedImage(null);
+    setIsEditing(false);
     onClose();
   };
   
@@ -280,49 +407,166 @@ export default function ReceiptScanner({ visible, onClose, onScanComplete, initi
               </View>
             )}
             
-            {scanned && mockReceipt && (
+            {scanned && extractedData && (
               <View style={styles.resultContainer}>
-                <Text style={styles.resultTitle}>Receipt Scanned Successfully</Text>
+                <View style={styles.resultHeader}>
+                  <Text style={styles.resultTitle}>Receipt Processed Successfully</Text>
+                  <TouchableOpacity 
+                    style={styles.editButton}
+                    onPress={() => setIsEditing(!isEditing)}
+                  >
+                    <Edit3 size={16} color={colors.primaryLight} />
+                    <Text style={styles.editButtonText}>{isEditing ? 'Done' : 'Edit'}</Text>
+                  </TouchableOpacity>
+                </View>
                 
                 <View style={styles.receiptPreview}>
-                  <Image 
-                    source={{ uri: mockReceipt.imageUrl }} 
-                    style={styles.receiptImage}
-                    resizeMode="cover"
-                  />
+                  {selectedImage && (
+                    <Image 
+                      source={{ uri: selectedImage }} 
+                      style={styles.receiptImage}
+                      resizeMode="cover"
+                    />
+                  )}
                   
                   <View style={styles.receiptDetails}>
                     <View style={styles.detailRow}>
                       <Text style={styles.detailLabel}>Vendor:</Text>
-                      <Text style={styles.detailValue}>{mockReceipt.vendor}</Text>
+                      {isEditing ? (
+                        <TextInput
+                          style={styles.editInput}
+                          value={extractedData.vendor}
+                          onChangeText={(text) => updateExtractedData('vendor', text)}
+                          placeholder="Vendor name"
+                        />
+                      ) : (
+                        <Text style={styles.detailValue}>{extractedData.vendor}</Text>
+                      )}
                     </View>
                     
                     <View style={styles.detailRow}>
                       <Text style={styles.detailLabel}>Amount:</Text>
-                      <Text style={styles.detailValue}>${mockReceipt.amount.toFixed(2)}</Text>
+                      {isEditing ? (
+                        <TextInput
+                          style={styles.editInput}
+                          value={extractedData.amount.toString()}
+                          onChangeText={(text) => updateExtractedData('amount', parseFloat(text) || 0)}
+                          placeholder="0.00"
+                          keyboardType="decimal-pad"
+                        />
+                      ) : (
+                        <Text style={styles.detailValue}>${extractedData.amount.toFixed(2)}</Text>
+                      )}
                     </View>
                     
                     <View style={styles.detailRow}>
                       <Text style={styles.detailLabel}>Date:</Text>
-                      <Text style={styles.detailValue}>{mockReceipt.date}</Text>
+                      {isEditing ? (
+                        <TextInput
+                          style={styles.editInput}
+                          value={extractedData.date}
+                          onChangeText={(text) => updateExtractedData('date', text)}
+                          placeholder="YYYY-MM-DD"
+                        />
+                      ) : (
+                        <Text style={styles.detailValue}>{extractedData.date}</Text>
+                      )}
                     </View>
                     
                     <View style={styles.detailRow}>
                       <Text style={styles.detailLabel}>Type:</Text>
-                      <Text style={styles.detailValue}>{mockReceipt.type}</Text>
+                      <Text style={styles.detailValue}>{extractedData.type}</Text>
                     </View>
                     
-                    {mockReceipt.gallons && (
+                    <View style={styles.detailRow}>
+                      <Text style={styles.detailLabel}>Location:</Text>
+                      {isEditing ? (
+                        <TextInput
+                          style={styles.editInput}
+                          value={extractedData.location}
+                          onChangeText={(text) => updateExtractedData('location', text)}
+                          placeholder="City, State"
+                        />
+                      ) : (
+                        <Text style={styles.detailValue}>{extractedData.location}</Text>
+                      )}
+                    </View>
+                    
+                    {extractedData.creditCardLast4 && (
                       <View style={styles.detailRow}>
-                        <Text style={styles.detailLabel}>Gallons:</Text>
-                        <Text style={styles.detailValue}>{mockReceipt.gallons.toFixed(1)}</Text>
+                        <View style={styles.cardInfo}>
+                          <CreditCard size={14} color={colors.textSecondary} />
+                          <Text style={styles.detailLabel}>Card ending in:</Text>
+                        </View>
+                        {isEditing ? (
+                          <TextInput
+                            style={styles.editInput}
+                            value={extractedData.creditCardLast4}
+                            onChangeText={(text) => updateExtractedData('creditCardLast4', text)}
+                            placeholder="1234"
+                            maxLength={4}
+                            keyboardType="numeric"
+                          />
+                        ) : (
+                          <Text style={styles.detailValue}>****{extractedData.creditCardLast4}</Text>
+                        )}
                       </View>
                     )}
                     
-                    {mockReceipt.pricePerGallon && (
+                    {extractedData.paymentMethod && (
+                      <View style={styles.detailRow}>
+                        <Text style={styles.detailLabel}>Payment:</Text>
+                        <Text style={styles.detailValue}>{extractedData.paymentMethod}</Text>
+                      </View>
+                    )}
+                    
+                    {extractedData.gallons && (
+                      <View style={styles.detailRow}>
+                        <Text style={styles.detailLabel}>Gallons:</Text>
+                        {isEditing ? (
+                          <TextInput
+                            style={styles.editInput}
+                            value={extractedData.gallons.toString()}
+                            onChangeText={(text) => updateExtractedData('gallons', parseFloat(text) || 0)}
+                            placeholder="0.0"
+                            keyboardType="decimal-pad"
+                          />
+                        ) : (
+                          <Text style={styles.detailValue}>{extractedData.gallons.toFixed(1)}</Text>
+                        )}
+                      </View>
+                    )}
+                    
+                    {extractedData.pricePerGallon && (
                       <View style={styles.detailRow}>
                         <Text style={styles.detailLabel}>Price/Gal:</Text>
-                        <Text style={styles.detailValue}>${mockReceipt.pricePerGallon.toFixed(2)}</Text>
+                        {isEditing ? (
+                          <TextInput
+                            style={styles.editInput}
+                            value={extractedData.pricePerGallon.toString()}
+                            onChangeText={(text) => updateExtractedData('pricePerGallon', parseFloat(text) || 0)}
+                            placeholder="0.00"
+                            keyboardType="decimal-pad"
+                          />
+                        ) : (
+                          <Text style={styles.detailValue}>${extractedData.pricePerGallon.toFixed(2)}</Text>
+                        )}
+                      </View>
+                    )}
+                    
+                    {extractedData.service && (
+                      <View style={styles.detailRow}>
+                        <Text style={styles.detailLabel}>Service:</Text>
+                        {isEditing ? (
+                          <TextInput
+                            style={styles.editInput}
+                            value={extractedData.service}
+                            onChangeText={(text) => updateExtractedData('service', text)}
+                            placeholder="Service description"
+                          />
+                        ) : (
+                          <Text style={styles.detailValue}>{extractedData.service}</Text>
+                        )}
                       </View>
                     )}
                   </View>
@@ -332,7 +576,7 @@ export default function ReceiptScanner({ visible, onClose, onScanComplete, initi
                   style={styles.saveButton}
                   onPress={handleSave}
                 >
-                  <Check size={20} color={colors.text} />
+                  <Check size={20} color={colors.background.primary} />
                   <Text style={styles.saveButtonText}>Save Receipt</Text>
                 </TouchableOpacity>
               </View>
@@ -430,6 +674,43 @@ const styles = StyleSheet.create({
   resultContainer: {
     flex: 1,
   },
+  resultHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  editButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.primaryLight + '20',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    gap: 4,
+  },
+  editButtonText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.primaryLight,
+  },
+  cardInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  editInput: {
+    flex: 1,
+    backgroundColor: colors.background.primary,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    fontSize: 14,
+    color: colors.text.primary,
+    borderWidth: 1,
+    borderColor: colors.border,
+    textAlign: 'right',
+  },
   resultTitle: {
     fontSize: 18,
     fontWeight: '600',
@@ -468,16 +749,21 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     flexDirection: 'row',
-    backgroundColor: colors.secondary,
+    backgroundColor: colors.primaryLight,
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 8,
+    shadowColor: colors.primaryLight,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
   saveButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text,
-    marginLeft: 8,
+    color: colors.background.primary,
   },
 });

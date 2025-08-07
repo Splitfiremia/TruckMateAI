@@ -257,12 +257,14 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
   },
   categoriesContainer: {
-    gap: 12,
+    gap: 16,
+    marginTop: 4,
   },
   categoryItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    paddingVertical: 4,
   },
   categoryHeader: {
     flexDirection: 'row',

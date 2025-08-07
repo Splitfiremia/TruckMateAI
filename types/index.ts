@@ -41,6 +41,8 @@ export interface Receipt {
   category: string;
   service?: string;
   imageUrl?: string;
+  creditCardLast4?: string;
+  paymentMethod?: string;
 }
 
 export interface Load {
