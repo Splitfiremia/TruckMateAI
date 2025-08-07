@@ -104,7 +104,7 @@ export default function ReceiptCard({ receipt, onPress }: ReceiptCardProps) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.background.secondary,
+    backgroundColor: colors.white,
     borderRadius: 16,
     marginBottom: 12,
     overflow: 'hidden',
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
   vendor: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text.primary,
+    color: colors.black,
     marginBottom: 2,
   },
   type: {
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
   amount: {
     fontSize: 18,
     fontWeight: '700',
-    color: colors.text.primary,
+    color: colors.black,
   },
   detailsContainer: {
     gap: 8,
@@ -203,6 +203,6 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: 8,
     marginTop: 12,
-    backgroundColor: colors.background.primary,
+    backgroundColor: colors.backgroundLight,
   },
 });

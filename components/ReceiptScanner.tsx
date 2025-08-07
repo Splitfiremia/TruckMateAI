@@ -352,7 +352,7 @@ export default function ReceiptScanner({ visible, onClose, onScanComplete, initi
           <View style={styles.header}>
             <Text style={styles.title}>Receipt Scanner</Text>
             <TouchableOpacity onPress={resetAndClose} style={styles.closeButton}>
-              <X size={24} color={colors.text.primary} />
+              <X size={24} color={colors.black} />
             </TouchableOpacity>
           </View>
           
@@ -369,7 +369,7 @@ export default function ReceiptScanner({ visible, onClose, onScanComplete, initi
                     style={styles.uploadButton}
                     onPress={handleCameraCapture}
                   >
-                    <Camera size={24} color={colors.text.primary} />
+                    <Camera size={24} color={colors.black} />
                     <Text style={styles.uploadButtonText}>Camera</Text>
                   </TouchableOpacity>
                   
@@ -377,7 +377,7 @@ export default function ReceiptScanner({ visible, onClose, onScanComplete, initi
                     style={styles.uploadButton}
                     onPress={handleGalleryPick}
                   >
-                    <ImageIcon size={24} color={colors.text.primary} />
+                    <ImageIcon size={24} color={colors.black} />
                     <Text style={styles.uploadButtonText}>Gallery</Text>
                   </TouchableOpacity>
                   
@@ -385,7 +385,7 @@ export default function ReceiptScanner({ visible, onClose, onScanComplete, initi
                     style={styles.uploadButton}
                     onPress={handleDocumentPick}
                   >
-                    <FileText size={24} color={colors.text.primary} />
+                    <FileText size={24} color={colors.black} />
                     <Text style={styles.uploadButtonText}>Files</Text>
                   </TouchableOpacity>
                 </View>
@@ -576,7 +576,7 @@ export default function ReceiptScanner({ visible, onClose, onScanComplete, initi
                   style={styles.saveButton}
                   onPress={handleSave}
                 >
-                  <Check size={20} color={colors.background.primary} />
+                  <Check size={20} color={colors.white} />
                   <Text style={styles.saveButtonText}>Save Receipt</Text>
                 </TouchableOpacity>
               </View>
@@ -595,7 +595,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   container: {
-    backgroundColor: colors.background.primary,
+    backgroundColor: colors.white,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     height: '80%',
@@ -610,7 +610,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '600',
-    color: colors.text.primary,
+    color: colors.black,
   },
   closeButton: {
     padding: 4,
@@ -647,7 +647,7 @@ const styles = StyleSheet.create({
   uploadButtonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: colors.text.primary,
+    color: colors.white,
   },
   processingImage: {
     width: 200,
@@ -663,7 +663,7 @@ const styles = StyleSheet.create({
   scanningText: {
     fontSize: 18,
     fontWeight: '600',
-    color: colors.text.primary,
+    color: colors.black,
     marginTop: 16,
   },
   scanningSubtext: {
@@ -701,12 +701,12 @@ const styles = StyleSheet.create({
   },
   editInput: {
     flex: 1,
-    backgroundColor: colors.background.primary,
+    backgroundColor: colors.white,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 8,
     fontSize: 14,
-    color: colors.text.primary,
+    color: colors.black,
     borderWidth: 1,
     borderColor: colors.border,
     textAlign: 'right',
@@ -745,7 +745,7 @@ const styles = StyleSheet.create({
   detailValue: {
     fontSize: 14,
     fontWeight: '500',
-    color: colors.text.primary,
+    color: colors.black,
   },
   saveButton: {
     flexDirection: 'row',
@@ -764,6 +764,6 @@ const styles = StyleSheet.create({
   saveButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.background.primary,
+    color: colors.white,
   },
 });

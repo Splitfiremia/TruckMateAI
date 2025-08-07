@@ -58,7 +58,7 @@ export default function ReceiptsScreen() {
       {icon}
       <Text style={[
         styles.filterButtonText,
-        activeFilter === type && { color: colors.background.primary }
+        activeFilter === type && { color: colors.white }
       ]}>
         {label}
       </Text>
@@ -75,7 +75,7 @@ export default function ReceiptsScreen() {
               style={styles.addButton}
               onPress={() => setUploadOptionsVisible(true)}
             >
-              <Plus size={20} color={colors.background.primary} />
+              <Plus size={20} color={colors.white} />
             </TouchableOpacity>
           ),
         }} 
@@ -92,7 +92,7 @@ export default function ReceiptsScreen() {
           </View>
         </View>
         
-        <View style={styles.categoriesContainer}>
+        <View style={styles.categoriesGrid}>
           <View style={styles.categoryItem}>
             <View style={styles.categoryHeader}>
               <View style={[styles.categoryIcon, { backgroundColor: colors.primaryLight + '20' }]}>
@@ -131,16 +131,27 @@ export default function ReceiptsScreen() {
         </View>
       </View>
       
+      {/* Quick Scan Button */}
+      <View style={styles.quickScanContainer}>
+        <TouchableOpacity 
+          style={styles.quickScanButton}
+          onPress={() => setScannerVisible(true)}
+        >
+          <Camera size={20} color={colors.white} />
+          <Text style={styles.quickScanText}>Scan Receipt</Text>
+        </TouchableOpacity>
+      </View>
+      
       <ScrollView 
         horizontal 
         showsHorizontalScrollIndicator={false}
         style={styles.filtersContainer}
         contentContainerStyle={styles.filtersContent}
       >
-        {renderFilterButton('All', <Filter size={16} color={activeFilter === 'All' ? colors.background.primary : colors.textSecondary} />, 'All')}
-        {renderFilterButton('Fuel', <Fuel size={16} color={activeFilter === 'Fuel' ? colors.background.primary : colors.textSecondary} />, 'Fuel')}
-        {renderFilterButton('Toll', <ReceiptIcon size={16} color={activeFilter === 'Toll' ? colors.background.primary : colors.textSecondary} />, 'Tolls')}
-        {renderFilterButton('Maintenance', <Truck size={16} color={activeFilter === 'Maintenance' ? colors.background.primary : colors.textSecondary} />, 'Maintenance')}
+        {renderFilterButton('All', <Filter size={16} color={activeFilter === 'All' ? colors.white : colors.textSecondary} />, 'All')}
+        {renderFilterButton('Fuel', <Fuel size={16} color={activeFilter === 'Fuel' ? colors.white : colors.textSecondary} />, 'Fuel')}
+        {renderFilterButton('Toll', <ReceiptIcon size={16} color={activeFilter === 'Toll' ? colors.white : colors.textSecondary} />, 'Tolls')}
+        {renderFilterButton('Maintenance', <Truck size={16} color={activeFilter === 'Maintenance' ? colors.white : colors.textSecondary} />, 'Maintenance')}
       </ScrollView>
       
       {filteredReceipts.length === 0 ? (
@@ -156,7 +167,7 @@ export default function ReceiptsScreen() {
             style={styles.primaryButton}
             onPress={() => setUploadOptionsVisible(true)}
           >
-            <Plus size={20} color={colors.background.primary} />
+            <Plus size={20} color={colors.white} />
             <Text style={styles.primaryButtonText}>Add Receipt</Text>
           </TouchableOpacity>
         </View>
@@ -209,7 +220,7 @@ export default function ReceiptsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background.primary,
+    backgroundColor: colors.backgroundLight,
   },
   addButton: {
     backgroundColor: colors.primaryLight,
@@ -221,7 +232,7 @@ const styles = StyleSheet.create({
     marginRight: 4,
   },
   summaryContainer: {
-    backgroundColor: colors.background.secondary,
+    backgroundColor: colors.white,
     marginHorizontal: 16,
     marginTop: 16,
     borderRadius: 16,
@@ -241,7 +252,7 @@ const styles = StyleSheet.create({
   summaryTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: colors.text.primary,
+    color: colors.black,
   },
   totalContainer: {
     alignItems: 'flex-end',
@@ -254,17 +265,18 @@ const styles = StyleSheet.create({
   totalValue: {
     fontSize: 20,
     fontWeight: '700',
-    color: colors.text.primary,
+    color: colors.black,
   },
-  categoriesContainer: {
-    gap: 16,
-    marginTop: 4,
+  categoriesGrid: {
+    gap: 12,
+    marginTop: 8,
   },
   categoryItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 4,
+    paddingVertical: 8,
+    paddingHorizontal: 4,
   },
   categoryHeader: {
     flexDirection: 'row',
@@ -281,7 +293,7 @@ const styles = StyleSheet.create({
   categoryLabel: {
     fontSize: 15,
     fontWeight: '500',
-    color: colors.text.primary,
+    color: colors.black,
   },
   categoryValue: {
     fontSize: 16,
@@ -298,7 +310,7 @@ const styles = StyleSheet.create({
   filterButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.background.secondary,
+    backgroundColor: colors.white,
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 24,
@@ -322,7 +334,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: colors.background.secondary,
+    backgroundColor: colors.white,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 20,
@@ -330,7 +342,7 @@ const styles = StyleSheet.create({
   emptyStateTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: colors.text.primary,
+    color: colors.black,
     marginBottom: 8,
   },
   emptyStateSubtitle: {
@@ -357,14 +369,38 @@ const styles = StyleSheet.create({
   primaryButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.background.primary,
+    color: colors.white,
   },
   receiptsList: {
     paddingHorizontal: 16,
     paddingTop: 8,
   },
   footer: {
-    height: 100, // Space for the floating button
+    height: 120, // Space for the floating button
+  },
+  quickScanContainer: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+  },
+  quickScanButton: {
+    flexDirection: 'row',
+    backgroundColor: colors.primaryLight,
+    borderRadius: 12,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    shadowColor: colors.primaryLight,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  quickScanText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.white,
   },
   voiceButtonContainer: {
     position: 'absolute',
