@@ -18,6 +18,8 @@ import {
   Settings,
   Route,
   Zap,
+  Clock,
+  TrendingUp,
 } from 'lucide-react-native';
 
 import { colors } from '@/constants/colors';
@@ -102,79 +104,98 @@ const RouteOptimizationMap: React.FC<RouteOptimizationMapProps> = ({
   const MapFallback = () => (
     <View style={[styles.map, styles.mapFallback]}>
       <View style={styles.mapFallbackContent}>
-        <MapPin size={48} color={colors.primary} />
-        <Text style={styles.mapFallbackTitle}>Route Optimization</Text>
-        <Text style={styles.mapFallbackText}>
-          Interactive maps are available on mobile devices.
-          {waypoints.length > 0 && (
-            `\n\nWaypoints (${waypoints.length}):`
-          )}
-        </Text>
-        <Text style={styles.mapFallbackSubtext}>
-          Use the mobile app for full map functionality.
-        </Text>
+        <View style={styles.mapIconContainer}>
+          <MapPin size={32} color={colors.primary} />
+        </View>
+        <Text style={styles.mapFallbackTitle}>Route Preview</Text>
+        {waypoints.length === 0 ? (
+          <View style={styles.emptyMapState}>
+            <Text style={styles.emptyMapText}>
+              Add waypoints to see your route visualization
+            </Text>
+          </View>
+        ) : (
+          <Text style={styles.mapFallbackText}>
+            {waypoints.length} stop{waypoints.length > 1 ? 's' : ''} added to your route
+          </Text>
+        )}
         
         {waypoints.length > 0 && (
-          <ScrollView style={styles.waypointsList} showsVerticalScrollIndicator={false}>
-            {waypoints.map((waypoint, index) => (
-              <TouchableOpacity
-                key={waypoint.id}
-                style={styles.waypointItem}
-                onPress={() => onWaypointPress?.(waypoint)}
-              >
-                <View style={[
-                  styles.waypointNumber,
-                  { backgroundColor: getWaypointColor(waypoint.type) }
-                ]}>
-                  <Text style={styles.waypointNumberText}>{index + 1}</Text>
-                </View>
-                <View style={styles.waypointInfo}>
-                  <Text style={styles.waypointAddress} numberOfLines={1}>
-                    {waypoint.address}
-                  </Text>
-                  <Text style={styles.waypointType}>
-                    {getWaypointIcon(waypoint.type)} {waypoint.type}
-                  </Text>
-                  {waypoint.notes && (
-                    <Text style={styles.waypointNotes} numberOfLines={1}>
-                      {waypoint.notes}
+          <View style={styles.waypointsContainer}>
+            <Text style={styles.waypointsTitle}>Route Stops</Text>
+            <ScrollView style={styles.waypointsList} showsVerticalScrollIndicator={false}>
+              {waypoints.map((waypoint, index) => (
+                <TouchableOpacity
+                  key={waypoint.id}
+                  style={styles.waypointItem}
+                  onPress={() => onWaypointPress?.(waypoint)}
+                >
+                  <View style={[
+                    styles.waypointNumber,
+                    { backgroundColor: getWaypointColor(waypoint.type) }
+                  ]}>
+                    <Text style={styles.waypointNumberText}>{index + 1}</Text>
+                  </View>
+                  <View style={styles.waypointInfo}>
+                    <Text style={styles.waypointAddress} numberOfLines={1}>
+                      {waypoint.address}
                     </Text>
-                  )}
-                </View>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+                    <View style={styles.waypointMeta}>
+                      <Text style={styles.waypointType}>
+                        {getWaypointIcon(waypoint.type)} {waypoint.type.replace('_', ' ')}
+                      </Text>
+                      {waypoint.notes && (
+                        <Text style={styles.waypointNotes} numberOfLines={1}>
+                          • {waypoint.notes}
+                        </Text>
+                      )}
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
         )}
         
         {currentRoute && (
           <View style={styles.routeInfo}>
-            <Text style={styles.routeTitle}>Route Summary</Text>
+            <Text style={styles.routeTitle}>Optimized Route</Text>
             <View style={styles.routeStats}>
               <View style={styles.routeStat}>
-                <Navigation size={16} color={colors.primary} />
+                <View style={styles.routeStatIcon}>
+                  <Navigation size={14} color={colors.primary} />
+                </View>
                 <Text style={styles.routeStatValue}>
                   {currentRoute.totalDistance.toFixed(1)} mi
                 </Text>
                 <Text style={styles.routeStatLabel}>Distance</Text>
               </View>
               <View style={styles.routeStat}>
+                <View style={styles.routeStatIcon}>
+                  <Clock size={14} color={colors.secondary} />
+                </View>
                 <Text style={styles.routeStatValue}>
                   {Math.floor(currentRoute.totalDuration / 60)}h {Math.floor(currentRoute.totalDuration % 60)}m
                 </Text>
                 <Text style={styles.routeStatLabel}>Duration</Text>
               </View>
               <View style={styles.routeStat}>
-                <Fuel size={16} color={colors.warning} />
+                <View style={styles.routeStatIcon}>
+                  <Fuel size={14} color={colors.warning} />
+                </View>
                 <Text style={styles.routeStatValue}>
-                  ${currentRoute.estimatedFuelCost.toFixed(2)}
+                  ${currentRoute.estimatedFuelCost.toFixed(0)}
                 </Text>
                 <Text style={styles.routeStatLabel}>Fuel Cost</Text>
               </View>
               <View style={styles.routeStat}>
+                <View style={styles.routeStatIcon}>
+                  <TrendingUp size={14} color={colors.success} />
+                </View>
                 <Text style={styles.routeStatValue}>
-                  {currentRoute.optimizationScore.toFixed(0)}/100
+                  {currentRoute.optimizationScore.toFixed(0)}%
                 </Text>
-                <Text style={styles.routeStatLabel}>Score</Text>
+                <Text style={styles.routeStatLabel}>Efficiency</Text>
               </View>
             </View>
           </View>
@@ -239,70 +260,49 @@ const RouteOptimizationMap: React.FC<RouteOptimizationMapProps> = ({
     <View style={styles.container}>
       <MapFallback />
 
-      {/* Control Panel */}
-      <View style={styles.controlPanel}>
-        <View style={styles.controlRow}>
+      {/* Map Controls */}
+      <View style={styles.mapControls}>
+        <View style={styles.mapControlsRow}>
           <TouchableOpacity
             style={[
-              styles.controlButton,
-              { backgroundColor: showTraffic ? colors.primary : colors.background.secondary }
+              styles.mapControlButton,
+              { backgroundColor: showTraffic ? colors.primary : colors.card }
             ]}
             onPress={toggleTrafficView}
           >
-            <Route size={20} color={showTraffic ? colors.white : colors.text.primary} />
+            <Route size={16} color={showTraffic ? colors.white : colors.text.primary} />
+            <Text style={[
+              styles.mapControlText,
+              { color: showTraffic ? colors.white : colors.text.primary }
+            ]}>Traffic</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[
-              styles.controlButton,
-              { backgroundColor: showFuelStops ? colors.warning : colors.background.secondary }
+              styles.mapControlButton,
+              { backgroundColor: showFuelStops ? colors.warning : colors.card }
             ]}
             onPress={toggleFuelStopsView}
           >
-            <Fuel size={20} color={showFuelStops ? colors.white : colors.text.primary} />
+            <Fuel size={16} color={showFuelStops ? colors.white : colors.text.primary} />
+            <Text style={[
+              styles.mapControlText,
+              { color: showFuelStops ? colors.white : colors.text.primary }
+            ]}>Fuel</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[
-              styles.controlButton,
-              { backgroundColor: showWeatherAlerts ? colors.secondary : colors.background.secondary }
+              styles.mapControlButton,
+              { backgroundColor: showWeatherAlerts ? colors.secondary : colors.card }
             ]}
             onPress={toggleWeatherView}
           >
-            <Cloud size={20} color={showWeatherAlerts ? colors.white : colors.text.primary} />
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.controlRow}>
-          <TouchableOpacity
-            style={[
-              styles.optimizeButton,
-              { opacity: isOptimizing ? 0.6 : 1 }
-            ]}
-            onPress={handleOptimizeRoute}
-            disabled={isOptimizing}
-          >
-            <Zap size={16} color={colors.white} />
-            <Text style={styles.optimizeButtonText}>
-              {isOptimizing ? 'Optimizing...' : 'Optimize Route'}
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.navigationButton,
-              { 
-                backgroundColor: isNavigating ? colors.danger : colors.success,
-                opacity: !currentRoute ? 0.6 : 1
-              }
-            ]}
-            onPress={isNavigating ? stopNavigation : handleStartNavigation}
-            disabled={!currentRoute}
-          >
-            <Navigation size={16} color={colors.white} />
-            <Text style={styles.navigationButtonText}>
-              {isNavigating ? 'Stop' : 'Navigate'}
-            </Text>
+            <Cloud size={16} color={showWeatherAlerts ? colors.white : colors.text.primary} />
+            <Text style={[
+              styles.mapControlText,
+              { color: showWeatherAlerts ? colors.white : colors.text.primary }
+            ]}>Weather</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -325,54 +325,68 @@ const styles = StyleSheet.create({
   mapFallbackContent: {
     alignItems: 'center',
     padding: 20,
-    paddingTop: 80,
+    paddingTop: 40,
     width: '100%',
     maxWidth: 500,
   },
+  mapIconContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: colors.primary + '15',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
   mapFallbackTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 20,
+    fontWeight: '700',
     color: colors.text.primary,
-    marginTop: 16,
     marginBottom: 8,
   },
-  mapFallbackText: {
-    fontSize: 16,
-    color: colors.text.secondary,
-    textAlign: 'center',
-    lineHeight: 24,
-    marginBottom: 8,
+  emptyMapState: {
+    paddingVertical: 20,
   },
-  mapFallbackSubtext: {
+  emptyMapText: {
     fontSize: 14,
     color: colors.text.secondary,
     textAlign: 'center',
-    fontStyle: 'italic',
-    marginBottom: 20,
+    lineHeight: 20,
+  },
+  mapFallbackText: {
+    fontSize: 14,
+    color: colors.text.secondary,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  waypointsContainer: {
+    width: '100%',
+    marginBottom: 16,
+  },
+  waypointsTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.text.primary,
+    marginBottom: 12,
   },
   waypointsList: {
     width: '100%',
-    maxHeight: 200,
-    marginBottom: 20,
+    maxHeight: 180,
   },
   waypointItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.card,
+    backgroundColor: colors.background.secondary,
     padding: 12,
-    borderRadius: 8,
+    borderRadius: 12,
     marginBottom: 8,
     gap: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
   },
   waypointNumber: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -388,56 +402,67 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: colors.text.primary,
-    marginBottom: 2,
+    marginBottom: 4,
+  },
+  waypointMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   waypointType: {
     fontSize: 12,
     color: colors.text.secondary,
     textTransform: 'capitalize',
-    marginBottom: 2,
   },
   waypointNotes: {
     fontSize: 11,
     color: colors.text.secondary,
     fontStyle: 'italic',
+    flex: 1,
   },
   routeInfo: {
     width: '100%',
-    backgroundColor: colors.card,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: colors.primary + '10',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: colors.primary + '20',
   },
   routeTitle: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '700',
     color: colors.text.primary,
-    marginBottom: 12,
+    marginBottom: 16,
     textAlign: 'center',
   },
   routeStats: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
   },
   routeStat: {
     alignItems: 'center',
     flex: 1,
   },
+  routeStatIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 6,
+  },
   routeStatValue: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '700',
     color: colors.text.primary,
-    marginTop: 4,
+    marginBottom: 2,
   },
   routeStatLabel: {
     fontSize: 11,
     color: colors.text.secondary,
-    marginTop: 2,
+    fontWeight: '500',
   },
   alertsSection: {
     width: '100%',
@@ -533,68 +558,35 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: colors.text.secondary,
   },
-  controlPanel: {
+  mapControls: {
     position: 'absolute',
-    top: 20,
+    top: 16,
+    left: 16,
     right: 16,
-    gap: 12,
     zIndex: 10,
-    alignItems: 'flex-end',
   },
-  controlRow: {
+  mapControlsRow: {
     flexDirection: 'row',
-    gap: 12,
-    alignItems: 'center',
-  },
-  controlButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: 'center',
+    gap: 8,
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
   },
-  optimizeButton: {
+  mapControlButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.primary,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 24,
-    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    gap: 6,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
+    shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 5,
-    minWidth: 120,
+    elevation: 3,
+    minWidth: 70,
+    justifyContent: 'center',
   },
-  optimizeButtonText: {
-    color: colors.white,
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  navigationButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 24,
-    gap: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-    minWidth: 100,
-  },
-  navigationButtonText: {
-    color: colors.white,
-    fontSize: 14,
+  mapControlText: {
+    fontSize: 12,
     fontWeight: '600',
   },
 });

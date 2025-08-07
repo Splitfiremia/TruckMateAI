@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Alert,
   Platform,
+  ScrollView,
 } from 'react-native';
 import { Stack } from 'expo-router';
 import {
@@ -18,6 +19,10 @@ import {
   DollarSign,
   TrendingUp,
   AlertTriangle,
+  Plus,
+  Route,
+  Play,
+  RotateCcw,
 } from 'lucide-react-native';
 
 import { colors } from '@/constants/colors';
@@ -234,15 +239,95 @@ export default function RouteOptimizationScreen() {
     );
   };
 
+  const renderQuickActions = () => {
+    return (
+      <View style={styles.quickActionsCard}>
+        <Text style={styles.quickActionsTitle}>Quick Actions</Text>
+        <View style={styles.quickActionsGrid}>
+          <TouchableOpacity
+            style={styles.quickActionButton}
+            onPress={() => setWaypointManagerVisible(true)}
+          >
+            <View style={[styles.quickActionIcon, { backgroundColor: colors.primary + '20' }]}>
+              <Plus size={20} color={colors.primary} />
+            </View>
+            <Text style={styles.quickActionText}>Add Stop</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.quickActionButton}
+            onPress={handleOptimizeRoute}
+            disabled={isOptimizing || waypoints.length < 2}
+          >
+            <View style={[styles.quickActionIcon, { backgroundColor: colors.success + '20' }]}>
+              <Route size={20} color={colors.success} />
+            </View>
+            <Text style={styles.quickActionText}>Optimize</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.quickActionButton}
+            onPress={() => {
+              if (!currentRoute) {
+                Alert.alert('Error', 'Please optimize a route first.');
+                return;
+              }
+              // Start navigation logic
+            }}
+            disabled={!currentRoute}
+          >
+            <View style={[styles.quickActionIcon, { backgroundColor: colors.warning + '20' }]}>
+              <Play size={20} color={colors.warning} />
+            </View>
+            <Text style={styles.quickActionText}>Navigate</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.quickActionButton}
+            onPress={() => setPreferencesVisible(true)}
+          >
+            <View style={[styles.quickActionIcon, { backgroundColor: colors.secondary + '20' }]}>
+              <Settings size={20} color={colors.secondary} />
+            </View>
+            <Text style={styles.quickActionText}>Settings</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
+  };
+
   const renderStatsCard = () => {
-    if (!currentRoute) return null;
+    if (!currentRoute) {
+      return (
+        <View style={styles.emptyStateCard}>
+          <MapPin size={48} color={colors.text.secondary} />
+          <Text style={styles.emptyStateTitle}>No Route Planned</Text>
+          <Text style={styles.emptyStateText}>
+            Add waypoints and optimize your route to see statistics
+          </Text>
+          <TouchableOpacity
+            style={styles.emptyStateButton}
+            onPress={() => setWaypointManagerVisible(true)}
+          >
+            <Plus size={16} color={colors.white} />
+            <Text style={styles.emptyStateButtonText}>Add First Stop</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
 
     return (
       <View style={styles.statsCard}>
+        <View style={styles.statsHeader}>
+          <Text style={styles.statsTitle}>Route Summary</Text>
+          <TouchableOpacity style={styles.refreshButton}>
+            <RotateCcw size={16} color={colors.primary} />
+          </TouchableOpacity>
+        </View>
         <View style={styles.statsRow}>
           <View style={styles.statItem}>
-            <View style={styles.statIcon}>
-              <Navigation size={16} color={colors.primary} />
+            <View style={[styles.statIcon, { backgroundColor: colors.primary + '15' }]}>
+              <Navigation size={18} color={colors.primary} />
             </View>
             <Text style={styles.statValue}>
               {currentRoute.totalDistance.toFixed(0)} mi
@@ -251,8 +336,8 @@ export default function RouteOptimizationScreen() {
           </View>
 
           <View style={styles.statItem}>
-            <View style={styles.statIcon}>
-              <Clock size={16} color={colors.secondary} />
+            <View style={[styles.statIcon, { backgroundColor: colors.secondary + '15' }]}>
+              <Clock size={18} color={colors.secondary} />
             </View>
             <Text style={styles.statValue}>
               {Math.floor(currentRoute.totalDuration / 60)}h {Math.floor(currentRoute.totalDuration % 60)}m
@@ -261,8 +346,8 @@ export default function RouteOptimizationScreen() {
           </View>
 
           <View style={styles.statItem}>
-            <View style={styles.statIcon}>
-              <Fuel size={16} color={colors.warning} />
+            <View style={[styles.statIcon, { backgroundColor: colors.warning + '15' }]}>
+              <Fuel size={18} color={colors.warning} />
             </View>
             <Text style={styles.statValue}>
               ${currentRoute.estimatedFuelCost.toFixed(0)}
@@ -271,13 +356,13 @@ export default function RouteOptimizationScreen() {
           </View>
 
           <View style={styles.statItem}>
-            <View style={styles.statIcon}>
-              <TrendingUp size={16} color={colors.success} />
+            <View style={[styles.statIcon, { backgroundColor: colors.success + '15' }]}>
+              <TrendingUp size={18} color={colors.success} />
             </View>
             <Text style={styles.statValue}>
-              {currentRoute.optimizationScore.toFixed(0)}
+              {currentRoute.optimizationScore.toFixed(0)}%
             </Text>
-            <Text style={styles.statLabel}>Score</Text>
+            <Text style={styles.statLabel}>Efficiency</Text>
           </View>
         </View>
 
@@ -333,59 +418,75 @@ export default function RouteOptimizationScreen() {
     <View style={styles.container}>
       <Stack.Screen
         options={{
-          title: 'Route Optimization',
-          headerRight: () => (
-            <View style={styles.headerButtons}>
-              <TouchableOpacity
-                style={styles.headerButton}
-                onPress={() => setPreferencesVisible(true)}
-              >
-                <Settings size={20} color={colors.primary} />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.headerButton}
-                onPress={() => setWaypointManagerVisible(true)}
-              >
-                <MapPin size={20} color={colors.primary} />
-              </TouchableOpacity>
-            </View>
-          ),
+          title: 'Routes',
+          headerStyle: {
+            backgroundColor: colors.background.primary,
+          },
+          headerTitleStyle: {
+            fontSize: 24,
+            fontWeight: 'bold',
+            color: colors.text.primary,
+          },
         }}
       />
 
-      <View style={styles.mapContainer}>
-        <RouteOptimizationMap
-          onMapPress={handleMapPress}
-          onWaypointPress={(waypoint) => {
-            Alert.alert(
-              waypoint.address,
-              `Type: ${waypoint.type}\n${waypoint.notes || 'No notes'}`,
-              [{ text: 'OK' }]
-            );
-          }}
-        />
-      </View>
-
-      <View style={styles.bottomPanel}>
+      <ScrollView 
+        style={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {renderQuickActions()}
         {renderStatsCard()}
         {renderAlertsCard()}
-
-        <View style={styles.actionButtons}>
-          <TouchableOpacity
-            style={[
-              styles.optimizeButton,
-              { opacity: isOptimizing || waypoints.length < 2 ? 0.6 : 1 }
-            ]}
-            onPress={handleOptimizeRoute}
-            disabled={isOptimizing || waypoints.length < 2}
-          >
-            <Zap size={20} color={colors.white} />
-            <Text style={styles.optimizeButtonText}>
-              {isOptimizing ? 'Optimizing...' : 'Optimize Route'}
-            </Text>
-          </TouchableOpacity>
+        
+        <View style={styles.mapSection}>
+          <View style={styles.mapHeader}>
+            <Text style={styles.mapTitle}>Route Map</Text>
+            <TouchableOpacity 
+              style={styles.testingModeButton}
+              onPress={() => Alert.alert('Testing Mode', 'This enables testing features for route optimization.')}
+            >
+              <Text style={styles.testingModeText}>Enable Testing Mode</Text>
+            </TouchableOpacity>
+          </View>
+          
+          <View style={styles.mapContainer}>
+            <RouteOptimizationMap
+              onMapPress={handleMapPress}
+              onWaypointPress={(waypoint) => {
+                Alert.alert(
+                  waypoint.address,
+                  `Type: ${waypoint.type}\n${waypoint.notes || 'No notes'}`,
+                  [{ text: 'OK' }]
+                );
+              }}
+            />
+          </View>
+          
+          <Text style={styles.mapSubtext}>
+            Interactive maps are available on mobile devices.{"\n"}
+            Use the mobile app for full map functionality.
+          </Text>
         </View>
-      </View>
+
+        {currentRoute && (
+          <View style={styles.primaryActionContainer}>
+            <TouchableOpacity
+              style={[
+                styles.primaryActionButton,
+                { opacity: isOptimizing ? 0.7 : 1 }
+              ]}
+              onPress={handleOptimizeRoute}
+              disabled={isOptimizing}
+            >
+              <Zap size={24} color={colors.white} />
+              <Text style={styles.primaryActionText}>
+                {isOptimizing ? 'Optimizing Route...' : 'Optimize Route'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </ScrollView>
 
       <WaypointManager
         visible={waypointManagerVisible}
@@ -405,32 +506,178 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background.primary,
   },
-  headerButtons: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  headerButton: {
-    padding: 8,
-  },
-  mapContainer: {
+  scrollContainer: {
     flex: 1,
   },
-  bottomPanel: {
-    backgroundColor: colors.background.primary,
-    paddingTop: 16,
+  scrollContent: {
     paddingHorizontal: 16,
-    paddingBottom: Platform.OS === 'ios' ? 160 : 150, // Increased to account for enhanced custom nav bar
+    paddingTop: 16,
+    paddingBottom: Platform.OS === 'ios' ? 120 : 100,
   },
-  statsCard: {
+  quickActionsCard: {
     backgroundColor: colors.card,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  quickActionsTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.text.primary,
+    marginBottom: 16,
+  },
+  quickActionsGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  quickActionButton: {
+    alignItems: 'center',
+    flex: 1,
+    marginHorizontal: 4,
+  },
+  quickActionIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  quickActionText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.text.primary,
+    textAlign: 'center',
+  },
+  emptyStateCard: {
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    padding: 32,
+    marginBottom: 16,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  emptyStateTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: colors.text.primary,
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  emptyStateText: {
+    fontSize: 14,
+    color: colors.text.secondary,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 24,
+  },
+  emptyStateButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.primary,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 24,
+    gap: 8,
+  },
+  emptyStateButtonText: {
+    color: colors.white,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  mapSection: {
+    marginBottom: 16,
+  },
+  mapHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  mapTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.text.primary,
+  },
+  testingModeButton: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+  },
+  testingModeText: {
+    color: colors.white,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  mapContainer: {
+    height: 300,
+    borderRadius: 16,
+    overflow: 'hidden',
+    marginBottom: 8,
+  },
+  mapSubtext: {
+    fontSize: 12,
+    color: colors.text.secondary,
+    textAlign: 'center',
+    fontStyle: 'italic',
+    lineHeight: 16,
+  },
+  primaryActionContainer: {
+    marginTop: 8,
+  },
+  primaryActionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primary,
+    borderRadius: 16,
+    paddingVertical: 18,
+    gap: 12,
+    shadowColor: colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  primaryActionText: {
+    color: colors.white,
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  statsCard: {
+    backgroundColor: colors.card,
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  statsHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  statsTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.text.primary,
+  },
+  refreshButton: {
+    padding: 8,
   },
   statsRow: {
     flexDirection: 'row',
@@ -441,23 +688,23 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   statIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: colors.background.secondary,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 8,
   },
   statValue: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
     color: colors.text.primary,
+    marginBottom: 2,
   },
   statLabel: {
     fontSize: 12,
     color: colors.text.secondary,
-    marginTop: 2,
+    fontWeight: '500',
   },
   tollInfo: {
     flexDirection: 'row',
@@ -475,80 +722,71 @@ const styles = StyleSheet.create({
   },
   alertsCard: {
     backgroundColor: colors.card,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowRadius: 8,
+    elevation: 4,
   },
   alertsHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
-    gap: 8,
+    marginBottom: 16,
+    gap: 10,
   },
   alertsTitle: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 18,
+    fontWeight: '700',
     color: colors.text.primary,
   },
   alertItem: {
     flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.background.secondary,
+    alignItems: 'flex-start',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: colors.background.secondary,
+    borderRadius: 12,
+    marginBottom: 8,
     gap: 12,
   },
   alertType: {
-    fontSize: 12,
-    fontWeight: '500',
+    fontSize: 11,
+    fontWeight: '600',
     color: colors.primary,
-    backgroundColor: colors.background.secondary,
+    backgroundColor: colors.white,
     paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 4,
+    paddingVertical: 4,
+    borderRadius: 8,
     minWidth: 60,
     textAlign: 'center',
+    textTransform: 'uppercase',
   },
   alertDescription: {
     flex: 1,
     fontSize: 14,
     color: colors.text.primary,
+    fontWeight: '500',
+    lineHeight: 18,
   },
   alertDelay: {
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: '600',
     color: colors.warning,
+    backgroundColor: colors.warning + '20',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
   },
   alertImpact: {
     fontSize: 12,
-    fontWeight: '500',
-    color: colors.text.secondary,
-  },
-  actionButtons: {
-    gap: 12,
-  },
-  optimizeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors.primary,
-    borderRadius: 12,
-    paddingVertical: 16,
-    gap: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-  },
-  optimizeButtonText: {
-    color: colors.white,
-    fontSize: 16,
     fontWeight: '600',
+    color: colors.text.secondary,
+    backgroundColor: colors.text.secondary + '20',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
   },
 });
