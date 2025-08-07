@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { Mail, Smartphone } from 'lucide-react-native';
+import { Mail } from 'lucide-react-native';
 import Svg, { Path } from 'react-native-svg';
 import * as AppleAuthentication from 'expo-apple-authentication';
 
@@ -22,7 +22,7 @@ import AppBrand from '@/components/AppBrand';
 export default function SignInScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [isAppleAvailable, setIsAppleAvailable] = useState(false);
-  const [isDevelopmentMode, setIsDevelopmentMode] = useState(authService.isDevelopmentModeEnabled());
+
   const { setUser } = useUserStore();
 
   useEffect(() => {
@@ -81,11 +81,7 @@ export default function SignInScreen() {
     router.replace('/onboarding');
   };
 
-  const toggleDevelopmentMode = () => {
-    const newMode = !isDevelopmentMode;
-    setIsDevelopmentMode(newMode);
-    authService.setDevelopmentMode(newMode);
-  };
+
 
   return (
     <SafeAreaView style={styles.container}>
@@ -173,7 +169,7 @@ export default function SignInScreen() {
             onPress={handleEmailSignIn}
             disabled={isLoading}
           >
-            <Mail size={20} color={colors.primary} />
+            <Mail size={22} color="#FFFFFF" />
             <Text style={[styles.signInButtonText, styles.emailButtonText]}>
               Continue with Email (Demo)
             </Text>
@@ -184,16 +180,6 @@ export default function SignInScreen() {
           <Text style={styles.footerText}>
             By continuing, you agree to our Terms of Service and Privacy Policy
           </Text>
-          
-          {/* Development Mode Toggle */}
-          <TouchableOpacity 
-            style={styles.devModeToggle}
-            onPress={toggleDevelopmentMode}
-          >
-            <Text style={styles.devModeText}>
-              Dev Mode: {isDevelopmentMode ? 'ON' : 'OFF'}
-            </Text>
-          </TouchableOpacity>
         </View>
       </View>
     </SafeAreaView>
@@ -255,20 +241,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 18,
+    paddingVertical: 20,
     paddingHorizontal: 24,
-    borderRadius: 14,
-    gap: 12,
+    borderRadius: 16,
+    gap: 14,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    elevation: 6,
+    transform: [{ scale: 1 }],
   },
   googleButton: {
-    backgroundColor: colors.card,
-    borderWidth: 1.5,
-    borderColor: colors.border,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2,
+    borderColor: '#E5E7EB',
   },
 
   appleButton: {
@@ -276,7 +263,7 @@ const styles = StyleSheet.create({
   },
   appleButtonCustom: {
     backgroundColor: '#000000',
-    borderWidth: 1.5,
+    borderWidth: 2,
     borderColor: '#000000',
   },
   appleIconContainer: {
@@ -323,18 +310,18 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   emailButton: {
-    backgroundColor: 'rgba(59, 130, 246, 0.08)',
-    borderWidth: 1.5,
+    backgroundColor: colors.primary,
+    borderWidth: 2,
     borderColor: colors.primary,
   },
   signInButtonText: {
-    fontSize: 17,
-    fontWeight: '600',
+    fontSize: 18,
+    fontWeight: '700',
     color: colors.text.primary,
-    letterSpacing: -0.2,
+    letterSpacing: -0.3,
   },
   emailButtonText: {
-    color: colors.primary,
+    color: '#FFFFFF',
   },
   footer: {
     alignItems: 'center',
@@ -345,19 +332,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 18,
   },
-  devModeToggle: {
-    marginTop: 20,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    backgroundColor: 'rgba(59, 130, 246, 0.1)',
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: colors.primary,
-  },
-  devModeText: {
-    fontSize: 12,
-    color: colors.primary,
-    fontWeight: '600',
-    textAlign: 'center',
-  },
+
 });
