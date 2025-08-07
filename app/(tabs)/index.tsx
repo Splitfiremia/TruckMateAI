@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { Stack, router } from 'expo-router';
-import { Mic, Camera, Clock, AlertTriangle, Truck, DollarSign, Clipboard, Upload, Shield, Cloud, Coffee, Bed, LogOut, Calendar, MessageSquare, FileText, CreditCard, Activity, Settings } from 'lucide-react-native';
+import { Mic, Camera, Clock, AlertTriangle, Truck, DollarSign, Clipboard, Upload, Shield, Cloud, Activity, Settings, Route, ScanLine, CheckCircle2, Sun, Wrench, Link as LinkIcon, Sparkles, BookOpen, Package as PackageIcon } from 'lucide-react-native';
 import AppBrand from '@/components/AppBrand';
 
 import { colors } from '@/constants/colors';
@@ -10,7 +10,6 @@ import { driverInfo, upcomingLoads, weeklyStats } from '@/constants/mockData';
 import StatusCard from '@/components/StatusCard';
 import ComplianceAlert from '@/components/ComplianceAlert';
 import UpcomingLoadCard from '@/components/UpcomingLoadCard';
-import QuickActionButton from '@/components/QuickActionButton';
 import VoiceCommandButton from '@/components/VoiceCommandButton';
 import StatusChangeModal from '@/components/StatusChangeModal';
 import CommandResponseModal from '@/components/CommandResponseModal';
@@ -239,6 +238,21 @@ export default function DashboardScreen() {
     );
   };
   
+  const navTiles = [
+    { key: 'logbook', label: 'Logbook', route: '/logbook', icon: BookOpen },
+    { key: 'loads', label: 'Loads', route: '/loads', icon: PackageIcon },
+    { key: 'receipts', label: 'Receipts', route: '/receipts', icon: ScanLine },
+    { key: 'routes', label: 'Routes', route: '/route-optimization', icon: Route },
+    { key: 'weather', label: 'Weather', route: '/weather', icon: Sun },
+    { key: 'compliance', label: 'Compliance', route: '/compliance', icon: CheckCircle2 },
+    { key: 'eld', label: 'ELD', route: '/eld-integration', icon: Activity },
+    { key: 'maintenance', label: 'Maintenance', route: '/maintenance', icon: Wrench },
+    { key: 'ai', label: 'AI Assist', route: '/ai-assistant', icon: Sparkles },
+    { key: 'integrations', label: 'Integrations', route: '/integrations', icon: LinkIcon },
+    { key: 'pricing', label: 'Pricing', route: '/pricing', icon: DollarSign },
+    { key: 'settings', label: 'Settings', route: '/settings', icon: Settings },
+  ] as const;
+  
   return (
     <View style={styles.container}>
       <Stack.Screen 
@@ -250,13 +264,13 @@ export default function DashboardScreen() {
       {/* Custom Header */}
       <View style={styles.customHeader}>
         <View style={styles.headerLeft}>
-          <TouchableOpacity style={styles.menuButton}>
+          <TouchableOpacity style={styles.menuButton} onPress={() => router.push('/settings')} testID="menuButton" accessibilityRole="button" accessibilityLabel="Open settings">
             <View style={styles.menuLine} />
             <View style={styles.menuLine} />
             <View style={styles.menuLine} />
           </TouchableOpacity>
           <View style={styles.headerBrand}>
-            <AppBrand size="small" showText={true} logoSize={32} />
+            <AppBrand size="small" showText={false} logoSize={32} />
           </View>
         </View>
         
@@ -286,6 +300,26 @@ export default function DashboardScreen() {
           <TouchableOpacity style={styles.editButton}>
             <Text style={styles.editButtonText}>✏️</Text>
           </TouchableOpacity>
+        </View>
+        
+        {/* Nav Tiles */}
+        <View style={styles.navGrid}>
+          {navTiles.map((tile) => {
+            const IconComp = tile.icon as any;
+            return (
+              <TouchableOpacity
+                key={tile.key}
+                testID={`navTile-${tile.key}`}
+                style={styles.navTile}
+                onPress={() => router.push(tile.route as any)}
+              >
+                <View style={styles.navTileIconWrap}>
+                  <IconComp color={colors.primary} size={24} />
+                </View>
+                <Text style={styles.navTileLabel}>{tile.label}</Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
         
         {/* Main Action Cards Grid */}
@@ -457,7 +491,7 @@ export default function DashboardScreen() {
       </ScrollView>
       
       {/* AI Assistant FAB positioned in top right */}
-      <AIAssistantFAB top={120} right={16} />
+      <AIAssistantFAB top={140} right={16} />
       
       <View style={styles.voiceButtonContainer}>
         <VoiceCommandButton onCommandProcessed={handleCommandProcessed} />
@@ -962,6 +996,45 @@ const styles = StyleSheet.create({
   },
   editButtonText: {
     fontSize: 18,
+  },
+  navGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: 24,
+    gap: 12,
+  },
+  navTile: {
+    width: '48%',
+    backgroundColor: colors.background.secondary,
+    borderRadius: 16,
+    paddingVertical: 18,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  navTileIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(37, 99, 235, 0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(37, 99, 235, 0.15)',
+    marginBottom: 10,
+  },
+  navTileLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: colors.text.primary,
+    textAlign: 'center',
   },
   mainActionsGrid: {
     flexDirection: 'row',
