@@ -45,7 +45,7 @@ export default function TabLayout() {
   const [expanded, setExpanded] = useState(false);
   const heightAnim = useRef(new Animated.Value(60)).current;
   const opacityAnim = useRef(new Animated.Value(0.8)).current;
-  const collapseTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const collapseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollViewRef = useRef<ScrollView>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
