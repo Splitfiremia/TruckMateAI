@@ -64,22 +64,26 @@ export default function TabLayout() {
     return <Redirect href="/onboarding" />;
   }
   
-  // Modern professional color palette
+  // Modern vibrant color palette with gradient effects
   const navColors = {
-    primary: settings.primaryColor || colors.primary,
-    secondary: settings.secondaryColor || colors.secondary,
-    background: '#FFFFFF', // Clean white background
-    backgroundSecondary: '#F8FAFC', // Light gray for depth
-    activeBackground: 'rgba(59, 130, 246, 0.08)', // Subtle blue highlight
-    activeBorder: '#3B82F6', // Primary blue
-    activeGlow: 'rgba(59, 130, 246, 0.2)', // Glow effect
-    text: '#1E293B', // Dark text for contrast
-    textSecondary: '#64748B', // Muted gray text
-    textActive: '#3B82F6', // Blue for active text
-    accent: colors.accent,
-    shadow: 'rgba(0, 0, 0, 0.08)', // Subtle shadow
-    border: 'rgba(148, 163, 184, 0.15)', // Light border
-    indicator: '#EF4444', // Red for notifications/alerts
+    primary: settings.primaryColor || '#6366F1', // Modern indigo
+    secondary: settings.secondaryColor || '#8B5CF6', // Purple accent
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', // Gradient background
+    backgroundSolid: '#FFFFFF', // Solid white fallback
+    backgroundSecondary: '#F1F5F9', // Light slate
+    activeBackground: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)', // Gradient active
+    activeBackgroundSolid: 'rgba(99, 102, 241, 0.12)', // Solid active fallback
+    activeBorder: '#6366F1', // Indigo border
+    activeGlow: 'rgba(99, 102, 241, 0.25)', // Enhanced glow
+    text: '#1E293B', // Slate text
+    textSecondary: '#64748B', // Muted slate
+    textActive: '#FFFFFF', // White for active text
+    accent: '#F59E0B', // Amber accent
+    shadow: 'rgba(99, 102, 241, 0.15)', // Colored shadow
+    border: 'rgba(148, 163, 184, 0.2)', // Enhanced border
+    indicator: '#EF4444', // Red indicator
+    glass: 'rgba(255, 255, 255, 0.85)', // Glass effect
+    darkGlass: 'rgba(30, 41, 59, 0.9)', // Dark glass
   };
 
   const expandTabBar = () => {
@@ -93,14 +97,15 @@ export default function TabLayout() {
       setExpanded(true);
       Animated.parallel([
         Animated.spring(heightAnim, {
-          toValue: 140, // Increased height for better readability
+          toValue: 150, // Enhanced height for better visibility
           useNativeDriver: false,
-          tension: 100,
-          friction: 8,
+          tension: 120,
+          friction: 9,
+          damping: 15,
         }),
         Animated.timing(opacityAnim, {
           toValue: 1,
-          duration: 250,
+          duration: 300,
           useNativeDriver: false,
         })
       ]).start();
@@ -108,25 +113,30 @@ export default function TabLayout() {
   };
 
   const collapseTabBar = () => {
-    // Set a timeout to auto-collapse after 4 seconds for better UX
+    // Enhanced auto-collapse with smart timing based on user interaction
+    if (collapseTimeoutRef.current) {
+      clearTimeout(collapseTimeoutRef.current);
+    }
+    
     collapseTimeoutRef.current = setTimeout(() => {
       if (expanded) {
         setExpanded(false);
         Animated.parallel([
           Animated.spring(heightAnim, {
-            toValue: 75, // Slightly taller collapsed state
+            toValue: 80, // Optimized collapsed height
             useNativeDriver: false,
-            tension: 100,
-            friction: 8,
+            tension: 120,
+            friction: 9,
+            damping: 15,
           }),
           Animated.timing(opacityAnim, {
-            toValue: 0.95,
-            duration: 250,
+            toValue: 0.92,
+            duration: 300,
             useNativeDriver: false,
           })
         ]).start();
       }
-    }, 4000);
+    }, 3500); // Faster auto-collapse for better UX
   };
 
   const navigateToTab = (route: string) => {
@@ -363,10 +373,15 @@ export default function TabLayout() {
                       minWidth: expanded ? 90 : 70,
                       paddingHorizontal: expanded ? 16 : 10,
                       paddingVertical: expanded ? 14 : 10,
-                      backgroundColor: isActive ? navColors.activeBackground : 'transparent',
+                      backgroundColor: isActive ? navColors.activeBackgroundSolid : 'transparent',
                       borderRadius: expanded ? 16 : 12,
                       borderWidth: isActive ? 2 : 0,
                       borderColor: isActive ? navColors.activeBorder : 'transparent',
+                      shadowColor: isActive ? navColors.activeBorder : 'transparent',
+                      shadowOffset: { width: 0, height: 4 },
+                      shadowOpacity: isActive ? 0.3 : 0,
+                      shadowRadius: 8,
+                      elevation: isActive ? 6 : 0,
                       transform: [{ scale: isActive ? 1.02 : 1 }],
                     }
                   ]}
@@ -391,8 +406,8 @@ export default function TabLayout() {
                   ]}>
                     <IconComponent 
                       color={isActive ? navColors.textActive : navColors.textSecondary}
-                      size={expanded ? 24 : 20} 
-                      strokeWidth={isActive ? 2.5 : 2}
+                      size={expanded ? 26 : 22} 
+                      strokeWidth={isActive ? 2.8 : 2.2}
                     />
                   </View>
                   
@@ -402,7 +417,7 @@ export default function TabLayout() {
                       {
                         fontSize: expanded ? 12 : 10,
                         fontWeight: isActive ? '700' : '600',
-                        color: isActive ? navColors.textActive : navColors.textSecondary,
+                        color: isActive ? navColors.textActive : navColors.text,
                         marginTop: expanded ? 8 : 4,
                         opacity: expanded ? 1 : 0.95,
                         lineHeight: expanded ? 14 : 12,
@@ -447,25 +462,31 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    backdropFilter: 'blur(20px)',
     borderTopWidth: 1,
-    borderTopColor: 'rgba(148, 163, 184, 0.15)',
-    elevation: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -8 },
-    shadowOpacity: 0.12,
-    shadowRadius: 20,
+    borderTopColor: 'rgba(99, 102, 241, 0.2)',
+    elevation: 25,
+    shadowColor: '#6366F1',
+    shadowOffset: { width: 0, height: -12 },
+    shadowOpacity: 0.15,
+    shadowRadius: 25,
     overflow: 'hidden',
   },
   topIndicator: {
     position: 'absolute',
     top: 0,
     left: '50%',
-    marginLeft: -20,
-    width: 40,
-    height: 4,
-    backgroundColor: '#E2E8F0',
-    borderRadius: 2,
+    marginLeft: -25,
+    width: 50,
+    height: 5,
+    backgroundColor: '#6366F1',
+    borderRadius: 3,
+    shadowColor: '#6366F1',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.4,
+    shadowRadius: 4,
+    elevation: 3,
   },
   arrowContainer: {
     position: 'absolute',
@@ -487,16 +508,16 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255, 255, 255, 0.98)',
   },
   arrowBackground: {
-    backgroundColor: 'rgba(59, 130, 246, 0.08)',
-    borderRadius: 24,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: 'rgba(59, 130, 246, 0.2)',
-    shadowColor: '#3B82F6',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    elevation: 2,
+    backgroundColor: 'rgba(99, 102, 241, 0.12)',
+    borderRadius: 28,
+    padding: 12,
+    borderWidth: 1.5,
+    borderColor: 'rgba(99, 102, 241, 0.3)',
+    shadowColor: '#6366F1',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
   },
   scrollContent: {
     flexDirection: 'row',
@@ -513,15 +534,16 @@ const styles = StyleSheet.create({
   },
   activeIndicator: {
     position: 'absolute',
-    top: -2,
-    width: 6,
-    height: 6,
-    backgroundColor: '#3B82F6',
-    borderRadius: 3,
-    shadowColor: '#3B82F6',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.5,
-    shadowRadius: 2,
+    top: -3,
+    width: 8,
+    height: 8,
+    backgroundColor: '#F59E0B',
+    borderRadius: 4,
+    shadowColor: '#F59E0B',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.6,
+    shadowRadius: 4,
+    elevation: 3,
   },
   iconContainer: {
     alignItems: 'center',
