@@ -66,12 +66,12 @@ export default function VoiceCommandButton({
         disabled={isProcessing}
       >
         {isProcessing ? (
-          <ActivityIndicator color={colors.text} size="small" />
+          <ActivityIndicator color={colors.text.primary} size="small" />
         ) : (
           isListening ? (
-            <MicOff size={size * 0.4} color={colors.text} />
+            <MicOff size={size * 0.4} color={colors.text.primary} />
           ) : (
-            <Mic size={size * 0.4} color={colors.text} />
+            <Mic size={size * 0.4} color={colors.text.primary} />
           )
         )}
       </TouchableOpacity>
