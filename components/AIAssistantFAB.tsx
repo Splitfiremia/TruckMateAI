@@ -6,6 +6,7 @@ import {
   Animated,
   Modal,
   Platform,
+  Text,
 } from 'react-native';
 import { Bot, X } from 'lucide-react-native';
 import { colors } from '@/constants/colors';
@@ -95,7 +96,8 @@ export default function AIAssistantFAB({ bottom = 100, right = 20 }: AIAssistant
           onPress={handlePress}
           activeOpacity={0.8}
         >
-          <Bot size={28} color={colors.white} />
+          <Bot size={20} color={colors.white} />
+          <Text style={styles.fabText}>AI Assist</Text>
           {(isProcessing || isSpeaking) && (
             <View style={styles.activityIndicator} />
           )}
@@ -130,12 +132,12 @@ const styles = StyleSheet.create({
     zIndex: 1000,
   },
   fabButton: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: colors.primaryLight,
-    justifyContent: 'center',
+    flexDirection: 'row',
     alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 25,
+    backgroundColor: colors.primaryLight,
     elevation: 8,
     shadowColor: colors.black,
     shadowOffset: {
@@ -144,6 +146,12 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.3,
     shadowRadius: 8,
+  },
+  fabText: {
+    color: colors.white,
+    fontSize: 14,
+    fontWeight: '600',
+    marginLeft: 8,
   },
   activityIndicator: {
     position: 'absolute',

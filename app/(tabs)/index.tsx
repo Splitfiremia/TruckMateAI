@@ -507,7 +507,7 @@ export default function DashboardScreen() {
         <VoiceCommandButton onCommandProcessed={handleCommandProcessed} />
       </View>
       
-      <AIAssistantFAB bottom={180} right={20} />
+      <AIAssistantFAB bottom={120} right={20} />
       
       <StatusChangeModal 
         visible={statusModalVisible}
