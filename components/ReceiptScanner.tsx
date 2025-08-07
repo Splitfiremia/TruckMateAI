@@ -352,7 +352,7 @@ export default function ReceiptScanner({ visible, onClose, onScanComplete, initi
           <View style={styles.header}>
             <Text style={styles.title}>Receipt Scanner</Text>
             <TouchableOpacity onPress={resetAndClose} style={styles.closeButton}>
-              <X size={24} color={colors.text} />
+              <X size={24} color={colors.text.primary} />
             </TouchableOpacity>
           </View>
           
@@ -369,7 +369,7 @@ export default function ReceiptScanner({ visible, onClose, onScanComplete, initi
                     style={styles.uploadButton}
                     onPress={handleCameraCapture}
                   >
-                    <Camera size={24} color={colors.text} />
+                    <Camera size={24} color={colors.text.primary} />
                     <Text style={styles.uploadButtonText}>Camera</Text>
                   </TouchableOpacity>
                   
@@ -377,7 +377,7 @@ export default function ReceiptScanner({ visible, onClose, onScanComplete, initi
                     style={styles.uploadButton}
                     onPress={handleGalleryPick}
                   >
-                    <ImageIcon size={24} color={colors.text} />
+                    <ImageIcon size={24} color={colors.text.primary} />
                     <Text style={styles.uploadButtonText}>Gallery</Text>
                   </TouchableOpacity>
                   
@@ -385,7 +385,7 @@ export default function ReceiptScanner({ visible, onClose, onScanComplete, initi
                     style={styles.uploadButton}
                     onPress={handleDocumentPick}
                   >
-                    <FileText size={24} color={colors.text} />
+                    <FileText size={24} color={colors.text.primary} />
                     <Text style={styles.uploadButtonText}>Files</Text>
                   </TouchableOpacity>
                 </View>
@@ -595,7 +595,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   container: {
-    backgroundColor: colors.background,
+    backgroundColor: colors.background.primary,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     height: '80%',
@@ -610,7 +610,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
   },
   closeButton: {
     padding: 4,
@@ -647,7 +647,7 @@ const styles = StyleSheet.create({
   uploadButtonText: {
     fontSize: 14,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
   },
   processingImage: {
     width: 200,
@@ -663,7 +663,7 @@ const styles = StyleSheet.create({
   scanningText: {
     fontSize: 18,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
     marginTop: 16,
   },
   scanningSubtext: {
@@ -745,7 +745,7 @@ const styles = StyleSheet.create({
   detailValue: {
     fontSize: 14,
     fontWeight: '500',
-    color: colors.text,
+    color: colors.text.primary,
   },
   saveButton: {
     flexDirection: 'row',
