@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
   summaryTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
   },
   totalContainer: {
     alignItems: 'flex-end',
@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
   totalValue: {
     fontSize: 20,
     fontWeight: '700',
-    color: colors.text,
+    color: colors.text.primary,
   },
   categoriesContainer: {
     gap: 12,
@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
   categoryLabel: {
     fontSize: 15,
     fontWeight: '500',
-    color: colors.text,
+    color: colors.text.primary,
   },
   categoryValue: {
     fontSize: 16,
@@ -328,7 +328,7 @@ const styles = StyleSheet.create({
   emptyStateTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
     marginBottom: 8,
   },
   emptyStateSubtitle: {

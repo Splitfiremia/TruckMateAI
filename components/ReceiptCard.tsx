@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
   vendor: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
     marginBottom: 2,
   },
   type: {
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
   amount: {
     fontSize: 18,
     fontWeight: '700',
-    color: colors.text,
+    color: colors.text.primary,
   },
   detailsContainer: {
     gap: 8,
