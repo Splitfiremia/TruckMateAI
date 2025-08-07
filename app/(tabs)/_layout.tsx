@@ -64,14 +64,12 @@ export default function TabLayout() {
     return <Redirect href="/onboarding" />;
   }
   
-  // Modern vibrant color palette with gradient effects
+  // Modern vibrant color palette
   const navColors = {
     primary: settings.primaryColor || '#6366F1', // Modern indigo
     secondary: settings.secondaryColor || '#8B5CF6', // Purple accent
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', // Gradient background
     backgroundSolid: '#FFFFFF', // Solid white fallback
     backgroundSecondary: '#F1F5F9', // Light slate
-    activeBackground: 'linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%)', // Gradient active
     activeBackgroundSolid: 'rgba(99, 102, 241, 0.12)', // Solid active fallback
     activeBorder: '#6366F1', // Indigo border
     activeGlow: 'rgba(99, 102, 241, 0.25)', // Enhanced glow
@@ -497,12 +495,10 @@ const styles = StyleSheet.create({
   },
   leftArrow: {
     left: 0,
-    background: 'linear-gradient(to right, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0))',
     backgroundColor: 'rgba(255, 255, 255, 0.98)',
   },
   rightArrow: {
     right: 0,
-    background: 'linear-gradient(to left, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0))',
     backgroundColor: 'rgba(255, 255, 255, 0.98)',
   },
   arrowBackground: {
