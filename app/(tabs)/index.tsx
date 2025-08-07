@@ -272,13 +272,16 @@ export default function DashboardScreen() {
             )}
           </View>
           
-          <TouchableOpacity 
-            style={styles.logOutButton}
-            onPress={handleLogOut}
-          >
-            <LogOut size={20} color={colors.text.secondary} />
-            <Text style={styles.logOutText}>Log Out</Text>
-          </TouchableOpacity>
+          <View style={styles.headerRightContainer}>
+            <AIAssistantFAB top={0} right={0} />
+            <TouchableOpacity 
+              style={styles.logOutButton}
+              onPress={handleLogOut}
+            >
+              <LogOut size={20} color={colors.text.secondary} />
+              <Text style={styles.logOutText}>Log Out</Text>
+            </TouchableOpacity>
+          </View>
         </View>
         
         <StatusCard onStatusChange={handleStatusCardPress} />
@@ -507,7 +510,7 @@ export default function DashboardScreen() {
         <VoiceCommandButton onCommandProcessed={handleCommandProcessed} />
       </View>
       
-      <AIAssistantFAB bottom={120} right={20} />
+
       
       <StatusChangeModal 
         visible={statusModalVisible}
@@ -888,6 +891,10 @@ const styles = StyleSheet.create({
   },
   breakToggleTextActive: {
     color: colors.white,
+  },
+  headerRightContainer: {
+    alignItems: 'flex-end',
+    gap: 12,
   },
   logOutButton: {
     flexDirection: 'row',

@@ -77,7 +77,7 @@ export default function VoiceCommandButton({
       </TouchableOpacity>
       
       <Text style={styles.label}>
-        {isProcessing ? "Processing..." : isListening ? "Listening..." : "Voice Command"}
+        {isProcessing ? "Processing..." : isListening ? "Listening..." : "Voice AI Assist"}
       </Text>
     </View>
   );

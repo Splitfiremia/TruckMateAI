@@ -15,10 +15,11 @@ import AIAssistant from './AIAssistant';
 
 interface AIAssistantFABProps {
   bottom?: number;
+  top?: number;
   right?: number;
 }
 
-export default function AIAssistantFAB({ bottom = 100, right = 20 }: AIAssistantFABProps) {
+export default function AIAssistantFAB({ bottom, top, right = 20 }: AIAssistantFABProps) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const { isProcessing, isSpeaking } = useAIAssistantStore();
   
@@ -82,7 +83,8 @@ export default function AIAssistantFAB({ bottom = 100, right = 20 }: AIAssistant
         style={[
           styles.fab,
           {
-            bottom,
+            ...(bottom !== undefined ? { bottom } : {}),
+            ...(top !== undefined ? { top } : {}),
             right,
             transform: [
               { scale: scaleAnim },
