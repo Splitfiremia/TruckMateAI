@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, FlatList } from 'react-native';
 import { Stack } from 'expo-router';
-import { Camera, Filter, Receipt as ReceiptIcon, Fuel, Truck, DollarSign, Upload, MoreHorizontal } from 'lucide-react-native';
+import { Camera, Filter, Receipt as ReceiptIcon, Fuel, Truck, DollarSign, Upload, Plus, TrendingUp } from 'lucide-react-native';
 
 import { colors } from '@/constants/colors';
 import { useReceiptStore } from '@/store/receiptStore';
@@ -58,7 +58,7 @@ export default function ReceiptsScreen() {
       {icon}
       <Text style={[
         styles.filterButtonText,
-        activeFilter === type && { color: colors.text }
+        activeFilter === type && { color: colors.background.primary }
       ]}>
         {label}
       </Text>
@@ -69,76 +69,96 @@ export default function ReceiptsScreen() {
     <View style={styles.container}>
       <Stack.Screen 
         options={{ 
-          title: 'Receipts & Expenses',
+          title: 'Receipts',
           headerRight: () => (
-            <View style={styles.headerActions}>
-              <TouchableOpacity 
-                style={styles.headerButton}
-                onPress={() => setUploadOptionsVisible(true)}
-              >
-                <MoreHorizontal size={22} color={colors.text} />
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity 
+              style={styles.addButton}
+              onPress={() => setUploadOptionsVisible(true)}
+            >
+              <Plus size={20} color={colors.background.primary} />
+            </TouchableOpacity>
           ),
         }} 
       />
       
       <View style={styles.summaryContainer}>
-        <View style={styles.summaryItem}>
-          <Text style={styles.summaryLabel}>Fuel</Text>
-          <View style={styles.summaryValueContainer}>
-            <DollarSign size={14} color={colors.primaryLight} />
-            <Text style={[styles.summaryValue, { color: colors.primaryLight }]}>
-              {fuelTotal.toFixed(2)}
+        <View style={styles.summaryHeader}>
+          <Text style={styles.summaryTitle}>Monthly Expenses</Text>
+          <View style={styles.totalContainer}>
+            <Text style={styles.totalLabel}>Total</Text>
+            <Text style={styles.totalValue}>
+              ${(fuelTotal + tollsTotal + maintenanceTotal).toFixed(2)}
             </Text>
           </View>
         </View>
         
-        <View style={styles.summaryDivider} />
-        
-        <View style={styles.summaryItem}>
-          <Text style={styles.summaryLabel}>Tolls</Text>
-          <View style={styles.summaryValueContainer}>
-            <DollarSign size={14} color={colors.warning} />
-            <Text style={[styles.summaryValue, { color: colors.warning }]}>
-              {tollsTotal.toFixed(2)}
+        <View style={styles.categoriesContainer}>
+          <View style={styles.categoryItem}>
+            <View style={styles.categoryHeader}>
+              <View style={[styles.categoryIcon, { backgroundColor: colors.primaryLight + '20' }]}>
+                <Fuel size={16} color={colors.primaryLight} />
+              </View>
+              <Text style={styles.categoryLabel}>Fuel</Text>
+            </View>
+            <Text style={[styles.categoryValue, { color: colors.primaryLight }]}>
+              ${fuelTotal.toFixed(2)}
             </Text>
           </View>
-        </View>
-        
-        <View style={styles.summaryDivider} />
-        
-        <View style={styles.summaryItem}>
-          <Text style={styles.summaryLabel}>Maintenance</Text>
-          <View style={styles.summaryValueContainer}>
-            <DollarSign size={14} color={colors.secondary} />
-            <Text style={[styles.summaryValue, { color: colors.secondary }]}>
-              {maintenanceTotal.toFixed(2)}
+          
+          <View style={styles.categoryItem}>
+            <View style={styles.categoryHeader}>
+              <View style={[styles.categoryIcon, { backgroundColor: colors.warning + '20' }]}>
+                <ReceiptIcon size={16} color={colors.warning} />
+              </View>
+              <Text style={styles.categoryLabel}>Tolls</Text>
+            </View>
+            <Text style={[styles.categoryValue, { color: colors.warning }]}>
+              ${tollsTotal.toFixed(2)}
+            </Text>
+          </View>
+          
+          <View style={styles.categoryItem}>
+            <View style={styles.categoryHeader}>
+              <View style={[styles.categoryIcon, { backgroundColor: colors.secondary + '20' }]}>
+                <Truck size={16} color={colors.secondary} />
+              </View>
+              <Text style={styles.categoryLabel}>Maintenance</Text>
+            </View>
+            <Text style={[styles.categoryValue, { color: colors.secondary }]}>
+              ${maintenanceTotal.toFixed(2)}
             </Text>
           </View>
         </View>
       </View>
       
-      <View style={styles.filtersContainer}>
-        {renderFilterButton('All', <Filter size={18} color={activeFilter === 'All' ? colors.text : colors.textSecondary} />, 'All')}
-        {renderFilterButton('Fuel', <Fuel size={18} color={activeFilter === 'Fuel' ? colors.text : colors.textSecondary} />, 'Fuel')}
-        {renderFilterButton('Toll', <ReceiptIcon size={18} color={activeFilter === 'Toll' ? colors.text : colors.textSecondary} />, 'Tolls')}
-        {renderFilterButton('Maintenance', <Truck size={18} color={activeFilter === 'Maintenance' ? colors.text : colors.textSecondary} />, 'Maintenance')}
-      </View>
+      <ScrollView 
+        horizontal 
+        showsHorizontalScrollIndicator={false}
+        style={styles.filtersContainer}
+        contentContainerStyle={styles.filtersContent}
+      >
+        {renderFilterButton('All', <Filter size={16} color={activeFilter === 'All' ? colors.background.primary : colors.textSecondary} />, 'All')}
+        {renderFilterButton('Fuel', <Fuel size={16} color={activeFilter === 'Fuel' ? colors.background.primary : colors.textSecondary} />, 'Fuel')}
+        {renderFilterButton('Toll', <ReceiptIcon size={16} color={activeFilter === 'Toll' ? colors.background.primary : colors.textSecondary} />, 'Tolls')}
+        {renderFilterButton('Maintenance', <Truck size={16} color={activeFilter === 'Maintenance' ? colors.background.primary : colors.textSecondary} />, 'Maintenance')}
+      </ScrollView>
       
       {filteredReceipts.length === 0 ? (
         <View style={styles.emptyState}>
-          <ReceiptIcon size={48} color={colors.textSecondary} />
-          <Text style={styles.emptyStateText}>No receipts found</Text>
-          <View style={styles.emptyActions}>
-            <TouchableOpacity 
-              style={styles.uploadButton}
-              onPress={() => setUploadOptionsVisible(true)}
-            >
-              <Upload size={20} color={colors.text} />
-              <Text style={styles.uploadButtonText}>Upload Receipts</Text>
-            </TouchableOpacity>
+          <View style={styles.emptyIconContainer}>
+            <ReceiptIcon size={48} color={colors.textSecondary} />
           </View>
+          <Text style={styles.emptyStateTitle}>No receipts yet</Text>
+          <Text style={styles.emptyStateSubtitle}>
+            Start tracking your expenses by uploading your first receipt
+          </Text>
+          <TouchableOpacity 
+            style={styles.primaryButton}
+            onPress={() => setUploadOptionsVisible(true)}
+          >
+            <Plus size={20} color={colors.background.primary} />
+            <Text style={styles.primaryButtonText}>Add Receipt</Text>
+          </TouchableOpacity>
         </View>
       ) : (
         <FlatList
@@ -191,92 +211,151 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background.primary,
   },
-  headerActions: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  headerButton: {
-    padding: 8,
+  addButton: {
+    backgroundColor: colors.primaryLight,
+    borderRadius: 20,
+    width: 36,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 4,
   },
   summaryContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
     backgroundColor: colors.background.secondary,
     marginHorizontal: 16,
     marginTop: 16,
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  summaryItem: {
+  summaryHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 20,
   },
-  summaryLabel: {
+  summaryTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  totalContainer: {
+    alignItems: 'flex-end',
+  },
+  totalLabel: {
     fontSize: 12,
     color: colors.textSecondary,
-    marginBottom: 4,
+    marginBottom: 2,
   },
-  summaryValueContainer: {
+  totalValue: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: colors.text,
+  },
+  categoriesContainer: {
+    gap: 12,
+  },
+  categoryItem: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
-  summaryValue: {
-    fontSize: 16,
-    fontWeight: '700',
+  categoryHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
-  summaryDivider: {
-    width: 1,
-    backgroundColor: colors.border,
+  categoryIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  categoryLabel: {
+    fontSize: 15,
+    fontWeight: '500',
+    color: colors.text,
+  },
+  categoryValue: {
+    fontSize: 16,
+    fontWeight: '600',
   },
   filtersContainer: {
-    flexDirection: 'row',
+    marginTop: 24,
+    marginBottom: 16,
+  },
+  filtersContent: {
     paddingHorizontal: 16,
-    marginTop: 16,
-    marginBottom: 8,
     gap: 8,
   },
   filterButton: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: colors.background.secondary,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    gap: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 24,
+    gap: 8,
+    minWidth: 80,
+    justifyContent: 'center',
   },
   filterButtonText: {
     fontSize: 14,
     color: colors.textSecondary,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   emptyState: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 40,
+    paddingHorizontal: 40,
+    paddingVertical: 60,
   },
-  emptyStateText: {
-    fontSize: 16,
-    color: colors.textSecondary,
-    marginTop: 16,
-    marginBottom: 24,
-  },
-  emptyActions: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  uploadButton: {
-    flexDirection: 'row',
-    backgroundColor: colors.primaryLight,
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
+  emptyIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: colors.background.secondary,
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'center',
+    marginBottom: 20,
   },
-  uploadButtonText: {
-    fontSize: 16,
+  emptyStateTitle: {
+    fontSize: 20,
     fontWeight: '600',
     color: colors.text,
+    marginBottom: 8,
+  },
+  emptyStateSubtitle: {
+    fontSize: 15,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: 32,
+  },
+  primaryButton: {
+    flexDirection: 'row',
+    backgroundColor: colors.primaryLight,
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    alignItems: 'center',
+    gap: 8,
+    shadowColor: colors.primaryLight,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  primaryButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.background.primary,
   },
   receiptsList: {
     paddingHorizontal: 16,
