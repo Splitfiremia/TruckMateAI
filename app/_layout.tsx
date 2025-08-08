@@ -54,6 +54,9 @@ function RootLayoutNav() {
         <Stack.Screen name="api-testing" options={{ title: "API Testing" }} />
         <Stack.Screen name="pricing" options={{ title: "Pricing" }} />
         <Stack.Screen name="admin" options={{ headerShown: false }} />
+        <Stack.Screen name="driver-login" options={{ headerShown: false }} />
+        <Stack.Screen name="driver-dashboard" options={{ headerShown: false }} />
+        <Stack.Screen name="(driver-tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       </Stack>
     </>

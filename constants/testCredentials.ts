@@ -100,6 +100,35 @@ export const QUICK_LOGIN = {
   },
 };
 
+// Fleet Management Test Credentials Summary
+export const FLEET_TEST_SUMMARY = {
+  description: 'Test credentials for Fleet Management System',
+  drivers: [
+    { email: 'john.driver@fleet.com', password: 'driver123', name: 'John Smith' },
+    { email: 'sarah.driver@fleet.com', password: 'driver123', name: 'Sarah Johnson' },
+    { email: 'mike.driver@fleet.com', password: 'driver123', name: 'Mike Rodriguez' },
+    { email: 'lisa.driver@fleet.com', password: 'driver123', name: 'Lisa Chen' },
+  ],
+  dispatchers: [
+    { email: 'dispatch@fleet.com', password: 'dispatch123', name: 'Robert Wilson' },
+    { email: 'dispatch2@fleet.com', password: 'dispatch123', name: 'Amanda Davis' },
+  ],
+  managers: [
+    { email: 'manager@fleet.com', password: 'manager123', name: 'David Thompson' },
+    { email: 'admin@fleet.com', password: 'admin123', name: 'Jennifer Martinez' },
+  ],
+  socialLogin: {
+    google: 'Mock Google Sign-In available for all roles',
+    apple: 'Mock Apple Sign-In available for all roles (iOS simulation on other platforms)',
+  },
+  notes: [
+    'All passwords are simple for testing purposes',
+    'Social login creates mock accounts automatically',
+    'Driver portal accessible at /driver-login',
+    'Fleet management accessible through main app flow',
+  ],
+};
+
 // Helper function to get test credential by email
 export const getTestCredential = (email: string): TestCredential | undefined => {
   return TEST_CREDENTIALS.find(cred => cred.email === email);

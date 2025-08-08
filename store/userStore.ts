@@ -78,37 +78,47 @@ export const useUserStore = create<UserState>()(persist(
       }
     },
     
-    logout: () => {
-      console.log('Logging out user...');
+    logout: async () => {
+      console.log('Starting logout process...');
       
-      // Clear user state immediately
-      set({ user: null, isAuthenticated: false, isOnboarded: false });
-      
-      // Clear AsyncStorage to ensure persistence is updated
-      AsyncStorage.removeItem('user-storage').then(() => {
-        console.log('User storage cleared successfully');
-      }).catch(error => {
-        console.error('Error clearing user storage:', error);
-      });
-      
-      // Navigate to index which will handle routing to sign-in
-      setTimeout(() => {
+      try {
+        // Clear user state immediately
+        set({ user: null, isAuthenticated: false, isOnboarded: false });
+        console.log('User state cleared');
+        
+        // Clear AsyncStorage to ensure persistence is updated
+        await AsyncStorage.removeItem('user-storage');
+        console.log('User storage cleared from AsyncStorage');
+        
+        // Also clear any other related storage keys
+        await AsyncStorage.removeItem('driver-storage');
+        console.log('Driver storage cleared from AsyncStorage');
+        
+        // Small delay to ensure state is fully updated
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Navigate to sign-in screen directly
+        console.log('Navigating to sign-in screen');
+        router.replace('/sign-in');
+        
+      } catch (error) {
+        console.error('Error during logout:', error);
+        
+        // Fallback: try to navigate anyway
         try {
-          console.log('Navigating to index after logout');
-          router.replace('/');
-        } catch (error) {
-          console.error('Navigation error after logout:', error);
-          // Try alternative navigation methods
+          router.replace('/sign-in');
+        } catch (navError) {
+          console.error('Navigation fallback failed:', navError);
+          // Last resort: try push navigation
           setTimeout(() => {
             try {
-              console.log('Trying router.push to index');
-              router.push('/');
-            } catch (pushError) {
-              console.error('Push navigation error:', pushError);
+              router.push('/sign-in');
+            } catch (finalError) {
+              console.error('All navigation attempts failed:', finalError);
             }
           }, 500);
         }
-      }, 100);
+      }
     },
     
     isOwnerOperator: () => {

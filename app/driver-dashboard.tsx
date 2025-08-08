@@ -129,7 +129,7 @@ export default function DriverDashboard() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity onPress={() => router.replace('/driver-login')} style={styles.backButton}>
           <ArrowLeft color={colors.text.primary} size={24} />
         </TouchableOpacity>
         <View style={styles.headerCenter}>

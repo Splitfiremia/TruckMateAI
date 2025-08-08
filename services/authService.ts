@@ -21,6 +21,9 @@ class AuthService {
   // Development mode - set to true for testing without real OAuth
   private isDevelopmentMode = true;
   
+  // Mock delay for realistic UX
+  private mockDelay = 800;
+  
   private googleClientId = Platform.select({
     ios: '1234567890-abcdefghijklmnopqrstuvwxyz123456.apps.googleusercontent.com',
     android: '1234567890-abcdefghijklmnopqrstuvwxyz123456.apps.googleusercontent.com',
@@ -29,15 +32,25 @@ class AuthService {
 
   async signInWithGoogle(): Promise<AuthResult> {
     try {
-      // Development mode - return mock user immediately
+      console.log('Starting Google Sign-In...');
+      
+      // Development mode - return mock user with delay
       if (this.isDevelopmentMode) {
+        console.log('Using development mode for Google Sign-In');
         return this.createMockGoogleUser();
       }
       
+      // For production, show appropriate message based on platform
       if (Platform.OS === 'web') {
-        return this.signInWithGoogleWeb();
+        return {
+          success: false,
+          error: 'Google Sign-In requires additional setup for web. Please use email sign-in for now.',
+        };
       } else {
-        return this.signInWithGoogleNative();
+        return {
+          success: false,
+          error: 'Google Sign-In requires additional setup. Please use email sign-in for now.',
+        };
       }
     } catch (error) {
       console.error('Google Sign-In Error:', error);
@@ -141,32 +154,35 @@ class AuthService {
 
   async signInWithApple(): Promise<AuthResult> {
     try {
-      // Development mode - return mock user immediately
+      console.log('Starting Apple Sign-In...');
+      
+      // Development mode - return mock user with delay
       if (this.isDevelopmentMode) {
+        console.log('Using development mode for Apple Sign-In');
         return this.createMockAppleUser();
       }
       
+      // Check platform availability
       if (Platform.OS === 'web') {
-        // For web, provide a mock Apple Sign-In experience
-        return new Promise((resolve) => {
-          setTimeout(() => {
-            resolve({
-              success: true,
-              user: {
-                id: 'apple_' + Date.now(),
-                email: 'user@privaterelay.appleid.com',
-                name: 'Apple User',
-                provider: 'apple',
-              },
-            });
-          }, 1000);
-        });
+        return {
+          success: false,
+          error: 'Apple Sign-In is not available on web. Please use email sign-in.',
+        };
       }
 
       if (Platform.OS !== 'ios') {
         return {
           success: false,
-          error: 'Apple Sign-In is only available on iOS devices',
+          error: 'Apple Sign-In is only available on iOS devices. Please use email sign-in.',
+        };
+      }
+
+      // Check if Apple Sign-In is available
+      const isAvailable = await AppleAuthentication.isAvailableAsync();
+      if (!isAvailable) {
+        return {
+          success: false,
+          error: 'Apple Sign-In is not available on this device. Please use email sign-in.',
         };
       }
 
@@ -193,9 +209,11 @@ class AuthService {
 
       return {
         success: false,
-        error: 'Apple Sign-In failed',
+        error: 'Apple Sign-In failed. Please try again.',
       };
     } catch (error: any) {
+      console.error('Apple Sign-In Error:', error);
+      
       if (error.code === 'ERR_CANCELED') {
         return {
           success: false,
@@ -203,10 +221,9 @@ class AuthService {
         };
       }
 
-      console.error('Apple Sign-In Error:', error);
       return {
         success: false,
-        error: 'Failed to sign in with Apple. Please try again.',
+        error: 'Failed to sign in with Apple. Please try email sign-in.',
       };
     }
   }
@@ -232,6 +249,7 @@ class AuthService {
   private createMockGoogleUser(): Promise<AuthResult> {
     return new Promise((resolve) => {
       setTimeout(() => {
+        console.log('Creating mock Google user');
         resolve({
           success: true,
           user: {
@@ -242,13 +260,14 @@ class AuthService {
             profilePicture: 'https://via.placeholder.com/100/4285F4/FFFFFF?text=G',
           },
         });
-      }, 500); // Simulate network delay
+      }, this.mockDelay);
     });
   }
 
   private createMockAppleUser(): Promise<AuthResult> {
     return new Promise((resolve) => {
       setTimeout(() => {
+        console.log('Creating mock Apple user');
         resolve({
           success: true,
           user: {
@@ -258,7 +277,7 @@ class AuthService {
             provider: 'apple',
           },
         });
-      }, 500); // Simulate network delay
+      }, this.mockDelay);
     });
   }
 
