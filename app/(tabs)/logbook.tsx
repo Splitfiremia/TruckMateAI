@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, FlatList } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, FlatList, Alert } from 'react-native';
 import { Stack } from 'expo-router';
-import { Clock, Calendar, MapPin, AlertTriangle, CheckCircle, Truck, Coffee, Bed, FileText, Activity, RotateCcw } from 'lucide-react-native';
+import { Clock, Calendar, MapPin, AlertTriangle, CheckCircle, Truck, Coffee, Bed, FileText, Activity, RotateCcw, LogOut } from 'lucide-react-native';
 
 import { colors } from '@/constants/colors';
 import { useLogbookStore } from '@/store/logbookStore';
@@ -12,12 +12,14 @@ import StatusChangeModal from '@/components/StatusChangeModal';
 import VoiceCommandButton from '@/components/VoiceCommandButton';
 import CommandResponseModal from '@/components/CommandResponseModal';
 import { useVoiceCommandStore } from '@/store/voiceCommandStore';
+import { useUserStore } from '@/store/userStore';
 
 export default function LogbookScreen() {
   const [statusModalVisible, setStatusModalVisible] = useState(false);
   const [commandModalVisible, setCommandModalVisible] = useState(false);
   const [selectedTab, setSelectedTab] = useState<'current' | 'status' | 'breaks' | 'overrides'>('current');
   const { lastCommand, lastResponse } = useVoiceCommandStore();
+  const { logout } = useUserStore();
   
   const { 
     currentStatus, 
@@ -46,6 +48,23 @@ export default function LogbookScreen() {
   const formatDate = (isoString: string) => {
     const date = new Date(isoString);
     return date.toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+  
+  const handleLogOut = () => {
+    Alert.alert(
+      'Log Out',
+      'Are you sure you want to log out?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Log Out', 
+          style: 'destructive',
+          onPress: () => {
+            logout();
+          }
+        }
+      ]
+    );
   };
   
   const getRemainingDrivingHours = () => {
@@ -217,6 +236,11 @@ export default function LogbookScreen() {
       <Stack.Screen 
         options={{ 
           title: 'Logbook',
+          headerRight: () => (
+            <TouchableOpacity onPress={handleLogOut} style={{ marginRight: 16 }}>
+              <LogOut size={24} color={colors.text.primary} />
+            </TouchableOpacity>
+          ),
         }} 
       />
       

@@ -238,13 +238,16 @@ export default function DashboardScreen() {
     );
   };
   
-  const navTiles = [
+  const primaryNavTiles = [
     { key: 'logbook', label: 'Logbook', route: '/logbook', icon: BookOpen },
     { key: 'loads', label: 'Loads', route: '/loads', icon: PackageIcon },
     { key: 'receipts', label: 'Receipts', route: '/receipts', icon: ScanLine },
     { key: 'routes', label: 'Routes', route: '/route-optimization', icon: Route },
     { key: 'weather', label: 'Weather', route: '/weather', icon: Sun },
     { key: 'compliance', label: 'Compliance', route: '/compliance', icon: CheckCircle2 },
+  ] as const;
+  
+  const secondaryNavTiles = [
     { key: 'eld', label: 'ELD', route: '/eld-integration', icon: Activity },
     { key: 'maintenance', label: 'Maintenance', route: '/maintenance', icon: Wrench },
     { key: 'ai', label: 'AI Assist', route: '/ai-assistant', icon: Sparkles },
@@ -270,7 +273,7 @@ export default function DashboardScreen() {
             <View style={styles.menuLine} />
           </TouchableOpacity>
           <View style={styles.headerBrand}>
-            <AppBrand size="small" showText={false} logoSize={32} />
+            <AppBrand size="small" showText={true} logoSize={28} />
           </View>
         </View>
         
@@ -302,88 +305,47 @@ export default function DashboardScreen() {
           </TouchableOpacity>
         </View>
         
-        {/* Nav Tiles */}
-        <View style={styles.navGrid}>
-          {navTiles.map((tile) => {
+        {/* Primary Nav Tiles - 3x2 Grid */}
+        <View style={styles.primaryNavGrid}>
+          {primaryNavTiles.map((tile) => {
             const IconComp = tile.icon as any;
             return (
               <TouchableOpacity
                 key={tile.key}
                 testID={`navTile-${tile.key}`}
-                style={styles.navTile}
+                style={styles.primaryNavTile}
                 onPress={() => router.push(tile.route as any)}
               >
-                <View style={styles.navTileIconWrap}>
-                  <IconComp color={colors.primary} size={24} />
+                <View style={styles.primaryNavTileIconWrap}>
+                  <IconComp color={colors.primary} size={28} />
                 </View>
-                <Text style={styles.navTileLabel}>{tile.label}</Text>
+                <Text style={styles.primaryNavTileLabel}>{tile.label}</Text>
               </TouchableOpacity>
             );
           })}
         </View>
         
-        {/* Main Action Cards Grid */}
-        <View style={styles.mainActionsGrid}>
-          <TouchableOpacity 
-            style={styles.mainActionCard}
-            onPress={() => handleQuickStatusChange('Driving')}
-          >
-            <View style={[styles.mainActionIcon, { backgroundColor: colors.primary }]}>
-              <Truck size={24} color={colors.white} />
-            </View>
-            <Text style={styles.mainActionTitle}>Start Driving</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={styles.mainActionCard}
-            onPress={() => setInspectionModalVisible(true)}
-          >
-            <View style={[styles.mainActionIcon, { backgroundColor: colors.success }]}>
-              <Clipboard size={24} color={colors.white} />
-            </View>
-            <Text style={styles.mainActionTitle}>Pre-Trip Inspection</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={styles.mainActionCard}
-            onPress={() => setScannerVisible(true)}
-          >
-            <View style={[styles.mainActionIcon, { backgroundColor: colors.accent }]}>
-              <Camera size={24} color={colors.white} />
-            </View>
-            <Text style={styles.mainActionTitle}>Scan Receipt</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={styles.mainActionCard}
-            onPress={() => setWeatherForecastVisible(true)}
-          >
-            <View style={[styles.mainActionIcon, { backgroundColor: colors.warning }]}>
-              <Cloud size={24} color={colors.white} />
-            </View>
-            <Text style={styles.mainActionTitle}>Weather</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={styles.mainActionCard}
-            onPress={() => setDotAssistantVisible(true)}
-          >
-            <View style={[styles.mainActionIcon, { backgroundColor: colors.secondary }]}>
-              <Shield size={24} color={colors.white} />
-            </View>
-            <Text style={styles.mainActionTitle}>DOT Assistant</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={styles.mainActionCard}
-            onPress={() => setBulkUploadVisible(true)}
-          >
-            <View style={[styles.mainActionIcon, { backgroundColor: colors.primaryLight }]}>
-              <Upload size={24} color={colors.white} />
-            </View>
-            <Text style={styles.mainActionTitle}>Bulk Upload</Text>
-          </TouchableOpacity>
+        {/* Secondary Nav Tiles - 3x2 Grid */}
+        <View style={styles.secondaryNavGrid}>
+          {secondaryNavTiles.map((tile) => {
+            const IconComp = tile.icon as any;
+            return (
+              <TouchableOpacity
+                key={tile.key}
+                testID={`navTile-${tile.key}`}
+                style={styles.secondaryNavTile}
+                onPress={() => router.push(tile.route as any)}
+              >
+                <View style={styles.secondaryNavTileIconWrap}>
+                  <IconComp color={colors.primary} size={24} />
+                </View>
+                <Text style={styles.secondaryNavTileLabel}>{tile.label}</Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
+        
+
         
         {/* Current Status Card */}
         <StatusCard onStatusChange={handleStatusCardPress} />
@@ -626,6 +588,8 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
     flex: 1,
   },
   greeting: {
@@ -915,15 +879,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     paddingTop: 60,
-    paddingBottom: 16,
+    paddingBottom: 20,
     backgroundColor: colors.primary,
     shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 5,
   },
   menuButton: {
     width: 40,
@@ -941,7 +905,7 @@ const styles = StyleSheet.create({
     borderRadius: 1,
   },
   headerBrand: {
-    marginLeft: 12,
+    marginLeft: 16,
   },
   headerRight: {
     alignItems: 'center',
@@ -980,13 +944,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 24,
-    marginBottom: 24,
+    marginTop: 32,
+    marginBottom: 32,
+    paddingHorizontal: 4,
   },
   welcomeTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
+    fontSize: 32,
+    fontWeight: '800',
     color: colors.text.primary,
+    letterSpacing: -0.5,
   },
   editButton: {
     width: 32,
@@ -997,18 +963,57 @@ const styles = StyleSheet.create({
   editButtonText: {
     fontSize: 18,
   },
-  navGrid: {
+  primaryNavGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    marginBottom: 24,
+    marginBottom: 32,
+    gap: 16,
+  },
+  primaryNavTile: {
+    width: '31%',
+    backgroundColor: colors.background.secondary,
+    borderRadius: 20,
+    paddingVertical: 24,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.border,
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  primaryNavTileIconWrap: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(37, 99, 235, 0.1)',
+    borderWidth: 2,
+    borderColor: 'rgba(37, 99, 235, 0.2)',
+    marginBottom: 12,
+  },
+  primaryNavTileLabel: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: colors.text.primary,
+    textAlign: 'center',
+  },
+  secondaryNavGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: 32,
     gap: 12,
   },
-  navTile: {
-    width: '48%',
+  secondaryNavTile: {
+    width: '31%',
     backgroundColor: colors.background.secondary,
     borderRadius: 16,
-    paddingVertical: 18,
+    paddingVertical: 20,
     paddingHorizontal: 12,
     alignItems: 'center',
     borderWidth: 1,
@@ -1016,10 +1021,10 @@ const styles = StyleSheet.create({
     shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
-    shadowRadius: 6,
+    shadowRadius: 8,
     elevation: 2,
   },
-  navTileIconWrap: {
+  secondaryNavTileIconWrap: {
     width: 44,
     height: 44,
     borderRadius: 22,
@@ -1030,7 +1035,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(37, 99, 235, 0.15)',
     marginBottom: 10,
   },
-  navTileLabel: {
+  secondaryNavTileLabel: {
     fontSize: 12,
     fontWeight: '600',
     color: colors.text.primary,
