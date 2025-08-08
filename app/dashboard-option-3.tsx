@@ -1,159 +1,221 @@
 import React from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
-import { Stack } from 'expo-router';
-import { Activity, MapPin, Clock, Fuel, Shield, AlertTriangle, TrendingUp, Users, Calendar, Star } from 'lucide-react-native';
+import { Stack, router } from 'expo-router';
+import { Shield, AlertTriangle, CheckCircle, Clock, Fuel, Thermometer, ArrowLeft, Activity } from 'lucide-react-native';
 import { colors } from '@/constants/colors';
-import AppBrand from '@/components/AppBrand';
 
 const { width } = Dimensions.get('window');
 
 export default function DashboardOption3() {
-  const kpiCards = [
-    { title: 'Fleet Efficiency', value: '94.2%', change: '+2.1%', trend: 'up', icon: TrendingUp },
-    { title: 'Safety Score', value: '98.7', change: '+0.3', trend: 'up', icon: Shield },
-    { title: 'Fuel Economy', value: '7.2 MPG', change: '-0.1', trend: 'down', icon: Fuel },
-    { title: 'Driver Rating', value: '4.8/5', change: '+0.1', trend: 'up', icon: Star },
-  ];
-
-  const priorityAlerts = [
-    { priority: 'high', title: 'Maintenance Due', subtitle: 'TRK-001 • 2,450 miles', time: '2h' },
-    { priority: 'medium', title: 'Route Delay', subtitle: 'Driver Mike • I-95 Traffic', time: '15m' },
-    { priority: 'low', title: 'Fuel Stop', subtitle: 'TRK-003 • Next 50 miles', time: '1h' },
-  ];
-
-  const todayStats = [
-    { label: 'Miles Driven', value: '2,847', icon: MapPin, color: colors.primary },
-    { label: 'Hours Logged', value: '156.5', icon: Clock, color: colors.accent },
-    { label: 'Active Drivers', value: '18', icon: Users, color: colors.success },
-    { label: 'Deliveries', value: '24', icon: Calendar, color: colors.warning },
-  ];
-
   return (
     <View style={styles.container}>
-      <Stack.Screen options={{ 
-        title: 'Dashboard Option 3',
-        headerStyle: { backgroundColor: colors.background.secondary },
-        headerTintColor: colors.text.primary
-      }} />
+      <Stack.Screen 
+        options={{ 
+          headerTitle: 'Dashboard Option 3 - Safety First',
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+              <ArrowLeft size={24} color={colors.primary} />
+            </TouchableOpacity>
+          ),
+        }} 
+      />
       
-      {/* Executive Header */}
-      <View style={styles.executiveHeader}>
-        <View style={styles.headerContent}>
-          <View style={styles.brandSection}>
-            <AppBrand size="medium" showText={false} />
-            <View style={styles.brandText}>
-              <Text style={styles.brandTitle}>TruckMate AI</Text>
-              <Text style={styles.brandSubtitle}>Executive Dashboard</Text>
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        {/* Safety Score Card */}
+        <View style={styles.safetyScoreCard}>
+          <View style={styles.scoreHeader}>
+            <Shield size={32} color="#10b981" />
+            <View style={styles.scoreInfo}>
+              <Text style={styles.scoreTitle}>Fleet Safety Score</Text>
+              <Text style={styles.scoreSubtitle}>Last 30 days</Text>
             </View>
           </View>
-          <View style={styles.dateSection}>
-            <Text style={styles.dateText}>Today</Text>
-            <Text style={styles.dateValue}>Dec 8, 2024</Text>
+          
+          <View style={styles.scoreDisplay}>
+            <Text style={styles.scoreNumber}>94</Text>
+            <Text style={styles.scoreOutOf}>/100</Text>
+          </View>
+          
+          <View style={styles.scoreBar}>
+            <View style={[styles.scoreProgress, { width: '94%' }]} />
+          </View>
+          
+          <Text style={styles.scoreDescription}>Excellent safety performance</Text>
+        </View>
+        
+        {/* Alert Summary */}
+        <View style={styles.alertSummary}>
+          <Text style={styles.sectionTitle}>Active Alerts</Text>
+          
+          <View style={styles.alertGrid}>
+            <View style={[styles.alertCard, styles.criticalAlert]}>
+              <AlertTriangle size={20} color="#ef4444" />
+              <Text style={styles.alertNumber}>2</Text>
+              <Text style={styles.alertLabel}>Critical</Text>
+            </View>
+            
+            <View style={[styles.alertCard, styles.warningAlert]}>
+              <Clock size={20} color="#f59e0b" />
+              <Text style={styles.alertNumber}>5</Text>
+              <Text style={styles.alertLabel}>Warning</Text>
+            </View>
+            
+            <View style={[styles.alertCard, styles.infoAlert]}>
+              <Activity size={20} color="#3b82f6" />
+              <Text style={styles.alertNumber}>12</Text>
+              <Text style={styles.alertLabel}>Info</Text>
+            </View>
+            
+            <View style={[styles.alertCard, styles.resolvedAlert]}>
+              <CheckCircle size={20} color="#10b981" />
+              <Text style={styles.alertNumber}>48</Text>
+              <Text style={styles.alertLabel}>Resolved</Text>
+            </View>
           </View>
         </View>
-      </View>
-
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* KPI Cards */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Key Performance Indicators</Text>
-          <View style={styles.kpiGrid}>
-            {kpiCards.map((kpi, index) => {
-              const IconComp = kpi.icon;
-              return (
-                <View key={index} style={styles.kpiCard}>
-                  <View style={styles.kpiHeader}>
-                    <View style={[styles.kpiIcon, { backgroundColor: `${colors.primary}15` }]}>
-                      <IconComp size={18} color={colors.primary} />
-                    </View>
-                    <View style={[styles.trendBadge, { 
-                      backgroundColor: kpi.trend === 'up' ? `${colors.success}15` : `${colors.warning}15` 
-                    }]}>
-                      <Text style={[styles.trendText, { 
-                        color: kpi.trend === 'up' ? colors.success : colors.warning 
-                      }]}>{kpi.change}</Text>
-                    </View>
-                  </View>
-                  <Text style={styles.kpiValue}>{kpi.value}</Text>
-                  <Text style={styles.kpiTitle}>{kpi.title}</Text>
-                </View>
-              );
-            })}
-          </View>
-        </View>
-
-        {/* Priority Alerts */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Priority Alerts</Text>
-            <TouchableOpacity>
-              <Text style={styles.viewAllText}>View All</Text>
-            </TouchableOpacity>
-          </View>
-          {priorityAlerts.map((alert, index) => (
-            <TouchableOpacity key={index} style={styles.alertCard}>
-              <View style={[styles.priorityIndicator, { 
-                backgroundColor: alert.priority === 'high' ? colors.danger : 
-                                alert.priority === 'medium' ? colors.warning : colors.success 
-              }]} />
-              <View style={styles.alertContent}>
-                <View style={styles.alertHeader}>
-                  <Text style={styles.alertTitle}>{alert.title}</Text>
-                  <Text style={styles.alertTime}>{alert.time}</Text>
-                </View>
-                <Text style={styles.alertSubtitle}>{alert.subtitle}</Text>
+        
+        {/* Vehicle Health Monitor */}
+        <View style={styles.vehicleHealthSection}>
+          <Text style={styles.sectionTitle}>Vehicle Health Monitor</Text>
+          
+          <View style={styles.vehicleCard}>
+            <View style={styles.vehicleHeader}>
+              <View style={styles.vehicleInfo}>
+                <Text style={styles.vehicleName}>Truck #1247</Text>
+                <Text style={styles.vehicleDriver}>Driver: John Doe</Text>
               </View>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* Today's Statistics */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Today&apos;s Performance</Text>
-          <View style={styles.statsGrid}>
-            {todayStats.map((stat, index) => {
-              const IconComp = stat.icon;
-              return (
-                <View key={index} style={styles.statCard}>
-                  <View style={[styles.statIcon, { backgroundColor: `${stat.color}15` }]}>
-                    <IconComp size={20} color={stat.color} />
-                  </View>
-                  <Text style={styles.statValue}>{stat.value}</Text>
-                  <Text style={styles.statLabel}>{stat.label}</Text>
-                </View>
-              );
-            })}
-          </View>
-        </View>
-
-        {/* Fleet Status Overview */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Fleet Status</Text>
-          <View style={styles.fleetOverview}>
-            <View style={styles.fleetStat}>
-              <View style={styles.fleetStatHeader}>
-                <Text style={styles.fleetStatValue}>24</Text>
-                <Text style={styles.fleetStatTotal}>/26</Text>
-              </View>
-              <Text style={styles.fleetStatLabel}>Active Vehicles</Text>
-              <View style={styles.fleetProgressBar}>
-                <View style={[styles.fleetProgressFill, { width: '92%' }]} />
+              <View style={styles.healthBadge}>
+                <Text style={styles.healthText}>GOOD</Text>
               </View>
             </View>
             
-            <View style={styles.fleetStat}>
-              <View style={styles.fleetStatHeader}>
-                <Text style={styles.fleetStatValue}>18</Text>
-                <Text style={styles.fleetStatTotal}>/20</Text>
+            <View style={styles.healthMetrics}>
+              <View style={styles.healthMetric}>
+                <View style={styles.metricIcon}>
+                  <Fuel size={16} color="#10b981" />
+                </View>
+                <View style={styles.metricInfo}>
+                  <Text style={styles.metricLabel}>Fuel Level</Text>
+                  <Text style={styles.metricValue}>78%</Text>
+                </View>
+                <View style={[styles.statusIndicator, { backgroundColor: '#10b981' }]} />
               </View>
-              <Text style={styles.fleetStatLabel}>Compliant Drivers</Text>
-              <View style={styles.fleetProgressBar}>
-                <View style={[styles.fleetProgressFill, { width: '90%' }]} />
+              
+              <View style={styles.healthMetric}>
+                <View style={styles.metricIcon}>
+                  <Thermometer size={16} color="#f59e0b" />
+                </View>
+                <View style={styles.metricInfo}>
+                  <Text style={styles.metricLabel}>Engine Temp</Text>
+                  <Text style={styles.metricValue}>195°F</Text>
+                </View>
+                <View style={[styles.statusIndicator, { backgroundColor: '#f59e0b' }]} />
+              </View>
+              
+              <View style={styles.healthMetric}>
+                <View style={styles.metricIcon}>
+                  <Activity size={16} color="#10b981" />
+                </View>
+                <View style={styles.metricInfo}>
+                  <Text style={styles.metricLabel}>Oil Pressure</Text>
+                  <Text style={styles.metricValue}>45 PSI</Text>
+                </View>
+                <View style={[styles.statusIndicator, { backgroundColor: '#10b981' }]} />
+              </View>
+            </View>
+          </View>
+          
+          <View style={styles.vehicleCard}>
+            <View style={styles.vehicleHeader}>
+              <View style={styles.vehicleInfo}>
+                <Text style={styles.vehicleName}>Truck #1248</Text>
+                <Text style={styles.vehicleDriver}>Driver: Mike Smith</Text>
+              </View>
+              <View style={[styles.healthBadge, { backgroundColor: '#fef3c7' }]}>
+                <Text style={[styles.healthText, { color: '#d97706' }]}>CAUTION</Text>
+              </View>
+            </View>
+            
+            <View style={styles.healthMetrics}>
+              <View style={styles.healthMetric}>
+                <View style={styles.metricIcon}>
+                  <Fuel size={16} color="#ef4444" />
+                </View>
+                <View style={styles.metricInfo}>
+                  <Text style={styles.metricLabel}>Fuel Level</Text>
+                  <Text style={styles.metricValue}>15%</Text>
+                </View>
+                <View style={[styles.statusIndicator, { backgroundColor: '#ef4444' }]} />
+              </View>
+              
+              <View style={styles.healthMetric}>
+                <View style={styles.metricIcon}>
+                  <Thermometer size={16} color="#10b981" />
+                </View>
+                <View style={styles.metricInfo}>
+                  <Text style={styles.metricLabel}>Engine Temp</Text>
+                  <Text style={styles.metricValue}>180°F</Text>
+                </View>
+                <View style={[styles.statusIndicator, { backgroundColor: '#10b981' }]} />
+              </View>
+              
+              <View style={styles.healthMetric}>
+                <View style={styles.metricIcon}>
+                  <Activity size={16} color="#10b981" />
+                </View>
+                <View style={styles.metricInfo}>
+                  <Text style={styles.metricLabel}>Oil Pressure</Text>
+                  <Text style={styles.metricValue}>42 PSI</Text>
+                </View>
+                <View style={[styles.statusIndicator, { backgroundColor: '#10b981' }]} />
               </View>
             </View>
           </View>
         </View>
-
+        
+        {/* Safety Incidents Timeline */}
+        <View style={styles.incidentsSection}>
+          <Text style={styles.sectionTitle}>Recent Safety Events</Text>
+          
+          <View style={styles.timeline}>
+            <View style={styles.timelineItem}>
+              <View style={[styles.timelineDot, { backgroundColor: '#10b981' }]} />
+              <View style={styles.timelineContent}>
+                <Text style={styles.timelineTitle}>Pre-trip Inspection Completed</Text>
+                <Text style={styles.timelineTime}>2 hours ago</Text>
+                <Text style={styles.timelineDescription}>Truck #1247 - All systems normal</Text>
+              </View>
+            </View>
+            
+            <View style={styles.timelineItem}>
+              <View style={[styles.timelineDot, { backgroundColor: '#f59e0b' }]} />
+              <View style={styles.timelineContent}>
+                <Text style={styles.timelineTitle}>Speed Limit Warning</Text>
+                <Text style={styles.timelineTime}>4 hours ago</Text>
+                <Text style={styles.timelineDescription}>Driver exceeded 70 mph on I-95</Text>
+              </View>
+            </View>
+            
+            <View style={styles.timelineItem}>
+              <View style={[styles.timelineDot, { backgroundColor: '#ef4444' }]} />
+              <View style={styles.timelineContent}>
+                <Text style={styles.timelineTitle}>Low Fuel Alert</Text>
+                <Text style={styles.timelineTime}>6 hours ago</Text>
+                <Text style={styles.timelineDescription}>Truck #1248 - Fuel level below 20%</Text>
+              </View>
+            </View>
+            
+            <View style={styles.timelineItem}>
+              <View style={[styles.timelineDot, { backgroundColor: '#10b981' }]} />
+              <View style={styles.timelineContent}>
+                <Text style={styles.timelineTitle}>Maintenance Completed</Text>
+                <Text style={styles.timelineTime}>1 day ago</Text>
+                <Text style={styles.timelineDescription}>Truck #1249 - Oil change and inspection</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+        
         <View style={styles.footer} />
       </ScrollView>
     </View>
@@ -163,245 +225,253 @@ export default function DashboardOption3() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background.primary,
+    backgroundColor: '#fafafa',
   },
-  executiveHeader: {
-    backgroundColor: colors.background.secondary,
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  headerContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  brandSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  brandText: {
-    flex: 1,
-  },
-  brandTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: colors.text.primary,
-  },
-  brandSubtitle: {
-    fontSize: 14,
-    color: colors.text.secondary,
-    marginTop: 2,
-  },
-  dateSection: {
-    alignItems: 'flex-end',
-  },
-  dateText: {
-    fontSize: 12,
-    color: colors.text.secondary,
-  },
-  dateValue: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.text.primary,
-    marginTop: 2,
+  backButton: {
+    padding: 8,
   },
   scrollView: {
     flex: 1,
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
   },
-  section: {
-    marginTop: 24,
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  safetyScoreCard: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 24,
+    marginTop: 16,
+    marginBottom: 24,
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  scoreHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  scoreInfo: {
+    marginLeft: 12,
+  },
+  scoreTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1f2937',
+  },
+  scoreSubtitle: {
+    fontSize: 14,
+    color: '#6b7280',
+    marginTop: 2,
+  },
+  scoreDisplay: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
     marginBottom: 16,
+  },
+  scoreNumber: {
+    fontSize: 48,
+    fontWeight: 'bold',
+    color: '#10b981',
+  },
+  scoreOutOf: {
+    fontSize: 24,
+    color: '#6b7280',
+    marginLeft: 4,
+  },
+  scoreBar: {
+    width: '100%',
+    height: 8,
+    backgroundColor: '#f3f4f6',
+    borderRadius: 4,
+    marginBottom: 12,
+  },
+  scoreProgress: {
+    height: '100%',
+    backgroundColor: '#10b981',
+    borderRadius: 4,
+  },
+  scoreDescription: {
+    fontSize: 14,
+    color: '#6b7280',
+    textAlign: 'center',
+  },
+  alertSummary: {
+    marginBottom: 24,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.text.primary,
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#1f2937',
     marginBottom: 16,
   },
-  viewAllText: {
-    fontSize: 14,
-    color: colors.primary,
-    fontWeight: '500',
-  },
-  kpiGrid: {
+  alertGrid: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
+    justifyContent: 'space-between',
   },
-  kpiCard: {
-    backgroundColor: colors.background.secondary,
-    borderRadius: 16,
+  alertCard: {
+    backgroundColor: 'white',
+    borderRadius: 12,
     padding: 16,
-    width: (width - 56) / 2,
-    shadowColor: colors.shadow,
+    alignItems: 'center',
+    width: (width - 64) / 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  criticalAlert: {
+    borderTopWidth: 3,
+    borderTopColor: '#ef4444',
+  },
+  warningAlert: {
+    borderTopWidth: 3,
+    borderTopColor: '#f59e0b',
+  },
+  infoAlert: {
+    borderTopWidth: 3,
+    borderTopColor: '#3b82f6',
+  },
+  resolvedAlert: {
+    borderTopWidth: 3,
+    borderTopColor: '#10b981',
+  },
+  alertNumber: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#1f2937',
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  alertLabel: {
+    fontSize: 12,
+    color: '#6b7280',
+    textAlign: 'center',
+  },
+  vehicleHealthSection: {
+    marginBottom: 24,
+  },
+  vehicleCard: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
-  kpiHeader: {
+  vehicleHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 16,
   },
-  kpiIcon: {
+  vehicleInfo: {
+    flex: 1,
+  },
+  vehicleName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1f2937',
+  },
+  vehicleDriver: {
+    fontSize: 14,
+    color: '#6b7280',
+    marginTop: 2,
+  },
+  healthBadge: {
+    backgroundColor: '#dcfce7',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+  },
+  healthText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#16a34a',
+  },
+  healthMetrics: {
+    gap: 12,
+  },
+  healthMetric: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  metricIcon: {
     width: 32,
     height: 32,
     borderRadius: 16,
+    backgroundColor: '#f8fafc',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  trendBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  trendText: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  kpiValue: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.text.primary,
-    marginBottom: 4,
-  },
-  kpiTitle: {
-    fontSize: 12,
-    color: colors.text.secondary,
-  },
-  alertCard: {
-    backgroundColor: colors.background.secondary,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  priorityIndicator: {
-    width: 4,
-    height: 40,
-    borderRadius: 2,
     marginRight: 12,
   },
-  alertContent: {
+  metricInfo: {
     flex: 1,
   },
-  alertHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 4,
+  metricLabel: {
+    fontSize: 14,
+    color: '#6b7280',
   },
-  alertTitle: {
+  metricValue: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1f2937',
+    marginTop: 2,
+  },
+  statusIndicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  incidentsSection: {
+    marginBottom: 24,
+  },
+  timeline: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  timelineItem: {
+    flexDirection: 'row',
+    marginBottom: 20,
+  },
+  timelineDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginTop: 4,
+    marginRight: 16,
+  },
+  timelineContent: {
+    flex: 1,
+  },
+  timelineTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: colors.text.primary,
-  },
-  alertTime: {
-    fontSize: 12,
-    color: colors.text.secondary,
-  },
-  alertSubtitle: {
-    fontSize: 12,
-    color: colors.text.secondary,
-  },
-  statsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  statCard: {
-    backgroundColor: colors.background.secondary,
-    borderRadius: 16,
-    padding: 16,
-    alignItems: 'center',
-    width: (width - 56) / 2,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  statIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 8,
-  },
-  statValue: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.text.primary,
+    color: '#1f2937',
     marginBottom: 4,
   },
-  statLabel: {
+  timelineTime: {
     fontSize: 12,
-    color: colors.text.secondary,
-    textAlign: 'center',
+    color: '#6b7280',
+    marginBottom: 4,
   },
-  fleetOverview: {
-    gap: 16,
-  },
-  fleetStat: {
-    backgroundColor: colors.background.secondary,
-    borderRadius: 16,
-    padding: 16,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  fleetStatHeader: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    marginBottom: 8,
-  },
-  fleetStatValue: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: colors.primary,
-  },
-  fleetStatTotal: {
-    fontSize: 18,
-    color: colors.text.secondary,
-    marginLeft: 4,
-  },
-  fleetStatLabel: {
-    fontSize: 14,
-    color: colors.text.secondary,
-    marginBottom: 12,
-  },
-  fleetProgressBar: {
-    height: 6,
-    backgroundColor: colors.background.tertiary,
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
-  fleetProgressFill: {
-    height: '100%',
-    backgroundColor: colors.primary,
-    borderRadius: 3,
+  timelineDescription: {
+    fontSize: 13,
+    color: '#374151',
+    lineHeight: 18,
   },
   footer: {
-    height: 40,
+    height: 20,
   },
 });

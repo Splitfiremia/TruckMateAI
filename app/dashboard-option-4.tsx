@@ -1,194 +1,247 @@
 import React from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
-import { Stack } from 'expo-router';
-import { Zap, Target, Award, Gauge, MapPin, Clock, Users, Truck, TrendingUp, Battery, Fuel, Shield } from 'lucide-react-native';
+import { Stack, router } from 'expo-router';
+import { Zap, Target, Award, TrendingUp, Users, Star, ArrowLeft, Trophy, Medal } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { colors } from '@/constants/colors';
-import AppBrand from '@/components/AppBrand';
 
 const { width } = Dimensions.get('window');
 
 export default function DashboardOption4() {
-  const performanceMetrics = [
-    { title: 'Efficiency Score', value: 94, maxValue: 100, icon: Target, color: colors.primary },
-    { title: 'Safety Rating', value: 98, maxValue: 100, icon: Shield, color: colors.success },
-    { title: 'Fuel Economy', value: 7.2, maxValue: 10, icon: Fuel, color: colors.warning, unit: 'MPG' },
-    { title: 'Uptime', value: 96, maxValue: 100, icon: Battery, color: colors.accent },
-  ];
-
-  const liveUpdates = [
-    { id: 1, driver: 'Mike Johnson', status: 'En Route', location: 'I-95 North', eta: '2:30 PM', progress: 0.65 },
-    { id: 2, driver: 'Sarah Davis', status: 'Loading', location: 'Warehouse B', eta: '3:15 PM', progress: 0.25 },
-    { id: 3, driver: 'Tom Wilson', status: 'Delivered', location: 'Downtown', eta: 'Completed', progress: 1.0 },
-  ];
-
-  const achievements = [
-    { title: 'Safety Champion', subtitle: '30 days accident-free', icon: Award, color: colors.success },
-    { title: 'Fuel Saver', subtitle: '15% below target', icon: Fuel, color: colors.primary },
-    { title: 'On-Time Hero', subtitle: '98% delivery rate', icon: Clock, color: colors.accent },
-  ];
-
   return (
     <View style={styles.container}>
-      <Stack.Screen options={{ 
-        title: 'Dashboard Option 4',
-        headerStyle: { backgroundColor: colors.primary },
-        headerTintColor: colors.white
-      }} />
+      <Stack.Screen 
+        options={{ 
+          headerTitle: 'Dashboard Option 4 - Performance Pro',
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+              <ArrowLeft size={24} color={colors.primary} />
+            </TouchableOpacity>
+          ),
+        }} 
+      />
       
-      {/* Dynamic Header */}
-      <View style={styles.dynamicHeader}>
-        <View style={styles.headerGradient}>
-          <View style={styles.headerContent}>
-            <View style={styles.brandRow}>
-              <AppBrand size="small" showText={false} />
-              <View style={styles.brandInfo}>
-                <Text style={styles.brandTitle}>TruckMate AI</Text>
-                <Text style={styles.brandSubtitle}>Real-Time Operations</Text>
-              </View>
-            </View>
-            <View style={styles.liveIndicator}>
-              <View style={styles.liveDot} />
-              <Text style={styles.liveText}>LIVE</Text>
-            </View>
-          </View>
-          
-          <View style={styles.quickStats}>
-            <View style={styles.quickStat}>
-              <Truck size={16} color={colors.white} />
-              <Text style={styles.quickStatValue}>24</Text>
-              <Text style={styles.quickStatLabel}>Active</Text>
-            </View>
-            <View style={styles.quickStat}>
-              <Users size={16} color={colors.white} />
-              <Text style={styles.quickStatValue}>18</Text>
-              <Text style={styles.quickStatLabel}>Drivers</Text>
-            </View>
-            <View style={styles.quickStat}>
-              <MapPin size={16} color={colors.white} />
-              <Text style={styles.quickStatValue}>12</Text>
-              <Text style={styles.quickStatLabel}>Routes</Text>
-            </View>
-          </View>
-        </View>
-      </View>
-
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Performance Gauges */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Performance Dashboard</Text>
-          <View style={styles.gaugesGrid}>
-            {performanceMetrics.map((metric, index) => {
-              const IconComp = metric.icon;
-              const percentage = (metric.value / metric.maxValue) * 100;
-              return (
-                <View key={index} style={styles.gaugeCard}>
-                  <View style={styles.gaugeHeader}>
-                    <View style={[styles.gaugeIcon, { backgroundColor: `${metric.color}15` }]}>
-                      <IconComp size={20} color={metric.color} />
-                    </View>
-                    <Text style={styles.gaugeTitle}>{metric.title}</Text>
-                  </View>
-                  
-                  <View style={styles.gaugeContainer}>
-                    <View style={styles.gaugeTrack}>
-                      <View style={[styles.gaugeFill, { 
-                        width: `${percentage}%`, 
-                        backgroundColor: metric.color 
-                      }]} />
-                    </View>
-                    <Text style={styles.gaugeValue}>
-                      {metric.value}{metric.unit || '%'}
-                    </Text>
-                  </View>
-                </View>
-              );
-            })}
-          </View>
-        </View>
-
-        {/* Live Fleet Updates */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Live Fleet Updates</Text>
-            <View style={styles.refreshIndicator}>
-              <Zap size={14} color={colors.primary} />
-              <Text style={styles.refreshText}>Auto-refresh</Text>
+        {/* Performance Hero */}
+        <LinearGradient
+          colors={['#7c3aed', '#a855f7', '#c084fc']}
+          style={styles.heroCard}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        >
+          <View style={styles.heroContent}>
+            <View style={styles.heroIcon}>
+              <Trophy size={32} color="white" />
+            </View>
+            <Text style={styles.heroTitle}>Fleet Performance</Text>
+            <Text style={styles.heroSubtitle}>Driving Excellence Forward</Text>
+            
+            <View style={styles.heroMetrics}>
+              <View style={styles.heroMetric}>
+                <Text style={styles.heroMetricNumber}>98.2%</Text>
+                <Text style={styles.heroMetricLabel}>Efficiency</Text>
+              </View>
+              <View style={styles.heroMetric}>
+                <Text style={styles.heroMetricNumber}>4.8</Text>
+                <Text style={styles.heroMetricLabel}>Rating</Text>
+              </View>
+              <View style={styles.heroMetric}>
+                <Text style={styles.heroMetricNumber}>24</Text>
+                <Text style={styles.heroMetricLabel}>Awards</Text>
+              </View>
             </View>
           </View>
+        </LinearGradient>
+        
+        {/* KPI Cards */}
+        <View style={styles.kpiSection}>
+          <Text style={styles.sectionTitle}>Key Performance Indicators</Text>
           
-          {liveUpdates.map((update) => (
-            <View key={update.id} style={styles.updateCard}>
-              <View style={styles.updateHeader}>
-                <View style={styles.driverInfo}>
-                  <Text style={styles.driverName}>{update.driver}</Text>
-                  <Text style={styles.driverLocation}>{update.location}</Text>
+          <View style={styles.kpiGrid}>
+            <View style={styles.kpiCard}>
+              <View style={styles.kpiHeader}>
+                <View style={[styles.kpiIcon, { backgroundColor: '#dbeafe' }]}>
+                  <Target size={20} color="#3b82f6" />
                 </View>
-                <View style={styles.statusBadge}>
-                  <Text style={styles.statusText}>{update.status}</Text>
-                </View>
+                <Text style={styles.kpiTrend}>+12%</Text>
               </View>
-              
-              <View style={styles.progressSection}>
-                <View style={styles.progressBar}>
-                  <View style={[styles.progressFill, { 
-                    width: `${update.progress * 100}%`,
-                    backgroundColor: update.progress === 1 ? colors.success : colors.primary
-                  }]} />
-                </View>
-                <Text style={styles.etaText}>ETA: {update.eta}</Text>
-              </View>
-            </View>
-          ))}
-        </View>
-
-        {/* Achievement Badges */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Recent Achievements</Text>
-          <View style={styles.achievementsContainer}>
-            {achievements.map((achievement, index) => {
-              const IconComp = achievement.icon;
-              return (
-                <TouchableOpacity key={index} style={styles.achievementCard}>
-                  <View style={[styles.achievementIcon, { backgroundColor: `${achievement.color}15` }]}>
-                    <IconComp size={24} color={achievement.color} />
-                  </View>
-                  <View style={styles.achievementContent}>
-                    <Text style={styles.achievementTitle}>{achievement.title}</Text>
-                    <Text style={styles.achievementSubtitle}>{achievement.subtitle}</Text>
-                  </View>
-                  <View style={[styles.achievementBadge, { backgroundColor: achievement.color }]}>
-                    <Text style={styles.achievementBadgeText}>NEW</Text>
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        </View>
-
-        {/* Real-time Analytics */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Today&apos;s Analytics</Text>
-          <View style={styles.analyticsGrid}>
-            <View style={styles.analyticsCard}>
-              <View style={styles.analyticsHeader}>
-                <TrendingUp size={20} color={colors.success} />
-                <Text style={styles.analyticsChange}>+12%</Text>
-              </View>
-              <Text style={styles.analyticsValue}>2,847</Text>
-              <Text style={styles.analyticsLabel}>Miles Driven</Text>
+              <Text style={styles.kpiValue}>94.2%</Text>
+              <Text style={styles.kpiLabel}>On-Time Delivery</Text>
             </View>
             
-            <View style={styles.analyticsCard}>
-              <View style={styles.analyticsHeader}>
-                <Gauge size={20} color={colors.primary} />
-                <Text style={styles.analyticsChange}>+5%</Text>
+            <View style={styles.kpiCard}>
+              <View style={styles.kpiHeader}>
+                <View style={[styles.kpiIcon, { backgroundColor: '#dcfce7' }]}>
+                  <Zap size={20} color="#10b981" />
+                </View>
+                <Text style={styles.kpiTrend}>+8%</Text>
               </View>
-              <Text style={styles.analyticsValue}>94.2%</Text>
-              <Text style={styles.analyticsLabel}>Efficiency</Text>
+              <Text style={styles.kpiValue}>7.2</Text>
+              <Text style={styles.kpiLabel}>MPG Average</Text>
+            </View>
+            
+            <View style={styles.kpiCard}>
+              <View style={styles.kpiHeader}>
+                <View style={[styles.kpiIcon, { backgroundColor: '#fef3c7' }]}>
+                  <Award size={20} color="#f59e0b" />
+                </View>
+                <Text style={styles.kpiTrend}>+15%</Text>
+              </View>
+              <Text style={styles.kpiValue}>$2,847</Text>
+              <Text style={styles.kpiLabel}>Cost Savings</Text>
+            </View>
+            
+            <View style={styles.kpiCard}>
+              <View style={styles.kpiHeader}>
+                <View style={[styles.kpiIcon, { backgroundColor: '#fce7f3' }]}>
+                  <TrendingUp size={20} color="#ec4899" />
+                </View>
+                <Text style={styles.kpiTrend}>+22%</Text>
+              </View>
+              <Text style={styles.kpiValue}>89%</Text>
+              <Text style={styles.kpiLabel}>Customer Satisfaction</Text>
             </View>
           </View>
         </View>
-
+        
+        {/* Top Performers */}
+        <View style={styles.performersSection}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Top Performers</Text>
+            <TouchableOpacity>
+              <Text style={styles.viewAllText}>View All</Text>
+            </TouchableOpacity>
+          </View>
+          
+          <View style={styles.leaderboard}>
+            <View style={styles.performerCard}>
+              <View style={styles.rankBadge}>
+                <Medal size={16} color="#ffd700" />
+                <Text style={styles.rankNumber}>1</Text>
+              </View>
+              <View style={styles.performerInfo}>
+                <Text style={styles.performerName}>Sarah Johnson</Text>
+                <Text style={styles.performerMetric}>98.5% Efficiency • 0 Incidents</Text>
+              </View>
+              <View style={styles.performerScore}>
+                <Text style={styles.scoreValue}>985</Text>
+                <Text style={styles.scoreLabel}>pts</Text>
+              </View>
+            </View>
+            
+            <View style={styles.performerCard}>
+              <View style={styles.rankBadge}>
+                <Medal size={16} color="#c0c0c0" />
+                <Text style={styles.rankNumber}>2</Text>
+              </View>
+              <View style={styles.performerInfo}>
+                <Text style={styles.performerName}>Mike Rodriguez</Text>
+                <Text style={styles.performerMetric}>96.8% Efficiency • 1 Incident</Text>
+              </View>
+              <View style={styles.performerScore}>
+                <Text style={styles.scoreValue}>968</Text>
+                <Text style={styles.scoreLabel}>pts</Text>
+              </View>
+            </View>
+            
+            <View style={styles.performerCard}>
+              <View style={styles.rankBadge}>
+                <Medal size={16} color="#cd7f32" />
+                <Text style={styles.rankNumber}>3</Text>
+              </View>
+              <View style={styles.performerInfo}>
+                <Text style={styles.performerName}>David Chen</Text>
+                <Text style={styles.performerMetric}>95.2% Efficiency • 0 Incidents</Text>
+              </View>
+              <View style={styles.performerScore}>
+                <Text style={styles.scoreValue}>952</Text>
+                <Text style={styles.scoreLabel}>pts</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+        
+        {/* Achievement Badges */}
+        <View style={styles.achievementsSection}>
+          <Text style={styles.sectionTitle}>Recent Achievements</Text>
+          
+          <View style={styles.badgeGrid}>
+            <View style={styles.badgeCard}>
+              <View style={[styles.badgeIcon, { backgroundColor: '#ffd700' }]}>
+                <Star size={24} color="white" />
+              </View>
+              <Text style={styles.badgeTitle}>Safety Champion</Text>
+              <Text style={styles.badgeDescription}>30 days accident-free</Text>
+            </View>
+            
+            <View style={styles.badgeCard}>
+              <View style={[styles.badgeIcon, { backgroundColor: '#10b981' }]}>
+                <Zap size={24} color="white" />
+              </View>
+              <Text style={styles.badgeTitle}>Fuel Efficiency</Text>
+              <Text style={styles.badgeDescription}>Best MPG this month</Text>
+            </View>
+            
+            <View style={styles.badgeCard}>
+              <View style={[styles.badgeIcon, { backgroundColor: '#3b82f6' }]}>
+                <Target size={24} color="white" />
+              </View>
+              <Text style={styles.badgeTitle}>On-Time Master</Text>
+              <Text style={styles.badgeDescription}>100% delivery rate</Text>
+            </View>
+            
+            <View style={styles.badgeCard}>
+              <View style={[styles.badgeIcon, { backgroundColor: '#8b5cf6' }]}>
+                <Users size={24} color="white" />
+              </View>
+              <Text style={styles.badgeTitle}>Team Player</Text>
+              <Text style={styles.badgeDescription}>Highest collaboration</Text>
+            </View>
+          </View>
+        </View>
+        
+        {/* Performance Trends */}
+        <View style={styles.trendsSection}>
+          <Text style={styles.sectionTitle}>Performance Trends</Text>
+          
+          <View style={styles.trendCard}>
+            <View style={styles.trendHeader}>
+              <Text style={styles.trendTitle}>Weekly Progress</Text>
+              <View style={styles.trendIndicator}>
+                <TrendingUp size={16} color="#10b981" />
+                <Text style={styles.trendValue}>+5.2%</Text>
+              </View>
+            </View>
+            
+            <View style={styles.trendChart}>
+              <View style={styles.chartArea}>
+                <View style={[styles.trendBar, { height: 30, backgroundColor: '#e5e7eb' }]} />
+                <View style={[styles.trendBar, { height: 45, backgroundColor: '#d1d5db' }]} />
+                <View style={[styles.trendBar, { height: 60, backgroundColor: '#9ca3af' }]} />
+                <View style={[styles.trendBar, { height: 75, backgroundColor: '#6b7280' }]} />
+                <View style={[styles.trendBar, { height: 90, backgroundColor: '#374151' }]} />
+                <View style={[styles.trendBar, { height: 85, backgroundColor: '#10b981' }]} />
+                <View style={[styles.trendBar, { height: 95, backgroundColor: '#059669' }]} />
+              </View>
+            </View>
+            
+            <View style={styles.trendMetrics}>
+              <View style={styles.trendMetric}>
+                <Text style={styles.metricLabel}>Best Day</Text>
+                <Text style={styles.metricValue}>Friday</Text>
+              </View>
+              <View style={styles.trendMetric}>
+                <Text style={styles.metricLabel}>Avg Score</Text>
+                <Text style={styles.metricValue}>92.4</Text>
+              </View>
+              <View style={styles.trendMetric}>
+                <Text style={styles.metricLabel}>Improvement</Text>
+                <Text style={styles.metricValue}>+5.2%</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+        
         <View style={styles.footer} />
       </ScrollView>
     </View>
@@ -198,82 +251,119 @@ export default function DashboardOption4() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background.primary,
+    backgroundColor: '#f9fafb',
   },
-  dynamicHeader: {
-    backgroundColor: colors.primary,
-  },
-  headerGradient: {
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-  },
-  headerContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  brandRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  brandInfo: {
-    flex: 1,
-  },
-  brandTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.white,
-  },
-  brandSubtitle: {
-    fontSize: 12,
-    color: `${colors.white}80`,
-    marginTop: 2,
-  },
-  liveIndicator: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    backgroundColor: `${colors.white}20`,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  liveDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: colors.success,
-  },
-  liveText: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    color: colors.white,
-  },
-  quickStats: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-  },
-  quickStat: {
-    alignItems: 'center',
-    gap: 4,
-  },
-  quickStatValue: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.white,
-  },
-  quickStatLabel: {
-    fontSize: 10,
-    color: `${colors.white}80`,
+  backButton: {
+    padding: 8,
   },
   scrollView: {
     flex: 1,
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
   },
-  section: {
-    marginTop: 24,
+  heroCard: {
+    borderRadius: 24,
+    padding: 32,
+    marginTop: 16,
+    marginBottom: 24,
+    alignItems: 'center',
+  },
+  heroContent: {
+    alignItems: 'center',
+  },
+  heroIcon: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  heroTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: 'white',
+    marginBottom: 8,
+  },
+  heroSubtitle: {
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.8)',
+    marginBottom: 24,
+  },
+  heroMetrics: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+  },
+  heroMetric: {
+    alignItems: 'center',
+  },
+  heroMetricNumber: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: 'white',
+  },
+  heroMetricLabel: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.8)',
+    marginTop: 4,
+  },
+  kpiSection: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#1f2937',
+    marginBottom: 16,
+  },
+  kpiGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  kpiCard: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 20,
+    width: (width - 48) / 2,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  kpiHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  kpiIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  kpiTrend: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#10b981',
+  },
+  kpiValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#1f2937',
+    marginBottom: 4,
+  },
+  kpiLabel: {
+    fontSize: 14,
+    color: '#6b7280',
+  },
+  performersSection: {
+    marginBottom: 24,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -281,219 +371,178 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.text.primary,
-    marginBottom: 16,
-  },
-  refreshIndicator: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  refreshText: {
-    fontSize: 12,
+  viewAllText: {
+    fontSize: 14,
     color: colors.primary,
     fontWeight: '500',
   },
-  gaugesGrid: {
+  leaderboard: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  performerCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f3f4f6',
+  },
+  rankBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f9fafb',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 12,
+    marginRight: 16,
+  },
+  rankNumber: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#1f2937',
+    marginLeft: 4,
+  },
+  performerInfo: {
+    flex: 1,
+  },
+  performerName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1f2937',
+    marginBottom: 4,
+  },
+  performerMetric: {
+    fontSize: 12,
+    color: '#6b7280',
+  },
+  performerScore: {
+    alignItems: 'center',
+  },
+  scoreValue: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1f2937',
+  },
+  scoreLabel: {
+    fontSize: 12,
+    color: '#6b7280',
+  },
+  achievementsSection: {
+    marginBottom: 24,
+  },
+  badgeGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
-  },
-  gaugeCard: {
-    backgroundColor: colors.background.secondary,
-    borderRadius: 16,
-    padding: 16,
-    width: (width - 56) / 2,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  gaugeHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 12,
-  },
-  gaugeIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  gaugeTitle: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: colors.text.primary,
-    flex: 1,
-  },
-  gaugeContainer: {
-    alignItems: 'center',
-    gap: 8,
-  },
-  gaugeTrack: {
-    width: '100%',
-    height: 6,
-    backgroundColor: colors.background.tertiary,
-    borderRadius: 3,
-    overflow: 'hidden',
-  },
-  gaugeFill: {
-    height: '100%',
-    borderRadius: 3,
-  },
-  gaugeValue: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: colors.text.primary,
-  },
-  updateCard: {
-    backgroundColor: colors.background.secondary,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 8,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  updateHeader: {
-    flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
   },
-  driverInfo: {
-    flex: 1,
-  },
-  driverName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.text.primary,
-  },
-  driverLocation: {
-    fontSize: 12,
-    color: colors.text.secondary,
-    marginTop: 2,
-  },
-  statusBadge: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  statusText: {
-    fontSize: 10,
-    fontWeight: '500',
-    color: colors.white,
-  },
-  progressSection: {
-    gap: 8,
-  },
-  progressBar: {
-    height: 4,
-    backgroundColor: colors.background.tertiary,
-    borderRadius: 2,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    borderRadius: 2,
-  },
-  etaText: {
-    fontSize: 12,
-    color: colors.text.secondary,
-    textAlign: 'right',
-  },
-  achievementsContainer: {
-    gap: 12,
-  },
-  achievementCard: {
-    backgroundColor: colors.background.secondary,
+  badgeCard: {
+    backgroundColor: 'white',
     borderRadius: 16,
-    padding: 16,
-    flexDirection: 'row',
+    padding: 20,
     alignItems: 'center',
-    gap: 12,
-    shadowColor: colors.shadow,
+    width: (width - 48) / 2,
+    marginBottom: 16,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
-  achievementIcon: {
+  badgeIcon: {
     width: 48,
     height: 48,
     borderRadius: 24,
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 12,
   },
-  achievementContent: {
-    flex: 1,
-  },
-  achievementTitle: {
+  badgeTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: colors.text.primary,
+    color: '#1f2937',
+    marginBottom: 4,
+    textAlign: 'center',
   },
-  achievementSubtitle: {
+  badgeDescription: {
     fontSize: 12,
-    color: colors.text.secondary,
-    marginTop: 2,
+    color: '#6b7280',
+    textAlign: 'center',
   },
-  achievementBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
+  trendsSection: {
+    marginBottom: 24,
   },
-  achievementBadgeText: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    color: colors.white,
-  },
-  analyticsGrid: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  analyticsCard: {
-    backgroundColor: colors.background.secondary,
+  trendCard: {
+    backgroundColor: 'white',
     borderRadius: 16,
-    padding: 16,
-    flex: 1,
-    shadowColor: colors.shadow,
+    padding: 20,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
   },
-  analyticsHeader: {
+  trendHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 20,
   },
-  analyticsChange: {
+  trendTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1f2937',
+  },
+  trendIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#dcfce7',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  trendValue: {
     fontSize: 12,
     fontWeight: '600',
-    color: colors.success,
+    color: '#16a34a',
+    marginLeft: 4,
   },
-  analyticsValue: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.text.primary,
+  trendChart: {
+    marginBottom: 20,
+  },
+  chartArea: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    height: 100,
+  },
+  trendBar: {
+    width: 24,
+    borderRadius: 4,
+  },
+  trendMetrics: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  trendMetric: {
+    alignItems: 'center',
+  },
+  metricLabel: {
+    fontSize: 12,
+    color: '#6b7280',
     marginBottom: 4,
   },
-  analyticsLabel: {
-    fontSize: 12,
-    color: colors.text.secondary,
+  metricValue: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1f2937',
   },
   footer: {
-    height: 40,
+    height: 20,
   },
 });

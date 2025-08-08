@@ -1,137 +1,190 @@
 import React from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Dimensions, TextInput } from 'react-native';
-import { Stack } from 'expo-router';
-import { Search, Bell, Settings, BarChart3, Navigation, Zap, CheckCircle, AlertCircle, Clock, Truck } from 'lucide-react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
+import { Stack, router } from 'expo-router';
+import { Navigation, DollarSign, Users, MapPin, ArrowLeft, Calendar, BarChart3 } from 'lucide-react-native';
 import { colors } from '@/constants/colors';
-import AppBrand from '@/components/AppBrand';
 
 const { width } = Dimensions.get('window');
 
 export default function DashboardOption2() {
-  const navigationItems = [
-    { icon: Truck, label: 'Fleet', count: 24, color: colors.primary },
-    { icon: Clock, label: 'Logbook', count: 8, color: colors.accent },
-    { icon: Navigation, label: 'Routes', count: 12, color: colors.success },
-    { icon: BarChart3, label: 'Analytics', count: null, color: colors.warning },
-    { icon: CheckCircle, label: 'Compliance', count: 3, color: colors.primary },
-    { icon: Settings, label: 'Settings', count: null, color: colors.text.secondary },
-  ];
-
-  const alerts = [
-    { type: 'warning', message: 'Vehicle TRK-001 needs maintenance in 500 miles', time: '2 hours ago' },
-    { type: 'success', message: 'Driver John completed pre-trip inspection', time: '4 hours ago' },
-    { type: 'info', message: 'New route optimization available', time: '6 hours ago' },
-  ];
-
   return (
     <View style={styles.container}>
-      <Stack.Screen options={{ 
-        title: 'Dashboard Option 2',
-        headerStyle: { backgroundColor: colors.background.secondary },
-        headerTintColor: colors.text.primary
-      }} />
+      <Stack.Screen 
+        options={{ 
+          headerTitle: 'Dashboard Option 2 - Analytics Hub',
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+              <ArrowLeft size={24} color={colors.primary} />
+            </TouchableOpacity>
+          ),
+        }} 
+      />
       
-      {/* Clean Header */}
-      <View style={styles.header}>
-        <View style={styles.headerTop}>
-          <View style={styles.brandContainer}>
-            <AppBrand size="small" showText={false} />
-            <View>
-              <Text style={styles.brandTitle}>TruckMate AI</Text>
-              <Text style={styles.brandSubtitle}>Fleet Management Suite</Text>
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        {/* Header Stats */}
+        <View style={styles.headerStats}>
+          <View style={styles.statCard}>
+            <View style={styles.statIcon}>
+              <DollarSign size={20} color="#10b981" />
             </View>
+            <Text style={styles.statValue}>$12,847</Text>
+            <Text style={styles.statLabel}>Revenue Today</Text>
           </View>
-          <TouchableOpacity style={styles.notificationButton}>
-            <Bell size={20} color={colors.text.primary} />
-            <View style={styles.notificationBadge}>
-              <Text style={styles.notificationBadgeText}>3</Text>
+          
+          <View style={styles.statCard}>
+            <View style={styles.statIcon}>
+              <Navigation size={20} color="#3b82f6" />
             </View>
-          </TouchableOpacity>
+            <Text style={styles.statValue}>2,341</Text>
+            <Text style={styles.statLabel}>Miles Driven</Text>
+          </View>
+          
+          <View style={styles.statCard}>
+            <View style={styles.statIcon}>
+              <Users size={20} color="#8b5cf6" />
+            </View>
+            <Text style={styles.statValue}>18/24</Text>
+            <Text style={styles.statLabel}>Active Drivers</Text>
+          </View>
         </View>
         
-        {/* Search Bar */}
-        <View style={styles.searchContainer}>
-          <Search size={16} color={colors.text.secondary} />
-          <TextInput 
-            style={styles.searchInput}
-            placeholder="Search vehicles, drivers, routes..."
-            placeholderTextColor={colors.text.secondary}
-          />
+        {/* Performance Chart Card */}
+        <View style={styles.chartCard}>
+          <View style={styles.chartHeader}>
+            <Text style={styles.chartTitle}>Weekly Performance</Text>
+            <TouchableOpacity style={styles.chartButton}>
+              <BarChart3 size={16} color={colors.primary} />
+              <Text style={styles.chartButtonText}>View Details</Text>
+            </TouchableOpacity>
+          </View>
+          
+          <View style={styles.chartPlaceholder}>
+            <View style={styles.chartBars}>
+              <View style={[styles.chartBar, { height: 40 }]} />
+              <View style={[styles.chartBar, { height: 60 }]} />
+              <View style={[styles.chartBar, { height: 80 }]} />
+              <View style={[styles.chartBar, { height: 45 }]} />
+              <View style={[styles.chartBar, { height: 90 }]} />
+              <View style={[styles.chartBar, { height: 70 }]} />
+              <View style={[styles.chartBar, { height: 85 }]} />
+            </View>
+            <View style={styles.chartLabels}>
+              <Text style={styles.chartLabel}>Mon</Text>
+              <Text style={styles.chartLabel}>Tue</Text>
+              <Text style={styles.chartLabel}>Wed</Text>
+              <Text style={styles.chartLabel}>Thu</Text>
+              <Text style={styles.chartLabel}>Fri</Text>
+              <Text style={styles.chartLabel}>Sat</Text>
+              <Text style={styles.chartLabel}>Sun</Text>
+            </View>
+          </View>
         </View>
-      </View>
-
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Key Metrics */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Today&apos;s Overview</Text>
-          <View style={styles.metricsContainer}>
-            <View style={styles.metricCard}>
-              <View style={styles.metricHeader}>
-                <Text style={styles.metricValue}>24/26</Text>
-                <Truck size={20} color={colors.primary} />
+        
+        {/* Live Tracking Section */}
+        <View style={styles.trackingSection}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Live Tracking</Text>
+            <TouchableOpacity>
+              <Text style={styles.viewAllText}>View All</Text>
+            </TouchableOpacity>
+          </View>
+          
+          <View style={styles.trackingCard}>
+            <View style={styles.trackingHeader}>
+              <View style={styles.driverInfo}>
+                <View style={styles.driverAvatar}>
+                  <Text style={styles.driverInitials}>AB</Text>
+                </View>
+                <View>
+                  <Text style={styles.driverName}>Alex Brown</Text>
+                  <Text style={styles.truckNumber}>Truck #1247</Text>
+                </View>
               </View>
-              <Text style={styles.metricLabel}>Active Vehicles</Text>
-              <View style={styles.progressBar}>
-                <View style={[styles.progressFill, { width: '92%', backgroundColor: colors.primary }]} />
+              <View style={styles.statusBadge}>
+                <Text style={styles.statusText}>EN ROUTE</Text>
               </View>
             </View>
             
-            <View style={styles.metricCard}>
-              <View style={styles.metricHeader}>
-                <Text style={styles.metricValue}>18/20</Text>
-                <CheckCircle size={20} color={colors.success} />
+            <View style={styles.routeInfo}>
+              <View style={styles.routePoint}>
+                <MapPin size={14} color="#10b981" />
+                <Text style={styles.routeText}>Chicago, IL</Text>
               </View>
-              <Text style={styles.metricLabel}>Compliant Drivers</Text>
-              <View style={styles.progressBar}>
-                <View style={[styles.progressFill, { width: '90%', backgroundColor: colors.success }]} />
+              <View style={styles.routeLine} />
+              <View style={styles.routePoint}>
+                <MapPin size={14} color="#ef4444" />
+                <Text style={styles.routeText}>Dallas, TX</Text>
+              </View>
+            </View>
+            
+            <View style={styles.trackingMetrics}>
+              <View style={styles.trackingMetric}>
+                <Text style={styles.metricLabel}>ETA</Text>
+                <Text style={styles.metricValue}>4h 32m</Text>
+              </View>
+              <View style={styles.trackingMetric}>
+                <Text style={styles.metricLabel}>Distance</Text>
+                <Text style={styles.metricValue}>287 mi</Text>
+              </View>
+              <View style={styles.trackingMetric}>
+                <Text style={styles.metricLabel}>Speed</Text>
+                <Text style={styles.metricValue}>65 mph</Text>
               </View>
             </View>
           </View>
         </View>
-
-        {/* Navigation Grid */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quick Access</Text>
-          <View style={styles.navigationGrid}>
-            {navigationItems.map((item, index) => {
-              const IconComp = item.icon;
-              return (
-                <TouchableOpacity key={index} style={styles.navigationCard}>
-                  <View style={styles.navigationCardContent}>
-                    <View style={[styles.navigationIcon, { backgroundColor: `${item.color}15` }]}>
-                      <IconComp size={22} color={item.color} />
-                    </View>
-                    {item.count && (
-                      <View style={styles.countBadge}>
-                        <Text style={styles.countBadgeText}>{item.count}</Text>
-                      </View>
-                    )}
-                  </View>
-                  <Text style={styles.navigationLabel}>{item.label}</Text>
-                </TouchableOpacity>
-              );
-            })}
+        
+        {/* Schedule Overview */}
+        <View style={styles.scheduleSection}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Today&apos;s Schedule</Text>
+            <TouchableOpacity>
+              <Calendar size={20} color={colors.primary} />
+            </TouchableOpacity>
           </View>
-        </View>
-
-        {/* Recent Activity */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Recent Activity</Text>
-          {alerts.map((alert, index) => (
-            <View key={index} style={styles.activityCard}>
-              <View style={styles.activityIcon}>
-                {alert.type === 'warning' && <AlertCircle size={16} color={colors.warning} />}
-                {alert.type === 'success' && <CheckCircle size={16} color={colors.success} />}
-                {alert.type === 'info' && <Zap size={16} color={colors.primary} />}
+          
+          <View style={styles.scheduleList}>
+            <View style={styles.scheduleItem}>
+              <View style={styles.scheduleTime}>
+                <Text style={styles.timeText}>08:00</Text>
               </View>
-              <View style={styles.activityContent}>
-                <Text style={styles.activityMessage}>{alert.message}</Text>
-                <Text style={styles.activityTime}>{alert.time}</Text>
+              <View style={styles.scheduleDetails}>
+                <Text style={styles.scheduleTitle}>Pickup - Warehouse A</Text>
+                <Text style={styles.scheduleLocation}>1234 Industrial Blvd</Text>
+              </View>
+              <View style={styles.scheduleStatus}>
+                <View style={[styles.statusDot, { backgroundColor: '#10b981' }]} />
               </View>
             </View>
-          ))}
+            
+            <View style={styles.scheduleItem}>
+              <View style={styles.scheduleTime}>
+                <Text style={styles.timeText}>14:30</Text>
+              </View>
+              <View style={styles.scheduleDetails}>
+                <Text style={styles.scheduleTitle}>Delivery - Customer Site</Text>
+                <Text style={styles.scheduleLocation}>5678 Commerce St</Text>
+              </View>
+              <View style={styles.scheduleStatus}>
+                <View style={[styles.statusDot, { backgroundColor: '#f59e0b' }]} />
+              </View>
+            </View>
+            
+            <View style={styles.scheduleItem}>
+              <View style={styles.scheduleTime}>
+                <Text style={styles.timeText}>18:00</Text>
+              </View>
+              <View style={styles.scheduleDetails}>
+                <Text style={styles.scheduleTitle}>Return to Depot</Text>
+                <Text style={styles.scheduleLocation}>Main Terminal</Text>
+              </View>
+              <View style={styles.scheduleStatus}>
+                <View style={[styles.statusDot, { backgroundColor: '#6b7280' }]} />
+              </View>
+            </View>
+          </View>
         </View>
-
+        
         <View style={styles.footer} />
       </ScrollView>
     </View>
@@ -141,209 +194,276 @@ export default function DashboardOption2() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background.primary,
+    backgroundColor: '#f1f5f9',
   },
-  header: {
-    backgroundColor: colors.background.secondary,
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  headerTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  brandContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  brandTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.text.primary,
-  },
-  brandSubtitle: {
-    fontSize: 12,
-    color: colors.text.secondary,
-  },
-  notificationButton: {
-    position: 'relative',
+  backButton: {
     padding: 8,
-  },
-  notificationBadge: {
-    position: 'absolute',
-    top: 4,
-    right: 4,
-    backgroundColor: colors.danger,
-    borderRadius: 8,
-    width: 16,
-    height: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  notificationBadgeText: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    color: colors.white,
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.background.tertiary,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    gap: 8,
-  },
-  searchInput: {
-    flex: 1,
-    fontSize: 14,
-    color: colors.text.primary,
   },
   scrollView: {
     flex: 1,
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
   },
-  section: {
-    marginTop: 24,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.text.primary,
-    marginBottom: 16,
-  },
-  metricsContainer: {
-    gap: 12,
-  },
-  metricCard: {
-    backgroundColor: colors.background.secondary,
-    borderRadius: 16,
-    padding: 16,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  metricHeader: {
+  headerStats: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
+    marginTop: 16,
+    marginBottom: 24,
   },
-  metricValue: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: colors.text.primary,
-  },
-  metricLabel: {
-    fontSize: 14,
-    color: colors.text.secondary,
-    marginBottom: 12,
-  },
-  progressBar: {
-    height: 4,
-    backgroundColor: colors.background.tertiary,
-    borderRadius: 2,
-    overflow: 'hidden',
-  },
-  progressFill: {
-    height: '100%',
-    borderRadius: 2,
-  },
-  navigationGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  navigationCard: {
-    backgroundColor: colors.background.secondary,
-    borderRadius: 16,
-    padding: 16,
-    alignItems: 'center',
-    width: (width - 56) / 3,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  navigationCardContent: {
-    position: 'relative',
-    marginBottom: 8,
-  },
-  navigationIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  countBadge: {
-    position: 'absolute',
-    top: -4,
-    right: -4,
-    backgroundColor: colors.danger,
-    borderRadius: 10,
-    minWidth: 20,
-    height: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 6,
-  },
-  countBadgeText: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    color: colors.white,
-  },
-  navigationLabel: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: colors.text.primary,
-    textAlign: 'center',
-  },
-  activityCard: {
-    backgroundColor: colors.background.secondary,
+  statCard: {
+    backgroundColor: 'white',
     borderRadius: 12,
     padding: 16,
-    marginBottom: 8,
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: 12,
-    shadowColor: colors.shadow,
+    alignItems: 'center',
+    width: (width - 48) / 3,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
-    elevation: 1,
+    elevation: 2,
   },
-  activityIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: colors.background.tertiary,
+  statIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#f8fafc',
     alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 8,
   },
-  activityContent: {
-    flex: 1,
-  },
-  activityMessage: {
-    fontSize: 14,
-    color: colors.text.primary,
-    lineHeight: 20,
+  statValue: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1f2937',
     marginBottom: 4,
   },
-  activityTime: {
+  statLabel: {
     fontSize: 12,
-    color: colors.text.secondary,
+    color: '#6b7280',
+    textAlign: 'center',
+  },
+  chartCard: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  chartHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  chartTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1f2937',
+  },
+  chartButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f1f5f9',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  chartButtonText: {
+    fontSize: 12,
+    color: colors.primary,
+    marginLeft: 4,
+    fontWeight: '500',
+  },
+  chartPlaceholder: {
+    height: 120,
+  },
+  chartBars: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    height: 90,
+    marginBottom: 8,
+  },
+  chartBar: {
+    width: 24,
+    backgroundColor: colors.primary,
+    borderRadius: 4,
+  },
+  chartLabels: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  chartLabel: {
+    fontSize: 12,
+    color: '#6b7280',
+    width: 24,
+    textAlign: 'center',
+  },
+  trackingSection: {
+    marginBottom: 24,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1f2937',
+  },
+  viewAllText: {
+    fontSize: 14,
+    color: colors.primary,
+    fontWeight: '500',
+  },
+  trackingCard: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  trackingHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  driverInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  driverAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  driverInitials: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  driverName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1f2937',
+  },
+  truckNumber: {
+    fontSize: 12,
+    color: '#6b7280',
+    marginTop: 2,
+  },
+  statusBadge: {
+    backgroundColor: '#dcfce7',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  statusText: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#16a34a',
+  },
+  routeInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  routePoint: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  routeText: {
+    fontSize: 14,
+    color: '#374151',
+    marginLeft: 4,
+  },
+  routeLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: '#d1d5db',
+    marginHorizontal: 12,
+  },
+  trackingMetrics: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  trackingMetric: {
+    alignItems: 'center',
+  },
+  metricLabel: {
+    fontSize: 12,
+    color: '#6b7280',
+    marginBottom: 4,
+  },
+  metricValue: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1f2937',
+  },
+  scheduleSection: {
+    marginBottom: 24,
+  },
+  scheduleList: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  scheduleItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f3f4f6',
+  },
+  scheduleTime: {
+    width: 60,
+    marginRight: 16,
+  },
+  timeText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1f2937',
+  },
+  scheduleDetails: {
+    flex: 1,
+  },
+  scheduleTitle: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#1f2937',
+    marginBottom: 2,
+  },
+  scheduleLocation: {
+    fontSize: 12,
+    color: '#6b7280',
+  },
+  scheduleStatus: {
+    marginLeft: 12,
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
   footer: {
-    height: 40,
+    height: 20,
   },
 });

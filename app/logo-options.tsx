@@ -1,129 +1,144 @@
 import React from 'react';
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
-import { Stack } from 'expo-router';
-import { Truck, Zap, Shield, Target, BarChart3 } from 'lucide-react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity } from 'react-native';
+import { Stack, router } from 'expo-router';
+import { ArrowLeft, Truck, Zap, Shield, Target, Brain } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { colors } from '@/constants/colors';
 
-const { width } = Dimensions.get('window');
+
 
 export default function LogoOptions() {
-  const logoOptions = [
-    {
-      id: 1,
-      name: 'Classic Shield',
-      description: 'Professional shield design with truck icon',
-      icon: Shield,
-      primaryColor: colors.primary,
-      secondaryColor: colors.accent,
-      style: 'classic'
-    },
-    {
-      id: 2,
-      name: 'Modern Bolt',
-      description: 'Dynamic lightning bolt representing speed and efficiency',
-      icon: Zap,
-      primaryColor: colors.primary,
-      secondaryColor: colors.warning,
-      style: 'modern'
-    },
-    {
-      id: 3,
-      name: 'Target Focus',
-      description: 'Precision target symbolizing accuracy and goals',
-      icon: Target,
-      primaryColor: colors.primary,
-      secondaryColor: colors.success,
-      style: 'geometric'
-    },
-    {
-      id: 4,
-      name: 'Truck Emblem',
-      description: 'Direct truck representation with clean lines',
-      icon: Truck,
-      primaryColor: colors.primary,
-      secondaryColor: colors.accent,
-      style: 'industrial'
-    },
-    {
-      id: 5,
-      name: 'Analytics Graph',
-      description: 'Data-driven chart design for AI emphasis',
-      icon: BarChart3,
-      primaryColor: colors.primary,
-      secondaryColor: colors.success,
-      style: 'tech'
-    }
-  ];
-
-  const renderLogo = (logo: typeof logoOptions[0], size: 'small' | 'medium' | 'large' = 'medium') => {
-    const IconComp = logo.icon;
-    const logoSize = size === 'small' ? 40 : size === 'medium' ? 60 : 80;
-    const iconSize = size === 'small' ? 20 : size === 'medium' ? 30 : 40;
-    
-    return (
-      <View style={[styles.logoContainer, { 
-        width: logoSize, 
-        height: logoSize,
-        backgroundColor: logo.primaryColor 
-      }]}>
-        <IconComp size={iconSize} color={colors.white} />
-        {size !== 'small' && (
-          <View style={[styles.logoAccent, { backgroundColor: logo.secondaryColor }]} />
-        )}
-      </View>
-    );
-  };
-
   return (
     <View style={styles.container}>
-      <Stack.Screen options={{ 
-        title: 'Logo Options',
-        headerStyle: { backgroundColor: colors.background.secondary },
-        headerTintColor: colors.text.primary
-      }} />
-      
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Choose Your Logo</Text>
-        <Text style={styles.headerSubtitle}>Select a logo design for TruckMate AI</Text>
-      </View>
+      <Stack.Screen 
+        options={{ 
+          headerTitle: 'TruckMate AI - Logo Options',
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+              <ArrowLeft size={24} color={colors.primary} />
+            </TouchableOpacity>
+          ),
+        }} 
+      />
       
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {logoOptions.map((logo) => (
-          <TouchableOpacity key={logo.id} style={styles.logoCard}>
-            <View style={styles.logoPreview}>
-              {renderLogo(logo, 'large')}
-              <View style={styles.logoSizes}>
-                <Text style={styles.sizesLabel}>Sizes:</Text>
-                <View style={styles.sizeVariants}>
-                  {renderLogo(logo, 'small')}
-                  {renderLogo(logo, 'medium')}
-                </View>
-              </View>
-            </View>
-            
-            <View style={styles.logoInfo}>
-              <Text style={styles.logoName}>{logo.name}</Text>
-              <Text style={styles.logoDescription}>{logo.description}</Text>
-              <View style={styles.logoMeta}>
-                <View style={styles.styleTag}>
-                  <Text style={styles.styleText}>{logo.style}</Text>
-                </View>
-                <View style={styles.colorPalette}>
-                  <View style={[styles.colorDot, { backgroundColor: logo.primaryColor }]} />
-                  <View style={[styles.colorDot, { backgroundColor: logo.secondaryColor }]} />
-                </View>
-              </View>
-            </View>
-          </TouchableOpacity>
-        ))}
+        <Text style={styles.pageTitle}>Choose Your TruckMate AI Logo</Text>
+        <Text style={styles.pageSubtitle}>Select the logo design that best represents your fleet management vision</Text>
         
-        <View style={styles.infoCard}>
-          <Text style={styles.infoTitle}>Logo Usage Guidelines</Text>
-          <Text style={styles.infoText}>
-            • All logos are designed to work with the blue color scheme{'\n'}
-            • Each logo includes multiple size variants{'\n'}
-            • Logos maintain readability at all sizes{'\n'}
-            • Professional appearance across all platforms
+        {/* Logo Option 1 - Modern Gradient */}
+        <View style={styles.logoCard}>
+          <Text style={styles.logoTitle}>Option 1 - Modern Gradient</Text>
+          <View style={styles.logoContainer}>
+            <LinearGradient
+              colors={['#3b82f6', '#1d4ed8', '#1e40af']}
+              style={styles.gradientLogo}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <Truck size={32} color="white" />
+              <Zap size={16} color="white" style={styles.aiIcon} />
+            </LinearGradient>
+            <View style={styles.logoText}>
+              <Text style={styles.brandName}>TruckMate</Text>
+              <Text style={styles.aiText}>AI</Text>
+            </View>
+          </View>
+          <Text style={styles.logoDescription}>
+            Clean, modern gradient design with integrated AI symbol. Perfect for tech-forward companies.
+          </Text>
+        </View>
+        
+        {/* Logo Option 2 - Shield Protection */}
+        <View style={styles.logoCard}>
+          <Text style={styles.logoTitle}>Option 2 - Shield Protection</Text>
+          <View style={styles.logoContainer}>
+            <View style={styles.shieldLogo}>
+              <Shield size={40} color="#10b981" />
+              <Truck size={20} color="white" style={styles.innerIcon} />
+            </View>
+            <View style={styles.logoText}>
+              <Text style={styles.brandName}>TruckMate</Text>
+              <Text style={[styles.aiText, { color: '#10b981' }]}>AI</Text>
+            </View>
+          </View>
+          <Text style={styles.logoDescription}>
+            Security-focused design emphasizing safety and protection. Ideal for safety-conscious fleets.
+          </Text>
+        </View>
+        
+        {/* Logo Option 3 - Target Precision */}
+        <View style={styles.logoCard}>
+          <Text style={styles.logoTitle}>Option 3 - Target Precision</Text>
+          <View style={styles.logoContainer}>
+            <View style={styles.targetLogo}>
+              <Target size={48} color="#f59e0b" />
+              <Truck size={20} color="#f59e0b" style={styles.centerIcon} />
+            </View>
+            <View style={styles.logoText}>
+              <Text style={styles.brandName}>TruckMate</Text>
+              <Text style={[styles.aiText, { color: '#f59e0b' }]}>AI</Text>
+            </View>
+          </View>
+          <Text style={styles.logoDescription}>
+            Precision-focused design highlighting accuracy and efficiency. Great for logistics optimization.
+          </Text>
+        </View>
+        
+        {/* Logo Option 4 - Brain Intelligence */}
+        <View style={styles.logoCard}>
+          <Text style={styles.logoTitle}>Option 4 - Brain Intelligence</Text>
+          <View style={styles.logoContainer}>
+            <LinearGradient
+              colors={['#8b5cf6', '#7c3aed', '#6d28d9']}
+              style={styles.brainLogo}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <Brain size={28} color="white" />
+              <Truck size={14} color="white" style={styles.brainTruck} />
+            </LinearGradient>
+            <View style={styles.logoText}>
+              <Text style={styles.brandName}>TruckMate</Text>
+              <Text style={[styles.aiText, { color: '#8b5cf6' }]}>AI</Text>
+            </View>
+          </View>
+          <Text style={styles.logoDescription}>
+            Intelligence-focused design emphasizing AI capabilities and smart decision making.
+          </Text>
+        </View>
+        
+        {/* Logo Option 5 - Minimalist Circle */}
+        <View style={styles.logoCard}>
+          <Text style={styles.logoTitle}>Option 5 - Minimalist Circle</Text>
+          <View style={styles.logoContainer}>
+            <View style={styles.circleLogo}>
+              <View style={styles.circleOuter}>
+                <View style={styles.circleInner}>
+                  <Truck size={24} color="#1f2937" />
+                </View>
+                <Text style={styles.circleAI}>AI</Text>
+              </View>
+            </View>
+            <View style={styles.logoText}>
+              <Text style={[styles.brandName, { color: '#1f2937' }]}>TruckMate</Text>
+              <Text style={[styles.aiText, { color: '#6b7280' }]}>AI</Text>
+            </View>
+          </View>
+          <Text style={styles.logoDescription}>
+            Clean, minimalist design with subtle AI integration. Perfect for professional, understated branding.
+          </Text>
+        </View>
+        
+        {/* Selection Instructions */}
+        <View style={styles.instructionsCard}>
+          <Text style={styles.instructionsTitle}>How to Choose</Text>
+          <Text style={styles.instructionsText}>
+            Consider your brand personality:
+            {'\n'}• Modern & Tech-Forward → Option 1
+            {'\n'}• Safety & Security Focus → Option 2  
+            {'\n'}• Precision & Efficiency → Option 3
+            {'\n'}• AI & Intelligence → Option 4
+            {'\n'}• Professional & Clean → Option 5
           </Text>
         </View>
         
@@ -136,144 +151,179 @@ export default function LogoOptions() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background.primary,
+    backgroundColor: '#f8fafc',
   },
-  header: {
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 24,
-    backgroundColor: colors.background.secondary,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: colors.text.primary,
-    marginBottom: 8,
-  },
-  headerSubtitle: {
-    fontSize: 16,
-    color: colors.text.secondary,
-    textAlign: 'center',
+  backButton: {
+    padding: 8,
   },
   scrollView: {
     flex: 1,
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
+  },
+  pageTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#1f2937',
+    textAlign: 'center',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  pageSubtitle: {
+    fontSize: 16,
+    color: '#6b7280',
+    textAlign: 'center',
+    marginBottom: 32,
+    lineHeight: 24,
   },
   logoCard: {
-    backgroundColor: colors.background.secondary,
-    borderRadius: 16,
-    padding: 20,
-    marginTop: 16,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 24,
+    marginBottom: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  logoPreview: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
-    gap: 20,
+  logoTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#1f2937',
+    marginBottom: 20,
+    textAlign: 'center',
   },
   logoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  gradientLogo: {
+    width: 64,
+    height: 64,
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
+    marginRight: 16,
     position: 'relative',
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
   },
-  logoAccent: {
+  aiIcon: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+  },
+  shieldLogo: {
+    width: 64,
+    height: 64,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+    position: 'relative',
+  },
+  innerIcon: {
+    position: 'absolute',
+  },
+  targetLogo: {
+    width: 64,
+    height: 64,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+    position: 'relative',
+  },
+  centerIcon: {
+    position: 'absolute',
+  },
+  brainLogo: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+    position: 'relative',
+  },
+  brainTruck: {
+    position: 'absolute',
+    bottom: 8,
+    right: 8,
+  },
+  circleLogo: {
+    marginRight: 16,
+  },
+  circleOuter: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    borderWidth: 2,
+    borderColor: '#e5e7eb',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  circleInner: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#f9fafb',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  circleAI: {
     position: 'absolute',
     bottom: -2,
     right: -2,
-    width: 16,
-    height: 16,
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: '#6b7280',
+    backgroundColor: 'white',
+    paddingHorizontal: 4,
+    paddingVertical: 2,
     borderRadius: 8,
-    borderWidth: 2,
-    borderColor: colors.white,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
   },
-  logoSizes: {
-    flex: 1,
-  },
-  sizesLabel: {
-    fontSize: 12,
-    color: colors.text.secondary,
-    marginBottom: 8,
-  },
-  sizeVariants: {
-    flexDirection: 'row',
-    gap: 12,
+  logoText: {
     alignItems: 'center',
   },
-  logoInfo: {
-    gap: 8,
-  },
-  logoName: {
-    fontSize: 18,
+  brandName: {
+    fontSize: 24,
     fontWeight: 'bold',
-    color: colors.text.primary,
+    color: '#1f2937',
+  },
+  aiText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#3b82f6',
+    marginTop: 2,
   },
   logoDescription: {
     fontSize: 14,
-    color: colors.text.secondary,
+    color: '#6b7280',
+    textAlign: 'center',
     lineHeight: 20,
   },
-  logoMeta: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  styleTag: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  styleText: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: colors.white,
-    textTransform: 'capitalize',
-  },
-  colorPalette: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-  colorDot: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: colors.border,
-  },
-  infoCard: {
-    backgroundColor: colors.background.secondary,
+  instructionsCard: {
+    backgroundColor: '#f1f5f9',
     borderRadius: 16,
     padding: 20,
-    marginTop: 24,
+    marginBottom: 24,
     borderLeftWidth: 4,
     borderLeftColor: colors.primary,
   },
-  infoTitle: {
+  instructionsTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.text.primary,
+    fontWeight: '600',
+    color: '#1f2937',
     marginBottom: 12,
   },
-  infoText: {
+  instructionsText: {
     fontSize: 14,
-    color: colors.text.secondary,
+    color: '#374151',
     lineHeight: 22,
   },
   footer: {
-    height: 40,
+    height: 20,
   },
 });

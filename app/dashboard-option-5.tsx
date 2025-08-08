@@ -1,223 +1,296 @@
 import React from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
-import { Stack } from 'expo-router';
-import { BarChart3, PieChart, TrendingUp, AlertCircle, CheckCircle, Clock, MapPin, Fuel, Users, Truck, Calendar, Star } from 'lucide-react-native';
+import { Stack, router } from 'expo-router';
+import { Smartphone, Wifi, Battery, Signal, MapPin, Clock, ArrowLeft, Zap, Globe } from 'lucide-react-native';
 import { colors } from '@/constants/colors';
-import AppBrand from '@/components/AppBrand';
 
 const { width } = Dimensions.get('window');
 
 export default function DashboardOption5() {
-  const chartData = [
-    { label: 'Mon', value: 85, color: colors.primary },
-    { label: 'Tue', value: 92, color: colors.primary },
-    { label: 'Wed', value: 78, color: colors.primary },
-    { label: 'Thu', value: 96, color: colors.primary },
-    { label: 'Fri', value: 88, color: colors.primary },
-    { label: 'Sat', value: 94, color: colors.primary },
-    { label: 'Sun', value: 90, color: colors.primary },
-  ];
-
-  const fleetDistribution = [
-    { label: 'Active', value: 24, color: colors.success, percentage: 85 },
-    { label: 'Maintenance', value: 3, color: colors.warning, percentage: 11 },
-    { label: 'Offline', value: 1, color: colors.danger, percentage: 4 },
-  ];
-
-  const topPerformers = [
-    { name: 'Mike Johnson', score: 98, metric: 'Safety Score', badge: 'gold' },
-    { name: 'Sarah Davis', score: 96, metric: 'Efficiency', badge: 'silver' },
-    { name: 'Tom Wilson', score: 94, metric: 'On-Time Rate', badge: 'bronze' },
-  ];
-
-  const weeklyInsights = [
-    { title: 'Fuel Efficiency Up', value: '+12%', description: 'Compared to last week', icon: TrendingUp, color: colors.success },
-    { title: 'Route Optimization', value: '15min', description: 'Average time saved', icon: MapPin, color: colors.primary },
-    { title: 'Driver Satisfaction', value: '4.8/5', description: 'Monthly survey results', icon: Star, color: colors.accent },
-  ];
-
   return (
     <View style={styles.container}>
-      <Stack.Screen options={{ 
-        title: 'Dashboard Option 5',
-        headerStyle: { backgroundColor: colors.background.secondary },
-        headerTintColor: colors.text.primary
-      }} />
-      
-      {/* Analytics Header */}
-      <View style={styles.analyticsHeader}>
-        <View style={styles.headerTop}>
-          <View style={styles.brandContainer}>
-            <AppBrand size="medium" showText={false} />
-            <View style={styles.brandInfo}>
-              <Text style={styles.brandTitle}>TruckMate AI</Text>
-              <Text style={styles.brandSubtitle}>Analytics Dashboard</Text>
-            </View>
-          </View>
-          <View style={styles.periodSelector}>
-            <Text style={styles.periodText}>This Week</Text>
-            <View style={styles.periodIndicator} />
-          </View>
-        </View>
-      </View>
-
-      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* Performance Chart */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Weekly Performance</Text>
-            <TouchableOpacity style={styles.chartTypeButton}>
-              <BarChart3 size={16} color={colors.primary} />
+      <Stack.Screen 
+        options={{ 
+          headerTitle: 'Dashboard Option 5 - Smart Connect',
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+              <ArrowLeft size={24} color={colors.primary} />
             </TouchableOpacity>
+          ),
+        }} 
+      />
+      
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        {/* Connection Status Header */}
+        <View style={styles.connectionHeader}>
+          <View style={styles.connectionCard}>
+            <View style={styles.connectionIcon}>
+              <Wifi size={24} color="#10b981" />
+            </View>
+            <View style={styles.connectionInfo}>
+              <Text style={styles.connectionTitle}>Fleet Network</Text>
+              <Text style={styles.connectionStatus}>All systems connected</Text>
+            </View>
+            <View style={styles.connectionBadge}>
+              <Text style={styles.badgeText}>ONLINE</Text>
+            </View>
           </View>
+        </View>
+        
+        {/* Real-time Metrics */}
+        <View style={styles.metricsSection}>
+          <Text style={styles.sectionTitle}>Real-Time Metrics</Text>
           
-          <View style={styles.chartCard}>
-            <View style={styles.chartContainer}>
-              <View style={styles.chartYAxis}>
-                <Text style={styles.axisLabel}>100%</Text>
-                <Text style={styles.axisLabel}>75%</Text>
-                <Text style={styles.axisLabel}>50%</Text>
-                <Text style={styles.axisLabel}>25%</Text>
-                <Text style={styles.axisLabel}>0%</Text>
-              </View>
-              <View style={styles.chartArea}>
-                {chartData.map((item, index) => (
-                  <View key={index} style={styles.chartColumn}>
-                    <View style={styles.chartBarContainer}>
-                      <View style={[styles.chartBar, { 
-                        height: `${item.value}%`, 
-                        backgroundColor: item.color 
-                      }]} />
-                    </View>
-                    <Text style={styles.chartLabel}>{item.label}</Text>
-                  </View>
-                ))}
-              </View>
-            </View>
-            <View style={styles.chartLegend}>
-              <View style={styles.legendItem}>
-                <View style={[styles.legendDot, { backgroundColor: colors.primary }]} />
-                <Text style={styles.legendText}>Fleet Efficiency %</Text>
-              </View>
-            </View>
-          </View>
-        </View>
-
-        {/* Fleet Distribution */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Fleet Status Distribution</Text>
-          <View style={styles.distributionCard}>
-            <View style={styles.pieChartContainer}>
-              <View style={styles.pieChart}>
-                <PieChart size={80} color={colors.primary} />
-                <View style={styles.pieChartCenter}>
-                  <Text style={styles.pieChartValue}>28</Text>
-                  <Text style={styles.pieChartLabel}>Total</Text>
-                </View>
-              </View>
-              <View style={styles.distributionLegend}>
-                {fleetDistribution.map((item, index) => (
-                  <View key={index} style={styles.distributionItem}>
-                    <View style={[styles.distributionDot, { backgroundColor: item.color }]} />
-                    <View style={styles.distributionInfo}>
-                      <Text style={styles.distributionLabel}>{item.label}</Text>
-                      <Text style={styles.distributionValue}>{item.value} vehicles</Text>
-                    </View>
-                    <Text style={styles.distributionPercentage}>{item.percentage}%</Text>
-                  </View>
-                ))}
-              </View>
-            </View>
-          </View>
-        </View>
-
-        {/* Top Performers */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Top Performers</Text>
-          {topPerformers.map((performer, index) => (
-            <View key={index} style={styles.performerCard}>
-              <View style={styles.performerRank}>
-                <View style={[styles.rankBadge, { 
-                  backgroundColor: performer.badge === 'gold' ? '#FFD700' : 
-                                  performer.badge === 'silver' ? '#C0C0C0' : '#CD7F32' 
-                }]}>
-                  <Text style={styles.rankText}>{index + 1}</Text>
-                </View>
-              </View>
-              <View style={styles.performerInfo}>
-                <Text style={styles.performerName}>{performer.name}</Text>
-                <Text style={styles.performerMetric}>{performer.metric}</Text>
-              </View>
-              <View style={styles.performerScore}>
-                <Text style={styles.scoreValue}>{performer.score}</Text>
-                <Text style={styles.scoreLabel}>Score</Text>
-              </View>
-            </View>
-          ))}
-        </View>
-
-        {/* Weekly Insights */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Weekly Insights</Text>
-          <View style={styles.insightsGrid}>
-            {weeklyInsights.map((insight, index) => {
-              const IconComp = insight.icon;
-              return (
-                <View key={index} style={styles.insightCard}>
-                  <View style={[styles.insightIcon, { backgroundColor: `${insight.color}15` }]}>
-                    <IconComp size={20} color={insight.color} />
-                  </View>
-                  <Text style={styles.insightValue}>{insight.value}</Text>
-                  <Text style={styles.insightTitle}>{insight.title}</Text>
-                  <Text style={styles.insightDescription}>{insight.description}</Text>
-                </View>
-              );
-            })}
-          </View>
-        </View>
-
-        {/* Key Metrics Summary */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Key Metrics Summary</Text>
           <View style={styles.metricsGrid}>
             <View style={styles.metricCard}>
               <View style={styles.metricHeader}>
-                <Truck size={18} color={colors.primary} />
-                <Text style={styles.metricChange}>+5%</Text>
+                <View style={[styles.metricIcon, { backgroundColor: '#dbeafe' }]}>
+                  <Signal size={18} color="#3b82f6" />
+                </View>
+                <View style={styles.liveIndicator}>
+                  <View style={styles.liveDot} />
+                  <Text style={styles.liveText}>LIVE</Text>
+                </View>
               </View>
-              <Text style={styles.metricValue}>2,847</Text>
-              <Text style={styles.metricLabel}>Total Miles</Text>
+              <Text style={styles.metricValue}>24</Text>
+              <Text style={styles.metricLabel}>Connected Vehicles</Text>
             </View>
             
             <View style={styles.metricCard}>
               <View style={styles.metricHeader}>
-                <Fuel size={18} color={colors.warning} />
-                <Text style={styles.metricChange}>-8%</Text>
+                <View style={[styles.metricIcon, { backgroundColor: '#dcfce7' }]}>
+                  <Battery size={18} color="#10b981" />
+                </View>
+                <View style={styles.liveIndicator}>
+                  <View style={styles.liveDot} />
+                  <Text style={styles.liveText}>LIVE</Text>
+                </View>
               </View>
-              <Text style={styles.metricValue}>$1,234</Text>
-              <Text style={styles.metricLabel}>Fuel Cost</Text>
+              <Text style={styles.metricValue}>87%</Text>
+              <Text style={styles.metricLabel}>Avg Battery Level</Text>
             </View>
             
             <View style={styles.metricCard}>
               <View style={styles.metricHeader}>
-                <Users size={18} color={colors.success} />
-                <Text style={styles.metricChange}>+2</Text>
+                <View style={[styles.metricIcon, { backgroundColor: '#fef3c7' }]}>
+                  <Zap size={18} color="#f59e0b" />
+                </View>
+                <View style={styles.liveIndicator}>
+                  <View style={styles.liveDot} />
+                  <Text style={styles.liveText}>LIVE</Text>
+                </View>
               </View>
-              <Text style={styles.metricValue}>18</Text>
-              <Text style={styles.metricLabel}>Active Drivers</Text>
+              <Text style={styles.metricValue}>2.1s</Text>
+              <Text style={styles.metricLabel}>Response Time</Text>
             </View>
             
             <View style={styles.metricCard}>
               <View style={styles.metricHeader}>
-                <Calendar size={18} color={colors.accent} />
-                <Text style={styles.metricChange}>+12%</Text>
+                <View style={[styles.metricIcon, { backgroundColor: '#fce7f3' }]}>
+                  <Globe size={18} color="#ec4899" />
+                </View>
+                <View style={styles.liveIndicator}>
+                  <View style={styles.liveDot} />
+                  <Text style={styles.liveText}>LIVE</Text>
+                </View>
               </View>
-              <Text style={styles.metricValue}>96%</Text>
-              <Text style={styles.metricLabel}>On-Time Rate</Text>
+              <Text style={styles.metricValue}>99.8%</Text>
+              <Text style={styles.metricLabel}>Network Uptime</Text>
             </View>
           </View>
         </View>
-
+        
+        {/* Device Status */}
+        <View style={styles.deviceSection}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Device Status</Text>
+            <TouchableOpacity>
+              <Text style={styles.viewAllText}>Manage All</Text>
+            </TouchableOpacity>
+          </View>
+          
+          <View style={styles.deviceList}>
+            <View style={styles.deviceCard}>
+              <View style={styles.deviceInfo}>
+                <View style={styles.deviceIcon}>
+                  <Smartphone size={20} color="#3b82f6" />
+                </View>
+                <View style={styles.deviceDetails}>
+                  <Text style={styles.deviceName}>Truck #1247 - Tablet</Text>
+                  <Text style={styles.deviceDriver}>Driver: John Doe</Text>
+                  <Text style={styles.deviceLocation}>Location: I-95 North, Mile 247</Text>
+                </View>
+              </View>
+              <View style={styles.deviceMetrics}>
+                <View style={styles.deviceMetric}>
+                  <Battery size={14} color="#10b981" />
+                  <Text style={styles.deviceMetricText}>89%</Text>
+                </View>
+                <View style={styles.deviceMetric}>
+                  <Signal size={14} color="#10b981" />
+                  <Text style={styles.deviceMetricText}>Strong</Text>
+                </View>
+                <View style={styles.deviceMetric}>
+                  <Wifi size={14} color="#10b981" />
+                  <Text style={styles.deviceMetricText}>5G</Text>
+                </View>
+              </View>
+            </View>
+            
+            <View style={styles.deviceCard}>
+              <View style={styles.deviceInfo}>
+                <View style={styles.deviceIcon}>
+                  <Smartphone size={20} color="#3b82f6" />
+                </View>
+                <View style={styles.deviceDetails}>
+                  <Text style={styles.deviceName}>Truck #1248 - Tablet</Text>
+                  <Text style={styles.deviceDriver}>Driver: Mike Smith</Text>
+                  <Text style={styles.deviceLocation}>Location: I-10 West, Mile 156</Text>
+                </View>
+              </View>
+              <View style={styles.deviceMetrics}>
+                <View style={styles.deviceMetric}>
+                  <Battery size={14} color="#f59e0b" />
+                  <Text style={styles.deviceMetricText}>34%</Text>
+                </View>
+                <View style={styles.deviceMetric}>
+                  <Signal size={14} color="#f59e0b" />
+                  <Text style={styles.deviceMetricText}>Weak</Text>
+                </View>
+                <View style={styles.deviceMetric}>
+                  <Wifi size={14} color="#10b981" />
+                  <Text style={styles.deviceMetricText}>4G</Text>
+                </View>
+              </View>
+            </View>
+            
+            <View style={styles.deviceCard}>
+              <View style={styles.deviceInfo}>
+                <View style={styles.deviceIcon}>
+                  <Smartphone size={20} color="#3b82f6" />
+                </View>
+                <View style={styles.deviceDetails}>
+                  <Text style={styles.deviceName}>Truck #1249 - Tablet</Text>
+                  <Text style={styles.deviceDriver}>Driver: Sarah Johnson</Text>
+                  <Text style={styles.deviceLocation}>Location: US-101 South, Mile 89</Text>
+                </View>
+              </View>
+              <View style={styles.deviceMetrics}>
+                <View style={styles.deviceMetric}>
+                  <Battery size={14} color="#10b981" />
+                  <Text style={styles.deviceMetricText}>92%</Text>
+                </View>
+                <View style={styles.deviceMetric}>
+                  <Signal size={14} color="#10b981" />
+                  <Text style={styles.deviceMetricText}>Strong</Text>
+                </View>
+                <View style={styles.deviceMetric}>
+                  <Wifi size={14} color="#10b981" />
+                  <Text style={styles.deviceMetricText}>5G</Text>
+                </View>
+              </View>
+            </View>
+          </View>
+        </View>
+        
+        {/* Live Activity Feed */}
+        <View style={styles.activitySection}>
+          <Text style={styles.sectionTitle}>Live Activity Feed</Text>
+          
+          <View style={styles.activityFeed}>
+            <View style={styles.activityItem}>
+              <View style={styles.activityTime}>
+                <Clock size={14} color="#6b7280" />
+                <Text style={styles.timeText}>2m ago</Text>
+              </View>
+              <View style={styles.activityContent}>
+                <Text style={styles.activityTitle}>Device Connected</Text>
+                <Text style={styles.activityDescription}>Truck #1250 tablet came online</Text>
+              </View>
+              <View style={[styles.activityStatus, { backgroundColor: '#dcfce7' }]}>
+                <Text style={[styles.statusText, { color: '#16a34a' }]}>CONNECTED</Text>
+              </View>
+            </View>
+            
+            <View style={styles.activityItem}>
+              <View style={styles.activityTime}>
+                <Clock size={14} color="#6b7280" />
+                <Text style={styles.timeText}>5m ago</Text>
+              </View>
+              <View style={styles.activityContent}>
+                <Text style={styles.activityTitle}>Location Update</Text>
+                <Text style={styles.activityDescription}>Truck #1247 reached checkpoint</Text>
+              </View>
+              <View style={[styles.activityStatus, { backgroundColor: '#dbeafe' }]}>
+                <Text style={[styles.statusText, { color: '#2563eb' }]}>UPDATE</Text>
+              </View>
+            </View>
+            
+            <View style={styles.activityItem}>
+              <View style={styles.activityTime}>
+                <Clock size={14} color="#6b7280" />
+                <Text style={styles.timeText}>8m ago</Text>
+              </View>
+              <View style={styles.activityContent}>
+                <Text style={styles.activityTitle}>Low Battery Alert</Text>
+                <Text style={styles.activityDescription}>Truck #1248 battery below 35%</Text>
+              </View>
+              <View style={[styles.activityStatus, { backgroundColor: '#fef3c7' }]}>
+                <Text style={[styles.statusText, { color: '#d97706' }]}>WARNING</Text>
+              </View>
+            </View>
+            
+            <View style={styles.activityItem}>
+              <View style={styles.activityTime}>
+                <Clock size={14} color="#6b7280" />
+                <Text style={styles.timeText}>12m ago</Text>
+              </View>
+              <View style={styles.activityContent}>
+                <Text style={styles.activityTitle}>Route Optimization</Text>
+                <Text style={styles.activityDescription}>New route calculated for Truck #1249</Text>
+              </View>
+              <View style={[styles.activityStatus, { backgroundColor: '#fce7f3' }]}>
+                <Text style={[styles.statusText, { color: '#be185d' }]}>OPTIMIZED</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+        
+        {/* Quick Actions */}
+        <View style={styles.quickActionsSection}>
+          <Text style={styles.sectionTitle}>Quick Actions</Text>
+          
+          <View style={styles.actionGrid}>
+            <TouchableOpacity style={styles.actionButton}>
+              <View style={[styles.actionIcon, { backgroundColor: '#3b82f6' }]}>
+                <Signal size={20} color="white" />
+              </View>
+              <Text style={styles.actionText}>Network Diagnostics</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity style={styles.actionButton}>
+              <View style={[styles.actionIcon, { backgroundColor: '#10b981' }]}>
+                <Battery size={20} color="white" />
+              </View>
+              <Text style={styles.actionText}>Battery Monitor</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity style={styles.actionButton}>
+              <View style={[styles.actionIcon, { backgroundColor: '#f59e0b' }]}>
+                <MapPin size={20} color="white" />
+              </View>
+              <Text style={styles.actionText}>Location Tracker</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity style={styles.actionButton}>
+              <View style={[styles.actionIcon, { backgroundColor: '#8b5cf6' }]}>
+                <Smartphone size={20} color="white" />
+              </View>
+              <Text style={styles.actionText}>Device Manager</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        
         <View style={styles.footer} />
       </ScrollView>
     </View>
@@ -227,315 +300,85 @@ export default function DashboardOption5() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background.primary,
+    backgroundColor: '#f8fafc',
   },
-  analyticsHeader: {
-    backgroundColor: colors.background.secondary,
-    paddingHorizontal: 20,
-    paddingVertical: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  headerTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  brandContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  brandInfo: {
-    flex: 1,
-  },
-  brandTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: colors.text.primary,
-  },
-  brandSubtitle: {
-    fontSize: 14,
-    color: colors.text.secondary,
-    marginTop: 2,
-  },
-  periodSelector: {
-    alignItems: 'center',
-    gap: 4,
-  },
-  periodText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.primary,
-  },
-  periodIndicator: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors.primary,
+  backButton: {
+    padding: 8,
   },
   scrollView: {
     flex: 1,
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
   },
-  section: {
-    marginTop: 24,
+  connectionHeader: {
+    marginTop: 16,
+    marginBottom: 24,
   },
-  sectionHeader: {
+  connectionCard: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 20,
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
-  sectionTitle: {
+  connectionIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#dcfce7',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+  },
+  connectionInfo: {
+    flex: 1,
+  },
+  connectionTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.text.primary,
-    marginBottom: 16,
-  },
-  chartTypeButton: {
-    padding: 8,
-    backgroundColor: `${colors.primary}15`,
-    borderRadius: 8,
-  },
-  chartCard: {
-    backgroundColor: colors.background.secondary,
-    borderRadius: 16,
-    padding: 20,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  chartContainer: {
-    flexDirection: 'row',
-    height: 200,
-    marginBottom: 16,
-  },
-  chartYAxis: {
-    width: 40,
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    paddingRight: 8,
-  },
-  axisLabel: {
-    fontSize: 10,
-    color: colors.text.secondary,
-  },
-  chartArea: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'space-between',
-    paddingHorizontal: 8,
-  },
-  chartColumn: {
-    alignItems: 'center',
-    flex: 1,
-  },
-  chartBarContainer: {
-    height: 160,
-    width: 20,
-    justifyContent: 'flex-end',
-    marginBottom: 8,
-  },
-  chartBar: {
-    width: '100%',
-    borderRadius: 4,
-    minHeight: 4,
-  },
-  chartLabel: {
-    fontSize: 10,
-    color: colors.text.secondary,
-  },
-  chartLegend: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-  },
-  legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  legendDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  legendText: {
-    fontSize: 12,
-    color: colors.text.secondary,
-  },
-  distributionCard: {
-    backgroundColor: colors.background.secondary,
-    borderRadius: 16,
-    padding: 20,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  pieChartContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 24,
-  },
-  pieChart: {
-    position: 'relative',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  pieChartCenter: {
-    position: 'absolute',
-    alignItems: 'center',
-  },
-  pieChartValue: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.text.primary,
-  },
-  pieChartLabel: {
-    fontSize: 10,
-    color: colors.text.secondary,
-  },
-  distributionLegend: {
-    flex: 1,
-    gap: 12,
-  },
-  distributionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  distributionDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-  },
-  distributionInfo: {
-    flex: 1,
-  },
-  distributionLabel: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: colors.text.primary,
-  },
-  distributionValue: {
-    fontSize: 12,
-    color: colors.text.secondary,
-  },
-  distributionPercentage: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: colors.text.primary,
-  },
-  performerCard: {
-    backgroundColor: colors.background.secondary,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 8,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  performerRank: {
-    alignItems: 'center',
-  },
-  rankBadge: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  rankText: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: colors.white,
-  },
-  performerInfo: {
-    flex: 1,
-  },
-  performerName: {
-    fontSize: 14,
     fontWeight: '600',
-    color: colors.text.primary,
+    color: '#1f2937',
   },
-  performerMetric: {
-    fontSize: 12,
-    color: colors.text.secondary,
+  connectionStatus: {
+    fontSize: 14,
+    color: '#6b7280',
     marginTop: 2,
   },
-  performerScore: {
-    alignItems: 'center',
+  connectionBadge: {
+    backgroundColor: '#dcfce7',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
   },
-  scoreValue: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.primary,
-  },
-  scoreLabel: {
-    fontSize: 10,
-    color: colors.text.secondary,
-  },
-  insightsGrid: {
-    gap: 12,
-  },
-  insightCard: {
-    backgroundColor: colors.background.secondary,
-    borderRadius: 16,
-    padding: 16,
-    alignItems: 'center',
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  insightIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 8,
-  },
-  insightValue: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.text.primary,
-    marginBottom: 4,
-  },
-  insightTitle: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.text.primary,
-    marginBottom: 4,
-    textAlign: 'center',
-  },
-  insightDescription: {
+  badgeText: {
     fontSize: 12,
-    color: colors.text.secondary,
-    textAlign: 'center',
+    fontWeight: '600',
+    color: '#16a34a',
+  },
+  metricsSection: {
+    marginBottom: 24,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#1f2937',
+    marginBottom: 16,
   },
   metricsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
+    justifyContent: 'space-between',
   },
   metricCard: {
-    backgroundColor: colors.background.secondary,
+    backgroundColor: 'white',
     borderRadius: 16,
     padding: 16,
-    width: (width - 56) / 2,
-    shadowColor: colors.shadow,
+    width: (width - 48) / 2,
+    marginBottom: 16,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -545,24 +388,208 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 12,
   },
-  metricChange: {
-    fontSize: 12,
+  metricIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  liveIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  liveDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#ef4444',
+    marginRight: 4,
+  },
+  liveText: {
+    fontSize: 10,
     fontWeight: '600',
-    color: colors.success,
+    color: '#ef4444',
   },
   metricValue: {
-    fontSize: 18,
+    fontSize: 24,
     fontWeight: 'bold',
-    color: colors.text.primary,
+    color: '#1f2937',
     marginBottom: 4,
   },
   metricLabel: {
     fontSize: 12,
-    color: colors.text.secondary,
+    color: '#6b7280',
+  },
+  deviceSection: {
+    marginBottom: 24,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  viewAllText: {
+    fontSize: 14,
+    color: colors.primary,
+    fontWeight: '500',
+  },
+  deviceList: {
+    gap: 12,
+  },
+  deviceCard: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  deviceInfo: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  deviceIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#dbeafe',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  deviceDetails: {
+    flex: 1,
+  },
+  deviceName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1f2937',
+    marginBottom: 2,
+  },
+  deviceDriver: {
+    fontSize: 14,
+    color: '#6b7280',
+    marginBottom: 2,
+  },
+  deviceLocation: {
+    fontSize: 12,
+    color: '#9ca3af',
+  },
+  deviceMetrics: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  deviceMetric: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f9fafb',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  deviceMetricText: {
+    fontSize: 12,
+    fontWeight: '500',
+    color: '#374151',
+    marginLeft: 4,
+  },
+  activitySection: {
+    marginBottom: 24,
+  },
+  activityFeed: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  activityItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f3f4f6',
+  },
+  activityTime: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: 80,
+    marginRight: 12,
+  },
+  timeText: {
+    fontSize: 12,
+    color: '#6b7280',
+    marginLeft: 4,
+  },
+  activityContent: {
+    flex: 1,
+  },
+  activityTitle: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#1f2937',
+    marginBottom: 2,
+  },
+  activityDescription: {
+    fontSize: 12,
+    color: '#6b7280',
+  },
+  activityStatus: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    marginLeft: 12,
+  },
+  statusText: {
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  quickActionsSection: {
+    marginBottom: 24,
+  },
+  actionGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  actionButton: {
+    backgroundColor: 'white',
+    borderRadius: 16,
+    padding: 20,
+    alignItems: 'center',
+    width: (width - 48) / 2,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  actionIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+  actionText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#1f2937',
+    textAlign: 'center',
   },
   footer: {
-    height: 40,
+    height: 20,
   },
 });
