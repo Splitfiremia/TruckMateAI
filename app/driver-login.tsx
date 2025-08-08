@@ -33,8 +33,8 @@ export default function DriverLoginScreen() {
     setIsLoading(true);
     try {
       await login(email, password);
-      router.replace('/(driver-tabs)');
-    } catch (error) {
+      router.replace('/(driver-tabs)/' as any);
+    } catch {
       Alert.alert('Login Failed', 'Invalid credentials. Please try again.');
     } finally {
       setIsLoading(false);
