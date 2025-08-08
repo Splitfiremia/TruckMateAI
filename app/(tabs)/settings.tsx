@@ -242,6 +242,11 @@ export default function SettingsScreen() {
             'AI Logo Generator',
             () => setShowLogoGeneratorModal(true)
           )}
+          {renderSettingLink(
+            <Smartphone size={20} color={theme.primaryLight} />,
+            'Dashboard & Logo Options',
+            () => router.push('/dashboard-selector')
+          )}
         </View>
         
         <View style={styles.sectionHeader}>

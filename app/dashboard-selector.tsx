@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
 import { Stack, router } from 'expo-router';
-import { ArrowRight, Smartphone, Layout, Grid3X3 } from 'lucide-react-native';
+import { ArrowRight, Smartphone, Layout, Grid3X3, BarChart3, Zap, Palette } from 'lucide-react-native';
 import { colors } from '@/constants/colors';
 import AppBrand from '@/components/AppBrand';
 
@@ -12,26 +12,42 @@ export default function DashboardSelector() {
     {
       id: 1,
       title: 'Dashboard Option 1',
-      description: 'Modern gradient header with quick actions grid and comprehensive status overview',
+      description: 'Hero header with quick actions grid and comprehensive status overview',
       route: '/dashboard-option-1',
       icon: Smartphone,
-      features: ['Gradient Header', 'Quick Actions', 'Status Cards', 'Weekly Stats']
+      features: ['Hero Header', 'Quick Actions', 'Status Cards', 'Weekly Stats']
     },
     {
       id: 2,
       title: 'Dashboard Option 2',
-      description: 'Clean minimal design with progress bars and organized navigation grid',
+      description: 'Clean minimal design with search bar and organized navigation grid',
       route: '/dashboard-option-2',
       icon: Layout,
-      features: ['Minimal Header', 'Progress Bars', 'Navigation Grid', 'Performance Metrics']
+      features: ['Search Bar', 'Progress Bars', 'Navigation Grid', 'Activity Feed']
     },
     {
       id: 3,
       title: 'Dashboard Option 3',
-      description: 'Professional edition with search, badges, and detailed performance analytics',
+      description: 'Executive dashboard with KPIs, alerts, and detailed performance analytics',
       route: '/dashboard-option-3',
       icon: Grid3X3,
-      features: ['Search Bar', 'Feature Badges', 'Performance Analytics', 'Priority Indicators']
+      features: ['KPI Cards', 'Priority Alerts', 'Performance Analytics', 'Fleet Status']
+    },
+    {
+      id: 4,
+      title: 'Dashboard Option 4',
+      description: 'Real-time operations with live updates, gauges, and achievement tracking',
+      route: '/dashboard-option-4',
+      icon: Zap,
+      features: ['Live Updates', 'Performance Gauges', 'Achievement Badges', 'Real-time Analytics']
+    },
+    {
+      id: 5,
+      title: 'Dashboard Option 5',
+      description: 'Analytics-focused dashboard with charts, insights, and performance metrics',
+      route: '/dashboard-option-5',
+      icon: BarChart3,
+      features: ['Performance Charts', 'Fleet Distribution', 'Top Performers', 'Weekly Insights']
     }
   ];
 
@@ -46,7 +62,7 @@ export default function DashboardSelector() {
       <View style={styles.header}>
         <AppBrand size="medium" showText={true} />
         <Text style={styles.headerTitle}>Choose Your Dashboard Style</Text>
-        <Text style={styles.headerSubtitle}>Select one of the three professional dashboard designs</Text>
+        <Text style={styles.headerSubtitle}>Select one of the five professional dashboard designs</Text>
       </View>
       
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
@@ -80,13 +96,30 @@ export default function DashboardSelector() {
           );
         })}
         
+        <TouchableOpacity 
+          style={styles.logoOptionsCard}
+          onPress={() => router.push('/logo-options' as any)}
+        >
+          <View style={styles.logoOptionsHeader}>
+            <View style={styles.logoOptionsIcon}>
+              <Palette size={24} color={colors.primary} />
+            </View>
+            <View style={styles.logoOptionsTitleContainer}>
+              <Text style={styles.logoOptionsTitle}>Company Logo Options</Text>
+              <Text style={styles.logoOptionsDescription}>Choose from 5 professional logo designs</Text>
+            </View>
+            <ArrowRight size={20} color={colors.text.secondary} />
+          </View>
+        </TouchableOpacity>
+        
         <View style={styles.infoCard}>
           <Text style={styles.infoTitle}>How to Use</Text>
           <Text style={styles.infoText}>
             • Tap on any dashboard option to preview it{"\n"}
             • Each design uses the same blue color scheme{"\n"}
             • All dashboards are fully functional{"\n"}
-            • Choose the one that best fits your workflow
+            • Choose the one that best fits your workflow{"\n"}
+            • Don&apos;t forget to select a logo design too!
           </Text>
         </View>
         
@@ -161,6 +194,41 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   optionDescription: {
+    fontSize: 14,
+    color: colors.text.secondary,
+    lineHeight: 20,
+  },
+  logoOptionsCard: {
+    backgroundColor: `${colors.primary}10`,
+    borderRadius: 16,
+    padding: 20,
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: `${colors.primary}30`,
+  },
+  logoOptionsHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  logoOptionsIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: `${colors.primary}15`,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  logoOptionsTitleContainer: {
+    flex: 1,
+  },
+  logoOptionsTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: colors.primary,
+    marginBottom: 4,
+  },
+  logoOptionsDescription: {
     fontSize: 14,
     color: colors.text.secondary,
     lineHeight: 20,
