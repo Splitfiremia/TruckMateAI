@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { validateTestCredentials } from '@/constants/testCredentials';
 
 export interface Driver {
   id: string;
@@ -32,13 +33,13 @@ export interface Trip {
   distance?: number;
   estimatedDuration?: number;
   actualDuration?: number;
-  stops?: Array<{
+  stops?: {
     id: string;
     address: string;
     coordinates: { lat: number; lng: number };
     completed: boolean;
     completedAt?: string;
-  }>;
+  }[];
 }
 
 export interface Vehicle {
@@ -53,12 +54,12 @@ export interface Vehicle {
   lastService: string;
   nextService: string;
   status: 'available' | 'in-use' | 'maintenance' | 'out-of-service';
-  maintenanceAlerts: Array<{
+  maintenanceAlerts: {
     id: string;
     type: 'warning' | 'critical';
     message: string;
     dueDate?: string;
-  }>;
+  }[];
 }
 
 export interface Message {
@@ -70,12 +71,12 @@ export interface Message {
   read: boolean;
   priority: 'low' | 'medium' | 'high' | 'urgent';
   type: 'text' | 'image' | 'location';
-  attachments?: Array<{
+  attachments?: {
     id: string;
     type: 'image' | 'document';
     url: string;
     name: string;
-  }>;
+  }[];
 }
 
 interface DriverState {
@@ -146,50 +147,92 @@ export const useDriverStore = create<DriverState>()(
       
       // Authentication Actions
       login: async (email: string, password: string) => {
-        // Mock authentication - replace with actual API call
-        if (email && password) {
-          const mockDriver: Driver = {
-            id: '1',
-            name: 'John Smith',
-            email: email,
-            phone: '+1 (555) 123-4567',
-            licenseNumber: 'CDL123456789',
-            vehicleId: 'truck-001',
-            fleetId: 'fleet-001',
-            status: 'active',
-            joinedDate: '2023-01-15',
-          };
-          
-          const mockVehicle: Vehicle = {
-            id: 'truck-001',
-            make: 'Freightliner',
-            model: 'Cascadia',
-            year: 2022,
-            licensePlate: 'TRK-001',
-            vin: '1FUJGHDV8NLAA1234',
-            fuelLevel: 75,
-            mileage: 125000,
-            lastService: '2024-01-15',
-            nextService: '2024-04-15',
-            status: 'available',
-            maintenanceAlerts: [
-              {
-                id: '1',
-                type: 'warning',
-                message: 'Oil change due in 500 miles',
-                dueDate: '2024-02-15',
-              },
-            ],
-          };
-          
-          set({
-            isAuthenticated: true,
-            driver: mockDriver,
-            assignedVehicle: mockVehicle,
-          });
-        } else {
+        // Validate credentials against test data
+        const credential = validateTestCredentials(email, password);
+        
+        if (!credential) {
           throw new Error('Invalid credentials');
         }
+        
+        // Only allow driver role to login to driver portal
+        if (credential.role !== 'driver') {
+          throw new Error('Access denied. Driver credentials required.');
+        }
+        
+        // Create driver profile based on test credential
+        const mockDriver: Driver = {
+          id: credential.email.split('@')[0], // Use email prefix as ID
+          name: credential.name,
+          email: credential.email,
+          phone: '+1 (555) 123-4567',
+          licenseNumber: `CDL${Math.random().toString().substr(2, 9)}`,
+          vehicleId: `vehicle-${credential.email.split('@')[0]}`,
+          fleetId: credential.fleetId,
+          status: 'active',
+          joinedDate: '2023-01-15',
+        };
+        
+        // Create vehicle based on assigned vehicle from credential
+        const vehicleInfo = credential.vehicleAssigned?.split(' ') || ['Unknown', 'Vehicle'];
+        const mockVehicle: Vehicle = {
+          id: `vehicle-${credential.email.split('@')[0]}`,
+          make: vehicleInfo[0] || 'Freightliner',
+          model: vehicleInfo[1] || 'Cascadia',
+          year: parseInt(vehicleInfo[2]) || 2022,
+          licensePlate: `${credential.name.split(' ').map(n => n[0]).join('')}-${Math.floor(Math.random() * 999)}`,
+          vin: `1FUJGHDV8NL${Math.random().toString().substr(2, 6)}`,
+          fuelLevel: Math.floor(Math.random() * 40) + 60, // 60-100%
+          mileage: Math.floor(Math.random() * 50000) + 100000,
+          lastService: '2024-01-15',
+          nextService: '2024-04-15',
+          status: 'available',
+          maintenanceAlerts: [
+            {
+              id: '1',
+              type: 'warning',
+              message: 'Oil change due in 500 miles',
+              dueDate: '2024-02-15',
+            },
+          ],
+        };
+        
+        // Generate some sample messages
+        const sampleMessages: Message[] = [
+          {
+            id: '1',
+            from: 'dispatcher',
+            to: mockDriver.id,
+            content: 'Your next pickup is scheduled for 2:00 PM at Warehouse District.',
+            timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+            read: false,
+            priority: 'medium',
+            type: 'text',
+          },
+          {
+            id: '2',
+            from: 'fleet-manager',
+            to: mockDriver.id,
+            content: 'Great job on maintaining your safety record this month!',
+            timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+            read: true,
+            priority: 'low',
+            type: 'text',
+          },
+        ];
+        
+        set({
+          isAuthenticated: true,
+          driver: mockDriver,
+          assignedVehicle: mockVehicle,
+          messages: sampleMessages,
+          unreadCount: sampleMessages.filter(m => !m.read).length,
+          todayStats: {
+            tripsCompleted: Math.floor(Math.random() * 5) + 1,
+            hoursWorked: Math.floor(Math.random() * 4) + 6,
+            idleTime: Math.floor(Math.random() * 30) + 15,
+            distanceTraveled: Math.floor(Math.random() * 200) + 150,
+          },
+        });
       },
       
       logout: () => {
