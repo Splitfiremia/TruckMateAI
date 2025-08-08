@@ -250,7 +250,6 @@ export default function DashboardScreen() {
     { key: 'ai', label: 'AI Assist', route: '/ai-assistant', icon: Sparkles },
     { key: 'integrations', label: 'Integrations', route: '/integrations', icon: LinkIcon },
     { key: 'pricing', label: 'Pricing', route: '/pricing', icon: DollarSign },
-    { key: 'dashboard-selector', label: 'Dashboard UI', route: '/dashboard-selector', icon: Settings },
     { key: 'settings', label: 'Settings', route: '/settings', icon: Settings },
   ] as const;
   

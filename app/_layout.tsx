@@ -53,10 +53,6 @@ function RootLayoutNav() {
         <Stack.Screen name="api-testing" options={{ title: "API Testing" }} />
         <Stack.Screen name="pricing" options={{ title: "Pricing" }} />
         <Stack.Screen name="admin" options={{ headerShown: false }} />
-        <Stack.Screen name="dashboard-selector" options={{ title: "Dashboard Options" }} />
-        <Stack.Screen name="dashboard-option-1" options={{ title: "Dashboard Option 1" }} />
-        <Stack.Screen name="dashboard-option-2" options={{ title: "Dashboard Option 2" }} />
-        <Stack.Screen name="dashboard-option-3" options={{ title: "Dashboard Option 3" }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       </Stack>
     </>
