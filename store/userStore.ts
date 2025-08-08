@@ -79,16 +79,20 @@ export const useUserStore = create<UserState>()(persist(
     },
     
     logout: () => {
+      console.log('Logging out user...');
       set({ user: null, isAuthenticated: false, isOnboarded: false });
-      // Navigate to sign-in screen after logout
+      
+      // Navigate to index which will handle routing to sign-in
       setTimeout(() => {
         try {
-          router.replace('/sign-in');
+          console.log('Navigating to index after logout');
+          router.replace('/');
         } catch (error) {
           console.error('Navigation error after logout:', error);
           // Fallback navigation
           setTimeout(() => {
             try {
+              console.log('Fallback navigation to sign-in');
               router.push('/sign-in');
             } catch (fallbackError) {
               console.error('Fallback navigation error after logout:', fallbackError);

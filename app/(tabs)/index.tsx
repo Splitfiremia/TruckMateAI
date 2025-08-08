@@ -232,6 +232,7 @@ export default function DashboardScreen() {
           text: 'Log Out', 
           style: 'destructive',
           onPress: () => {
+            console.log('User confirmed logout');
             logout();
           }
         }

@@ -46,6 +46,7 @@ function RootLayoutNav() {
         }}
       >
         <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="sign-in" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding-flow" options={{ headerShown: false }} />
         <Stack.Screen name="logo-generator" options={{ title: "Logo Generator" }} />
