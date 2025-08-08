@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { Truck, Building2, User, Mail, Hash, Phone } from 'lucide-react-native';
+import { Truck, Building2, User, Mail, Hash, Phone, ArrowLeft } from 'lucide-react-native';
 import { colors } from '@/constants/colors';
 import { useUserStore, UserRole, UserProfile } from '@/store/userStore';
 import DeviceDetectionStep from '@/components/DeviceDetectionStep';
@@ -127,6 +127,32 @@ export default function OnboardingScreen() {
     setUser(updatedProfile);
     completeUserOnboarding();
     router.replace('/(tabs)');
+  };
+
+  const handleBackPress = () => {
+    switch (currentStep) {
+      case 'role-selection':
+        router.back();
+        break;
+      case 'profile-setup':
+        setCurrentStep('role-selection');
+        setSelectedRole(null);
+        break;
+      case 'company-details':
+        setCurrentStep('profile-setup');
+        break;
+      case 'device-setup':
+        if (selectedRole === 'fleet-company') {
+          setCurrentStep('company-details');
+        } else {
+          setCurrentStep('profile-setup');
+        }
+        break;
+    }
+  };
+
+  const canGoBack = () => {
+    return currentStep !== 'role-selection';
   };
 
 
@@ -346,6 +372,18 @@ export default function OnboardingScreen() {
           onScrollBeginDrag={() => Keyboard.dismiss()}
         >
         <View style={styles.header}>
+          <View style={styles.headerTop}>
+            {canGoBack() && (
+              <TouchableOpacity 
+                style={styles.backButton}
+                onPress={handleBackPress}
+                testID="back-button"
+              >
+                <ArrowLeft size={24} color={colors.text.primary} />
+              </TouchableOpacity>
+            )}
+            <View style={styles.headerSpacer} />
+          </View>
           <View style={styles.logoContainer}>
             <AppBrand size="large" />
           </View>
@@ -391,6 +429,22 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     marginBottom: 16,
+  },
+  headerTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: 8,
+  },
+  backButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: colors.card,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerSpacer: {
+    flex: 1,
   },
   logoContainer: {
     marginBottom: 12,
