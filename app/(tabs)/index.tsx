@@ -521,8 +521,6 @@ export default function DashboardScreen() {
         <VoiceCommandButton onCommandProcessed={handleCommandProcessed} />
       </View>
       
-
-      
       <StatusChangeModal 
         visible={statusModalVisible}
         onClose={() => setStatusModalVisible(false)}
