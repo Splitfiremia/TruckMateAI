@@ -280,7 +280,7 @@ export default function LogbookScreen() {
             <View style={styles.infoItem}>
               <Text style={styles.infoLabel}>Daily Driving</Text>
               <View style={styles.infoValueContainer}>
-                <Clock size={16} color={colors.text} />
+                <Clock size={16} color={colors.text.primary} />
                 <Text style={styles.infoValue}>{drivingHoursToday.toFixed(1)}h</Text>
               </View>
             </View>
@@ -295,7 +295,7 @@ export default function LogbookScreen() {
             <View style={styles.infoItem}>
               <Text style={styles.infoLabel}>Cycle Hours</Text>
               <View style={styles.infoValueContainer}>
-                <Calendar size={16} color={colors.text} />
+                <Calendar size={16} color={colors.text.primary} />
                 <Text style={styles.infoValue}>{drivingHoursWeek.toFixed(1)}h</Text>
               </View>
             </View>
@@ -512,7 +512,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
     marginBottom: 12,
   },
   infoRow: {
@@ -531,7 +531,7 @@ const styles = StyleSheet.create({
   infoValue: {
     fontSize: 16,
     fontWeight: '500',
-    color: colors.text,
+    color: colors.text.primary,
   },
   infoValueContainer: {
     flexDirection: 'row',
@@ -557,7 +557,7 @@ const styles = StyleSheet.create({
   ruleValue: {
     fontSize: 14,
     fontWeight: '500',
-    color: colors.text,
+    color: colors.text.primary,
   },
   actionsContainer: {
     marginVertical: 16,
@@ -571,7 +571,7 @@ const styles = StyleSheet.create({
   actionButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
   },
   footer: {
     height: 100, // Space for the floating button
@@ -633,7 +633,7 @@ const styles = StyleSheet.create({
   currentStatusText: {
     fontSize: 18,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
   },
   currentStatusTime: {
     fontSize: 14,
@@ -642,7 +642,7 @@ const styles = StyleSheet.create({
   },
   currentStatusDuration: {
     fontSize: 14,
-    color: colors.text,
+    color: colors.text.primary,
     fontWeight: '500',
   },
   breakIndicator: {
@@ -667,7 +667,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
     marginBottom: 12,
   },
   logList: {
@@ -700,7 +700,7 @@ const styles = StyleSheet.create({
   logTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.text,
+    color: colors.text.primary,
     marginBottom: 4,
   },
   logTime: {
@@ -710,7 +710,7 @@ const styles = StyleSheet.create({
   },
   logDuration: {
     fontSize: 14,
-    color: colors.text,
+    color: colors.text.primary,
     fontWeight: '500',
     marginBottom: 4,
   },
@@ -723,7 +723,7 @@ const styles = StyleSheet.create({
   },
   logReason: {
     fontSize: 14,
-    color: colors.text,
+    color: colors.text.primary,
     marginBottom: 4,
     fontStyle: 'italic',
   },
