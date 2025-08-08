@@ -232,8 +232,14 @@ export default function DashboardScreen() {
           text: 'Log Out', 
           style: 'destructive',
           onPress: () => {
-            console.log('User confirmed logout');
-            logout();
+            console.log('User confirmed logout - starting logout process');
+            try {
+              logout();
+              console.log('Logout function called successfully');
+            } catch (error) {
+              console.error('Error calling logout function:', error);
+              Alert.alert('Error', 'Failed to log out. Please try again.');
+            }
           }
         }
       ]
@@ -281,7 +287,7 @@ export default function DashboardScreen() {
               <LogOut size={20} color={colors.text.secondary} />
               <Text style={styles.logOutText}>Log Out</Text>
             </TouchableOpacity>
-            <AIAssistantFAB top={60} right={0} />
+            <AIAssistantFAB top={80} right={0} />
           </View>
         </View>
         

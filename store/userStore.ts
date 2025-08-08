@@ -80,26 +80,42 @@ export const useUserStore = create<UserState>()(persist(
     
     logout: () => {
       console.log('Logging out user...');
+      
+      // Clear user state immediately
       set({ user: null, isAuthenticated: false, isOnboarded: false });
       
-      // Navigate to index which will handle routing to sign-in
+      // Clear AsyncStorage to ensure persistence is updated
+      AsyncStorage.removeItem('user-storage').catch(error => {
+        console.error('Error clearing user storage:', error);
+      });
+      
+      // Navigate to sign-in directly
       setTimeout(() => {
         try {
-          console.log('Navigating to index after logout');
-          router.replace('/');
+          console.log('Navigating to sign-in after logout');
+          router.replace('/sign-in');
         } catch (error) {
           console.error('Navigation error after logout:', error);
-          // Fallback navigation
+          // Try alternative navigation methods
           setTimeout(() => {
             try {
-              console.log('Fallback navigation to sign-in');
+              console.log('Trying router.push to sign-in');
               router.push('/sign-in');
-            } catch (fallbackError) {
-              console.error('Fallback navigation error after logout:', fallbackError);
+            } catch (pushError) {
+              console.error('Push navigation error:', pushError);
+              // Last resort - navigate to index
+              setTimeout(() => {
+                try {
+                  console.log('Last resort - navigating to index');
+                  router.replace('/');
+                } catch (indexError) {
+                  console.error('Index navigation error:', indexError);
+                }
+              }, 300);
             }
-          }, 500);
+          }, 300);
         }
-      }, 100);
+      }, 200);
     },
     
     isOwnerOperator: () => {
