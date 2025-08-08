@@ -14,7 +14,8 @@ import {
   Link as LinkIcon,
   DollarSign,
   Wrench,
-  ArrowLeft
+  ArrowLeft,
+  LogOut
 } from "lucide-react-native";
 import React from "react";
 import { View, Pressable } from "react-native";
@@ -22,7 +23,7 @@ import { colors } from "@/constants/colors";
 import { useUserStore } from "@/store/userStore";
 
 export default function TabLayout() {
-  const { isOnboarded, isOwnerOperator, isFleetCompany } = useUserStore();
+  const { isOnboarded, isOwnerOperator, isFleetCompany, logout } = useUserStore();
 
   if (!isOnboarded) {
     return <Redirect href="/onboarding" />;
@@ -55,6 +56,22 @@ export default function TabLayout() {
                 <ArrowLeft color={colors.text.primary} size={22} />
               </Pressable>
             ),
+          headerRight: () => (
+            <Pressable
+              onPress={() => {
+                try {
+                  logout();
+                } catch (e) {
+                  console.log("Sign out error", e);
+                }
+              }}
+              style={{ paddingHorizontal: 12, paddingVertical: 8 }}
+              accessibilityLabel="Sign out"
+              testID="sign-out-button"
+            >
+              <LogOut color={colors.text.primary} size={22} />
+            </Pressable>
+          ),
         })}
       >
         <Tabs.Screen

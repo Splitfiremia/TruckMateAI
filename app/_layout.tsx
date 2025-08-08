@@ -4,6 +4,8 @@ import * as SplashScreen from "expo-splash-screen";
 import React, { useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { Pressable } from "react-native";
+import { LogOut } from "lucide-react-native";
 import { colors } from "@/constants/colors";
 import { useUserStore } from "@/store/userStore";
 import { useBrandingStore } from "@/store/brandingStore";
@@ -18,7 +20,7 @@ SplashScreen.preventAutoHideAsync();
 const queryClient = new QueryClient();
 
 function RootLayoutNav() {
-  const { isOnboarded, user } = useUserStore();
+  const { isOnboarded, user, logout } = useUserStore();
   const { settings } = useBrandingStore();
   const { theme, isDark } = useTheme();
   
@@ -43,6 +45,22 @@ function RootLayoutNav() {
           contentStyle: {
             backgroundColor: activeColors.background,
           },
+          headerRight: () => (
+            <Pressable
+              onPress={() => {
+                try {
+                  logout();
+                } catch (e) {
+                  console.log("Sign out error", e);
+                }
+              }}
+              style={{ paddingHorizontal: 12, paddingVertical: 8 }}
+              accessibilityLabel="Sign out"
+              testID="sign-out-button"
+            >
+              <LogOut color={activeColors.text} size={22} />
+            </Pressable>
+          ),
         }}
       >
         <Stack.Screen name="index" options={{ headerShown: false }} />
