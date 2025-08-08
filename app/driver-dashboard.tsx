@@ -22,10 +22,10 @@ import {
   LogOut,
   Play,
   Pause,
-
   Phone,
   Camera,
   Settings,
+  ArrowLeft,
 } from 'lucide-react-native';
 import { colors } from '@/constants/colors';
 import { useDriverStore } from '@/store/driverStore';
@@ -129,7 +129,10 @@ export default function DriverDashboard() {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <View style={styles.headerLeft}>
+        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <ArrowLeft color={colors.text.primary} size={24} />
+        </TouchableOpacity>
+        <View style={styles.headerCenter}>
           <View style={styles.avatarContainer}>
             <User color={colors.primary} size={24} />
           </View>
@@ -351,9 +354,14 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
-  headerLeft: {
+  backButton: {
+    padding: 8,
+    marginRight: 8,
+  },
+  headerCenter: {
     flexDirection: 'row',
     alignItems: 'center',
+    flex: 1,
   },
   avatarContainer: {
     width: 48,
