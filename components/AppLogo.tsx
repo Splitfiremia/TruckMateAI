@@ -1,73 +1,48 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { View, StyleSheet, Animated, Text } from 'react-native';
+import React from 'react';
+import { View } from 'react-native';
+import Svg, { Defs, RadialGradient, Stop, Filter, FeDropShadow, Circle, Ellipse } from 'react-native-svg';
 
 interface AppLogoProps {
   size?: number;
   animated?: boolean;
 }
 
-const LOGO_URL = 'https://r2-pub.rork.com/attachments/yosfnxqh8dxtfxzrefs2f';
-
 export default function AppLogo({ size = 120, animated = true }: AppLogoProps) {
-  const [hasError, setHasError] = useState<boolean>(false);
-  const opacity = useRef<Animated.Value>(new Animated.Value(animated ? 0 : 1)).current;
-
-  const containerStyle = useMemo(() => [styles.container, { width: size, height: size }], [size]);
-  const imageStyle = useMemo(() => [styles.image, { width: size, height: size, opacity }], [size, opacity]);
-
-  const handleLoad = useCallback(() => {
-    console.log('AppLogo: image loaded');
-    if (!animated) return;
-    Animated.timing(opacity, {
-      toValue: 1,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-  }, [animated, opacity]);
-
-  const handleError = useCallback(() => {
-    console.error('AppLogo: failed to load logo image');
-    setHasError(true);
-  }, []);
-
   return (
-    <View style={containerStyle} testID="app-logo-container">
-      {!hasError ? (
-        <Animated.Image
-          testID="app-logo"
-          accessibilityLabel="Truck company logo"
-          source={{ uri: LOGO_URL }}
-          onLoad={handleLoad}
-          onError={handleError}
-          resizeMode="contain"
-          style={imageStyle as any}
-        />
-      ) : (
-        <View style={[styles.fallback, { width: size, height: size }]} testID="app-logo-fallback">
-          <Text style={styles.fallbackText}>TM</Text>
-        </View>
-      )}
+    <View style={{ width: size, height: size, justifyContent: 'center', alignItems: 'center' }}>
+      <Svg width={size} height={size} viewBox="0 0 120 120">
+        <Defs>
+          <RadialGradient id={`eyeGradient-${size}`} cx="0.3" cy="0.3" r="0.8">
+            <Stop offset="0%" stopColor="#2563eb" stopOpacity="1" />
+            <Stop offset="50%" stopColor="#1e40af" stopOpacity="1" />
+            <Stop offset="100%" stopColor="#1d4ed8" stopOpacity="1" />
+          </RadialGradient>
+          
+          <RadialGradient id={`irisGradient-${size}`} cx="0.5" cy="0.5" r="0.6">
+            <Stop offset="0%" stopColor="#1e40af" stopOpacity="0.6" />
+            <Stop offset="100%" stopColor="#1e40af" stopOpacity="0.9" />
+          </RadialGradient>
+          
+          <RadialGradient id={`pupilGradient-${size}`} cx="0.3" cy="0.3" r="0.7">
+            <Stop offset="0%" stopColor="#334155" stopOpacity="1" />
+            <Stop offset="100%" stopColor="#0f172a" stopOpacity="1" />
+          </RadialGradient>
+          
+          <Filter id={`shadow-${size}`} x="-50%" y="-50%" width="200%" height="200%">
+            <FeDropShadow dx="0" dy="2" stdDeviation="4" floodColor="#000000" floodOpacity="0.3"/>
+          </Filter>
+        </Defs>
+        
+        <Circle cx="60" cy="60" r="50" fill="none" stroke="#1e40af" strokeWidth="2" opacity="0.3" />
+        <Circle cx="60" cy="60" r="45" fill="none" stroke="#2563eb" strokeWidth="2" opacity="0.4" />
+        <Circle cx="60" cy="60" r="40" fill={`url(#eyeGradient-${size})`} filter={`url(#shadow-${size})`} />
+        <Circle cx="60" cy="60" r="28" fill={`url(#irisGradient-${size})`}/>
+        <Circle cx="60" cy="60" r="16" fill={`url(#pupilGradient-${size})`}/>
+        <Ellipse cx="54" cy="54" rx="6" ry="8" fill="rgba(255,255,255,0.9)" opacity="0.8"/>
+        <Circle cx="52" cy="52" r="3" fill="rgba(255,255,255,0.6)"/>
+        <Circle cx="60" cy="60" r="28" fill="none" stroke="rgba(30,64,175,0.3)" strokeWidth="1"/>
+        <Circle cx="60" cy="60" r="35" fill="none" stroke="rgba(30,64,175,0.2)" strokeWidth="0.5"/>
+      </Svg>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  image: {
-    alignSelf: 'center',
-  },
-  fallback: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#E5F0FF',
-    borderRadius: 16,
-  },
-  fallbackText: {
-    fontSize: 28,
-    fontWeight: '800' as const,
-    color: '#2563eb',
-  },
-});
