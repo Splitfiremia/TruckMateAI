@@ -223,6 +223,7 @@ export default function DashboardScreen() {
   const companyName = settings.companyName || user?.companyName;
   
   const handleLogOut = () => {
+    console.log('handleLogOut called');
     Alert.alert(
       'Log Out',
       'Are you sure you want to log out?',
@@ -233,6 +234,7 @@ export default function DashboardScreen() {
           style: 'destructive',
           onPress: () => {
             console.log('User confirmed logout - starting logout process');
+            console.log('Current user state:', { user: user?.name, isAuthenticated: user !== null });
             try {
               logout();
               console.log('Logout function called successfully');
@@ -283,11 +285,13 @@ export default function DashboardScreen() {
             <TouchableOpacity 
               style={styles.logOutButton}
               onPress={handleLogOut}
+              activeOpacity={0.7}
+              testID="logout-button"
             >
               <LogOut size={20} color={colors.text.secondary} />
               <Text style={styles.logOutText}>Log Out</Text>
             </TouchableOpacity>
-            <AIAssistantFAB top={80} right={0} />
+            <AIAssistantFAB top={50} right={0} />
           </View>
         </View>
         
@@ -915,6 +919,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     gap: 6,
+    zIndex: 1001,
   },
   logOutText: {
     fontSize: 14,
