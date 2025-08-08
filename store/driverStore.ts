@@ -105,6 +105,7 @@ interface DriverState {
   
   // Actions
   login: (email: string, password: string) => Promise<void>;
+  socialLogin: (socialData: { provider: 'google' | 'apple'; email: string; name: string; id: string; photo?: string }) => Promise<void>;
   logout: () => void;
   updateDriverProfile: (updates: Partial<Driver>) => void;
   
@@ -231,6 +232,85 @@ export const useDriverStore = create<DriverState>()(
             hoursWorked: Math.floor(Math.random() * 4) + 6,
             idleTime: Math.floor(Math.random() * 30) + 15,
             distanceTraveled: Math.floor(Math.random() * 200) + 150,
+          },
+        });
+      },
+      
+      socialLogin: async (socialData: { provider: 'google' | 'apple'; email: string; name: string; id: string; photo?: string }) => {
+        // For social login, we'll create a mock driver profile
+        // In a real app, you'd validate the social login with your backend
+        
+        const mockDriver: Driver = {
+          id: socialData.id,
+          name: socialData.name,
+          email: socialData.email,
+          phone: '+1 (555) 123-4567',
+          licenseNumber: `CDL${Math.random().toString().substr(2, 9)}`,
+          vehicleId: `vehicle-${socialData.id}`,
+          fleetId: 'social-fleet-001', // Default fleet for social logins
+          status: 'active',
+          avatar: socialData.photo,
+          joinedDate: '2023-01-15',
+        };
+        
+        // Create a mock vehicle
+        const mockVehicle: Vehicle = {
+          id: `vehicle-${socialData.id}`,
+          make: 'Freightliner',
+          model: 'Cascadia',
+          year: 2022,
+          licensePlate: `${socialData.name.split(' ').map(n => n[0]).join('')}-${Math.floor(Math.random() * 999)}`,
+          vin: `1FUJGHDV8NL${Math.random().toString().substr(2, 6)}`,
+          fuelLevel: Math.floor(Math.random() * 40) + 60, // 60-100%
+          mileage: Math.floor(Math.random() * 50000) + 100000,
+          lastService: '2024-01-15',
+          nextService: '2024-04-15',
+          status: 'available',
+          maintenanceAlerts: [
+            {
+              id: '1',
+              type: 'warning',
+              message: 'Oil change due in 500 miles',
+              dueDate: '2024-02-15',
+            },
+          ],
+        };
+        
+        // Generate some sample messages
+        const sampleMessages: Message[] = [
+          {
+            id: '1',
+            from: 'dispatcher',
+            to: mockDriver.id,
+            content: `Welcome ${mockDriver.name}! Your vehicle assignment is ready.`,
+            timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+            read: false,
+            priority: 'medium',
+            type: 'text',
+          },
+          {
+            id: '2',
+            from: 'fleet-manager',
+            to: mockDriver.id,
+            content: 'Please complete your profile setup when you have a moment.',
+            timestamp: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+            read: false,
+            priority: 'low',
+            type: 'text',
+          },
+        ];
+        
+        set({
+          isAuthenticated: true,
+          driver: mockDriver,
+          assignedVehicle: mockVehicle,
+          messages: sampleMessages,
+          unreadCount: sampleMessages.filter(m => !m.read).length,
+          todayStats: {
+            tripsCompleted: Math.floor(Math.random() * 3) + 1,
+            hoursWorked: Math.floor(Math.random() * 4) + 4,
+            idleTime: Math.floor(Math.random() * 20) + 10,
+            distanceTraveled: Math.floor(Math.random() * 150) + 100,
           },
         });
       },
