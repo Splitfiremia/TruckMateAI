@@ -1,4 +1,4 @@
-import { Tabs, Redirect } from "expo-router";
+import { Tabs, Redirect, router } from "expo-router";
 import { 
   BookOpen, 
   Home, 
@@ -13,10 +13,11 @@ import {
   Sparkles,
   Link as LinkIcon,
   DollarSign,
-  Wrench
+  Wrench,
+  ArrowLeft
 } from "lucide-react-native";
 import React from "react";
-import { View } from "react-native";
+import { View, Pressable } from "react-native";
 import { colors } from "@/constants/colors";
 import { useUserStore } from "@/store/userStore";
 
@@ -30,16 +31,36 @@ export default function TabLayout() {
   return (
     <View style={{ flex: 1 }}>
       <Tabs
-        screenOptions={{
-          headerShown: false,
+        screenOptions={({ route }) => ({
+          headerShown: true,
+          headerStyle: { backgroundColor: colors.background.primary },
+          headerTintColor: colors.text.primary,
           tabBarStyle: { display: 'none' },
           tabBarActiveTintColor: colors.primary,
           tabBarInactiveTintColor: '#888888',
-        }}
+          headerLeft: () =>
+            route.name === "index" ? null : (
+              <Pressable
+                onPress={() => {
+                  try {
+                    router.replace("/(tabs)");
+                  } catch (e) {
+                    console.log("Header back press error", e);
+                  }
+                }}
+                style={{ paddingHorizontal: 12, paddingVertical: 8 }}
+                accessibilityLabel="Go back"
+                testID="header-back-button"
+              >
+                <ArrowLeft color={colors.text.primary} size={22} />
+              </Pressable>
+            ),
+        })}
       >
         <Tabs.Screen
           name="index"
           options={{
+            headerShown: false,
             title: "Dashboard",
             tabBarIcon: ({ color }) => <Home color={color} size={20} />,
           }}
