@@ -27,6 +27,7 @@ export default function OnboardingScreen() {
   const { user, setUser, completeOnboarding: completeUserOnboarding } = useUserStore();
   const [currentStep, setCurrentStep] = useState<OnboardingStep>('role-selection');
   const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
+  const [validationMessage, setValidationMessage] = useState<string | null>(null);
   
   // All refs at the top level to avoid hooks order issues
   const nameInputRef = useRef<TextInput>(null);
@@ -80,10 +81,13 @@ export default function OnboardingScreen() {
   };
 
   const handleProfileSetup = () => {
+    console.log('[Onboarding] Continue pressed on profile-setup');
     if (!validateAllFields()) {
-      Alert.alert('Validation Error', 'Please fix the errors below before continuing.');
+      setValidationMessage('Please fix the highlighted fields before continuing.');
+      try { Alert.alert('Validation Error', 'Please fix the errors below before continuing.'); } catch (e) { console.log('Alert not available:', e); }
       return;
     }
+    setValidationMessage(null);
     
     if (selectedRole === 'fleet-company') {
       setCurrentStep('company-details');
@@ -93,10 +97,13 @@ export default function OnboardingScreen() {
   };
 
   const handleCompanyDetails = () => {
+    console.log('[Onboarding] Continue pressed on company-details');
     if (!validateAllFields()) {
-      Alert.alert('Validation Error', 'Please fix the errors below before continuing.');
+      setValidationMessage('Please fix the highlighted fields before continuing.');
+      try { Alert.alert('Validation Error', 'Please fix the errors below before continuing.'); } catch (e) { console.log('Alert not available:', e); }
       return;
     }
+    setValidationMessage(null);
     
     setCurrentStep('device-setup');
   };
@@ -213,6 +220,11 @@ export default function OnboardingScreen() {
         <Text style={styles.stepSubtitle}>
           Tell us a bit about yourself to personalize your experience
         </Text>
+        {validationMessage && (
+          <View style={styles.validationBanner} testID="validation-banner">
+            <Text style={styles.validationBannerText}>{validationMessage}</Text>
+          </View>
+        )}
         
         <View style={styles.form}>
           <ValidatedTextInput
@@ -272,17 +284,15 @@ export default function OnboardingScreen() {
           </View>
         
         <TouchableOpacity 
-          style={[
-            styles.continueButton,
-            hasErrors && styles.continueButtonDisabled
-          ]} 
+          style={styles.continueButton}
           onPress={handleProfileSetup}
-          disabled={hasErrors}
+          testID="continue-button-profile"
+          accessibilityRole="button"
         >
-          <Text style={[
-            styles.continueButtonText,
-            hasErrors && styles.continueButtonTextDisabled
-          ]}>
+          <Text style={
+            styles.continueButtonText
+
+          }>
             Continue
           </Text>
         </TouchableOpacity>
@@ -297,6 +307,11 @@ export default function OnboardingScreen() {
         <Text style={styles.stepSubtitle}>
           Set up your fleet company details for white-label customization
         </Text>
+        {validationMessage && (
+          <View style={styles.validationBanner} testID="validation-banner">
+            <Text style={styles.validationBannerText}>{validationMessage}</Text>
+          </View>
+        )}
         
         <View style={styles.form}>
           <ValidatedTextInput
@@ -339,17 +354,15 @@ export default function OnboardingScreen() {
           </View>
         
         <TouchableOpacity 
-          style={[
-            styles.continueButton,
-            hasErrors && styles.continueButtonDisabled
-          ]} 
+          style={styles.continueButton}
           onPress={handleCompanyDetails}
-          disabled={hasErrors}
+          testID="continue-button-company"
+          accessibilityRole="button"
         >
-          <Text style={[
-            styles.continueButtonText,
-            hasErrors && styles.continueButtonTextDisabled
-          ]}>
+          <Text style={
+            styles.continueButtonText
+
+          }>
             Complete Setup
           </Text>
         </TouchableOpacity>
@@ -570,5 +583,16 @@ const styles = StyleSheet.create({
   },
   continueButtonTextDisabled: {
     color: colors.text.secondary,
+  },
+  validationBanner: {
+    backgroundColor: `${colors.error}10`,
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+  },
+  validationBannerText: {
+    color: colors.error,
+    fontSize: 13,
+    textAlign: 'center',
   },
 });
