@@ -154,7 +154,9 @@ const styles = StyleSheet.create({
   },
   inputContainerError: {
     borderColor: colors.error,
-    backgroundColor: colors.error + '05',
+    backgroundColor: colors.error + '20',
+    borderLeftColor: colors.error,
+    borderLeftWidth: 4,
   },
   inputContainerValid: {
     borderColor: colors.success,
