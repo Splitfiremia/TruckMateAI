@@ -78,7 +78,7 @@ export const useUserStore = create<UserState>()(persist(
       }
     },
     
-    logout: async () => {
+    logout: () => {
       console.log('Starting logout process...');
       
       try {
@@ -86,38 +86,56 @@ export const useUserStore = create<UserState>()(persist(
         set({ user: null, isAuthenticated: false, isOnboarded: false });
         console.log('User state cleared');
         
-        // Clear AsyncStorage to ensure persistence is updated
-        await AsyncStorage.removeItem('user-storage');
-        console.log('User storage cleared from AsyncStorage');
+        // Clear AsyncStorage asynchronously but don't wait for it
+        AsyncStorage.removeItem('user-storage').then(() => {
+          console.log('User storage cleared from AsyncStorage');
+        }).catch((error) => {
+          console.error('Error clearing user storage:', error);
+        });
         
         // Also clear any other related storage keys
-        await AsyncStorage.removeItem('driver-storage');
-        console.log('Driver storage cleared from AsyncStorage');
+        AsyncStorage.removeItem('driver-storage').then(() => {
+          console.log('Driver storage cleared from AsyncStorage');
+        }).catch((error) => {
+          console.error('Error clearing driver storage:', error);
+        });
         
-        // Small delay to ensure state is fully updated
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
-        // Navigate to sign-in screen directly
+        // Navigate to sign-in screen immediately
         console.log('Navigating to sign-in screen');
-        router.replace('/sign-in');
+        
+        // Use setTimeout to ensure state update is processed
+        setTimeout(() => {
+          try {
+            console.log('Attempting navigation to sign-in');
+            router.replace('/sign-in');
+          } catch (navError) {
+            console.error('Navigation failed, trying push:', navError);
+            try {
+              router.push('/sign-in');
+            } catch (pushError) {
+              console.error('Push navigation also failed:', pushError);
+              // Force reload as last resort
+              if (typeof window !== 'undefined') {
+                window.location.href = '/sign-in';
+              }
+            }
+          }
+        }, 50);
         
       } catch (error) {
         console.error('Error during logout:', error);
         
-        // Fallback: try to navigate anyway
-        try {
-          router.replace('/sign-in');
-        } catch (navError) {
-          console.error('Navigation fallback failed:', navError);
-          // Last resort: try push navigation
-          setTimeout(() => {
-            try {
-              router.push('/sign-in');
-            } catch (finalError) {
-              console.error('All navigation attempts failed:', finalError);
+        // Emergency fallback
+        setTimeout(() => {
+          try {
+            router.replace('/sign-in');
+          } catch (finalError) {
+            console.error('All logout attempts failed:', finalError);
+            if (typeof window !== 'undefined') {
+              window.location.href = '/sign-in';
             }
-          }, 500);
-        }
+          }
+        }, 100);
       }
     },
     

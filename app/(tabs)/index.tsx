@@ -235,12 +235,32 @@ export default function DashboardScreen() {
           onPress: () => {
             console.log('User confirmed logout - starting logout process');
             console.log('Current user state:', { user: user?.name, isAuthenticated: user !== null });
+            
+            // Show immediate feedback
+            console.log('Calling logout function...');
+            
             try {
               logout();
               console.log('Logout function called successfully');
             } catch (error) {
               console.error('Error calling logout function:', error);
-              Alert.alert('Error', 'Failed to log out. Please try again.');
+              Alert.alert(
+                'Logout Error', 
+                'There was an issue logging out. The app will attempt to redirect you to the sign-in screen.',
+                [
+                  {
+                    text: 'OK',
+                    onPress: () => {
+                      // Force navigation as fallback
+                      try {
+                        router.replace('/sign-in');
+                      } catch (navError) {
+                        console.error('Fallback navigation failed:', navError);
+                      }
+                    }
+                  }
+                ]
+              );
             }
           }
         }
